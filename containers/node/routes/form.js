@@ -5,6 +5,7 @@ const multer = require('multer');
 const upload = multer();
 
 const { createThread, createReply } = require('../controllers/posting.js');
+const middlewares = require('../utils/middlewares');
 
 router.post('/form/post', [
     upload.single('imagefile'),
@@ -19,17 +20,10 @@ router.post('/form/post', [
     body('message').trim(),
     body('postpassword').trim(),
     body('sage').toBoolean(),
-    body('noko').toBoolean()
+    body('noko').toBoolean(),
+    middlewares.validateRequest
   ],
-  async (req, res) => {
-    try {
-      validationResult(req).throw();
-    } catch (validationErrors) {
-      res.status(400);
-      res.json(validationErrors.mapped());
-      return;
-    }
-
+  async (req, res, next) => {
     // TODO check ban
     const ip = req.ip;
     // TODO check capthca
@@ -60,12 +54,7 @@ router.post('/form/post', [
         await createReply(boardUri, replythread, postData, file);
       }
     } catch (error) {
-      if (error.type === 'input_error') {
-        res.status(400);
-        res.send(error.message);
-      }
-      console.log(error);
-      res.sendStatus(500);
+      next(error);
       return;
     }
 
