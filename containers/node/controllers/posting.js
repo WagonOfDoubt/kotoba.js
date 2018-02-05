@@ -21,8 +21,14 @@ module.exports.createThread = async (boardUri, postData, file) => {
     error.reason = 'missing_value';
     throw error;
   }
-  if (!board.allowNoFileOp && !file) {
+  if (!board.allowNoFilesOp && !file) {
     const error = Error('New threads must include image');
+    error.type = 'input_error';
+    error.reason = 'missing_value';
+    throw error;
+  }
+  if (!postData.body && !file) {
+    const error = Error('No comment entered');
     error.type = 'input_error';
     error.reason = 'missing_value';
     throw error;
@@ -34,7 +40,7 @@ module.exports.createThread = async (boardUri, postData, file) => {
       postData.attachments = [fileDocument];
     } catch (error) {
       throw error;
-    }    
+    }
   }
 
   if (board.isForcedAnon || !postData.name) {
@@ -80,7 +86,7 @@ module.exports.createReply = async (boardUri, threadId, postData, file) => {
     throw error;
   }
   if (!postData.body && !file) {
-    const error = Error('Message is empty');
+    const error = Error('No comment entered');
     error.type = 'input_error';
     error.reason = 'missing_value';
     throw error;
@@ -94,7 +100,7 @@ module.exports.createReply = async (boardUri, threadId, postData, file) => {
       throw error;
     }
   }
-  
+
   if (board.isForcedAnon || !postData.name) {
     postData.name = board.defaultPosterName;
   }
