@@ -1,0 +1,28 @@
+extends layouts/default.pug
+
+block bodyClass
+  - var bodyClass = 'board-page'
+
+block header
+  nav.adminbar.adminbar-top!= filters.markdown(site.menu)
+  h1.logo= board.name
+  if board.header
+    div.board-header
+      div.board-header-content!= filters.markdown(board.header)
+
+block main
+  include includes/postform.pug
+
+  form#delform(action='/form/post', method='post')
+    if !threads.length
+      div.nothreads Nobody here but chickens
+    for thread in threads
+      != thread
+    include includes/delpostform.pug
+
+block footer
+  include includes/pagination.pug
+  nav.adminbar.adminbar-bottom!= filters.markdown(site.menu)
+
+block scripts
+  script(src='/.static/js/kotoba.js')

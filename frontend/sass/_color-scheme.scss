@@ -1,0 +1,80 @@
+body {
+  color: $text-color;
+  background-color: $background-color;
+}
+
+aside {
+  border-color: $border-color;
+  background-color: $background-color;
+}
+
+.reply {
+  background-color: $primary-color;
+  border-color: $secondary-color;
+}
+
+a {
+  color: $link-color;
+
+  &:hover {
+    color: $link-color-hover;
+  }
+}
+
+h1, h2, h3, h4, h5, th {
+  color: $header-color;
+}
+
+.postername {
+  color: $name-color;
+}
+
+.thread-container, .postarea {
+  border-color: $border-color;
+}
+
+.filetitle {
+  color: $subject-color;
+}
+
+.postblock {
+  color: $postblock-color;
+  background-color: $postblock-background-color;
+}
+
+.omittedposts {
+  color: $omitted-posts-color;
+}
+
+.unkfunc {
+  color: $quote-color;
+}
+
+.spoiler {
+  color: $spoiler-color;
+  background-color: $spoiler-bg;
+
+  &:hover {
+    color: $spoiler-open-color;
+    background-color: $spoiler-open-bg;
+  }
+}
+
+.modal-content, .modal-header, .modal-footer {
+  background-color: $background-color;
+  border-color: $border-color;
+}
+
+table.table {
+  thead tr {
+    border-color: $border-color;
+  }
+
+  tbody tr, tfoot tr {
+    border-color: $border-color;
+  }
+}
+
+.news-header {
+  background: $border-color;
+}

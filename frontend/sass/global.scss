@@ -1,0 +1,283 @@
+@import 'fonts.scss';
+@import 'img_global';
+@import 'icons';
+@import 'attachments';
+@import 'media_print';
+@import 'posts';
+@import 'postform';
+@import 'spinner';
+
+
+$sidebar-width: 20vw;
+
+body {
+  font-family: sans-serif;
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas: 
+    "header"
+    "main"
+    "footer";
+}
+
+body.layout-sidebar {
+  grid-template-columns: $sidebar-width 1fr;
+  grid-template-areas: 
+    "sidebar header"
+    "sidebar main"
+    "sidebar footer";
+  header, footer, main {
+    padding: 0 1.5rem;
+  }
+}
+
+.board-header {
+  display: flex;
+  
+  .board-header-content {
+    margin: 0 auto;
+  }
+}
+
+
+.nothreads {
+  font-size: 5em;
+  text-align: center;
+  opacity: 0.5;
+}
+
+aside {
+  grid-area: sidebar;
+  position: fixed;
+  width: $sidebar-width;
+  height: 100vh;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  // box-shadow: 0 0 5px 2px rgba(0,0,0,0.5)
+}
+
+.list-group {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0 -1.5rem;
+}
+
+.list-group-item {
+  padding: .5rem 1.25rem;
+  border: 1px solid transparent;
+}
+
+main {
+  grid-area: main;
+}
+
+.logo {
+  display: block;
+  text-align: center;
+
+  img {
+    max-width: 100%;
+  }
+}
+
+header {
+  grid-area: header;
+}
+
+footer {
+  grid-area: footer;
+}
+
+main, footer, header {
+  padding: 1vh 1vw;
+}
+
+aside {
+  border-right: 1px solid transparent;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+table.table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+
+  td, th {
+    padding: 0.75rem;
+  }
+
+  thead tr {
+    border-bottom: 2px solid grey;
+  }
+
+  tbody tr, tfoot tr {
+    border-bottom: 1px solid grey;
+  }
+}
+
+.form-group {
+  display: grid;
+  grid-template-columns: 12rem auto 1fr;
+
+  :target {
+    outline: 2px solid red;
+  }
+
+  label {
+    text-align: right;
+    align-self: center;
+    padding: .75rem;
+  }
+
+  input {
+    align-self: center;
+  }
+
+  small {
+    align-self: center;
+    padding: .75rem;
+  }
+
+  textarea {
+    grid-column-start: 2;
+    grid-column-end: 4;
+  }
+
+  textarea + small {    
+    grid-column-start: 2;
+    grid-column-end: 4;
+  }
+}
+
+.error {
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+}
+
+.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.thread-container {
+  border-bottom: 1px solid;
+  padding: 5px 0 15px 0;
+  overflow: hidden;  // zalgo protection
+
+  &:after {
+    content: ' ';
+    display: block;
+    clear: left;
+  }
+}
+
+
+.section-wrapper {
+  &:before {
+    content: '[';
+  }
+
+  &:after {
+    content: ']';
+  }
+
+  .link-wrapper:not(:last-child) {
+    &:after {
+      content: '/';
+    }
+  }
+
+  a {
+    margin: 0 .5em;
+  }
+}
+
+.link-button-wrapper {
+    &:before {
+    content: '[';
+  }
+
+  &:after {
+    content: ']';
+  }
+}
+
+.filetitle {
+  font-weight: 800;
+  font-size: 1.2em;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+
+.hidden {          
+  display: none;
+}
+
+q {
+  &::before, &::after {
+    content: '';
+  }
+}
+
+.adminbar {
+  text-align: right;
+}
+
+.post-hidden {
+  .post-body,
+  .attachment,
+  .post-btn:not(.post-btn-hide) {
+    display: none;
+  }
+
+  & ~ .omittedposts, & ~ .replies-container {
+    display: none;
+  }
+}
+
+@import 'modal';
+
+// https://stackoverflow.com/questions/6867095/css-selector-when-target-empty
+.tabs-container {
+  .tab-content:target ~ .tab-content:last-child, .tab-content {
+    display: none;
+  }
+  
+  /* :last-child works, but for some reason .tab-content:last-child will not */
+  & > :last-child, .tab-content:target {
+    display: block;
+  }
+}
+
+
+
+// news on front page
+.news-entry {
+  .news-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-weight: bold;
+  }
+
+  margin: 1rem 3rem;
+}

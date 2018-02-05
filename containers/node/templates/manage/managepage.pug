@@ -1,0 +1,10 @@
+extends ../layouts/sidebar.pug
+
+block bodyClass
+  - var bodyClass = 'manage-page ' + activity
+
+block aside
+  include sidepanel.pug
+
+block scripts
+  script(src='/.static/js/kotoba.js')

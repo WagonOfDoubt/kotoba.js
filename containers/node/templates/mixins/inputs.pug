@@ -1,0 +1,56 @@
+//- variables values and defaults must be defined
+//- filters from /utils/filters must be defined as 'filters'
+
+mixin hintText(hint, def)
+  if typeof def !== 'undefined'
+    small.desc #{hint} Default: <strong>#{ def }</strong>
+  else
+    small.desc= hint
+
+mixin textArea(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    label(for=param, data-default=def) #{ label }:
+    textarea(name=param, id=param, rows='10', required=required)= val
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
+mixin textEdit(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    label(for=param, data-default=def) #{ label }:
+    input(name=param, id=param, type='text', value=val, required=required)
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
+mixin numberEdit(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    label(for=param, data-default=def) #{ label }:
+    input(name=param+':number', id=param, type='number', value=val, required=required)
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
+mixin checkboxEdit(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    label(for=param, data-default=def) #{ label }:
+    input(name=param+':boolean', id=param, type='checkbox', checked=val, required=required)
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)

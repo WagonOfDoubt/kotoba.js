@@ -1,0 +1,25 @@
+head
+  meta(charset="utf-8")
+  meta(http-equiv="X-UA-Compatible", content="IE=edge")
+  meta(
+    name="viewport"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+  )
+
+  - var baseTitle = board && board.name ? board.name : site && site.name ? site.name : pkg.name;
+  if title
+    title= title + ' — ' + baseTitle
+  else
+    title= baseTitle
+
+  - var desc = board && board.desc ? board.desc : site && site.desc ? site.desc : pkg.description;
+  meta(name="description", content=desc)
+  link(rel="stylesheet", href="/.static/css/global.css")
+  - var defaultStyle = board && board.defaultStyle ? board.defaultStyle : site && site.defaultStyle ? site.defaultStyle : 'umnochan';
+  link(rel="stylesheet", href=`/.static/css/${ defaultStyle }.css`)
+  for style in site.styles
+    if style != defaultStyle
+      link(rel="alternate stylesheet", href=`/.static/css/${ style }.css`)
+  link(rel="shortcut icon", href="/.static/img/favicon.png")
+
+  block head

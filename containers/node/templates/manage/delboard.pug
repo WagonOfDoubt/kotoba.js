@@ -1,0 +1,39 @@
+extends managepage.pug
+
+block header
+  h1 Delete board
+
+block main
+  h2 /#{ board.uri }/ - #{ board.name }
+  div.link-button-wrapper
+    a(href='/manage/boardopts') Select another board
+  h2 Danger zone
+  form#form-delete-board
+    div
+      label
+        input(type='checkbox', required, name='check[0]:boolean')
+        | Yes, I want to delete this board
+    div
+      label
+        input(type='checkbox', required, name='check[1]:boolean')
+        | Yes, I know all threads and posts on this board will be deleted
+    div
+      label
+        input(type='checkbox', required, name='check[2]:boolean')
+        | Yes, I regularly make backups
+    div
+      label
+        input(type='checkbox', required, name='check[3]:boolean')
+        | Yes, I want folder /#{board.uri}/ to be permanently deleted, including html, uploads, thumbnails and archived threads
+    div
+      label
+        input(type='checkbox', required, name='check[4]:boolean')
+        | Yes, I know that this action can not be undone
+    div
+      label I'm sure this is the board I want to delete:
+        input(type='text', required, name='board')
+    div
+      label
+        input(type='checkbox', required, name='check[5]:boolean')
+        | No, I'm not baka
+    input#btn-delete-board(type='submit', value='Delete Board')

@@ -1,0 +1,31 @@
+@media print {
+  .extrabtns, input, .postarea, .section-wrapper, .link-button-wrapper,
+  .filesize, .userdelete, .pagelist, .clickreplytoview {
+    display: none;
+  }
+
+  .thread-container {
+    column-count: 2;
+  }
+
+  .reply-container {
+    clear: both;
+  }
+
+  .reply-container::before {
+    display: none;
+  }
+
+  .postbody {
+    margin: 0.3rem;
+  }
+
+  .reply {
+    width: 100%;
+    border: none !important;
+  }
+
+  .post-header {
+    font-size: 0.7rem;
+  }
+}

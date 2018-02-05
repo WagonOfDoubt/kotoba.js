@@ -1,0 +1,41 @@
+$background-color: #FFFFEE;
+$primary-color: #FFECB2;
+$secondary-color: #F9E0A8;
+$border-color: #D0AB65;
+
+$text-color: #090E00;
+$header-color: #800000;
+$name-color: #310000;
+$subject-color: #CC1105;
+$quote-color: #789922;
+$omitted-posts-color: #707070;
+
+$postblock-color: #403C0F;
+$postblock-background-color: #F1C984;
+
+$link-color: #DD0000;
+$link-color-hover: #0000EE;
+
+$spoiler-color: #000;
+$spoiler-bg: #000;
+$spoiler-open-color: #fff;
+$spoiler-open-bg: #000;
+
+.reply {
+    border: 1px solid;
+}
+
+.form-label {
+  font-weight: 800;
+}
+
+
+@import 'color-scheme';
+
+.replymode {
+  background: $border-color;
+  text-align: center;
+  padding: 2px;
+  color: #FFFFFF;
+  width: 100%;
+}

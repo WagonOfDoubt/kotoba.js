@@ -1,0 +1,5 @@
+{
+  "secure_cookies": false,
+  "html_path": "/home/node/app/html",
+  "salt_rounds": 10
+}

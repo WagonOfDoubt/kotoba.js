@@ -1,0 +1,65 @@
+.extrabtns {
+  vertical-align: middle;
+  margin: 0 0.3rem;
+
+  :not(:first-child) {
+    margin-left: 0.2rem;
+  }
+
+  display: inline-flex;
+}
+
+.post-btn-hide {
+  background: transparent url('/.static/img/icons.png') -32px -16px no-repeat;
+}
+
+.post-hidden .post-btn-hide, .post-btn-unhide {
+  background: transparent url('/.static/img/icons.png') -48px 0px no-repeat;
+}
+
+.post-btn-fav {
+  background: transparent url('/.static/img/icons.png') -32px 0px no-repeat;
+}
+
+.post-btn-expthr {
+  background: transparent url('/.static/img/icons.png') 0px -16px no-repeat;
+}
+
+.post-btn-rep {
+  background: transparent url('/.static/img/icons.png') 0px 0px no-repeat;
+}
+
+.fav-panel-btn-close {
+  background: transparent url('/.static/img/icons.png') -48px -16px no-repeat;
+}
+
+.fav-panel-btn-refresh {
+  background: transparent url('/.static/img/icons.png') -16px -16px no-repeat;
+}
+
+.fav-panel-btn-restore {
+  background: transparent url('/.static/img/icons.png') -16px 0px no-repeat;
+}
+
+.post-icon-sage:after {
+  content: '⬇️';
+  color: red;
+}
+
+.post-icon-sticky {
+  background: transparent url('/.static/img/sticky.gif') 0 0 no-repeat;
+}
+
+.post-icon, .post-btn {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+.post-icon {
+  cursor: help;
+}
+
+.post-btn {
+  cursor: pointer;
+}

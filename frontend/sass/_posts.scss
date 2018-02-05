@@ -1,0 +1,60 @@
+.postbody {
+  word-wrap: break-word;
+}
+
+.code-aa {
+  font-family: 'Mona', 'Ume P Gothic', 'MS PGothic', "ＭＳ Ｐゴシック", sans-serif;
+  display: block;
+  font-size: 12pt;
+  line-height: 1.1;
+  overflow: auto;
+}
+
+.code-multiline, .code-aa {
+  white-space: pre-wrap;
+}
+
+.reply .extrabtns::after {
+  content: '#'counter(thr-cnt);
+  counter-increment: thr-cnt 1;
+  color: #707070;
+  margin-left: 10px;
+  font-size: 13px;
+}
+
+.reply-container {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: row;
+
+  .reply {
+    min-width: 380px;
+  }
+
+  &::before {
+    content: '>>';
+    margin-right: 4px;
+  }
+}
+
+.reply, .board-page, .thread-page {
+  .post-board-link {
+    display: none;
+  }
+}
+
+.post-board-link {
+  &::before {
+    content: '/';
+  }
+
+  &::after {
+    content: '/';
+  }
+
+  margin: 0 3px 0 3px;
+}
+
+.post-delete-checkbox {
+  margin: 0 3px 0 3px;
+}

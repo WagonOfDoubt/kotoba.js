@@ -1,0 +1,53 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+
+block header
+  if news
+    h1 Edit news post
+  else
+    h1 Add news post
+
+block main
+  - var action = news ? '/api/news/' + news.number : '/api/news/';
+  form#form-edit-news(method='GET', action=action)
+    - var values = news ? news : { postedby: user.login };
+    +textEdit('subject', 'Subject', '', true)
+    +textArea('message', 'Message', '', true)
+      | This message will be displayed as it is written, so make sure you add the proper HTML.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    +textEdit('postedby', 'Posted by', 'Can be left blank.')
+    +textEdit('postedemail', 'E-mail', 'Can be left blank.')
+    if news
+      input#btn-edit-news(type='submit', value='Edit')
+    else
+      input#btn-add-news(type='submit', value='Add')
+
+  if newsList.length
+    h2 Edit/Delete News
+    table.table
+      thead
+        tr
+          th #
+          th Date Added
+          th Subject
+          th Posted by
+          th Message
+          th Edit/Delete
+      tbody
+        for n in newsList
+          tr
+            td= n.number
+            td
+              if n.postedDate
+                time.time(datetime=n.postedDate.toJSON())= n.postedDate.toLocaleString()
+            td= n.subject
+            td
+              if n.postedemail
+                a(href='mailto:' + n.postedemail)= n.postedby
+              else
+                =n.postedby
+            td= n.message
+            td
+              button(type='button', class='btn', data-news=n.number, data-action='edit') Edit
+              button(type='button', class='btn', data-news=n.number, data-action='delete') Delete

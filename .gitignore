@@ -57,3 +57,14 @@ typings/
 # dotenv environment variables file
 .env
 
+# sublime text
+*.sublime-workspace
+
+!db/
+db/*
+
+# Generated html
+
+!html/
+html/*
+!html/.static/

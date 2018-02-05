@@ -1,0 +1,19 @@
+div.news-entry(id='news-' + n.number)
+  div.news-header
+    span.news-subject
+      span.news-subject= n.subject
+      | 
+      | by
+      | 
+      if n.postedemail
+        a.news-author(href='mailto:' + n.postedemail)= n.postedby
+      else
+        span.news-author= n.postedby
+      if n.postedDate
+        | 
+        | -
+        | 
+        time.time(datetime=n.postedDate.toJSON())= n.postedDate.toLocaleString()
+    span.news-hash
+      a(href='#news-' + n.number, title='premalink') #
+  div.news-content!= filters.markdown(n.message)

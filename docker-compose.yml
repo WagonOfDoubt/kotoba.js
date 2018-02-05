@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:3.6.0
+    volumes:
+      - ./db:/data/db
+    ports:
+      - 27017:27017
+    env_file:
+      - environment-development.env
+
+  node:
+    build: ./containers/node
+    user: node
+    working_dir: /home/node/app
+    env_file:
+      - environment-development.env
+    volumes:
+      - ./containers/node:/home/node/app
+      - ./html:/home/node/app/html
+    expose:
+      - 3000
+    command: npm run-script debug
+    depends_on:
+      - mongo
+    links:
+      - mongo
+
+  nginx:
+    build: ./containers/nginx
+    volumes:
+      - ./html:/var/www/html
+      - ./containers/nginx/conf.d/:/etc/nginx/conf.d/
+    env_file:
+      - environment-development.env
+    ports:
+      - 80:80
+    depends_on:
+      - node
+    links:
+      - node

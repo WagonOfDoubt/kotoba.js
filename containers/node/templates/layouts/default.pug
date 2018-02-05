@@ -1,0 +1,16 @@
+doctype html
+html(lang= lang)
+  include ../includes/head.pug
+  block bodyClass
+    - var bodyClass = ''
+  body(class=bodyClass + ' layout-default')
+    header
+      block header
+    main
+      block main
+    footer
+      block footer
+      include ../includes/footer.pug
+    div.modal-backdrop.fade
+    block modals
+    include ../includes/scripts.pug

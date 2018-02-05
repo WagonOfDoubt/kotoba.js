@@ -1,0 +1,115 @@
+mixin attachments
+  if post.attachments
+    each attachment in post.attachments
+      figure(
+        class=['attachment', 'attachment-' + attachment.type]
+        data-post-id=post.postId
+        data-file=attachment.file
+        data-duration=attachment.duration
+        data-type=attachment.type
+      )
+        - var fileHref = filters.encodeUri(attachment.file)
+        figcaption.filesize
+          a.file-link(
+            href!= fileHref
+            target='_blank'
+            title=attachment.name)!= filters.shortFileName(attachment.name, {length: 25, placeholder: '[...]'})
+          | 
+          if attachment.size || (attachment.width && attachment.height)
+            span.file-info
+              | (
+              if attachment.size
+                span.file-info-size
+                  != filters.readableSize(attachment.size)
+              if attachment.width && attachment.height
+                | , 
+                span.file-info-resolution #{ attachment.width }x#{ attachment.height }
+              | )
+        div.thumb-container
+          a.thumb-link(
+            href!= fileHref
+            data-full-src=attachment.file
+            data-full-width=attachment.width
+            data-full-height=attachment.height
+            data-thumb-src=attachment.thumb
+            data-thumb-width=attachment.thumbWidth
+            data-thumb-height=attachment.thumbHeight
+          )
+            img.thumb(
+              src=attachment.thumb
+              alt=attachment.name
+              width=attachment.thumbWidth
+              height=attachment.thumbHeight
+            )
+          if attachment.duration
+            div.file-info-duration!= filters.readableDuration(attachment.duration)
+
+div(
+  id=`p${ post.postId }`
+  data-post-id=post.postId
+  data-board-uri=post.boardUri
+  class={
+    'reply': !post.isOp,
+    'oppost': post.isOp,
+    'oppost-sticky': post.isSticky,
+    'oppost-closed': post.isClosed,
+    'oppost-autosage': post.isAutosage,
+    'post': true,
+    'post-sage': post.isSage,
+    'post-deleted': post.isDeleted,
+    'post-approved': post.isApproved
+  }
+)
+  if post.isOp
+    +attachments
+  div.post-header
+    a.post-board-link(href=`/${ post.boardUri }`)= post.boardUri
+    label
+      input.post-delete-checkbox(name='delete[]', value=post.postId, type='checkbox')
+      if post.subject
+        span.filetitle= post.subject
+        | 
+      if post.name
+        if post.email
+          a.postername(href=`mailto:${ post.email }`)= post.name
+        else
+          span.postername= post.name
+        | 
+      time.time(datetime=post.timestamp.toJSON())= post.timestamp.toLocaleString()
+      | 
+    span.reflink
+      - var threadUrl = `/${ post.boardUri }/res/${ post.threadId || post.postId }.html`;
+      a(href=`${ threadUrl }#p${ post.postId }`) No.&nbsp;
+      a(href=`${ threadUrl }#i${ post.postId }`)= post.postId
+    //- badges
+    span.extrabtns.de-post-hiddencontent
+      if post.isSage && !post.isOp
+        span.post-icon.post-icon-sage(title='Sage')
+      if post.isOp
+        if post.isSticky
+          span.post-icon.post-icon-sticky(title='Sticky')
+        if post.isClosed
+          span.post-icon.post-icon-closed(title='Closed')
+        if post.isAutosage
+          span.post-icon.post-icon-autosage(title='Autosage')
+      if post.isDeleted
+        span.post-icon.post-icon-deleted(title='Deleted')
+      if post.isOp
+        if site.features.hideThread
+          a.post-btn.post-btn-hide(href='#', title='Hide thread')
+        if site.features.favorites
+          a.post-btn.post-btn-fav(href='#', title='Watch thread')
+        if site.features.expandThread
+          a.post-btn.post-btn-expthr(href='#', title='Expand thread')
+      else
+        if site.features.hidePost
+          a.post-btn.post-btn-hide(href='#', title='Hide post')
+      if site.features.quickreply
+        a.post-btn.post-btn-rep(href='#', title='Quick reply')
+    if isPage && post.isOp
+      span.link-button-wrapper
+        a(href=`/${ post.boardUri }/res/${ post.postId }.html`) Reply
+  if !post.isOp
+    +attachments
+  div.postbody.post-body
+    blockquote(id=`post${ post.postId }`)!= post.rawHtml

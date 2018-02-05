@@ -1,0 +1,30 @@
+.postform, .delform {
+  .trap {
+    display:none;
+  }
+  input[type=text], input[type=password], textarea {
+    margin: 0px;
+    margin-right: 2px;
+    padding: 2px 4px 3px 4px;
+    outline: none;
+    font-size: 10pt;
+  }
+
+  input[type="text"], input[type="password"], textarea {
+    border: 1px solid #AAA;
+  }
+}
+
+.postarea {
+  text-align: center;
+  border-top:1px solid ;
+  border-bottom:1px solid ;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.postarea table {
+  margin: 0 auto;
+  text-align: left;
+}

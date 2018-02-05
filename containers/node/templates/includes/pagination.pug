@@ -1,0 +1,38 @@
+div.pages.pagelist
+  //- "border=1" for compatibility with fhird-party code for wakaba and others
+  table(border='1')
+    tbody
+      tr
+        td
+          if pagination.current === 0
+            span ←
+          else
+            if pagination.current === 1
+              a(href=`/${ board.uri }/index.html`) ←
+            else
+              a(href=`/${ board.uri }/${ pagination.current - 1 }.html`, rel='prev') ←
+        td
+          //- pages
+          - var p = 0
+          if p === pagination.current
+            | [#{ p }]
+          else
+            | [
+            a(href=`/${ board.uri }`)= p
+            | ]
+          while p < pagination.total - 1
+            - p++
+            if p === pagination.current
+              | 
+              | [#{ p }]
+            else
+              |
+              | [
+              a(href=`/${ board.uri }/${ p }.html`)= p
+              | ]
+        td
+          //- next page button
+          if pagination.current === pagination.total - 1
+            span →
+          else
+            a(href=`/${ board.uri }/${ pagination.current + 1 }.html`, rel='next') →

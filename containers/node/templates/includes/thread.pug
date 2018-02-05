@@ -1,0 +1,21 @@
+div.thread-container(
+  id=`thread${ thread.postId }${ thread.boardUri }`
+  style={ 'counter-reset': `thr-cnt ${ omittedPosts }` }
+  data-thread-id=thread.postId
+  data-board-uri=thread.boardUri
+  data-bumped=thread.bumped.toJSON()
+  data-omitted-posts=omittedPosts
+  data-omitted-files=omittedAttachments
+)
+  - var post = thread
+  include post.pug
+  if omittedPosts > 0
+    span.omittedposts
+      | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
+      | 
+      span.clickreplytoview
+        | Click Reply to view.
+  div.replies-container
+    for post in replies
+      div.reply-container(id=`reply${ post.postId }`)
+        include post.pug

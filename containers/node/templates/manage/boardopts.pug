@@ -1,0 +1,67 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+
+block header
+  if board
+    h1 Board options
+  else
+    h1 Add board
+
+block main
+  - var values = board || boardDefaults
+  - var defaults = boardDefaults
+  if board
+    h2 /#{ board.uri }/ - #{ board.name }
+    div.link-button-wrapper
+      a(href='/manage/boardopts') Select another board
+    div.link-button-wrapper
+      a(href='/' + board.uri) Browse board
+  else
+    div.link-button-wrapper
+      a(href='/manage/boardopts') Edit boards
+
+  - var action = board ? '/api/board/' + board.uri : '/api/board/';
+  form#form-update-board(method='GET', action=action)
+    if !board
+      +textEdit('uri', 'Directory', 'The directory of the board.')
+    +textEdit('name', 'Name', 'The name of the board.')
+    +textEdit('desc', 'Description', 'Short description of board for meta.')
+    +textEdit('locale', 'Locale', 'Locale to use on this board. Leave blank to use the locale defined in site settings.')
+    +textArea('header', 'Include header')
+      | HTML under board title in page header.
+      | Be careful and close all tags.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    +textEdit('defaultStyle', 'Default style', 'The style which will be set when the user first visits the board.')
+    +textEdit('imageUri', 'Header image', 'URL. Overrides the header set in site settings. Leave blank to use configured global header image.')
+    +textEdit('faviconUri', 'Favicon image', 'URL. Overrides default favicon. Leave blank to use default favicon.')
+    +numberEdit('maxFileSize', 'Maximum file size', 'Maxmimum size of uploaded images, in bytes.')
+    +numberEdit('maxFilesPerPost', 'Maximum files per post', '0 forbids any uploads making board text only.')
+    +numberEdit('maxThreadsOnPage', 'Threads per page', 'How many threads are shown on page by default.')
+    +numberEdit('maxPages', 'Maximum board pages.')
+    +numberEdit('autosage', 'Maximum thread replies', 'The number of replies a thread can have before autosaging to the back of the board.')
+    +numberEdit('showReplies', 'Show replies', 'Number of replies to show on a board page.')
+    +numberEdit('showRepliesSticky', 'Show replies sticky', 'Number of replies to show on a board page when the thread is sticked.')
+    +numberEdit('maxMessageLength', 'Maximum message length.')
+    +textEdit('defaultPosterName', 'Anonymous', 'Name to display when a name is not attached to a post.')
+    +checkboxEdit('isLocked', 'Locked', 'Only moderators of the board and admins can make new posts/replies.')
+    +checkboxEdit('isForcedAnon', 'Forced anonymous', 'If set to yes, users will not be allowed to enter a name, making everyone appear as Anonymous.')
+    +checkboxEdit('allowNoFilesOp', 'Enable "no file" posting', 'If set to yes, new threads will not require an image to be posted.')
+    +checkboxEdit('allowNoMessageOp', 'Enable no message posting', 'If set to yes, new threads will not require message to be posted.')
+    +checkboxEdit('enableReporting', 'Enable reporting', 'Reporting allows users to report posts, adding the post to the report list.')
+    +checkboxEdit('enableCaptcha', 'Enable captcha', 'Enable/disable captcha system for this board. If captcha is enabled, in order for a user to post, they must first correctly enter the text on an image.')
+    +checkboxEdit('enableArchiving', 'Enable archiving', 'Enable/disable thread archiving for this board.')
+    +checkboxEdit('enableCatalog', 'Enable catalog', 'If set to yes, a catalog.html file will be built with the other files, displaying the original picture of every thread in a box.')
+    +checkboxEdit('enableSage', 'Enable sage', 'Allow users to reply to threads without bumping them.')
+    +checkboxEdit('permanentSage', 'Permanent sage', 'If set to yes, poster can only sage thread once. After that, they no longer can post in threads they saged.')
+    +checkboxEdit('isHidden', 'Hidden', 'Do not dispaly this board in navigation menu.')
+
+    if board
+      input#btn-update-board(type='submit', value='Update board options')
+    else
+      input#btn-create-board(type='submit', value='Create board')
+
+  if board
+    h2 Danger zone
+    div.link-button-wrapper
+      a(href='/manage/delboard/' + board.uri) Delete board

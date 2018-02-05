@@ -1,0 +1,32 @@
+extends layouts/sidebar.pug
+
+block header
+  h1.text-center= site.siteName
+  h3.text-center
+    em= site.slogan
+
+block main
+  div.tabs-selector.text-center
+    span.section-wrapper
+      span.link-wrapper
+        a(href='#news') News
+      span.link-wrapper
+        a(href='#faq') FAQ
+      span.link-wrapper
+        a(href='#rules') Rules
+  div.tabs-container
+    div#rules.tab-content!= filters.markdown(site.rules)
+    div#faq.tab-content!= filters.markdown(site.faq)
+    div#news.tab-content
+      if news
+        for n in news
+          include includes/newsentry.pug
+
+  //- debug data
+  //- pre= JSON.stringify(site, null, 2)
+
+block aside
+  != filters.markdown(site.frame)
+
+block scripts
+  script(src='/.static/js/kotoba.js')

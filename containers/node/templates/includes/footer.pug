@@ -1,0 +1,8 @@
+.text-center
+  small
+    a.kotoba-name(href=pkg.homepage)= pkg.name
+      | 
+      span.kotoba-version= pkg.version
+    | 
+    | page updated 
+    time.kotoba-time(datetime=(new Date()).toJSON())= (new Date()).toLocaleString()

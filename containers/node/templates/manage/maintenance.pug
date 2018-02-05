@@ -1,0 +1,14 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+
+block header
+  h1 Site maintenance
+
+block main
+  h2 Rebuild all html files
+  p This action may take some time
+  button(type='button', class='btn', data-action='rebuildall') Rebuild all html files
+
+  h2 Cleanup
+  p TO DO

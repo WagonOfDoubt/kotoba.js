@@ -1,0 +1,19 @@
+extends layouts/default.pug
+
+block bodyClass
+  - var bodyClass = 'error-page'
+
+block header
+  nav.text-right
+    span.section-wrapper
+      span.link-wrapper
+        a(href='/') Home
+  h1.text-center Kuso!
+
+block main
+  div.error= message
+  if error
+    pre= JSON.stringify(error, null, 2)
+
+block scripts
+  script(src='/.static/js/kotoba.js')

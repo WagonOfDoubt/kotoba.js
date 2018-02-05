@@ -1,0 +1,67 @@
+extends managepage.pug
+
+block header
+  h1 Disk Space Used
+
+block main
+  table.table
+    caption Disk Space Used
+    thead
+      tr
+        th Board
+        th Area
+        th Files
+        th Space Used
+    tbody
+      - var totalSize = 0
+      - var totalFiles = 0
+      - var dirTotals = [{ files: 0, size: 0}, { files: 0, size: 0}, { files: 0, size: 0} ]
+
+      mixin stats(d)
+        if d
+          td #{d.dirname}/
+          td= d.files
+          td!= filters.readableSize(d.size)
+        
+      mixin statsCount(dir, num)
+        if dir.children[num]
+          +stats(dir.children[num])
+          - dirTotals[num].files += dir.children[num].files
+          - dirTotals[num].size += dir.children[num].size
+          - dirTotals[num].dirname = dir.children[num].dirname
+
+      for dir in dirStats
+        tr
+          th(rowspan='4') /#{dir.dirname}/
+          +statsCount(dir, 0)
+        tr
+          +statsCount(dir, 1)
+        tr
+          +statsCount(dir, 2)
+        tr
+          td
+            strong Total
+          td
+            - var dirFiles = dir.children.reduce((sum, child) => sum + child.files, 0)
+            - totalFiles += dirFiles
+            strong= dirFiles
+          td
+            - var dirSize = dir.children.reduce((sum, child) => sum + child.size, 0)
+            - totalSize += dirSize
+            strong!= filters.readableSize(dirSize)
+    tfoot
+      tr
+        th(rowspan='4')
+          strong All boards
+        +stats(dirTotals[0])
+      tr
+        +stats(dirTotals[1])
+      tr
+        +stats(dirTotals[2])
+      tr
+        td
+          strong Total
+        td
+          strong= totalFiles
+        td
+          strong!= filters.readableSize(totalSize)

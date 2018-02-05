@@ -1,0 +1,101 @@
+[
+  {
+    "initiator": "**",
+    "terminator": "**",
+    "multiline": false,
+    "newline": false,
+    "nesting": true,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<strong>",
+    "closeTag": "</strong>"
+  },
+  {
+    "initiator": "*",
+    "terminator": "*",
+    "multiline": false,
+    "newline": false,
+    "nesting": true,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<em>",
+    "closeTag": "</em>"
+  },
+  {
+    "initiator": "__",
+    "terminator": "__",
+    "multiline": false,
+    "newline": false,
+    "nesting": true,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<strong>",
+    "closeTag": "</strong>"
+  },
+  {
+    "initiator": "~~",
+    "terminator": "~~",
+    "multiline": false,
+    "newline": false,
+    "nesting": true,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<del>",
+    "closeTag": "</del>"
+  },
+  {
+    "initiator": "%%",
+    "terminator": "%%",
+    "multiline": false,
+    "newline": false,
+    "nesting": true,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<span class=\"spoiler\">",
+    "closeTag": "</span>"
+  },
+  {
+    "initiator": "```aa\n",
+    "terminator": "```\n",
+    "multiline": true,
+    "newline": true,
+    "nesting": false,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<code class=\"code code-aa\">",
+    "closeTag": "</code>"
+  },
+  {
+    "initiator": "```\n",
+    "terminator": "```\n",
+    "multiline": true,
+    "newline": true,
+    "nesting": false,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<code class=\"code code-multiline\">",
+    "closeTag": "</code>"
+  },
+  {
+    "initiator": "`",
+    "terminator": "`",
+    "multiline": false,
+    "newline": false,
+    "nesting": false,
+    "preserveInitiator": false,
+    "preserveTerminator": false,
+    "openTag": "<code>",
+    "closeTag": "</code>"
+  },
+  {
+    "initiator": ">",
+    "terminator": "\n",
+    "multiline": false,
+    "newline": true,
+    "nesting": true,
+    "preserveInitiator": true,
+    "preserveTerminator": true,
+    "openTag": "<q class=\"unkfunc quote\">",
+    "closeTag": "</q>"
+  }
+]

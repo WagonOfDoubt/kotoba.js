@@ -1,0 +1,48 @@
+a.logo(href='/')
+  img(src='/.static/img/kotoba_logo_sm.png', alt='Home', title='Home')
+nav
+  ul.list-group
+    li.list-group-item
+      a(href='/') Home
+    li.list-group-item
+      a(href='/manage/logout') Log out
+    li.list-group-item Change account password
+    li.list-group-item
+      a(href='/manage/dashboard') Dashboard
+    li.list-group-item
+      a(href='/manage/spaceused') Disk space used
+    li.list-group-item
+      a(href='/manage/sitesettings') Site settings
+    li.list-group-item
+      a(href='/manage/maintenance') Site maintenance
+    li.list-group-item
+      a(href='/manage/news') News
+    li.list-group-item Blotter
+    li.list-group-item
+      a(href=pkg.homepage, target='_blank') Check for new version
+    li.list-group-item Staff
+    li.list-group-item ModLog
+    li.list-group-item Ban proxy list
+    li.list-group-item
+      a(href='/manage/boardopts') Manage boards
+    li.list-group-item Wordfilter
+    li.list-group-item Move thread
+    li.list-group-item Move Search posts
+    li.list-group-item View deleted thread
+    li.list-group-item Edit filetypes
+    li.list-group-item Edit sections
+    li.list-group-item Moderation
+    li.list-group-item View Reports
+    li.list-group-item Bans
+    li.list-group-item BanDelAll
+    li.list-group-item Recent uploads
+
+if user
+  div
+    | Welcome,
+    | 
+    strong #{user.login}
+  div
+    | Staff rights:
+    | 
+    strong #{user.authority}

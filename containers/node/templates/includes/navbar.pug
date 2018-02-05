@@ -1,0 +1,9 @@
+nav.navbar
+  //- each section in sections
+  span.section-wrapper
+    each board in boards
+      span.link-wrapper
+        a(
+          title=board.name
+          href=`/${board.uri}`
+        )= board.uri

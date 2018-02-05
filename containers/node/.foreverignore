@@ -1,0 +1,10 @@
+html
+html/*
+html/**/*
+**/html/**/*
+templates
+node_modules
+Dockerfile
+.jshintrc
+*.log
+*.pug

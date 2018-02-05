@@ -1,0 +1,58 @@
+.attachment {
+  margin: 0;
+}
+
+
+.thumb-container {
+  float: left;
+  padding: 2px 20px;
+  position: relative;
+}
+
+
+.thumb-video-playing {
+  .file-info-duration, .thumb {
+    display: none;
+  }
+
+  .thumb-link::before {
+    content: '[close]';
+    display: block;
+  }
+}
+
+.thumb, .video-player {
+  max-width: 100%;
+  height: auto;
+}
+
+.thumb[src*="/src/"] {
+  height: auto;
+}
+
+
+.filesize {
+  display: inline;
+  font-size: 10px;
+  font-family: sans-serif;
+  margin-left: 20px;
+
+  &::after {
+    content: ' ';
+    display: block;
+    clear: left;
+  }
+}
+
+
+.file-info-duration {
+  position: absolute;
+  right: 25px;
+  bottom: 10px;
+  color: #fff;
+  background: rgba(0,0,0,0.8);
+  font-family: sans-serif;
+  font-size: 12px;
+  padding: 2px;
+  border-radius: 2px;
+}

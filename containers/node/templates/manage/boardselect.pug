@@ -1,0 +1,13 @@
+extends managepage.pug
+
+block header
+  h1 Board administration
+
+block main
+  h2 Select board
+  ul.boards-list
+    for b in boards
+      li.board-item(data-board=b.uri, data-name=b.name)
+        a(href='/manage/boardopts/' + b.uri) /#{ b.uri }/ - #{ b.name }
+  h2 Add board
+  a(href='/manage/addboard') Add board

@@ -1,0 +1,66 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+
+block header
+  h1 Site settings
+
+block main
+  //- pre= JSON.stringify(sitesettings, null, 2)
+  //- pre= JSON.stringify(defaults, null, 2)
+  form#form-update-sitesettings(method='GET', action='/api/settings')
+    - var values = sitesettings
+    h2 Common settings
+    +textEdit('siteName', 'Site name', 'The name of your site.')
+    +textEdit('slogan', 'Slogan', 'Site slogan, set to nothing to disable its display.')
+    +textEdit('desc', 'Site description', 'Short description for metadata.')
+    +textEdit('locale', 'Locale', 'Default locale. Locales can be assigned individually pre board.')
+    +textEdit('dateformat', 'Date format', 'Default date format.')
+    +textEdit('imageUri', 'Header image', 'URL. Default header image. Can be overriden on each board.')
+    //- features
+    h2 Engine features
+    +checkboxEdit('features[expandThread]', 'Expand thread button', 'Whether or not to add expand thread buttons.')
+    +checkboxEdit('features[hideThread]', 'Hide thread button', 'Whether or not to add hide thread buttons.')
+    +checkboxEdit('features[hidePost]', 'Hide post button', 'Whether or not to add hide buttons on posts.')
+    +checkboxEdit('features[favorites]', 'Watched threads', 'Whether or not to add thread watching capabilities.')
+    +checkboxEdit('features[quickreply]', 'Quick reply', 'Whether or not to add quick reply buttons on posts.')
+    //- thumbnail
+    h2 Thumbnails
+    +numberEdit('thumbSize[width]', 'Thumbnail width', 'Maximum thumbnail width.', 'thumbSize.width')
+    +numberEdit('thumbSize[height]', 'Thumbnail height', 'Maximum thumbnail height.')
+    //- delays
+    h2 Posting limits
+    +numberEdit('newThreadDelay', 'Reply delay', 'Minimum time in seonds a user must wait before posting a new thread again.')
+    +numberEdit('replyDelay', 'Reply delay', 'Minimum time in seonds a user must wait before posting a reply again.')
+    //- html
+    h2 Site pages
+    +textArea('faq', 'FAQ')
+      | HTML of FAQ section displayed on front page of site.
+      | Write here about posts markup and other stuff.
+      | Be careful and close all tags.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    div.text-right
+      button(type='button', class='btn', data-action='preview-markdown', data-field='faq') Preivew
+    +textArea('rules', 'Rules')
+      | HTML of Rules section displayed on front page of site.
+      | Write here rules of posting like no CP, no shitposting, moderator is always right, etc.
+      | Be careful and close all tags.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    div.text-right
+      button(type='button', class='btn', data-action='preview-markdown', data-field='rules') Preivew
+    +textArea('menu', 'Top links')
+      | HTML of FAQ section displayed on top of each page.
+      | Write here liks to featured boards, links to sattelite websites, twitter, and manage page.
+      | Be careful and close all tags.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    div.text-right
+      button(type='button', class='btn', data-action='preview-markdown', data-field='menu') Preivew
+    +textArea('frame', '"Frame" links')
+      | HTML of default tab of sidebar on the left.
+      | Traditionally it's list of all boards grouped in categories.
+      | Be careful and close all tags.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    div.text-right
+      button(type='button', class='btn', data-action='preview-markdown', data-field='frame') Preivew
+
+    input#btn-update-sitesettings(type='submit', value='Save changes')
