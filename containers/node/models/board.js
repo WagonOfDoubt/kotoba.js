@@ -72,35 +72,7 @@ boardSchema.statics.findBoards = (boardUri, inclHidden = true) => {
   const query = boardUri
     ? Board.findOne(q)
     : Board.find(q);
-  return query.select({
-    uri: 1,
-    name: 1,
-    desc: 1,
-    imageUri: 1,
-    maxFileSize: 1,
-    maxFilesPerPost: 1,
-    maxPages: 1,
-    maxThreadsOnPage: 1,
-    autosage: 1,
-    showReplies: 1,
-    showRepliesSticky: 1,
-    maxMessageLength: 1,
-    createdDate: 1,
-    defaultPosterName: 1,
-    isLocked: 1,
-    isForcedAnon: 1,
-    isTrial: 1,
-    isPopular: 1,
-    defaultStyle: 1,
-    locale: 1,
-    allowNoFilesOp: 1,
-    allowNoMessageOp: 1,
-    enableReporting: 1,
-    enableCaptcha: 1,
-    enableArchiving: 1,
-    enableCatalog: 1,
-    enableSage: 1
-  });
+  return query;
 };
 
 const Board = module.exports = mongoose.model('Board', boardSchema);

@@ -1,5 +1,5 @@
 const ObjectId = require('mongoose').Types.ObjectId;
-const { generateThread, generateThreadPreview, generateBoard } = require('./generate');
+const { generateThread, generateBoardPages } = require('./generate');
 const { uploadFile } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
@@ -54,14 +54,10 @@ module.exports.createThread = async (boardUri, postData, file) => {
   await Parser.parsePost(post);
   await post
     .save()
-    .then(() => Promise.all([
-        generateThread(post),
-        generateThreadPreview(post)
-      ])
-    );
+    .then(generateThread);
   await Board
       .findByIdAndUpdate(board._id, { $inc: { postcount: 1 } }, { new: true })
-      .then(generateBoard);
+      .then(generateBoardPages);
 
   return post.postId;
 };
@@ -119,18 +115,12 @@ module.exports.createReply = async (boardUri, threadId, postData, file) => {
   await post.save();
   await Post
     .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams, { new: true })
-    .exec();
   await Post
     .findThreads(boardUri, threadId, true)
-    .exec()
-    .then((t) => Promise.all([
-        generateThread(t[0]),
-        generateThreadPreview(t[0])
-      ])
-    );
+    .then((t) => generateThread(t[0]));
   await Board
     .findByIdAndUpdate(ObjectId(board._id), boardUpdateParams, { new: true })
-    .then(generateBoard);
+    .then(generateBoardPages);
 
   return post.postId;
 };

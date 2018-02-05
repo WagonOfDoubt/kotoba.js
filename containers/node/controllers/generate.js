@@ -10,6 +10,11 @@ const News = require('../models/news');
 const pkg = require('../package.json');
 
 
+/**
+ * Helper function.
+ * Gets Settings object from database
+ * and returns object with parameters nessessary for templates.
+ */
 const getTemplateGlobals = async () => {
   const s = await Settings.get();
   const data = {
@@ -23,34 +28,173 @@ const getTemplateGlobals = async () => {
 };
 
 
-const regenerateAll = async () => {
-  const regenerateAllThreadsOnBoard = threads =>
-    Promise.all(threads.map((thread) =>
-      Promise.all([
-        generateThread(thread),
-        generateThreadPreview(thread)
-      ]))
-    );
-  const regenerateAllBoards = boards =>
-    Promise.all(boards.map(board =>
-      Promise.all([
-        Post.findThreads(board.uri)
-          .then(regenerateAllThreadsOnBoard)
-          .then(() => generateBoard(board)),
-        generateCatalog(board)
-      ])));
-  return Promise.all([
-    Board
-      .findBoards()
-      .exec()
-      .then(regenerateAllBoards)
-    ]).catch(err => {
-      throw err;
-    });
+/**
+ * Helper function.
+ * Renders template with given data and saves it to dir as filename
+ * Also passes global template variables to template
+ * @param {String} dir - Directory to save to.
+ * @param {String} filename - Filename of resulting file.
+ * @param {String} template - Name of pug template.
+ * @param {Object} data - Data to pass to pug template.
+ */
+const renderToFile = async (dir, filename, template, data) => {
+  const path = `${ dir }/${ filename }`;
+  const dirExists = fs.existsSync(dir);
+  if (!dirExists) {
+    fs.mkdirSync(dir);
+  }
+  const globals = await getTemplateGlobals();
+  const templateData = Object.assign(globals, data);
+  fs.writeFileSync(path, pug.renderFile(template, templateData));
 };
 
 
-const generateBoard = async (board) => {
+/**
+ * Generates thread reply page.
+ * Saves file board/res/[postId].html
+ * @param {Post} thread - The op-post mongoose document.
+ */
+const generateThreadPage = async (thread) => {
+  const board = await Board.findBoards(thread.boardUri).exec();
+
+  const data = {
+    board: board,
+    thread: thread,
+    replies: thread.children,
+    isPage: false,
+  };
+
+  if (board.locale) {
+    data.lang = board.locale;
+  }
+
+  const dir = `${ config.html_path }/${ board.uri }/res`;
+  const filename = `${ thread.postId }.html`;
+  const template = './templates/threadpage.pug';
+  await renderToFile(dir, filename, template, data);
+  console.log('generateThreadPage', board.uri, thread.postId);
+  return thread;
+};
+
+
+/**
+ * Generates cached thread fragment which will be displayed on board page.
+ * When thread is bumped, threads on board are shuffled, so each page of board
+ * must be regenerated. But there is no need to render each thread fragment
+ * since none of them was changed. Keeping rendered thread fragments lets avoid
+ * unnesessary database queries and increaces overall performance.
+ * Saves file board/res/[postId]-preview.html
+ * @param {Post} thread - The op-post mongoose document.
+ */
+const generateThreadPreview = async (thread) => {
+  const board = await Board.findBoards(thread.boardUri).exec();
+  const showReplies = thread.isSticky
+    ? board.showRepliesSticky
+    : board.showReplies;
+  const children = thread.children;
+  const omitted = children.slice(0, children.length - showReplies);
+  const omittedPosts = omitted.length;
+  const omittedAttachments = omitted.length
+    ? omitted
+      .reduce((acc, reply) => {
+        return acc + (reply.attachments ? reply.attachments.length : 0);
+      }, 0)
+    : 0;
+  const notOmitted = children.slice(-showReplies);
+
+  const data = {
+    lang: board.locale || globals.lang,
+    board: board,
+    thread: thread,
+    replies: notOmitted,
+    omittedPosts: omittedPosts,
+    omittedAttachments: omittedAttachments,
+    isPage: true,
+  };
+  const dir = `${ config.html_path }/${ board.uri }/res`;
+  const filename = `${ thread.postId }-preview.html`;
+  const template = './templates/includes/thread.pug';
+  await renderToFile(dir, filename, template, data);
+  console.log('generateThreadPreview', board.uri, thread.postId);
+};
+
+
+/**
+ * Generates thread reply page and thread preview.
+ * @param {Post} thread - The op-post mongoose document.
+ * @returns {Promise}
+ */
+const generateThread = thread =>
+  Promise.all([
+    generateThreadPage(thread),
+    generateThreadPreview(thread)
+  ]);
+
+
+/**
+ * Generates thread reply page and thread preview for each thread.
+ * @param {Array} threads - Array of {Post} threads to display on page.
+ * @returns {Promise}
+ */
+const generateThreads = threads =>
+  Promise.all(threads.map(generateThread));
+
+
+/**
+ * Generates one page of board.
+ * Threads on page are not rendered, but included from -preview.html files.
+ * Saves file board/index.html or board/[pNum].html
+ * @param {Board} board - The board mongoose document.
+ * @param {Array} threads - Array of {Post} threads to display on page.
+ * @param {Number} pNum - Current page. If 0, file will be named index.html
+ * @param {Number} totalPages - Number of pages for pages selector.
+ */
+const generateBoardPage = async (board, threads, pNum, totalPages) => {
+  const files = threads.map((thread) =>
+    `${ config.html_path }/${ board.uri }/res/${ thread.postId }-preview.html`);
+  const promises = files.map(filepath => {
+    return new Promise((resolve, reject) => {
+      fs.readFile(filepath, (err, fileData) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(fileData)
+        }
+      });
+    });
+  });
+  const threadPreivews = await Promise.all(promises);
+
+  const data = {
+    board: board,
+    threads: threadPreivews,
+    isPage: true,
+    pagination: {
+      current: pNum,
+      total: totalPages
+    },
+  };
+
+  if (board.locale) {
+    data.lang = board.locale;
+  }
+
+  const dir = `${ config.html_path }/${ board.uri }`;
+  const filename = pNum === 0
+    ? 'index.html'
+    : `${ pNum }.html`;
+  const template = './templates/boardpage.pug';
+  await renderToFile(dir, filename, template, data);
+  console.log('generateBoardPage', board.uri, pNum);
+};
+
+
+/**
+ * Generates all pages on given board.
+ * Saves files board/index.html, board/1.html, ..., board/n.html
+ * @param {Board} board - The board mongoose document.
+ */
+const generateBoardPages = async (board) => {
   const threads = await Post
     .find({
       boardUri: board.uri,
@@ -74,110 +218,18 @@ const generateBoard = async (board) => {
       await generateBoardPage(board, e, i, arr.length);
       return e;
     }));
-  console.log('generateBoard', board.uri);
+  console.log('generateBoardPages', board.uri);
   return board;
 };
 
 
-const generateBoardPage = async (board, threads, pNum, totalPages) => {
-  const files = threads.map((thread) =>
-    `${ config.html_path }/${ board.uri }/res/${ thread.postId }-preview.html`);
-  const promises = files.map(filepath => {
-    return new Promise((resolve, reject) => {
-      fs.readFile(filepath, (err, fileData) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(fileData)
-        }
-      });
-    });
-  });
-  const threadPreivews = await Promise.all(promises);
-
-  const globals = await getTemplateGlobals();
-  const data = {
-    ...globals,
-    lang: board.locale || globals.lang,
-    board: board,
-    threads: threadPreivews,
-    isPage: true,
-    pagination: {
-      current: pNum,
-      total: totalPages
-    },
-  };
-
-  const dir = `${ config.html_path }/${ board.uri }`;
-  const filename = pNum === 0
-    ? 'index.html'
-    : `${ pNum }.html`;
-  const template = './templates/boardpage.pug';
-  renderToFile(dir, filename, template, data);
-  console.log('generateBoardPage', board.uri, pNum);
-};
-
-
-const generateThread = async (thread) => {
-  const board = await Board.findBoards(thread.boardUri).exec();
-
-  const globals = await getTemplateGlobals();
-  const data = {
-    ...globals,
-    lang: board.locale || globals.lang,
-    board: board,
-    thread: thread,
-    replies: thread.children,
-    isPage: false,
-  };
-  const dir = `${ config.html_path }/${ board.uri }/res`;
-  const filename = `${ thread.postId }.html`;
-  const template = './templates/threadpage.pug';
-  renderToFile(dir, filename, template, data);
-  console.log('generateThread', board.uri, thread.postId);
-  return thread;
-};
-
-
-const generateThreadPreview = async (thread) => {
-  const board = await Board.findBoards(thread.boardUri).exec();
-  const showReplies = thread.isSticky
-    ? board.showRepliesSticky
-    : board.showReplies;
-  const children = thread.children;
-  const omitted = children.slice(0, children.length - showReplies);
-  const omittedPosts = omitted.length;
-  const omittedAttachments = omitted.length
-    ? omitted
-      .reduce((acc, reply) => {
-        return acc + (reply.attachments ? reply.attachments.length : 0);
-      }, 0)
-    : 0;
-  const notOmitted = children.slice(-showReplies);
-
-  const globals = await getTemplateGlobals();
-  const data = {
-    ...globals,
-    lang: board.locale || globals.lang,
-    board: board,
-    thread: thread,
-    replies: notOmitted,
-    omittedPosts: omittedPosts,
-    omittedAttachments: omittedAttachments,
-    isPage: true,
-  };
-  const dir = `${ config.html_path }/${ board.uri }/res`;
-  const filename = `${ thread.postId }-preview.html`;
-  const template = './templates/includes/thread.pug';
-  renderToFile(dir, filename, template, data);
-  console.log('generateThread', board.uri, thread.postId);
-};
-
-
+/**
+ * Generates catalog of board.
+ * Saves file board/catalog.html
+ * @param {Board} board - The board mongoose document.
+ */
 const generateCatalog = async (board) => {
-  const globals = await getTemplateGlobals();
   const data = {
-    ...globals,
     lang: board.locale || globals.lang,
     board: board,
   };
@@ -186,34 +238,66 @@ const generateCatalog = async (board) => {
 };
 
 
+/**
+ * Regenerates all board pages, thread reply pages and catalog for given board
+ * @param {Array} threads - Array of {Board} boards to regenerate.
+ * @returns {Promise}
+ */
+const generateBoard = board =>
+  Promise.all([
+    Post.findThreads(board.uri)
+      .then(generateThreads)
+      .then(() => generateBoardPages(board)),
+    generateCatalog(board)
+  ]);
+
+
+/**
+ * Regenerates all board pages, thread reply pages and catalog for all given boards
+ * @param {Array} threads - Array of {Board} boards to regenerate.
+ * @returns {Promise}
+ */
+const generateBoards = boards =>
+  Promise.all(boards.map(generateBoard));
+
+
+/**
+ * Generates main page (/index.html)
+ */
 const generateMainPage = async () => {
-  const globals = await getTemplateGlobals();
   const news = await News.find().sort({ postedDate: -1 }).exec();
   const data = {
-    ...globals,
     news: news
   };
   const dir = config.html_path;
   const template = './templates/mainpage.pug';
-  renderToFile(dir, 'index.html', template, data);
+  await renderToFile(dir, 'index.html', template, data);
   console.log('generateMainPage');
 };
 
 
-const renderToFile = (dir, filename, template, data) => {
-  const path = `${ dir }/${ filename }`;
-  const dirExists = fs.existsSync(dir);
-  if (!dirExists) {
-    fs.mkdirSync(dir);
-  }
-  fs.writeFileSync(path, pug.renderFile(template, data));
-};
+/**
+ * Regenerates all static html.
+ * @returns {Promise}
+ */
+const regenerateAll = () =>
+  Promise.all([
+    generateMainPage,
+    Board
+      .findBoards()
+      .exec()
+      .then(generateBoards)
+    ]);
 
 
-module.exports.regenerateAll = regenerateAll;
-module.exports.generateBoard = generateBoard;
-module.exports.generateBoardPage = generateBoardPage;
-module.exports.generateThread = generateThread;
+module.exports.generateThreadPage = generateThreadPage;
 module.exports.generateThreadPreview = generateThreadPreview;
+module.exports.generateThread = generateThread;
+module.exports.generateThreads = generateThreads;
+module.exports.generateBoardPage = generateBoardPage;
+module.exports.generateBoardPages = generateBoardPages;
 module.exports.generateCatalog = generateCatalog;
+module.exports.generateBoard = generateBoard;
+module.exports.generateBoards = generateBoards;
 module.exports.generateMainPage = generateMainPage;
+module.exports.regenerateAll = regenerateAll;
