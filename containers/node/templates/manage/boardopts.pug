@@ -44,17 +44,22 @@ block main
     +numberEdit('showRepliesSticky', 'Show replies sticky', 'Number of replies to show on a board page when the thread is sticked.')
     +numberEdit('maxMessageLength', 'Maximum message length.')
     +textEdit('defaultPosterName', 'Anonymous', 'Name to display when a name is not attached to a post.')
+    +checkboxEdit('isHidden', 'Hidden', 'Do not dispaly this board in navigation menu.')
     +checkboxEdit('isLocked', 'Locked', 'Only moderators of the board and admins can make new posts/replies.')
     +checkboxEdit('isForcedAnon', 'Forced anonymous', 'If set to yes, users will not be allowed to enter a name, making everyone appear as Anonymous.')
-    +checkboxEdit('allowNoFilesOp', 'Enable "no file" posting', 'If set to yes, new threads will not require an image to be posted.')
-    +checkboxEdit('allowNoMessageOp', 'Enable no message posting', 'If set to yes, new threads will not require message to be posted.')
-    +checkboxEdit('enableReporting', 'Enable reporting', 'Reporting allows users to report posts, adding the post to the report list.')
-    +checkboxEdit('enableCaptcha', 'Enable captcha', 'Enable/disable captcha system for this board. If captcha is enabled, in order for a user to post, they must first correctly enter the text on an image.')
-    +checkboxEdit('enableArchiving', 'Enable archiving', 'Enable/disable thread archiving for this board.')
-    +checkboxEdit('enableCatalog', 'Enable catalog', 'If set to yes, a catalog.html file will be built with the other files, displaying the original picture of every thread in a box.')
-    +checkboxEdit('enableSage', 'Enable sage', 'Allow users to reply to threads without bumping them.')
-    +checkboxEdit('permanentSage', 'Permanent sage', 'If set to yes, poster can only sage thread once. After that, they no longer can post in threads they saged.')
-    +checkboxEdit('isHidden', 'Hidden', 'Do not dispaly this board in navigation menu.')
+    +checkboxEdit('allowRepliesSubject', 'Enable subject field for replies', 'Who needs it anyway?')
+    h3 Captcha
+    +checkboxEdit('captcha[enabled]', 'Enable captcha', 'Enable/disable captcha system for this board. If captcha is enabled, in order for a user to post, they must first correctly enter the text on an image.')
+    h3 New threads require
+    +checkboxEdit('newThreadsRequired[files]', 'Attachments', 'If set to yes, new threads will require an image to be posted.')
+    +checkboxEdit('newThreadsRequired[message]', 'Message', 'If set to yes, new threads will require message to be posted.')
+    +checkboxEdit('newThreadsRequired[subject]', 'Subject', 'If set to yes, new threads will require subject to be posted.')
+    h3 Features
+    +checkboxEdit('features[reporting]', 'Enable reporting', 'Reporting allows users to report posts, adding the post to the report list.')
+    +checkboxEdit('features[archive]', 'Enable archiving', 'Enable/disable thread archiving for this board.')
+    +checkboxEdit('features[catalog]', 'Enable catalog', 'If set to yes, a catalog.html file will be built with the other files, displaying the original picture of every thread in a box.')
+    +checkboxEdit('features[sage]', 'Enable sage', 'Allow users to reply to threads without bumping them.')
+    +checkboxEdit('features[permanentSage]', 'Permanent sage', 'If set to yes, poster can only sage thread once. After that, they no longer can post in threads they saged.')
 
     if board
       input#btn-update-board(type='submit', value='Update board options')

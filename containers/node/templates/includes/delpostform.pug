@@ -5,8 +5,8 @@ div.userdelete
     label.link-button-wrapper
       input#fileonly(name='fileonly', type='checkbox')
       | File only
-  label Пароль
+  label Password
     input(name='postpassword', size='8', type='password')
   input(name='deletepost', value='Delete', type='submit')
-  if board.enableReporting
+  if board.features.reporting
     input(name='reportpost', value='Report', type='submit')

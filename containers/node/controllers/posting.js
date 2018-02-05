@@ -15,13 +15,19 @@ module.exports.createThread = async (boardUri, postData, file) => {
     error.reason = 'invalid_value';
     throw error;
   }
-  if (!board.allowNoMessageOp && !postData.body) {
+  if (board.newThreadsRequired.message && !postData.body) {
     const error = Error('New threads must contain message');
     error.type = 'input_error';
     error.reason = 'missing_value';
     throw error;
   }
-  if (!board.allowNoFilesOp && !file) {
+  if (board.newThreadsRequired.subject && !postData.subject) {
+    const error = Error('New threads must contain subject');
+    error.type = 'input_error';
+    error.reason = 'missing_value';
+    throw error;
+  }
+  if (board.newThreadsRequired.files && !file) {
     const error = Error('New threads must include image');
     error.type = 'input_error';
     error.reason = 'missing_value';

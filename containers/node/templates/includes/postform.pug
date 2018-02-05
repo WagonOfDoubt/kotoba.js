@@ -72,8 +72,9 @@ div#postbox.postarea
               accesskey='c'
               type='text'
             )
-      //- div.form-row
-      tr
+      if isPage || board.allowRepliesSubject
+        //- div.form-row
+        tr
         //- div.form-col
         td.postblock
           label(for='subject-input').form-label Subject
@@ -85,6 +86,7 @@ div#postbox.postarea
             maxlength='75'
             accesskey='s'
             type='text'
+            required=isPage && board.newThreadsRequired.subject
           )
           input(
             type='submit'
@@ -109,6 +111,7 @@ div#postbox.postarea
             cols='38'
             rows='4'
             accesskey='m'
+            required=isPage && board.newThreadsRequired.message
           )
           div#resizer
       //- div.form-row
@@ -123,6 +126,7 @@ div#postbox.postarea
             size='35'
             accesskey='f'
             type='file'
+            required=isPage && board.newThreadsRequired.files
           )
       //- div.form-row
       tr
@@ -145,7 +149,7 @@ div#postbox.postarea
         //- div.form-col
         td
           div.form-input-group
-            if board.enableSage && !isPage
+            if board.features.sage && !isPage
               span.link-button-wrapper
                 input#sage(name='sage', type='checkbox')
                 label(for='sage') säge
