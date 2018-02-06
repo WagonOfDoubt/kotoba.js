@@ -1,0 +1,54 @@
+extends layouts/default.pug
+include mixins/attachments.pug
+include mixins/timestamp.pug
+
+block bodyClass
+  - var bodyClass = 'catalog-page'
+
+block header
+  include includes/boardheader.pug
+
+block main
+  div.link-button-wrapper.return-link-return-link-top
+    a(href='/' + board.uri) Return
+
+  div.catalog
+    div.catalog-mode Catalog
+
+    div.catalog-list
+      for thread in threads
+        - var replies = thread.children.length;
+        - var images = thread.numberOfAttachmentsInThread;
+        - var file = null;
+        if thread.attachments && thread.attachments.length
+          - file = thread.attachments[0];
+        div.catalog-thread(
+          data-replies=replies
+          data-images=images
+          data-board-uri=thread.boardUri
+          data-thread-id=thread.postId
+          data-created=thread.timestamp
+          data-subject=thread.subject
+          data-message=thread.body
+          )
+          a.catalog-thread-link(href=`/${thread.boardUri}/res/${thread.postId}.html`)
+            if file
+              figure.catalog-thread-image
+                +thumbnail(file)
+            if thread.subject
+              span.catalog-thread-subject= thread.subject
+            div.catalog-thread-stats
+              span.catalog-thread-replies(title='Number of replies')= replies
+              |
+              span.catalog-thread-attachments(title='Number of images')= images
+              |
+              span.catalog-thread-created(title='Thread created')
+                +date(thread.timestamp)
+            if thread.body
+              div.catalog-thread-message= thread.body.substring(0, 100)
+
+  div.link-button-wrapper.return-link-return-link-bottom
+    a(href='/' + board.uri) Return
+
+block scripts
+  script(src='/.static/js/kotoba.js')

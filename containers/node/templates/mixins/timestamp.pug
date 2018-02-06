@@ -1,0 +1,8 @@
+mixin datetime(timestamp)
+  time.datetime(datetime=timestamp.toJSON())= timestamp.toLocaleString()
+
+mixin date(timestamp)
+  time.date(datetime=timestamp.toJSON())= timestamp.toLocaleDateString()
+
+mixin time(timestamp)
+  time.date(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()

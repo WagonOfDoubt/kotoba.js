@@ -4,14 +4,10 @@ block bodyClass
   - var bodyClass = 'thread-page'
 
 block header
-  nav.adminbar.adminbar-top!= filters.markdown(site.menu)
-  h1.logo= board.name
-  if board.header
-    div.board-header
-      div.board-header-content!= filters.markdown(board.header)
+  include includes/boardheader.pug
 
 block main
-  .link-button-wrapper
+  .return-link.return-link-top.link-button-wrapper
     a(href='/' + board.uri) Return
 
   include includes/postform.pug
@@ -20,7 +16,7 @@ block main
     include includes/thread.pug
     include includes/delpostform.pug
 
-  .link-button-wrapper
+  .return-link.return-link-bottom.link-button-wrapper
     a(href='/' + board.uri) Return
 
 block footer

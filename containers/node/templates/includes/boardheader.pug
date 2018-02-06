@@ -1,0 +1,5 @@
+nav.adminbar.adminbar-top!= filters.markdown(site.menu)
+h1.logo= board.name
+if board.header
+  div.board-header
+    div.board-header-content!= filters.markdown(board.header)

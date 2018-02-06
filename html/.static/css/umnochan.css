@@ -63,11 +63,14 @@ table.table tbody tr, table.table tfoot tr {
 .news-header {
   background: #D0AB65; }
 
-.replymode {
+.catalog-thread-stats {
+  color: #707070; }
+
+.catalog-thread-subject {
+  color: #CC1105; }
+
+.replymode, .catalog-mode, .page-title {
   background: #D0AB65;
-  text-align: center;
-  padding: 2px;
-  color: #FFFFFF;
-  width: 100%; }
+  color: #FFFFFF; }
 
 /*# sourceMappingURL=umnochan.css.map */

@@ -1,3 +1,5 @@
+include ../mixins/timestamp.pug
+
 div.news-entry(id='news-' + n.number)
   div.news-header
     span.news-subject
@@ -13,7 +15,7 @@ div.news-entry(id='news-' + n.number)
         | 
         | -
         | 
-        time.time(datetime=n.postedDate.toJSON())= n.postedDate.toLocaleString()
+        +datetime(n.postedDate)
     span.news-hash
       a(href='#news-' + n.number, title='premalink') #
   div.news-content!= filters.markdown(n.message)

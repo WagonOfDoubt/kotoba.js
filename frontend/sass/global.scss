@@ -6,7 +6,7 @@
 @import 'posts';
 @import 'postform';
 @import 'spinner';
-
+@import 'catalog';
 
 $sidebar-width: 20vw;
 
@@ -168,6 +168,12 @@ table.table {
   color: #721c24;
   background-color: #f8d7da;
   border-color: #f5c6cb;
+}
+
+.replymode, .page-title {
+  text-align: center;
+  padding: 2px;
+  width: 100%;
 }
 
 .thread-container {

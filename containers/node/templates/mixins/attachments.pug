@@ -1,0 +1,51 @@
+mixin attachments(post)
+  if post.attachments
+    each attachment in post.attachments
+      +attachment(attachment, post)
+
+mixin attachment(attachment, post)
+  figure(
+    class=['attachment', 'attachment-' + attachment.type]
+    data-post-id=post.postId
+    data-file=attachment.file
+    data-duration=attachment.duration
+    data-type=attachment.type
+  )
+    - var fileHref = filters.encodeUri(attachment.file)
+    figcaption.filesize
+      a.file-link(
+        href!= fileHref
+        target='_blank'
+        title=attachment.name)!= filters.shortFileName(attachment.name, {length: 25, placeholder: '[...]'})
+      |
+      if attachment.size || (attachment.width && attachment.height)
+        span.file-info
+          | (
+          if attachment.size
+            span.file-info-size
+              != filters.readableSize(attachment.size)
+          if attachment.width && attachment.height
+            | ,
+            span.file-info-resolution #{ attachment.width }x#{ attachment.height }
+          | )
+    div.thumb-container
+      a.thumb-link(
+        href!= fileHref
+        data-full-src=attachment.file
+        data-full-width=attachment.width
+        data-full-height=attachment.height
+        data-thumb-src=attachment.thumb
+        data-thumb-width=attachment.thumbWidth
+        data-thumb-height=attachment.thumbHeight
+      )
+        +thumbnail(attachment)
+      if attachment.duration
+        div.file-info-duration!= filters.readableDuration(attachment.duration)
+
+mixin thumbnail(attachment)
+  img.thumb(
+    src=attachment.thumb
+    alt=attachment.name
+    width=attachment.thumbWidth
+    height=attachment.thumbHeight
+  )

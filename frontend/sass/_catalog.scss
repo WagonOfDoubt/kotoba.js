@@ -1,0 +1,60 @@
+.catalog-list {
+  margin: 20px 0;
+  display: grid;
+  grid-gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-auto-flow: row dense;
+}
+
+.catalog-thread-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  &, &:hover, &:visited {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
+.catalog-thread-image {
+  margin: 0;
+  text-align: center;
+}
+
+.catalog-thread-stats {
+  font-weight: 800;
+  font-size: small;
+  color: #707070;
+
+  span {
+    margin-left: .5em;
+  }
+}
+
+.catalog-thread-replies {
+  &:before {
+    content: '💬 ';
+  }
+}
+
+.catalog-thread-attachments {
+  &:before {
+    content: '📎 ';
+  }
+}
+
+.catalog-thread-created {
+  &:before {
+    content: '📆 ';
+  }
+}
+
+.catalog-thread-subject {
+  font-weight: 800;
+}
+
+.catalog-mode {
+  text-align: center;
+  padding: 2px;
+  width: 100%;
+}

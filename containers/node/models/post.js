@@ -245,4 +245,25 @@ postSchema.statics.findPost = (boardUri, postId) => {
     ]);
 };
 
+
+postSchema.statics.getSortedThreads = (board) =>
+  Post
+    .find({
+      boardUri: board.uri,
+      parent: { $exists: false }
+    })
+    .sort({ isSticky: -1, bumped: -1})
+    .limit(board.maxPages * board.maxThreadsOnPage);
+
+
+postSchema.virtual('numberOfAttachmentsInThread').get(function () {
+  if (!this.children.length) {
+    return 0;
+  }
+  return this.children.reduce((acc, child) => {
+    return acc + (child.attachments ? child.attachments.length : 0);
+  }, 0);
+});
+
+
 const Post = module.exports = mongoose.model('Post', postSchema);

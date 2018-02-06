@@ -78,3 +78,16 @@ table.table {
 .news-header {
   background: $border-color;
 }
+
+.catalog-thread-stats {
+  color: $omitted-posts-color;
+}
+
+.catalog-thread-subject {
+  color: $subject-color;
+}
+
+.replymode, .catalog-mode, .page-title {
+  background: $page-title-background-color;
+  color: $page-title-color;
+}

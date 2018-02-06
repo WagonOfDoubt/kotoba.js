@@ -113,7 +113,13 @@ div#postbox.postarea
             accesskey='m'
             required=isPage && board.newThreadsRequired.message
           )
-          div#resizer
+          if !(isPage || board.allowRepliesSubject)
+            div
+              input(
+                type='submit'
+                value='Submit'
+                accesskey='z'
+                )
       //- div.form-row
       tr
         //- div.form-col

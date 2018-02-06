@@ -1,5 +1,5 @@
 const ObjectId = require('mongoose').Types.ObjectId;
-const { generateThread, generateBoardPages } = require('./generate');
+const { generateThread, generateBoardPagesAndCatalog } = require('./generate');
 const { uploadFile } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
@@ -63,7 +63,7 @@ module.exports.createThread = async (boardUri, postData, file) => {
     .then(generateThread);
   await Board
       .findByIdAndUpdate(board._id, { $inc: { postcount: 1 } }, { new: true })
-      .then(generateBoardPages);
+      .then(generateBoardPagesAndCatalog);
 
   return post.postId;
 };
@@ -126,7 +126,7 @@ module.exports.createReply = async (boardUri, threadId, postData, file) => {
     .then((t) => generateThread(t[0]));
   await Board
     .findByIdAndUpdate(ObjectId(board._id), boardUpdateParams, { new: true })
-    .then(generateBoardPages);
+    .then(generateBoardPagesAndCatalog);
 
   return post.postId;
 };

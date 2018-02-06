@@ -45,7 +45,15 @@ const renderToFile = async (dir, filename, template, data) => {
   }
   const globals = await getTemplateGlobals();
   const templateData = Object.assign(globals, data);
-  fs.writeFileSync(path, pug.renderFile(template, templateData));
+  try {
+    fs.writeFileSync(path, pug.renderFile(template, templateData));
+  } catch (err) {
+    const error = new Error('fail to generate ' + filename);
+    error.data = data;
+    error.error = err;
+    console.log('fail to generate', filename, 'data:', data, err);
+    throw error;
+  }
 };
 
 
@@ -193,17 +201,13 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
  * Generates all pages on given board.
  * Saves files board/index.html, board/1.html, ..., board/n.html
  * @param {Board} board - The board mongoose document.
+ * @param {Array} threads - Array of threads sorted by bump order.
+ * If null, it threads will be retrieved from database.
  */
-const generateBoardPages = async (board) => {
-  const threads = await Post
-    .find({
-      boardUri: board.uri,
-      parent: { $exists: false }
-    })
-    .select('postId')
-    .limit(board.maxPages * board.maxThreadsOnPage)
-    .sort({ isSticky: -1, bumped: -1})
-    .exec();
+const generateBoardPages = async (board, threads) => {
+  if (!threads) {
+    threads = await Post.getSortedThreads(board);
+  }
   if (!threads.length) {
     await generateBoardPage(board, [], 0, 1);
     return board;
@@ -227,29 +231,55 @@ const generateBoardPages = async (board) => {
  * Generates catalog of board.
  * Saves file board/catalog.html
  * @param {Board} board - The board mongoose document.
+ * @param {Array} threads - Array of threads sorted by bump order.
+ * If null, it threads will be retrieved from database.
  */
-const generateCatalog = async (board) => {
+const generateCatalog = async (board, threads = null) => {
+  if (!board.features.catalog) {
+    return board;
+  }
+  if (!threads) {
+    threads = await Post.getSortedThreads(board).populate('children');
+  }
   const data = {
     lang: board.locale || globals.lang,
     board: board,
+    threads: threads
   };
+  const filename = config.catalog_filename;
+  const dir = `${ config.html_path }/${ board.uri }`;
+  const template = './templates/catalogpage.pug';
+  await renderToFile(dir, filename, template, data);
   console.log('generateCatalog', board.uri);
   return board;
 };
 
 
 /**
+ * Regenerates all board pages and catalog for given board
+ * @param {Board} board - Board to regenerate.
+ * @returns {Promise}
+ */
+const generateBoardPagesAndCatalog = board =>
+  Post.getSortedThreads(board).populate('children')
+    .then(threads => Promise.all([
+      generateBoardPages(board, threads),
+      generateCatalog(board, threads)
+    ]));
+
+
+/**
  * Regenerates all board pages, thread reply pages and catalog for given board
- * @param {Array} threads - Array of {Board} boards to regenerate.
+ * @param {Board} board - Board to regenerate.
  * @returns {Promise}
  */
 const generateBoard = board =>
-  Promise.all([
-    Post.findThreads(board.uri)
-      .then(generateThreads)
-      .then(() => generateBoardPages(board)),
-    generateCatalog(board)
-  ]);
+  Post.getSortedThreads(board).populate('children')
+    .then(threads => Promise.all([
+      generateThreads(threads)
+        .then(generateBoardPages(board, threads)),
+      generateCatalog(board, threads)
+    ]));
 
 
 /**
@@ -297,6 +327,7 @@ module.exports.generateThreads = generateThreads;
 module.exports.generateBoardPage = generateBoardPage;
 module.exports.generateBoardPages = generateBoardPages;
 module.exports.generateCatalog = generateCatalog;
+module.exports.generateBoardPagesAndCatalog = generateBoardPagesAndCatalog;
 module.exports.generateBoard = generateBoard;
 module.exports.generateBoards = generateBoards;
 module.exports.generateMainPage = generateMainPage;

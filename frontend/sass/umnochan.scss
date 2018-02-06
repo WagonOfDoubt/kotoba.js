@@ -21,8 +21,11 @@ $spoiler-bg: #000;
 $spoiler-open-color: #fff;
 $spoiler-open-bg: #000;
 
+$page-title-color: #FFFFFF;
+$page-title-background-color: #D0AB65;
+
 .reply {
-    border: 1px solid;
+  border: 1px solid;
 }
 
 .form-label {
@@ -32,10 +35,3 @@ $spoiler-open-bg: #000;
 
 @import 'color-scheme';
 
-.replymode {
-  background: $border-color;
-  text-align: center;
-  padding: 2px;
-  color: #FFFFFF;
-  width: 100%;
-}
