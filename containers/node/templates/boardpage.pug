@@ -18,7 +18,7 @@ block main
 
 block footer
   include includes/pagination.pug
-  nav.adminbar.adminbar-bottom!= filters.markdown(site.menu)
+  include includes/boardfooter.pug
 
 block scripts
   script(src='/.static/js/kotoba.js')

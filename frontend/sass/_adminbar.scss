@@ -1,0 +1,54 @@
+$adminbar-space-between: .3rem;
+
+.adminbar {
+  text-align: right;
+}
+
+.adminbar .menu {
+  p {
+    display: inline;
+    padding: 0;
+    margin: 0;
+  }
+
+  ul {
+    display: inline-flex;
+    list-style: none;
+    align-items: baseline;
+    margin: 0 0 0 $adminbar-space-between;
+    padding: 0;
+
+    &::before {
+      content: '[';
+      margin-right: $adminbar-space-between;
+    }
+
+    &::after {
+      content: ']';
+      margin-left: $adminbar-space-between;
+    }
+
+    li:not(:last-child) {
+      &:after {
+        content: '/';
+        margin: 0 $adminbar-space-between;
+      }
+    }
+
+    li {
+      display: inline-flex;
+    }
+  }
+
+  .menu-link {
+    margin-left: $adminbar-space-between;
+
+    &:before {
+      content: '[';
+    }
+
+    &:after {
+      content: ']';
+    }
+  }
+}

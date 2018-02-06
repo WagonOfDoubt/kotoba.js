@@ -16,10 +16,11 @@ module.exports.globalTemplateVariables = async (req, res, next) => {
   res.locals.pkg = pkg;
   res.locals.basedir = config.html_path;
   res.locals.filters = filters;
+  res.locals.config: config;
   res.locals.user = req.user && {
     authority: req.user.authority,
     login: req.user.login
-  }
+  };
   next();
 };
 

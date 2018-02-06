@@ -1,4 +1,20 @@
-nav.adminbar.adminbar-top!= filters.markdown(site.menu)
+div.adminbar.adminbar-top
+  nav.menu.menu-site.menu-top!= filters.markdown(site.menu)
+  nav.menu.menu-board.menu-top
+    ul
+      for s in site.styles
+        li
+          a(href='#', data-action='set-style', data-style=s)= s[0].toUpperCase() + s.substring(1)
+    span.menu-link
+      a(href='/') Home
+    span.menu-link
+      a(href='/manage') Manage
+    if board.features.catalog
+      span.menu-link
+        a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
+    if board.features.archive
+      span.menu-link
+        a(href='/' + board.uri + '/arch/res') Archive
 h1.logo= board.name
 if board.header
   div.board-header

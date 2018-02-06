@@ -21,6 +21,7 @@ const getTemplateGlobals = async () => {
     site: s,
     lang: s.locale,
     pkg: pkg,
+    config: config,
     filters: filters,
     basedir: config.html_path
   };

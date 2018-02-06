@@ -20,7 +20,7 @@ block main
     a(href='/' + board.uri) Return
 
 block footer
-  nav.adminbar.adminbar-bottom!= filters.markdown(site.menu)
+  include includes/boardfooter.pug
 
 block scripts
   script(src='/.static/js/kotoba.js')
