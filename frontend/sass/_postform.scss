@@ -28,3 +28,14 @@
   margin: 0 auto;
   text-align: left;
 }
+
+.rules {
+  font-size: 0.6rem;
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    margin-left: 1em;
+  }
+}

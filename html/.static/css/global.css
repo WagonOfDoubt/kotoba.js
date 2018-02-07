@@ -288,6 +288,14 @@ span [id*="unhidethread"] {
   margin: 0 auto;
   text-align: left; }
 
+.rules {
+  font-size: 0.6rem; }
+  .rules ul {
+    margin: 0;
+    padding: 0; }
+  .rules li {
+    margin-left: 1em; }
+
 .loader {
   width: 200px;
   height: 200px; }

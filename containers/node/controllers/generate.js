@@ -71,8 +71,9 @@ const generateThreadPage = async (thread) => {
     thread: thread,
     replies: thread.children,
     isPage: false,
+    stats: {},
   };
-
+  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
   if (board.locale) {
     data.lang = board.locale;
   }
@@ -119,7 +120,9 @@ const generateThreadPreview = async (thread) => {
     omittedPosts: omittedPosts,
     omittedAttachments: omittedAttachments,
     isPage: true,
+    stats: {},
   };
+  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
   const dir = `${ config.html_path }/${ board.uri }/res`;
   const filename = `${ thread.postId }-preview.html`;
   const template = './templates/includes/thread.pug';
@@ -182,8 +185,9 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
       current: pNum,
       total: totalPages
     },
+    stats: {},
   };
-
+  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
   if (board.locale) {
     data.lang = board.locale;
   }
@@ -245,8 +249,10 @@ const generateCatalog = async (board, threads = null) => {
   const data = {
     lang: board.locale || globals.lang,
     board: board,
-    threads: threads
+    threads: threads,
+    stats: {},
   };
+  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
   const filename = config.catalog_filename;
   const dir = `${ config.html_path }/${ board.uri }`;
   const template = './templates/catalogpage.pug';

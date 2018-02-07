@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const schemaUtils = require('../utils/schema');
+const Post = require('./post');
 
 const boardSchema = Schema({
   uri: {
@@ -82,5 +83,11 @@ boardSchema.statics.findBoards = (boardUri, inclHidden = true) => {
     : Board.find(q);
   return query;
 };
+
+boardSchema.methods.getUniqueUserPosts = async function () {
+  const posts = await Post.getNumberOfUniqueUserPosts(this.uri);
+  return posts;
+};
+
 
 const Board = module.exports = mongoose.model('Board', boardSchema);

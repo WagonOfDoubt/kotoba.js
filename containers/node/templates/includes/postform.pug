@@ -121,19 +121,20 @@ div#postbox.postarea
                 accesskey='z'
                 )
       //- div.form-row
-      tr
-        //- div.form-col
-        td.postblock
-          label(for='imagefile-input').form-label File
-        //- div.form-col
-        td
-          input#imagefile-input.from-input(
-            name='imagefile'
-            size='35'
-            accesskey='f'
-            type='file'
-            required=isPage && board.newThreadsRequired.files
-          )
+      if board.maxFilesPerPost !== 0
+        tr
+          //- div.form-col
+          td.postblock
+            label(for='imagefile-input').form-label File
+          //- div.form-col
+          td
+            input#imagefile-input.from-input(
+              name='imagefile'
+              size='35'
+              accesskey='f'
+              type='file'
+              required=isPage && board.newThreadsRequired.files
+            )
       //- div.form-row
       tr
         //- div.form-col
@@ -147,6 +148,9 @@ div#postbox.postarea
             accesskey='p'
             type='password'
           )
+          |
+          |
+          small.desc (For post and file deletion)
       //- div.form-row
       tr
         //- div.form-col
@@ -165,3 +169,14 @@ div#postbox.postarea
               label(for='noko') nöko
       tr
         td.rules(colspan='2')
+          ui
+            li Supported file types are: GIF, PNG, JPG, SVG, WEBP, WEBM, MP4, OGV
+            li Maximum file size allowed is #{filters.readableSize(board.maxFileSize)}.
+            li Maximum number of files per upload is #{board.maxFilesPerPost}.
+            li Images greater than #{site.thumbSize.width}x#{site.thumbSize.width} will be thumbnailed.
+            li
+              | Currently #{stats.uniqueUserPosts} unique user posts.
+              if board.features.catalog
+                |
+                |
+                a(href=`/${board.uri}/${config.catalog_filename}`) View catalog

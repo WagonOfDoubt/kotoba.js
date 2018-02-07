@@ -133,6 +133,34 @@ postSchema.statics.findRefs = (postsQueryList) => {
 };
 
 
+const cachedUniqueUserPosts = {};
+
+postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
+  if (cachedUniqueUserPosts.hasOwnProperty(boardUri)) {
+    return cachedUniqueUserPosts[boardUri];
+  }
+
+  const queryResult = await Post.aggregate([
+    {
+        $match: {boardUri: 'b'}
+    },
+    { $group: { _id: "$ip"} },
+    { $group: { _id: 1, unique: { $sum: 1 } } }
+  ]);
+  console.log(queryResult);
+  if (!queryResult.length || !queryResult[0].unique) {
+    return 0;
+  }
+  cachedUniqueUserPosts[boardUri] = queryResult[0].unique;
+  return cachedUniqueUserPosts[boardUri];
+};
+
+postSchema.pre('save', function(next) {
+  delete cachedUniqueUserPosts[this.boardUri];
+  next();
+});
+
+
 postSchema.statics.findThreads = (boardUri, threadId, removeId = true) => {
   // const q = {
   //   parent: { $exists: false }
