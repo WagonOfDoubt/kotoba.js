@@ -141,9 +141,7 @@ postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
   }
 
   const queryResult = await Post.aggregate([
-    {
-        $match: {boardUri: 'b'}
-    },
+    { $match: {boardUri: boardUri} },
     { $group: { _id: "$ip"} },
     { $group: { _id: 1, unique: { $sum: 1 } } }
   ]);

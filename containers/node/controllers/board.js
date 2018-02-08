@@ -7,9 +7,10 @@ const Post = require('../models/post');
 
 module.exports.createBoard = async (data) => {
   const board = new Board(data);
-  return board
+  await board
     .save()
     .then(generateBoard);
+  return board;
 };
 
 

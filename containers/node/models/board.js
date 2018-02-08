@@ -40,7 +40,7 @@ const boardSchema = Schema({
   newThreadsRequired:  {
     files:      { type: Boolean, default: false },
     message:    { type: Boolean, default: false },
-    subject:    { type: Boolean, default: true },
+    subject:    { type: Boolean, default: false },
   },
   allowRepliesSubject: { type: Boolean, default: true },
   captcha: {
