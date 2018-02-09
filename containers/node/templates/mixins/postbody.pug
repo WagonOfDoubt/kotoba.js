@@ -12,7 +12,6 @@ mixin reflink(ref, type, match)
     data-post= ref.postId
     data-board= ref.boardUri
     data-thread= ref.threadId
-    data-op= ref.isOp
     href= `/${ ref.boardUri }/res/${ ref.threadId }.html#p${ ref.postId }`
   )= match
 
