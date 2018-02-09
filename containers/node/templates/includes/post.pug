@@ -1,5 +1,6 @@
 include ../mixins/attachments.pug
 include ../mixins/timestamp.pug
+include ../mixins/postbody.pug
 
 div(
   id=`p${ post.postId }`
@@ -69,4 +70,18 @@ div(
   if !post.isOp
     +attachments(post)
   div.postbody.post-body
-    blockquote(id=`post${ post.postId }`)!= post.rawHtml
+    blockquote(id=`post${ post.postId }`)
+      +postbody(post)
+  if site.features.refmaps
+    div.post-footer
+      if post.replies && post.replies.length
+        ul.post-replies.inline-list
+          for ref in post.replies
+            li.inline-list-item
+              +reflink(ref, 'reply')
+      if post.references && post.references.length
+        ul.post-references.inline-list
+          for ref in post.references
+            li.inline-list-item
+              +reflink(ref, 'reference')
+  //- pre= JSON.stringify(post, null, 2)

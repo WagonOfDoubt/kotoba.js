@@ -52,7 +52,7 @@ module.exports.createThread = async (boardUri, postData, file) => {
   if (board.isForcedAnon || !postData.name) {
     postData.name = board.defaultPosterName;
   }
-  postData.postId = board.postcount + 1;
+  postData.postId = postData.threadId = board.postcount + 1;
   postData.board = board._id;
   postData.isOp = true;
 
@@ -107,6 +107,7 @@ module.exports.createReply = async (boardUri, threadId, postData, file) => {
     postData.name = board.defaultPosterName;
   }
   postData.postId = board.postcount + 1;
+  postData.threadId = thread.postId;
   postData.board = ObjectId(board._id);
   postData.parent = ObjectId(thread._id);
   postData.isOp = false;

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+
 const attachmentSchema = Schema({
   file:                String,
   hash:                Number,
@@ -15,8 +16,20 @@ const attachmentSchema = Schema({
   type:                String
 });
 
+const reflinkSchema = Schema({
+  src: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post'
+  },
+  boardUri: String,
+  threadId: Number,
+  postId: Number,
+  isOp: Boolean
+});
+
 const postSchema = Schema({
   postId:              { type: Number, default: 1, min: 1, index: true },
+  threadId:            { type: Number },
   boardUri:            { type: String, required: true },
   board: {
     type: Schema.Types.ObjectId,
@@ -31,14 +44,6 @@ const postSchema = Schema({
     type: Schema.Types.ObjectId,
     ref: 'Post'
   }],
-  replies: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Post'
-  }],
-  references: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Post'
-  }],
   timestamp:           { type: Date, default: Date.now },
   bumped:              { type: Date, default: Date.now },
   name:                { type: String, default: '' },
@@ -47,6 +52,9 @@ const postSchema = Schema({
   subject:             { type: String, default: '' },
   body:                { type: String, default: '' },
   rawHtml:             { type: String, default: '' },
+  parsed:              [ ],
+  replies:             [ reflinkSchema ],
+  references:          [ reflinkSchema ],
   attachments:         [ attachmentSchema ],
   isOp:                { type: Boolean, default: false },
   // op only
@@ -59,6 +67,37 @@ const postSchema = Schema({
   password:            { type: String, default: '', select: false },
   isApproved:          { type: Boolean, default: true, select: false },
   isDeleted:           { type: Boolean, default: false, select: false }
+});
+
+
+postSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    const isRef = el => el.type === 'reference' && el.resolved;
+    const isRep = el => el.type === 'reply' && el.resolved;
+    const toQuery = el => {
+      return {_id: el.resolved.src}
+    };
+    const refs = this.parsed.filter(isRef).map(toQuery);
+    const repls = this.parsed.filter(isRep).map(toQuery);
+    const queries = [];
+    const refToThis = {
+      src: this._id,
+      boardUri: this.boardUri,
+      threadId: this.threadId,
+      postId: this.postId,
+      isOp: this.isOp
+    };
+    if (refs.length) {
+      queries.push(
+        Post.updateMany({$or: refs}, { $addToSet: { references: refToThis } }));
+    }
+    if (repls.length) {
+      queries.push(
+        Post.updateMany({$or: repls}, { $addToSet: { replies: refToThis } }));
+    }
+    await Promise.all(queries);
+  }
+  next();
 });
 
 
@@ -94,42 +133,16 @@ postSchema.pre('remove', function(next, done) {
 
 
 postSchema.statics.findRefs = (postsQueryList) => {
-  return Post.aggregate([
-    {
-      $match: {
-        $or: postsQueryList
-      }
-    },
-    {
-      $lookup: {
-        from: "posts",
-        localField: "parent",
-        foreignField: "_id",
-        as: "threadId"
-      }
-    },
-    {
-      $project: {
+  return Post
+    .aggregate({ $match: { $or: postsQueryList } })
+    .project({
+        src: '$_id',
         _id: 0,
         postId: 1,
         boardUri: 1,
-        threadId: {
-          $cond: ['$isOp', '$postId',
-            {
-              $let: {
-                vars: {
-                  op: {
-                    $arrayElemAt: ['$threadId', 0]
-                  }
-                },
-                in: '$$op.postId'
-              }
-            }
-          ]
-        }
-      }
-    }
-  ]);
+        isOp: 1,
+        threadId: 1
+      });
 };
 
 
@@ -202,12 +215,14 @@ postSchema.statics.findThreads = (boardUri, threadId, removeId = true) => {
           tripcode: 1,
           email: 1,
           subject: 1,
-          rawHtml: 1,
+          parsed: 1,
           attachments: 1,
           isSage: 1,
           isSticky: 1,
           children: 1,
           isOp: 1,
+          replies: 1,
+          references: 1,
           children: {
             postId: 1,
             boardUri: 1,
@@ -217,10 +232,12 @@ postSchema.statics.findThreads = (boardUri, threadId, removeId = true) => {
             tripcode: 1,
             email: 1,
             subject: 1,
-            rawHtml: 1,
+            parsed: 1,
             isSage: 1,
             isOp: 1,
-            threadId: '$postId'
+            replies: 1,
+            references: 1,
+            threadId: 1
           }
         }
       }
@@ -259,16 +276,13 @@ postSchema.statics.findPost = (boardUri, postId) => {
       tripcode: 1,
       email: 1,
       subject: 1,
-      rawHtml: 1,
+      parsed: 1,
       isSage: 1,
-      isOp: 1
-    })
-    .populate([
-      { path: 'replies', select: 'postId -_id' },
-      { path: 'parent', select: 'postId -_id' },
-      { path: 'references', select: 'postId -_id' },
-      { path: 'attachments', select: '-_id -file_hex' }
-    ]);
+      isOp: 1,
+      threadId: 1,
+      replies: 1,
+      references: 1
+    });
 };
 
 
@@ -290,6 +304,7 @@ postSchema.virtual('numberOfAttachmentsInThread').get(function () {
     return acc + (child.attachments ? child.attachments.length : 0);
   }, 0);
 });
+
 
 
 const Post = module.exports = mongoose.model('Post', postSchema);

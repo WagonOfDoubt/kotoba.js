@@ -58,3 +58,36 @@
 .post-delete-checkbox {
   margin: 0 3px 0 3px;
 }
+
+
+.post-footer {
+  margin: 10px 4px 4px 4px;
+  font-size: 75%;
+  font-style: italic;
+}
+
+.post-replies::before {
+  content: 'Replies: ';
+}
+
+.post-references::before {
+  content: 'References: ';
+}
+
+.reflink-op::after {
+  content: ' (OP)';
+}
+
+
+.inline-list {
+  margin: 0;
+  padding: 0;
+}
+
+.inline-list-item {
+  display: inline;
+
+  &:not(:first-child)::before {
+    content: ', ';
+  }
+}

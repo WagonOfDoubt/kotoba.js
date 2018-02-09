@@ -28,6 +28,7 @@ const reflinks = [
     regexp: /^>>(\d+)(?=\n)/i,
     newline: true,
     type: 'reply',
+    relative: true,
     match: 0,
     post: 1
   },
@@ -36,6 +37,7 @@ const reflinks = [
     regexp: /^>>(\d+)(?=\s)/i,
     newline: false,
     type: 'reference',
+    relative: true,
     match: 0,
     post: 1
   },
@@ -44,6 +46,7 @@ const reflinks = [
     regexp: /^>>\/(\w+)\/(\d+)(?=\s)/i,
     newline: false,
     type: 'reference',
+    relative: false,
     match: 0,
     post: 2,
     board: 1
@@ -53,6 +56,7 @@ const reflinks = [
     regexp: /^>>>\/(\w+)\/(?=\s)/i,
     newline: false,
     type: 'board',
+    relative: false,
     match: 0,
     board: 1
   }
@@ -70,13 +74,13 @@ class Parser {
   async parseThread(thread) {
     const promises = [thread].concat(thread.children)
       .map((post) => this.parseBody(post.body, post.boardUri)
-        .then(result => post.rawHtml = result));
+        .then(result => post.parsed = result));
     await Promise.all(promises);
     return thread;
   };
 
   async parsePost(post) {
-    post.rawHtml = await this.parseBody(post.body, post.boardUri);
+    post.parsed = await this.parseBody(post.body, post.boardUri);
     return post;
   }
 
@@ -91,7 +95,7 @@ class Parser {
 
     let elements = Parser.append([], this.parseElement(text));
     elements = await this.resolveReflinks(elements, board);
-    return elements.join('');
+    return elements;
   }
 
   async resolveReflinks(parseResult, board) {
@@ -117,23 +121,6 @@ class Parser {
         throw error;
       }
     }
-    parseResult = parseResult.map((el) => {
-      if (typeof el === 'string') {
-        return el;
-      }
-      if (el.resolved) {
-        const res = el.resolved;
-        return `<a class="reflink reflink-${ el.type
-          }" data-board="${ res.boardUri }" data-thread="${ res.threadId 
-          }" data-post="${ res.postId 
-          }" href="/${ res.boardUri }/res/${ res.threadId
-          }.html#p${ res.postId }">${ Parser.sanitize(el.match) }</a>`;
-      } else if (el.type === 'board') {
-        return `<a class="reflink reflink-board" data-board="${ el.board
-          }" href="/${ el.board }">${ Parser.sanitize(el.match) }</a>`;
-      }
-      return Parser.sanitize(el.match);
-    });
     return parseResult;
   }
 
@@ -167,7 +154,7 @@ class Parser {
             directive.terminator, directive.multiline);
           if (terminatorIndex !== -1) {
             if (acc.length) {
-              elements = Parser.append(elements, Parser.parseLinks(acc), false);              
+              elements = Parser.append(elements, Parser.parseLinks(acc), false);
               acc = '';
             }
             const body = tailAfterInitiator.substring(0, terminatorIndex);
@@ -306,7 +293,7 @@ class Parser {
       });
       if (!replaced) {
         const char = text[i];
-        acc += Parser.sanitizeChar(char);          
+        acc += Parser.sanitizeChar(char);
       }
     }
     return acc;

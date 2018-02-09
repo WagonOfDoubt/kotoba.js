@@ -263,6 +263,29 @@ span [id*="unhidethread"] {
 .post-delete-checkbox {
   margin: 0 3px 0 3px; }
 
+.post-footer {
+  margin: 10px 4px 4px 4px;
+  font-size: 75%;
+  font-style: italic; }
+
+.post-replies::before {
+  content: 'Replies: '; }
+
+.post-references::before {
+  content: 'References: '; }
+
+.reflink-op::after {
+  content: ' (OP)'; }
+
+.inline-list {
+  margin: 0;
+  padding: 0; }
+
+.inline-list-item {
+  display: inline; }
+  .inline-list-item:not(:first-child)::before {
+    content: ', '; }
+
 .postform .trap, .delform .trap {
   display: none; }
 
@@ -423,7 +446,7 @@ body {
   min-height: 100vh;
   margin: 0;
   display: grid;
-  grid-template-columns: auto;
+  grid-template-columns: 100%;
   grid-template-rows: auto 1fr auto;
   grid-template-areas: "header" "main" "footer"; }
 

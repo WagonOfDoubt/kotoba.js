@@ -35,6 +35,7 @@ const settingsSchema = Schema({
     hideThread:   { type: Boolean, default: true },
     hidePost:     { type: Boolean, default: true },
     favorites:    { type: Boolean, default: true },
+    refmaps:      { type: Boolean, default: true },
     quickreply:   { type: Boolean, default: true }
   },
   faq: { type: String, default: faqDefault },

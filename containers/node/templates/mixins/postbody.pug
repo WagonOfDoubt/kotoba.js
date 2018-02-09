@@ -1,0 +1,42 @@
+mixin reflink(ref, type, match)
+  - var isRelative = board && ref.boardUri === board.uri;
+  if !match
+    - match = `>>${ isRelative ? '' : '/' + ref.boardUri + '/' }${ ref.postId }`;
+  a(
+    class= {
+      'reflink': true,
+      'reflink-op': ref.isOp,
+      'reflink-reply': type === 'reply',
+      'reflink-reference': type === 'reference',
+    }
+    data-post= ref.postId
+    data-board= ref.boardUri
+    data-thread= ref.threadId
+    data-op= ref.isOp
+    href= `/${ ref.boardUri }/res/${ ref.threadId }.html#p${ ref.postId }`
+  )= match
+
+
+mixin boardlink(el)
+  a.reflink.reflink-board(
+    data-board= el.board
+    href= `/${ el.board }`
+  )= el.match
+
+
+mixin element(el)
+  if typeof el === 'string'
+    != el
+  else if el.resolved
+    +reflink(el.resolved, el.type, el.match)
+  else if el.type === 'board'
+    +boardlink(el)
+  else
+    = el.match
+
+mixin postbody(post)
+  if post.rawHtml
+    != post.rawHtml
+  else if post.parsed
+    for el in post.parsed
+      +element(el)

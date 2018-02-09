@@ -17,9 +17,9 @@ body {
   min-height: 100vh;
   margin: 0;
   display: grid;
-  grid-template-columns: auto;
+  grid-template-columns: 100%;
   grid-template-rows: auto 1fr auto;
-  grid-template-areas: 
+  grid-template-areas:
     "header"
     "main"
     "footer";
@@ -27,7 +27,7 @@ body {
 
 body.layout-sidebar {
   grid-template-columns: $sidebar-width 1fr;
-  grid-template-areas: 
+  grid-template-areas:
     "sidebar header"
     "sidebar main"
     "sidebar footer";
@@ -38,7 +38,7 @@ body.layout-sidebar {
 
 .board-header {
   display: flex;
-  
+
   .board-header-content {
     margin: 0 auto;
   }
@@ -152,7 +152,7 @@ table.table {
     grid-column-end: 4;
   }
 
-  textarea + small {    
+  textarea + small {
     grid-column-start: 2;
     grid-column-end: 4;
   }
@@ -235,7 +235,7 @@ table.table {
   text-align: right;
 }
 
-.hidden {          
+.hidden {
   display: none;
 }
 
@@ -264,7 +264,7 @@ q {
   .tab-content:target ~ .tab-content:last-child, .tab-content {
     display: none;
   }
-  
+
   /* :last-child works, but for some reason .tab-content:last-child will not */
   & > :last-child, .tab-content:target {
     display: block;
