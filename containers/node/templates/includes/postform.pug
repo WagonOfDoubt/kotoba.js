@@ -125,15 +125,16 @@ div#postbox.postarea
         tr
           //- div.form-col
           td.postblock
-            label(for='imagefile-input').form-label File
+            label.form-label File
           //- div.form-col
           td
-            input#imagefile-input.from-input(
-              name='imagefile'
+            input.from-input(
+              name=`files`
               size='35'
               accesskey='f'
               type='file'
-              required=isPage && board.newThreadsRequired.files
+              multiple= board.maxFilesPerPost > 1
+              required= n == 0 && isPage && board.newThreadsRequired.files
             )
       //- div.form-row
       tr
@@ -170,12 +171,12 @@ div#postbox.postarea
       tr
         td.rules(colspan='2')
           ui
-            li Supported file types are: GIF, PNG, JPG, SVG, WEBP, WEBM, MP4, OGV
-            li Maximum file size allowed is #{filters.readableSize(board.maxFileSize)}.
-            li Maximum number of files per upload is #{board.maxFilesPerPost}.
-            li Images greater than #{site.thumbSize.width}x#{site.thumbSize.width} will be thumbnailed.
+            li Supported file types are: <strong>GIF, PNG, JPG, SVG, WEBP, WEBM, MP4, OGV</strong>
+            li Maximum file size allowed is <strong>#{filters.readableSize(board.maxFileSize)}</strong>.
+            li Maximum number of files per upload is <strong>#{board.maxFilesPerPost}</strong>.
+            li Images greater than <strong>#{site.thumbSize.width}x#{site.thumbSize.width}</strong> will be thumbnailed.
             li
-              | Currently #{stats.uniqueUserPosts} unique user posts.
+              | Currently <strong>#{stats.uniqueUserPosts}</strong> unique user posts.
               if board.features.catalog
                 |
                 |

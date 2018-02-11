@@ -8,7 +8,7 @@ const { createThread, createReply } = require('../controllers/posting.js');
 const middlewares = require('../utils/middlewares');
 
 router.post('/form/post', [
-    upload.single('imagefile'),
+    upload.array('files'),
     body('board').isAlphanumeric(),
     body('replythread').isInt({ min: 0 }),
     body('replythread').toInt(),
@@ -28,7 +28,7 @@ router.post('/form/post', [
     const ip = req.ip;
     // TODO check capthca
     const capthca = req.body.capthca;
-    const file = req.file;
+    const files = req.files;
     const boardUri = req.body.board;
 
     const postData = {
@@ -49,9 +49,9 @@ router.post('/form/post', [
     let threadId = replythread;
     try {
       if (isNewThread) {
-        threadId = await createThread(boardUri, postData, file);
+        threadId = await createThread(boardUri, postData, files);
       } else {
-        await createReply(boardUri, replythread, postData, file);
+        await createReply(boardUri, replythread, postData, files);
       }
     } catch (error) {
       next(error);

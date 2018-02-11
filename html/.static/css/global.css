@@ -162,6 +162,20 @@ span [id*="unhidethread"] {
 .attachment {
   margin: 0; }
 
+.attachments-container .attachment {
+  display: inline-block; }
+
+.attachments-container .attachment:not(:last-child) .thumb-container {
+  padding-right: 0; }
+
+.attachments-container .filesize {
+  width: 100%;
+  display: flex;
+  flex-direction: column; }
+
+.attachments-container .file-info {
+  display: inline-block; }
+
 .thumb-container {
   float: left;
   padding: 2px 20px;

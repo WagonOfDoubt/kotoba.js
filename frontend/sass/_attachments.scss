@@ -3,6 +3,26 @@
 }
 
 
+.attachments-container {
+  .attachment {
+    display: inline-block;
+  }
+
+  .attachment:not(:last-child) .thumb-container {
+    padding-right: 0;
+  }
+
+  .filesize {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .file-info {
+    display: inline-block;
+  }
+}
+
 .thumb-container {
   float: left;
   padding: 2px 20px;

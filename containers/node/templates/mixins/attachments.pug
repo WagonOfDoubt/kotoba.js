@@ -1,7 +1,13 @@
 mixin attachments(post)
-  if post.attachments
-    each attachment in post.attachments
-      +attachment(attachment, post)
+  if post.attachments && post.attachments.length
+    //- only one file
+    if post.attachments.length === 1
+      +attachment(post.attachments[0], post)
+    //- more than one file
+    else
+      div.attachments-container
+        each attachment in post.attachments
+          +attachment(attachment, post)
 
 mixin attachment(attachment, post)
   figure(
@@ -17,6 +23,7 @@ mixin attachment(attachment, post)
         href!= fileHref
         target='_blank'
         title=attachment.name)!= filters.shortFileName(attachment.name, {length: 25, placeholder: '[...]'})
+      |
       |
       if attachment.size || (attachment.width && attachment.height)
         span.file-info

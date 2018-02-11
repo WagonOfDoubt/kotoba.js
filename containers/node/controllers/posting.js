@@ -6,47 +6,41 @@ const Post = require('../models/post');
 const Parser = require('./parser');
 
 
-module.exports.createThread = async (boardUri, postData, file) => {
-  const board = await Board.findOne({ uri: boardUri }).exec();
+const InputError = (msg, reason) => {
+  const error = Error(msg);
+  error.type = 'input_error';
+  error.reason = reason;
+  return error;
+};
 
+
+const uploadFiles = (boardUri, files) =>
+  Promise.all(files.map(file => uploadFile(boardUri, file)));
+
+
+module.exports.createThread = async (boardUri, postData, files = []) => {
+  const board = await Board.findOne({ uri: boardUri }).exec();
   if (!board) {
-    const error = Error('no such board: ' + boardUri);
-    error.type = 'input_error';
-    error.reason = 'invalid_value';
-    throw error;
+    throw InputError('no such board: ' + boardUri, 'invalid_value');
+  }
+  if (files.length > board.maxFilesPerPost) {
+    throw InputError('Too many files', 'max_array_length');
+  }
+  if (!postData.body && !files.length) {
+    throw InputError('No comment entered', 'missing_value');
   }
   if (board.newThreadsRequired.message && !postData.body) {
-    const error = Error('New threads must contain message');
-    error.type = 'input_error';
-    error.reason = 'missing_value';
-    throw error;
+    throw InputError('New threads must contain message', 'missing_value');
   }
   if (board.newThreadsRequired.subject && !postData.subject) {
-    const error = Error('New threads must contain subject');
-    error.type = 'input_error';
-    error.reason = 'missing_value';
-    throw error;
+    throw InputError('New threads must contain subject', 'missing_value');
   }
-  if (board.newThreadsRequired.files && !file) {
-    const error = Error('New threads must include image');
-    error.type = 'input_error';
-    error.reason = 'missing_value';
-    throw error;
-  }
-  if (!postData.body && !file) {
-    const error = Error('No comment entered');
-    error.type = 'input_error';
-    error.reason = 'missing_value';
-    throw error;
+  if (board.newThreadsRequired.files && !files.length) {
+    throw InputError('New threads must include image', 'missing_value');
   }
 
-  if (file) {
-    try {
-      const fileDocument = await uploadFile(boardUri, file);
-      postData.attachments = [fileDocument];
-    } catch (error) {
-      throw error;
-    }
+  if (files.length) {
+    postData.attachments = await uploadFiles(boardUri, files);
   }
 
   if (board.isForcedAnon || !postData.name) {
@@ -69,38 +63,27 @@ module.exports.createThread = async (boardUri, postData, file) => {
 };
 
 
-module.exports.createReply = async (boardUri, threadId, postData, file) => {
-  const thread = await Post
-    .findThread(boardUri, threadId)
-    .exec();
-  const board = await Board.findOne({ uri: boardUri }).exec();
+module.exports.createReply = async (boardUri, threadId, postData, files = []) => {
+  const [thread, board] = await Promise.all([
+      Post.findThread(boardUri, threadId).exec(),
+      Board.findOne({ uri: boardUri }).exec()
+    ]);
 
   if (!board) {
-    const error = Error('no such board: ' + boardUri);
-    error.type = 'input_error';
-    error.reason = 'invalid_value';
-    throw error;
+    throw InputError('no such board: ' + boardUri, 'invalid_value');
   }
   if (!thread) {
-    const error = Error(`No thread to reply to: ${ boardUri }/${ threadId }`);
-    error.type = 'input_error';
-    error.reason = 'invalid_value';
-    throw error;
+    throw InputError(`No thread to reply to: ${ boardUri }/${ threadId }`, 'invalid_value');
   }
-  if (!postData.body && !file) {
-    const error = Error('No comment entered');
-    error.type = 'input_error';
-    error.reason = 'missing_value';
-    throw error;
+  if (files.length > board.maxFilesPerPost) {
+    throw InputError('Too many files', 'max_array_length');
+  }
+  if (!postData.body && !files.length) {
+    throw InputError('No comment entered', 'missing_value');
   }
 
-  if (file) {
-    try {
-      const fileDocument = await uploadFile(boardUri, file);
-      postData.attachments = [fileDocument];
-    } catch (error) {
-      throw error;
-    }
+  if (files.length) {
+    postData.attachments = await uploadFiles(boardUri, files);
   }
 
   if (board.isForcedAnon || !postData.name) {

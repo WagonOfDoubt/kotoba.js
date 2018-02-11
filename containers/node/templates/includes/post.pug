@@ -18,7 +18,7 @@ div(
     'post-approved': post.isApproved
   }
 )
-  if post.isOp
+  if post.isOp && post.attachments.length === 1
     +attachments(post)
   div.post-header
     a.post-board-link(href=`/${ post.boardUri }`)= post.boardUri
@@ -67,7 +67,7 @@ div(
     if isPage && post.isOp
       span.link-button-wrapper
         a(href=`/${ post.boardUri }/res/${ post.postId }.html`) Reply
-  if !post.isOp
+  if !post.isOp || post.attachments.length > 1
     +attachments(post)
   div.postbody.post-body
     blockquote(id=`post${ post.postId }`)
