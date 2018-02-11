@@ -34,7 +34,7 @@ const reflinks = [
   },
   // >>123 links (references)
   {
-    regexp: /^>>(\d+)(?=\s)/i,
+    regexp: /^>>(\d+)/i,
     newline: false,
     type: 'reference',
     relative: true,
@@ -43,7 +43,7 @@ const reflinks = [
   },
   // >>/b/123 links (reference)
   {
-    regexp: /^>>\/(\w+)\/(\d+)(?=\s)/i,
+    regexp: /^>>\/(\w+)\/(\d+)/i,
     newline: false,
     type: 'reference',
     relative: false,
