@@ -7,6 +7,7 @@ import { initHidePost } from './modules/hide-post';
 import { initExpandThread } from './modules/expand-thread';
 import { localizeTime } from './modules/time';
 import * as manage from './modules/manage';
+import * as forms from './modules/form';
 
 $(() => {
   initExpandImage();
@@ -15,4 +16,5 @@ $(() => {
   initExpandThread();
   localizeTime();
   manage.init();
+  forms.init();
 });
