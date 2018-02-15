@@ -12,7 +12,7 @@ router.use(middlewares.globalTemplateVariables);
 
 router.get('/manage/login', (req, res) => {
   res.render('loginpage', {
-    errors: req.flash('errors') || [ req.flash('error') ]
+    errors: [...req.flash('errors'), ...req.flash('error') ]
   });
 });
 
@@ -26,7 +26,7 @@ router.get('/manage/logout', async (req, res) => {
 
 router.get('/manage/registration', (req, res) => {
   res.render('registrationpage', {
-    errors: req.flash('errors') || [ req.flash('error') ]
+    errors: [...req.flash('errors'), ...req.flash('error') ]
   });
 });
 
@@ -103,7 +103,6 @@ router.post('/manage/registration', [
         }
       }));
     } catch (err) {
-      console.log(err);
       const errs = {
         'error': {
           msg: 'Something went wrong'
