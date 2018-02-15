@@ -86,7 +86,7 @@ passport.use(new LocalStrategy({
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
-      const validPassword = await user.validPassword(password);
+      const validPassword = await user.checkPassword(password);
       if (!validPassword) {
         return done(null, false, { message: 'Incorrect password.' });
       }

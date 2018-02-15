@@ -1,10 +1,8 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
-const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator/check');
 
-const config = require('../config.json');
 const middlewares = require('../utils/middlewares');
 const User = require('../models/user');
 
@@ -24,7 +22,7 @@ router.get('/manage/logout', async (req, res) => {
 });
 
 
-router.post('/manage/login', 
+router.post('/manage/login',
   passport.authenticate('local', {
     failureRedirect: '/manage/login',
     successRedirect:'/manage'
@@ -80,10 +78,9 @@ router.post('/manage/registration', [
       : 'guest';
 
     try {
-      const hash = await bcrypt.hash(req.body.password, config.salt_rounds);
       const user = new User({
         login: login,
-        password: hash,
+        password: password,
         authority: authority
       });
       await user.save();

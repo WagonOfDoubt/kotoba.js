@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
+const config = require('../config.json');
+
 
 const boardPermissionsSchema = Schema({
   board: {
@@ -26,7 +28,12 @@ const userSchema = Schema({
   settings:            { type: String }
 });
 
-userSchema.methods.validPassword = async function(password) {
+userSchema.pre('save', async function(next) {
+  this.password = await bcrypt.hash(this.password, config.salt_rounds);
+  next();
+});
+
+userSchema.methods.checkPassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
