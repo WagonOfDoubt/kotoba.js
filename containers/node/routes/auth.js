@@ -11,7 +11,9 @@ router.use(middlewares.globalTemplateVariables);
 
 
 router.get('/manage/login', (req, res) => {
-  res.render('loginpage');
+  res.render('loginpage', {
+    errors: req.flash('errors') || [ req.flash('error') ]
+  });
 });
 
 
@@ -22,10 +24,18 @@ router.get('/manage/logout', async (req, res) => {
 });
 
 
+router.get('/manage/registration', (req, res) => {
+  res.render('registrationpage', {
+    errors: req.flash('errors') || [ req.flash('error') ]
+  });
+});
+
+
 router.post('/manage/login',
   passport.authenticate('local', {
     failureRedirect: '/manage/login',
-    successRedirect:'/manage'
+    successRedirect:'/manage',
+    failureFlash: 'Invalid username or password.'
   }),
   (req, res) => {
     res.redirect('/');
@@ -53,9 +63,9 @@ router.post('/manage/registration', [
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.render('registrationpage', {
-        errors: errors.mapped()
-      });
+      req.flash('errors', errors.array());
+      res.redirect('/manage/registration');
+      return;
     }
     const { login, password, repeat } = req.body;
 
@@ -66,9 +76,9 @@ router.post('/manage/registration', [
           msg: 'this login already taken'
         }
       };
-      return res.render('registrationpage', {
-        errors: errors
-      });
+      req.flash('errors', errors);
+      res.redirect('/manage/registration');
+      return;
     }
 
     const numberOfUsers = await User.count().exec();
@@ -99,9 +109,9 @@ router.post('/manage/registration', [
           msg: 'Something went wrong'
         }
       };
-      return res.render('registrationpage', {
-        errors: errs
-      });
+      req.flash('errors', errs);
+      res.redirect('/manage/registration');
+      return;
     }
 
     res.redirect('/manage');

@@ -13,10 +13,11 @@ block header
   h1.text-center Registration
 
 block main
-  if errors
+  if errors && errors.length
     div.errors
       for error in errors
-        div.error= error.msg
+        //- pre= JSON.stringify(error, null, 2)
+        div.error= error.msg || error
   div.text-center
     img(src='/.static/img/kotoba_logo_md.png')
   form.text-center(

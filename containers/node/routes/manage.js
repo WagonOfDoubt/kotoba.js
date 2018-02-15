@@ -14,10 +14,6 @@ const Settings = require('../models/settings');
 
 router.use(middlewares.globalTemplateVariables);
 
-router.get('/manage/registration', (req, res) => {
-  res.render('registrationpage');
-});
-
 
 router.get('/manage/',
   middlewares.authRequired,
