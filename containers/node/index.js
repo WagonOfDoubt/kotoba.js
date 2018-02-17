@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const flash = require('connect-flash');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const passport = require('passport');
@@ -57,6 +58,7 @@ app.use(session({
   cookie: { secure: config.secure_cookies },
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());
@@ -81,7 +83,6 @@ passport.use(new LocalStrategy({
   },
   async (login, password, done) => {
     User.findOne({ login: login }, async (err, user) => {
-      console.log(login, password);
       if (err) { return done(err); }
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
