@@ -12,7 +12,7 @@ mixin reflink(ref, type, match)
     data-post= ref.postId
     data-board= ref.boardUri
     data-thread= ref.threadId
-    href= `/${ ref.boardUri }/res/${ ref.threadId }.html#p${ ref.postId }`
+    href= `/${ ref.boardUri }/res/${ ref.threadId }.html#post-${ ref.boardUri }-${ ref.postId }`
   )= match
 
 

@@ -3,7 +3,7 @@ include ../mixins/timestamp.pug
 include ../mixins/postbody.pug
 
 div(
-  id=`p${ post.postId }`
+  id=`post-${ post.boardUri }-${ post.postId }`
   data-post-id=post.postId
   data-board-uri=post.boardUri
   class={
@@ -23,22 +23,26 @@ div(
   div.post-header
     a.post-board-link(href=`/${ post.boardUri }`)= post.boardUri
     label
-      input.post-delete-checkbox(name='delete[]', value=post.postId, type='checkbox')
+      input.post-delete-checkbox(
+        name='posts[]',
+        value=`${post.boardUri}/${post.postId}`,
+        type='checkbox'
+      )
       if post.subject
         span.filetitle= post.subject
-        | 
+        |
       if post.name
         if post.email
           a.postername(href=`mailto:${ post.email }`)= post.name
         else
           span.postername= post.name
-        | 
+        |
       +datetime(post.timestamp)
-      | 
+      |
     span.reflink
       - var threadUrl = `/${ post.boardUri }/res/${ post.threadId || post.postId }.html`;
-      a(href=`${ threadUrl }#p${ post.postId }`) No.&nbsp;
-      a(href=`${ threadUrl }#i${ post.postId }`)= post.postId
+      a(href=`${ threadUrl }#post-${ post.boardUri }-${ post.postId }`) No.&nbsp;
+      a(href='#postbox')= post.postId
     //- badges
     span.extrabtns.de-post-hiddencontent
       if post.isSage && !post.isOp
@@ -70,7 +74,7 @@ div(
   if !post.isOp || post.attachments.length > 1
     +attachments(post)
   div.postbody.post-body
-    blockquote(id=`post${ post.postId }`)
+    blockquote
       +postbody(post)
   if site.features.refmaps
     div.post-footer
