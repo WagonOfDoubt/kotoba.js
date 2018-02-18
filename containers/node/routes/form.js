@@ -4,8 +4,10 @@ const { body, validationResult } = require('express-validator/check');
 const multer = require('multer');
 const upload = multer();
 
-const { createThread, createReply } = require('../controllers/posting.js');
+const { createThread, createReply, deletePosts } = require('../controllers/posting.js');
 const middlewares = require('../utils/middlewares');
+const Post = require('../models/post');
+
 
 router.post('/form/post', [
     upload.array('files'),
@@ -62,6 +64,44 @@ router.post('/form/post', [
       ? `/${ boardUri }/res/${ threadId }.html`
       : `/${ boardUri }`;
     res.redirect(302, redirectUri);
-});
+  }
+);
+
+
+router.post('/form/delpost', [
+    body('posts').exists(),
+    body('postpassword').exists(),
+    middlewares.validateRequest
+  ],
+  async (req, res, next) => {
+    try {
+      const password = req.body.postpassword;
+      const postsQuery = req.body.posts
+        .map(boardAndNumber => {
+          const [boardUri, postId] = boardAndNumber.split('/');
+          return { boardUri: boardUri, postId: parseInt(postId) };
+        });
+      if (postsQuery.length === 0) {
+        throw new Error('Error: No posts selected.');
+      }
+      const selectedPosts = await Post.find({ $or: postsQuery });
+      if (selectedPosts.length === 0) {
+        throw new Error('Error: None of selected posts exists.');
+      }
+      const mathcedPasswords = await Promise.all(
+        selectedPosts.map(post => post.checkPassword(password)));
+      const postsToDelete = selectedPosts
+        .filter((_, index) => mathcedPasswords[index]);
+      if (postsToDelete.length === 0) {
+        throw new Error('Error: Incorrect password for deletion.');
+      }
+      const delResult = await deletePosts(postsToDelete);
+      req.flash('deletion', delResult);
+      res.redirect('back');
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;

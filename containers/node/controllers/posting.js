@@ -4,6 +4,9 @@ const { uploadFile } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
 const Parser = require('./parser');
+const fs = require('fs-extra');
+const config = require('../config');
+const path = require('path');
 
 
 const InputError = (msg, reason) => {
@@ -106,11 +109,116 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
   await Post
     .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams, { new: true })
   await Post
-    .findThreads(boardUri, threadId, true)
-    .then((t) => generateThread(t[0]));
+    .findThread(boardUri, threadId)
+    .populate('children')
+    .then(generateThread);
   await Board
     .findByIdAndUpdate(ObjectId(board._id), boardUpdateParams, { new: true })
     .then(generateBoardPagesAndCatalog);
 
   return post.postId;
+};
+
+
+module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
+  // leave only unique posts just in case
+  postsToDelete = [...new Set(postsToDelete)];
+  // all board pages that contain deleted posts will be regenerated
+  const boardsToRegenerate = [...new Set(
+    postsToDelete.map(p => ({ uri: p.boardUri}))
+  )];
+  // if threads was selected for deletion, replies also has to be deleted
+  const threadsToDelete = postsToDelete.filter(p => p.isOp);
+  const threadsRepliesIds = threadsToDelete
+    // extract arrays of children from threads
+    .map(t => t.children)
+    // flatten to single array
+    .reduce((a, b) => a.concat(b), [])
+    // exclude ids of posts that are already selected for deletion
+    .filter(id => !postsToDelete.find(post => post._id.equals(id)));
+
+  // normal non-op posts selected for deletion
+  const repliesToDelete = postsToDelete.filter(p => !p.isOp);
+  // threads that contain posts selected for deletion will be regenerated
+  const threadsToRegenerate = repliesToDelete
+    // but not threads that will be deleted themselves
+    .filter(p => !threadsToDelete.find(t => t._id.equals(p.threadId)))
+    .map(p => ({ boardUri: p.boardUri, postId: p.threadId }));
+
+  if (threadsRepliesIds.length) {
+    // select replies to deleted threads from database
+    const threadsReplies = await Post.find({ _id: { $in: threadsRepliesIds } });
+    // add replies to deleted threads to deletion list
+    postsToDelete = postsToDelete.concat(threadsReplies);
+  }
+
+  // now figure out file paths of attachments to deleted posts
+  const attachmentsToDelete = postsToDelete
+    // extract arrays of attachments form posts
+    .map(post => post.attachments)
+    // flatten array of attachments
+    .reduce((a, b) => a.concat(b), []);
+  const attachmentFilesToDelete = attachmentsToDelete
+    .map(attachment => [
+      path.join(config.html_path, path.dirname(attachment.file)),
+      path.join(config.html_path, attachment.thumb)
+    ])
+    // flatten result again to get plain array of paths to both thumbs and originals
+    .reduce((a, b) => a.concat(b), []);
+
+  // delete thread.html, thread-preview.html, images and thumbnail files
+  const delThreadsPaths = threadsToDelete.map(t =>
+    path.join(config.html_path, t.boardUri, 'res', t.threadId.toString()));
+  const filesToDelete = [
+    ...delThreadsPaths.map(p => p + '.html'),
+    ...delThreadsPaths.map(p => p + '-preview.html'),
+    ...attachmentFilesToDelete
+  ];
+
+  // prelude ends here, now actually do stuff
+  if (postsToDelete.length) {
+    // delte posts from database
+    const deleteMongoIds = postsToDelete.map(p => p._id);
+    await Post.deleteMany({
+      _id: { $in: deleteMongoIds }
+    });
+
+    // delete all replies and references from other posts in database
+    await Post.update({
+        $or: [
+          {'replies.src': { $in: deleteMongoIds }},
+          {'references.src': { $in: deleteMongoIds }}
+        ]
+      }, {
+        $pull: {
+          replies: { src: { $in: deleteMongoIds } },
+          references: { src: { $in: deleteMongoIds } }
+        }
+      })
+      .exec();
+  }
+  // regenerate threads
+  if (regenerate && threadsToRegenerate.length) {
+    await Post.findThreads(threadsToRegenerate)
+      .populate('children')
+      .then(threads =>
+          Promise.all(threads.map(generateThread)));
+  }
+  // regenerate boards
+  if (regenerate && boardsToRegenerate.length) {
+    await Board.find({ $or: boardsToRegenerate })
+      .then(boards =>
+        Promise.all(boards.map(generateBoardPagesAndCatalog)));
+  }
+  // delete files
+  if (filesToDelete.length) {
+    await Promise.all(filesToDelete.map(f =>
+      new Promise((resolve, reject) => fs.remove(f, () => resolve()))));
+  }
+
+  return {
+    threads: threadsToDelete.length,
+    replies: repliesToDelete.length,
+    attachments: attachmentsToDelete.length
+  };
 };

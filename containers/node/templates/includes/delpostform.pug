@@ -1,11 +1,13 @@
 div.userdelete
   div
     | Delete message
-    | 
+    |
     label.link-button-wrapper
       input#fileonly(name='fileonly', type='checkbox')
       | File only
   label Password
+    |
+    |
     input(name='postpassword', size='8', type='password')
   input(name='deletepost', value='Delete', type='submit')
   if board.features.reporting

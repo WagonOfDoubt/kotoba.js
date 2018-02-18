@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const bcrypt = require('bcrypt');
+const config = require('../config.json');
 
 
 const attachmentSchema = Schema({
@@ -63,23 +65,16 @@ const postSchema = Schema({
   // replies only
   isSage:              { type: Boolean, default: false },
   // private fields for administrator eyes only
-  ip:                  { type: String, required: true, select: false },
-  password:            { type: String, default: '', select: false },
-  isApproved:          { type: Boolean, default: true, select: false },
-  isDeleted:           { type: Boolean, default: false, select: false }
+  ip:                  { type: String, required: true },
+  password:            { type: String, default: '' },
+  isApproved:          { type: Boolean, default: true },
+  isDeleted:           { type: Boolean, default: false }
 });
 
 
 postSchema.pre('save', async function(next) {
   if (this.isNew) {
-    const isRef = el => el.type === 'reference' && el.resolved;
-    const isRep = el => el.type === 'reply' && el.resolved;
-    const toQuery = el => {
-      return {_id: el.resolved.src}
-    };
-    const refs = this.parsed.filter(isRef).map(toQuery);
-    const repls = this.parsed.filter(isRep).map(toQuery);
-    const queries = [];
+    // put replies and references to other posts
     const refToThis = {
       src: this._id,
       boardUri: this.boardUri,
@@ -87,49 +82,39 @@ postSchema.pre('save', async function(next) {
       postId: this.postId,
       isOp: this.isOp
     };
-    if (refs.length) {
-      queries.push(
-        Post.updateMany({$or: refs}, { $addToSet: { references: refToThis } }));
-    }
-    if (repls.length) {
-      queries.push(
-        Post.updateMany({$or: repls}, { $addToSet: { replies: refToThis } }));
-    }
-    await Promise.all(queries);
+
+    const matchQueries = type =>
+      this.parsed
+        .filter(el => el.type === type && el.resolved)
+        .map(el => ({_id: el.resolved.src}));
+    const selectQuery = type => ({ $or: matchQueries(type) });
+    const updateQuery = key => ({ $addToSet: { [key]: refToThis } });
+    const updateMany = (type, key) => {
+      const sel = selectQuery(type);
+      if (!sel.$or.length) {
+        return null;
+      }
+      return Post.updateMany(sel, updateQuery(key));
+    };
+
+    const [replies, references, password] = await Promise.all([
+      // put replies to posts this post has links to
+      updateMany('reply', 'replies'),
+      // put references to posts this post has links to
+      updateMany('reference', 'references'),
+      // replace password with hash
+      bcrypt.hash(this.password, config.salt_rounds)
+    ]);
+
+    this.password = password;
   }
   next();
 });
 
 
-postSchema.pre('remove', function(next, done) {
-  console.log('removepost')
-  // remove all child posts
-  Post.find({
-    _id: {
-      $in: this.children
-    }
-  })
-  .remove()
-  // remove references to this post
-  .then(
-    Post.update(
-      {
-        $or: [
-          { replies: this._id },
-          { references: this._id }
-        ]
-      },
-      {
-        $pullAll: {
-          replies: [this._id],
-          references: [this._id]
-        }
-      }
-    )
-  )
-  .then(done);
-  next();
-});
+postSchema.methods.checkPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
 
 
 postSchema.statics.findRefs = (postsQueryList) => {
@@ -158,7 +143,6 @@ postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
     { $group: { _id: "$ip"} },
     { $group: { _id: 1, unique: { $sum: 1 } } }
   ]);
-  console.log(queryResult);
   if (!queryResult.length || !queryResult[0].unique) {
     return 0;
   }
@@ -172,76 +156,8 @@ postSchema.pre('save', function(next) {
 });
 
 
-postSchema.statics.findThreads = (boardUri, threadId, removeId = true) => {
-  // const q = {
-  //   parent: { $exists: false }
-  // };
-  // if (boardUri) {
-  //   q.boardUri = boardUri;
-  // }
-  // if (threadId) {
-  //   q.postId = threadId;
-  // }
-  // const query = boardUri && threadId
-  //   ? Post.findOne(q)
-  //   : Post.find(q);
-  const match = {
-    boardUri: boardUri,
-    isOp: true
-  };
-  if (threadId) {
-    match.postId = parseInt(threadId)
-  }
-  return Post.aggregate([
-    {
-      $match: match
-    },
-    {
-      $lookup: {
-        from: "posts",
-        localField: "children",
-        foreignField: "_id",
-        as: "children"
-      }
-    },
-    {
-      $project: {
-          _id: removeId ? 0 : 1,
-          postId: 1,
-          boardUri: 1,
-          timestamp: 1,
-          bumped: 1,
-          name: 1,
-          tripcode: 1,
-          email: 1,
-          subject: 1,
-          parsed: 1,
-          attachments: 1,
-          isSage: 1,
-          isSticky: 1,
-          children: 1,
-          isOp: 1,
-          replies: 1,
-          references: 1,
-          children: {
-            postId: 1,
-            boardUri: 1,
-            timestamp: 1,
-            name: 1,
-            attachments: 1,
-            tripcode: 1,
-            email: 1,
-            subject: 1,
-            parsed: 1,
-            isSage: 1,
-            isOp: 1,
-            replies: 1,
-            references: 1,
-            threadId: 1
-          }
-        }
-      }
-    ]);
+postSchema.statics.findThreads = (array) => {
+  return Post.find({ $or: array, isOp: true });
 };
 
 
@@ -249,8 +165,7 @@ postSchema.statics.findThread = (boardUri, postId) => {
   return Post.findOne({
     boardUri: boardUri,
     postId: postId,
-    isOp: true,
-    parent: { $exists: false }
+    isOp: true
   });
 };
 

@@ -31,13 +31,16 @@ div(
       if post.subject
         span.filetitle= post.subject
         |
+        |
       if post.name
         if post.email
           a.postername(href=`mailto:${ post.email }`)= post.name
         else
           span.postername= post.name
         |
+        |
       +datetime(post.timestamp)
+      |
       |
     span.reflink
       - var threadUrl = `/${ post.boardUri }/res/${ post.threadId || post.postId }.html`;
