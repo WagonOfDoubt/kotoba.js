@@ -16,11 +16,11 @@ This project is in active development. Almoust nothing implemented yet. Pull req
 
 ## TODO
 
-- [ ] posts deletion
+- [x] posts deletion
 - [ ] staff permissions system
 - [ ] bans and moderation features
 - [ ] autoupdate and notifications
-- [ ] replies map
+- [x] replies map
 - [ ] personal settings stored on server
 
 ## License
@@ -30,10 +30,11 @@ MIT
 ## How to run
 
 - install [Docker](https://docker.com/) and [Docker Compose](https://docs.docker.com/compose/install/)
-- `git clone [this repository]`
+- `git clone https://github.com/WagonOfDoubt/kotoba.js.git`
 - `cd kotoba.js`
 - `docker-compose up`
-- go to [localhost](http://localhost/manage) and add some boards
+- go to [localhost/manage/registration](http://localhost/manage/registration) and create your admin account
+- add any news to generate main page, add some boards and tweak other settings, have fun.
 
 Note that kotoba.js will run in development mode. Do not try to use this in production.
 
