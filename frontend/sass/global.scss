@@ -246,18 +246,6 @@ q {
   }
 }
 
-.post-hidden {
-  .post-body,
-  .attachment,
-  .post-btn:not(.post-btn-hide) {
-    display: none;
-  }
-
-  & ~ .omittedposts, & ~ .replies-container {
-    display: none;
-  }
-}
-
 
 // https://stackoverflow.com/questions/6867095/css-selector-when-target-empty
 .tabs-container {

@@ -2,6 +2,7 @@
   word-wrap: break-word;
 }
 
+/* ShiftJIS-art formatting */
 .code-aa {
   font-family: 'Mona', 'Ume P Gothic', 'MS PGothic', "ＭＳ Ｐゴシック", sans-serif;
   display: block;
@@ -60,6 +61,11 @@
 }
 
 
+.reflink-op::after {
+  content: ' (OP)';
+}
+
+/* post footer */
 .post-footer {
   margin: 10px 4px 4px 4px;
   font-size: 75%;
@@ -74,11 +80,6 @@
   content: 'References: ';
 }
 
-.reflink-op::after {
-  content: ' (OP)';
-}
-
-
 .inline-list {
   margin: 0;
   padding: 0;
@@ -89,5 +90,19 @@
 
   &:not(:first-child)::before {
     content: ', ';
+  }
+}
+
+/* hidden posts */
+.post-hidden {
+  .post-body,
+  .post-footer,
+  .attachment,
+  .post-btn:not(.post-btn-hide) {
+    display: none;
+  }
+
+  & ~ .omittedposts, & ~ .replies-container {
+    display: none;
   }
 }
