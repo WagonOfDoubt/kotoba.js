@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import 'jquery-serializejson';
+import '../sass/global.scss';
+import '../sass/umnochan.scss';
 
 import { initExpandVideo } from './modules/expand-video';
 import { initExpandImage } from './modules/expand-image';

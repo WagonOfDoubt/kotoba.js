@@ -1,13 +1,14 @@
-@import 'fonts.scss';
-@import 'img_global';
-@import 'icons';
-@import 'attachments';
-@import 'media_print';
-@import 'posts';
-@import 'postform';
-@import 'spinner';
-@import 'catalog';
-@import 'adminbar';
+@import './components/fonts.scss';
+@import './components/img_global';
+@import './components/icons';
+@import './components/attachments';
+@import './components/media_print';
+@import './components/posts';
+@import './components/postform';
+@import './components/spinner';
+@import './components/catalog';
+@import './components/adminbar';
+@import './components/modal';
 
 $sidebar-width: 20vw;
 
@@ -257,7 +258,6 @@ q {
   }
 }
 
-@import 'modal';
 
 // https://stackoverflow.com/questions/6867095/css-selector-when-target-empty
 .tabs-container {

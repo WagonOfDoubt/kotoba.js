@@ -12,7 +12,7 @@
   },
   "keywords": [
     "imageboard",
-    "mongo",
+    "mongodb",
     "express"
   ],
   "author": "WagonOfDoubt",
