@@ -2,35 +2,7 @@ import $ from 'jquery';
 import 'jquery-serializejson';
 import * as modal from './modal';
 import escape from 'lodash.escape';
-
-
-const objDiff = (newObj, origObj) => {
-  newObj = flatten(newObj);
-  origObj = flatten(origObj);
-  const diff = {};
-  for (const [key, value] of Object.entries(newObj)) {
-    if (origObj.hasOwnProperty(key) && origObj[key] !== value) {
-      diff[key] = {new: value, old: origObj[key]};
-    }
-  }
-  return diff;
-};
-
-
-const isObject = (obj) => obj instanceof Object && obj.constructor === Object;
-
-
-const flatten = (obj, result={}, path='') => {
-  Object.entries(obj).forEach(([key, value]) => {
-    const newPath = path.length ? path + '.' + key : key;
-    if (isObject(value)) {
-      flatten(value, result, newPath);
-    } else {
-      result[newPath] = value;
-    }
-  });
-  return result;
-};
+import { objectDiff } from './utils';
 
 
 const serializeForm = (form) =>
@@ -101,7 +73,7 @@ const fetchChanges = (form, populateContainer) => {
   const getRoute = form.attr('action');
   $.getJSON(getRoute)
     .done((data) => {
-      const diff = objDiff(formData, data);
+      const diff = objectDiff(formData, data);
       const table = createTable(
         Object.entries(diff)
           .map(([key, value]) => [key, value.old, value.new ]),
