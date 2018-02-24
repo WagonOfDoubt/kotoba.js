@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import 'jquery-serializejson';
 import * as modal from './modal';
-import _ from 'lodash';
+import escape from 'lodash.escape';
 
 
 const objDiff = (newObj, origObj) => {
@@ -71,7 +71,7 @@ const sendJSON = (url, type, data, callback) => {
 const createTable = (rows = [], head = []) => {
   let tableContent = '';
   const maxchars = 100;
-  const trimString = str => _.escape(
+  const trimString = str => escape(
     str.length > maxchars
       ? str.substring(0, maxchars) + '...'
       : str);
