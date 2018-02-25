@@ -154,7 +154,7 @@ describe('utils', () => {
       };
       assert.deepEqual(utils.objectDiff(newObj, origObj), diff);
     });
-    it('should campare missing keys', () => {
+    it('should compare missing keys', () => {
       const origObj = {
         a: [1,2]
       };
@@ -170,7 +170,7 @@ describe('utils', () => {
       const diff2 = {
         'b': { new: undefined, old: 'new value' },
       };
-      assert.deepEqual(utils.objectDiff(origObj, newObj), diff2);
+      assert.deepEqual(utils.objectDiff(origObj, newObj, true), diff2);
     });
   });
 });

@@ -2,6 +2,7 @@ import $ from 'jquery';
 import 'jquery-serializejson';
 import * as modal from './modal';
 import escape from 'lodash.escape';
+import truncate from 'lodash.truncate';
 import { objectDiff } from './utils';
 
 
@@ -41,29 +42,20 @@ const sendJSON = (url, type, data, callback) => {
 
 
 const createTable = (rows = [], head = []) => {
-  let tableContent = '';
-  const maxchars = 100;
-  const trimString = str => escape(
-    str.length > maxchars
-      ? str.substring(0, maxchars) + '...'
-      : str);
+  const truncHTML = str => escape(truncate(str, { length: 100 }));
   const wrapInTags = (tag, str) => `<${ tag }>${ str }</${ tag }>`;
+  const createCols = (cols, tdTag) => cols
+    .map(col => wrapInTags(tdTag, truncHTML(col)))
+    .join('');
+  const createRows = (rows, tdTag) => rows
+    .map(row => wrapInTags('tr', createCols(row, tdTag)))
+    .join('');
+  const createBody = (rows, bodyTag, tdTag) =>
+    wrapInTags(bodyTag, createRows(rows, tdTag));
 
-  if (head.length) {
-    const ths = head.map(th =>
-      wrapInTags('th', trimString(th)));
-    tableContent += wrapInTags('thead', wrapInTags('tr', ths.join('')));
-  }
-  if (rows.length) {
-    const trs = rows.map(tr =>
-      wrapInTags('tr',
-        tr.map((td) =>
-          wrapInTags('td', trimString(td))
-        ).join('')
-      ));
-    tableContent += wrapInTags('tbody', trs.join(''));
-  }
-  return $(`<table class="table">${ tableContent }</table>`);
+  const thead = createBody([head], 'thead', 'th');
+  const tbody = createBody(rows, 'tbody', 'td');
+  return $(`<table class="table">${ thead }${ tbody }</table>`);
 };
 
 

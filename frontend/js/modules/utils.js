@@ -19,13 +19,13 @@ export const objectToPaths = (obj, result = {}, path = '') => {
 };
 
 
-export const objectDiff = (newObj, origObj) => {
+export const objectDiff = (newObj, origObj, deletedKeys = false) => {
   newObj = objectToPaths(newObj);
   origObj = objectToPaths(origObj);
   return Array
     .from(new Set([
       ...Object.keys(newObj),
-      ...Object.keys(origObj),
+      ...(deletedKeys ? Object.keys(origObj) : []),
     ]))
     .filter(key => !isEqual(origObj[key], newObj[key]))
     .reduce((diff, key) => {
