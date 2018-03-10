@@ -20,7 +20,7 @@ module.exports = {
   plugins: [
     new UglifyJsPlugin({ sourceMap: true }),
     new ExtractTextPlugin('../css/global.css'),
-    new CleanWebpackPlugin(pathsToClean, { root: distFolder }),
+    // new CleanWebpackPlugin(pathsToClean, { root: distFolder }),
   ],
   module: {
     rules: [
