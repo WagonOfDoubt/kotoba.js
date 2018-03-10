@@ -2,5 +2,6 @@
   "secure_cookies": false,
   "html_path": "/home/node/app/html",
   "salt_rounds": 10,
-  "catalog_filename": "kotolog.html"
+  "catalog_filename": "kotolog.html",
+  "session_age": 2592000000
 }

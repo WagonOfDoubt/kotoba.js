@@ -19,7 +19,6 @@ router.get('/manage/login', (req, res) => {
 
 router.get('/manage/logout', async (req, res) => {
   req.logout();
-  await req.session.destroy();
   res.redirect('/');
 });
 

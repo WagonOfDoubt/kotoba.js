@@ -55,7 +55,12 @@ app.use(session({
   secret: process.env.RANDOM_SEED,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: config.secure_cookies },
+  cookie: {
+    path: '/',
+    httpOnly: false,
+    secure: config.secure_cookies,
+    maxAge: config.session_age,
+  },
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 app.use(flash());
@@ -96,15 +101,8 @@ passport.use(new LocalStrategy({
   }
 ));
 
-passport.serializeUser(function(user, done) {
-  done(null, user._id);
-});
- 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function (err, user) {
-    done(err, user);
-  });
-});
+passport.serializeUser((user, done) => done(null, user._id));
+passport.deserializeUser((id, done) => User.findById(id, done));
 
 // error handler
 app.use((err, req, res, next) => {
@@ -122,7 +120,7 @@ app.use((err, req, res, next) => {
         title: 'Error',
         message: err.message,
         error: isDev ? err : {}
-      });    
+      });
     }
   }
 );
