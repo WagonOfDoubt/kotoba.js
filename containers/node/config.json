@@ -3,5 +3,6 @@
   "html_path": "/home/node/app/html",
   "salt_rounds": 10,
   "catalog_filename": "kotolog.html",
-  "session_age": 2592000000
+  "session_age": 2592000000,
+  "session_cookie_name": "kot.session"
 }

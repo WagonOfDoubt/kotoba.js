@@ -52,6 +52,7 @@ app.set('view engine', 'pug');
 app.use(middlewares.globalTemplateVariables);
 app.use(cookieParser());
 app.use(session({
+  name: config.session_cookie_name,
   secret: process.env.RANDOM_SEED,
   resave: false,
   saveUninitialized: true,
