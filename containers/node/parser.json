@@ -97,5 +97,16 @@
     "preserveTerminator": true,
     "openTag": "<q class=\"unkfunc quote\">",
     "closeTag": "</q>"
+  },
+  {
+    "initiator": "!",
+    "terminator": "\n",
+    "multiline": false,
+    "newline": true,
+    "nesting": false,
+    "preserveInitiator": false,
+    "preserveTerminator": true,
+    "openTag": "<strong class=\"cow\">",
+    "closeTag": "</strong>"
   }
 ]
