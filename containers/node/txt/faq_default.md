@@ -165,7 +165,7 @@ Result will be with Mona font:
 </div>
 
 Parser is highly customisable, you can easily add new tags or change default.
-Read wiki to find out how.
+Read [wiki](https://github.com/WagonOfDoubt/kotoba.js/wiki/Markup-language-customization) to find out how.
 
 
 ### URLs
