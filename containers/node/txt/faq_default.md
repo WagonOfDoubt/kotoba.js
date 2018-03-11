@@ -22,7 +22,7 @@ Or by board and number:
 
 Reflinks on separate lines will add post as *reply* to referenced post. If reflink on line with other text, post will be added as *reference*.
 
-You can also just write short link to board like this: <a class="reflink">&gt;&gt;&gt;/d/</a>
+You can also just write short link to board like this: <a href="/d" class="reflink">&gt;&gt;&gt;/d/</a>
 
 ### Inline tags
 
@@ -56,6 +56,12 @@ You can also just write short link to board like this: <a class="reflink">&gt;&g
       <td>%%spoiler%%</td>
       <td>
         <span class="spoiler">spoiler</span>
+      </td>
+    </tr>
+    <tr>
+      <td>!cow text</td>
+      <td>
+        <strong class="cow">cow text</strong>
       </td>
     </tr>
     <tr>
@@ -100,6 +106,8 @@ don't work*
 
 ### Block tags
 
+#### Code
+
 Multiline code sould be enclosed in <span><code>&#96;&#96;&#96;</code></span>:
 
 ~~~
@@ -126,7 +134,7 @@ def factorial(n):
 
 Both open and close <span><code>&#96;&#96;&#96;</code></span> tags must be on separate lines.
 
-### Shift_JIS
+#### Shift_JIS
 
 You can convert multiline code into Shift_JIS art by adding `aa` after open tag like this:
 
@@ -162,6 +170,11 @@ Read wiki to find out how.
 
 ### URLs
 
+If you post a url starting with either http:// or https://, it will automatically be linked.
+
 Parser will automatically decode %20 encoded URL, so [https://zh.wikipedia.org/wiki/%E8%97%AA%E8%B2%93](https://zh.wikipedia.org/wiki/%E8%97%AA%E8%B2%93) becomes [https://zh.wikipedia.org/wiki/藪貓](https://zh.wikipedia.org/wiki/%E8%97%AA%E8%B2%93).
+
+Leave double spaces after url to separate link from punctuation.
+"http://example.com&nbsp;&nbsp;, some text" will become "[http://example.com](http://example.com), some text".
 
 Attribute `rel="noreferrer"` is added to links in posts.

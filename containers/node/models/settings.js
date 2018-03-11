@@ -3,10 +3,10 @@ const Schema = mongoose.Schema;
 const schemaUtils = require('../utils/schema');
 const fs = require('fs');
 
-const faqDefault = fs.readFileSync('txt/faq_default.html');
-const rulesDefault = fs.readFileSync('txt/rules_default.html');
-const menuDefault = fs.readFileSync('txt/menu_default.html');
-const frameDefault = fs.readFileSync('txt/frame_default.html');
+const faqDefault = fs.readFileSync('txt/faq_default.md');
+const rulesDefault = fs.readFileSync('txt/rules_default.md');
+const menuDefault = fs.readFileSync('txt/menu_default.md');
+const frameDefault = fs.readFileSync('txt/frame_default.md');
 
 const settingsSchema = Schema({
   siteName:      { type: String, default: 'kotoba' },
