@@ -28,6 +28,7 @@ module.exports.globalTemplateVariables = async (req, res, next) => {
 module.exports.authRequired = (req, res, next) => {
   const isLoginned = req.isAuthenticated();
   if (!isLoginned) {
+    req.session.redirectTo = req.originalUrl;
     return res.redirect('/manage/login');
   }
   next();

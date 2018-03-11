@@ -72,7 +72,10 @@ router.post('/manage/login',
         }
         setUserCookie(req, res);
         // successRedirect
-        return res.redirect('/manage');
+        const redirectTo = req.session.redirectTo || '/manage';
+        const redirectHash = req.body.redirectHash || '';
+        delete req.session.redirectTo;
+        return res.redirect(redirectTo + redirectHash);
       });
     })(req, res, next);
   });

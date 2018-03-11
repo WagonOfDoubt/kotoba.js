@@ -25,6 +25,7 @@ const getPassword = () => {
 };
 
 export const init = () => {
+  $('[name=redirectHash]').val(window.location.hash);
   $('input[name="postpassword"]').val(getPassword());
   $('input[name="postpassword"]')
     .closest('form')

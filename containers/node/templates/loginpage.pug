@@ -27,6 +27,10 @@ block main
     id='login-form'
     method='post'
   )
+    input(
+      type='hidden'
+      name='redirectHash'
+    )
     div
       input(
         type='text'
