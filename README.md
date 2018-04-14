@@ -5,14 +5,23 @@
 
 Yet another imageboard engine written with node.js
 
-This project is in active development. Almoust nothing implemented yet. Pull requests are welcome.
+This project is in active development. Most things are not implemented, so don’t try to use this in production yet. Pull requests are welcome.
 
 ## Core design ideas
 
-- Frontend should be compatible with most standard wakaba/kusaba based imageboards, therefore third-party code like [Dollchan Extension Tools](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools) should with minimal modifications.
-- Templates should generate 100% valid HTML5.
-- Basic features like posting and reading should work without javascript enabled in browser
-- Conainerized application easy to deploy and get up and running. Easiest installation with no spetial skills required.
+Despite the fact that there are many modern imageboard engines, obsolete engines like Wakaba, Kusaba and their forks are still very popular choice even for new imageboards. Those classic engines have minimal, yet sufficient set of features and familiar look. However, they have code that is no longer supported, written for obsolete versions of interpreters, don’t follow commonly accepted standards, have known unfixed bugs, and very hard to maintain. Most of them have HTML that still uses tables for layout and CSS that is not optimized for mobile. Last, but not least, installation and deployment can be a nightmare, especially for unexperienced users, with vague installation instructions and undocumented dependencies.
+
+The goal of this project is to create feature-rich engine that looks and feels very familiar, but does not have the issues of classic imageboard engines. The ease of administration is highest priority. The installation process is automated and just cannot be easier; all customization is accessible through admin panel – no more source files editing for basic configuration. Kotoba.js can be deployed on almost any hosting and works right away out of the box.
+
+Kotoba.js principles:
+
+- Frontend should be compatible with most standard Wakaba/Kusaba based imageboards, therefore third-party code like [Dollchan Extension Tools](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools) and [Overchan-Android](https://github.com/AliceCA/Overchan-Android) require minimal modifications.
+- However, third party tools should not be necessary as most of features that they add are implemented in engine itself.
+- Templates must generate valid HTML5, use semantic elements and provide machine-readable output as much as possible.
+- Basic features like posting and reading should work without JavaScript enabled in browser.
+- Containerized application easy to deploy and get up and running. Easiest installation with no special skills required.
+- It should be highly customizable and user-friendly.
+
 
 ## TODO
 
