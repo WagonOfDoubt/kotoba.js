@@ -9,7 +9,7 @@ This project is in active development. Almoust nothing implemented yet. Pull req
 
 ## Core design ideas
 
-- Fronend should be compatible with most standard wakaba/kusaba based imageboards, therefore third-party code like [Dollchan Extension Tools](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools) should with minimal modifications.
+- Frontend should be compatible with most standard wakaba/kusaba based imageboards, therefore third-party code like [Dollchan Extension Tools](https://github.com/SthephanShinkufag/Dollchan-Extension-Tools) should with minimal modifications.
 - Templates should generate 100% valid HTML5.
 - Basic features like posting and reading should work without javascript enabled in browser
 - Conainerized application easy to deploy and get up and running. Easiest installation with no spetial skills required.
