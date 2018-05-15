@@ -18,6 +18,7 @@ services:
       - environment-development.env
     volumes:
       - ./containers/node:/home/node/app
+      - /home/node/app/node_modules
       - ./html:/home/node/app/html
     expose:
       - 3000
