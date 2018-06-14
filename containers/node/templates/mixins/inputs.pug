@@ -11,8 +11,8 @@ mixin textArea(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param, data-default=def) #{ label }:
-    textarea(name=param, id=param, rows='10', required=required)= val
+    label(for=param) #{ label }:
+    textarea(data-default=def, name=param, id=param, rows='10', required=required)= val
     if block
       small.desc
         block
@@ -23,8 +23,20 @@ mixin textEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param, data-default=def) #{ label }:
-    input(name=param, id=param, type='text', value=val, required=required)
+    label(for=param) #{ label }:
+    input(data-default=def, name=param, id=param, type='text', value=val, required=required)
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
+mixin passwordEdit(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    label(for=param) #{ label }:
+    input(data-default=def, name=param, id=param, type='password', value=val, required=required)
     if block
       small.desc
         block
@@ -35,8 +47,8 @@ mixin numberEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param, data-default=def) #{ label }:
-    input(name=param+':number', id=param, type='number', value=val, required=required)
+    label(for=param) #{ label }:
+    input(data-default=def, name=param+':number', id=param, type='number', value=val, required=required)
     if block
       small.desc
         block
@@ -47,8 +59,8 @@ mixin checkboxEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param, data-default=def) #{ label }:
-    input(name=param+':boolean', id=param, type='checkbox', checked=val, required=required)
+    label(for=param) #{ label }:
+    input(data-default=def, name=param+':boolean', id=param, type='checkbox', checked=val, required=required)
     if block
       small.desc
         block

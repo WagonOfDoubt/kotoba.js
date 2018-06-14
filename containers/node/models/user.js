@@ -19,7 +19,10 @@ const boardPermissionsSchema = Schema({
 
 const userSchema = Schema({
   login:               { type: String, required: true },
-  password:            { type: String, required: true },
+  // md5 hash of password
+  // select: false makes User.find() not include this field by default
+  password:            { type: String, required: true, select: false },
+  contacts:            { type: String },
   addedon:             { type: Date, default: Date.now},
   lastactive:          { type: Date, default: Date.now},
   displayname:         { type: String, default: '' },
@@ -33,9 +36,14 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
+
 userSchema.methods.checkPassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
+
+userSchema.statics.hashPassword = async function(password) {
+  return await bcrypt.hash(password, config.salt_rounds);
+}
 
 const User = module.exports = mongoose.model('User', userSchema);

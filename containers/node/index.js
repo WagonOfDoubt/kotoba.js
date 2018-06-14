@@ -15,6 +15,7 @@ const previewRouter = require('./routes/preview');
 
 const apiBoardRouter = require('./api/board');
 const apiNewsRouter = require('./api/news');
+const apiUserRouter = require('./api/user');
 const apiSettingsRouter = require('./api/settings');
 const apiMaintenanceRouter = require('./api/maintenance');
 
@@ -74,6 +75,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(formRouter);
 app.use(apiBoardRouter);
 app.use(apiNewsRouter);
+app.use(apiUserRouter);
 app.use(apiSettingsRouter);
 app.use(apiMaintenanceRouter);
 app.use(authRouter);
@@ -88,16 +90,20 @@ passport.use(new LocalStrategy({
     session: true
   },
   async (login, password, done) => {
-    User.findOne({ login: login }, async (err, user) => {
+    User.findOne({ login: login }, { password: 1 }, async (err, user) => {
       if (err) { return done(err); }
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
-      const validPassword = await user.checkPassword(password);
-      if (!validPassword) {
-        return done(null, false, { message: 'Incorrect password.' });
+      try {
+        const validPassword = await user.checkPassword(password);
+        if (!validPassword) {
+          return done(null, false, { message: 'Incorrect password.' });
+        }
+        return done(null, user);
+      } catch (e) {
+        return done(e);
       }
-      return done(null, user);
     });
   }
 ));

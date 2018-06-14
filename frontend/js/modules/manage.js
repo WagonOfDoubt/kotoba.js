@@ -13,7 +13,7 @@ const serializeForm = (form) =>
 const alertErrorHandler = (data) => {
   console.error(data);
   const {status, statusText} = data;
-  const errorText = `Something went wrong (${status} ${ statusText})`;
+  const errorText = `Something went wrong (${ status } ${ statusText })`;
   if (!data.responseJSON) {
     modal.alert('Error', errorText);
     return;
@@ -399,6 +399,28 @@ const managePage_maintenance = () => {
 };
 
 
+const managePage_profile = () => {
+  const updateUserForm = $('#form-update-user');
+  const onUserUpdated = (data) => {
+    modal.alert('Success', 'Profile updated');
+  };
+  updateUserForm.submit((e) => {
+    modal.wait();
+    sendJSON('/api/me', 'PATCH', serializeForm(updateUserForm), onUserUpdated);
+    e.preventDefault();
+  });
+  const changePasswordForm = $('#form-change-password');
+  const onPasswordChanged = (data) => {
+    modal.alert('Success', 'Passord successfully changed');
+  };
+  changePasswordForm.submit((e) => {
+    modal.wait();
+    sendJSON('/api/me/password', 'PATCH', serializeForm(changePasswordForm), onPasswordChanged);
+    e.preventDefault();
+  });
+};
+
+
 export const init = () => {
   const body = document.body;
   if (!body.classList.contains('manage-page')) {
@@ -432,6 +454,10 @@ export const init = () => {
   }
   if (body.classList.contains('manage-page-maintenance')) {
     managePage_maintenance();
+    return;
+  }
+  if (body.classList.contains('manage-page-profile')) {
+    managePage_profile();
     return;
   }
 }

@@ -52,7 +52,7 @@ router.get('/manage/boardopts/:board?',
         activity: 'manage-page-boardselect',
         boards: boards,
         title: 'Board options'
-      });      
+      });
     }
   }
 );
@@ -144,6 +144,23 @@ router.get('/manage/maintenance',
         title: 'Site maintenance'
       });
     } catch(err) {
+      next(err);
+    }
+  }
+);
+
+
+router.get('/manage/profile',
+  middlewares.authRequired,
+  async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user._id);
+      res.render('manage/profile', {
+        activity: 'manage-page-profile',
+        title: 'Profile',
+        user: user
+      });
+    } catch (err) {
       next(err);
     }
   }

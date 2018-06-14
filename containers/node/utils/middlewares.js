@@ -35,6 +35,24 @@ module.exports.authRequired = (req, res, next) => {
 };
 
 
+module.exports.apiAuthRequired = (req, res, next) => {
+  const isLoginned = req.isAuthenticated();
+  if (!isLoginned) {
+    return res
+      .status(401)  // 401 Unauthorized
+      .json({
+        ok: 0,
+        errors: {
+          'login_required': {
+            msg: `You must be logged in to perform this action`
+          }
+        }
+      });
+  }
+  next();
+};
+
+
 module.exports.validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

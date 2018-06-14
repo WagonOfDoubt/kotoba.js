@@ -59,7 +59,7 @@ const renderToFile = async (dir, filename, template, data) => {
 
 
 /**
- * Generates thread reply page.
+ * Generate thread reply page.
  * Saves file board/res/[postId].html
  * @param {Post} thread - The op-post mongoose document.
  */
@@ -88,7 +88,7 @@ const generateThreadPage = async (thread) => {
 
 
 /**
- * Generates cached thread fragment which will be displayed on board page.
+ * Generate cached thread fragment which will be displayed on board page.
  * When thread is bumped, threads on board are shuffled, so each page of board
  * must be regenerated. But there is no need to render each thread fragment
  * since none of them was changed. Keeping rendered thread fragments lets avoid
@@ -132,7 +132,7 @@ const generateThreadPreview = async (thread) => {
 
 
 /**
- * Generates thread reply page and thread preview.
+ * Generate thread reply page and thread preview.
  * @param {Post} thread - The op-post mongoose document.
  * @returns {Promise}
  */
@@ -144,7 +144,7 @@ const generateThread = thread =>
 
 
 /**
- * Generates thread reply page and thread preview for each thread.
+ * Generate thread reply page and thread preview for each thread.
  * @param {Array} threads - Array of {Post} threads to display on page.
  * @returns {Promise}
  */
@@ -153,7 +153,7 @@ const generateThreads = threads =>
 
 
 /**
- * Generates one page of board.
+ * Generate one page of board.
  * Threads on page are not rendered, but included from -preview.html files.
  * Saves file board/index.html or board/[pNum].html
  * @param {Board} board - The board mongoose document.
@@ -203,11 +203,10 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
 
 
 /**
- * Generates all pages on given board.
+ * Generate all pages on given board.
  * Saves files board/index.html, board/1.html, ..., board/n.html
  * @param {Board} board - The board mongoose document.
  * @param {Array} threads - Array of threads sorted by bump order.
- * If null, it threads will be retrieved from database.
  */
 const generateBoardPages = async (board, threads) => {
   if (!threads) {
@@ -233,11 +232,10 @@ const generateBoardPages = async (board, threads) => {
 
 
 /**
- * Generates catalog of board.
+ * Generate catalog of board.
  * Saves file board/catalog.html
  * @param {Board} board - The board mongoose document.
  * @param {Array} threads - Array of threads sorted by bump order.
- * If null, it threads will be retrieved from database.
  */
 const generateCatalog = async (board, threads = null) => {
   if (!board.features.catalog) {
@@ -263,7 +261,7 @@ const generateCatalog = async (board, threads = null) => {
 
 
 /**
- * Regenerates all board pages and catalog for given board
+ * Regenerate all board pages and catalog for given board
  * @param {Board} board - Board to regenerate.
  * @returns {Promise}
  */
@@ -276,7 +274,7 @@ const generateBoardPagesAndCatalog = board =>
 
 
 /**
- * Regenerates all board pages, thread reply pages and catalog for given board
+ * Regenerate all board pages, thread reply pages and catalog for given board
  * @param {Board} board - Board to regenerate.
  * @returns {Promise}
  */
@@ -290,7 +288,7 @@ const generateBoard = board =>
 
 
 /**
- * Regenerates all board pages, thread reply pages and catalog for all given boards
+ * Regenerate all board pages, thread reply pages and catalog for all given boards
  * @param {Array} threads - Array of {Board} boards to regenerate.
  * @returns {Promise}
  */
@@ -299,7 +297,7 @@ const generateBoards = boards =>
 
 
 /**
- * Generates main page (/index.html)
+ * Generate main page (/index.html)
  */
 const generateMainPage = async () => {
   const news = await News.find().sort({ postedDate: -1 }).exec();
@@ -314,7 +312,7 @@ const generateMainPage = async () => {
 
 
 /**
- * Regenerates all static html.
+ * Regenerate all static html.
  * @returns {Promise}
  */
 const regenerateAll = () =>

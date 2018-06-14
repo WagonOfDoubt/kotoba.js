@@ -91,7 +91,7 @@ router.post('/manage/registration', [
       .isLength({ min: 6, max: 25 }),
     body('login', 'Login must contain only letters and numbers')
       .isAlphanumeric(),
-    body('password', 'Password must be at between 6 and 72 characters long and contain one number')
+    body('password', 'Password must be between 6 and 72 characters long and contain one number')
       .exists()
       .isLength({ min: 6, max: 72 })
       .matches(/\d/),
