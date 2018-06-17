@@ -87,12 +87,44 @@ router.patch('/api/me/password', [
 );
 
 
-// TODO delete user
 router.delete('/api/me', [
     middlewares.apiAuthRequired,
+    body('login')
+      .custom((login, { req }) => req.user.login === login)
+      .withMessage('Login is incorrect'),
+    body('password')
+      .custom((passwords) => passwords['0'] === passwords['1'] && passwords['0'] === passwords['2'])
+      .withMessage(`Passwords don't match`),
+    body('password')
+      .custom((passwords, { req }) => {
+        return User
+          .findById(req.user._id)
+          .select(['password', 'authority'])
+          .exec()
+          .then(currentUser => {
+            if (currentUser.authority === 'admin') {
+              return Promise.reject(`Admin account can not be deleted`);
+            }
+            return currentUser.checkPassword(passwords['0']);
+          })
+          .then(passwordValid => {
+            if (!passwordValid) {
+              return Promise.reject(`Password is incorrect`);
+            }
+            return true;
+          });
+        }),
+    middlewares.validateRequest,
   ],
   async (req, res, next) => {
-    res.status(501).send();
+    try {
+      const status = await userController.removeUser(req.user._id);
+      res.clearCookie('kot.user');
+      req.logout();
+      res.send(status);
+    } catch (err) {
+      next(err);
+    }
   }
 );
 

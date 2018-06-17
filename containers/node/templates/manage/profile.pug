@@ -2,6 +2,7 @@ extends managepage.pug
 
 include ../mixins/inputs.pug
 include ../mixins/timestamp.pug
+include ../mixins/modals.pug
 
 block main
   - var values = user
@@ -27,30 +28,33 @@ block main
 
   h2 Delete account
   div Once you delete your account, there is no going back. Please be certain.
-  form#form-delete-account(data-method='open-dialog', data-target='#dialog-delete-account')
-    input#btn-delete-account(type='submit', class='btn', value='Delete account')
-  dialog#dialog-delete-account.modal.fade
-    div.modal-dialog
-      form.modal-content(method='dialog', action='/api/me', data-method='delete')
-        div.modal-header
-          h5 Delete account
-        div.modal-body
-          +textEdit('login', 'Login', '', true)
-          +passwordEdit('password[0]', 'Password', '', true)
-          +passwordEdit('password[1]', 'Confirm password', '', true)
-          +passwordEdit('password[2]', 'Confirm password one more time', '', true)
-          div
-            label
-              input(type='checkbox', required, name='check[0]:boolean')
-              | Yes, I want to delete my account
-          div
-            label
-              input(type='checkbox', required, name='check[1]:boolean')
-              | Yes, I undersand that this can not be undone
-          div
-            label
-              input(type='checkbox', required, name='check[2]:boolean')
-              | Yes, I don't care
-        div.modal-footer
-          button#btn-delete-user.btn(type='submit', value='ok') Delete Board
-          button#btn-cancel-delete-user.btn(type='reset', value='cancel') Cancel
+  form#form-delete-account(
+    method='post',
+    action='/api/me/',
+    data-method='delete',
+    data-confirm='#dialog-delete-account',
+    data-success='#dialog-delete-account-success'
+    )
+      input#btn-delete-account(type='submit', class='btn', value='Delete account')
+
+block modals
+  +confirmPrompt('dialog-delete-account', 'Delete account', 'Delete account')
+    +textEdit('login', 'Login', '', true)
+    +passwordEdit('password[0]', 'Password', '', true)
+    +passwordEdit('password[1]', 'Confirm password', '', true)
+    +passwordEdit('password[2]', 'Confirm password one more time', '', true)
+    div
+      label
+        input(type='checkbox', required, name='check[0]:boolean')
+        | Yes, I want to delete my account
+    div
+      label
+        input(type='checkbox', required, name='check[1]:boolean')
+        | Yes, I undersand that this can not be undone
+    div
+      label
+        input(type='checkbox', required, name='check[2]:boolean')
+        | Yes, I don't care
+
+  +alertPrompt('dialog-delete-account-success', 'Success')
+    p Your account has been deleted. Now you'll be logged out and redirected to main page.

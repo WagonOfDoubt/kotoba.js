@@ -16,8 +16,8 @@ module.exports.createUser = async (data) => {
  * @param {ObjectId} userId - Id of user in MongoDB.
  * @returns {Promise}
  */
-module.exports.removeUser = async (userId) => {
-  // TODO
+module.exports.removeUser = (userId) => {
+  return User.findById(userId).remove().exec();
 };
 
 
@@ -26,9 +26,9 @@ module.exports.removeUser = async (userId) => {
  * This does not change user password.
  * @param {ObjectId} userId - Id of user in MongoDB.
  * @param {Object} data - Dictionary of new values.
- * @returns {Promise} Updated user mongoose docment.
+ * @returns {Promise} Updated user mongoose document.
  */
-module.exports.updateUser = async (userId, data = {}) => {
+module.exports.updateUser = (userId, data = {}) => {
   // pick only fields that can be changed by user
   const updateData = _.pick(data, [
       'contacts',

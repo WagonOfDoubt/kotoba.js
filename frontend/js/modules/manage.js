@@ -304,10 +304,24 @@ const managePage_profile = () => {
   };
   addSubmitListener($('#form-update-user'), onUserUpdated);
   addSubmitListener($('#form-change-password'), onPasswordChanged);
-  $('#form-delete-account').submit((e) => {
-    modal.dialogPromise(document.getElementById('dialog-delete-account'))
-      .then((returnValue) => console.log('resolve!', returnValue))
-      .catch(() => console.log('reject!'));
+
+  const $form = $('#form-delete-account');
+  const method = $form.data('method');
+  const action = $form.attr('action');
+  const confirmDialog = document.querySelector($form.data('confirm'));
+  const successDialog = document.querySelector($form.data('success'));
+  $form.submit((e) => {
+    modal
+      .dialogPromise(confirmDialog)
+      .then(({ formData }) => {
+        sendJSON(action, method, Object.assign({ data: serializeForm($form) }, formData))
+          .then(() => {
+            modal
+              .dialogPromise(successDialog)
+              .then(() => window.location.href = '/');
+          })
+          .catch(alertErrorHandler);
+      });
     e.preventDefault();
   });
 };
