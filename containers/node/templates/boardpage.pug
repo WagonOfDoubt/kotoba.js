@@ -11,7 +11,7 @@ block main
 
   form#delform(action='/form/delpost', method='post')
     if !threads.length
-      div.nothreads Nobody here but chickens
+      div.nothreads Nobody Here but Us Chickens
     for thread in threads
       != thread
     include includes/delpostform.pug

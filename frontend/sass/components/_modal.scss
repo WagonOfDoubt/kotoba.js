@@ -4,7 +4,6 @@
 // .modal-dialog    - positioning shell for the actual modal
 // .modal-content   - actual modal w/ bg and corners and stuff
 
-$zindex-modal: 9999;
 $modal-dialog-margin: 40px;
 $modal-footer-border-width: 1px;
 $modal-footer-border-color: #e9ecef;
@@ -22,12 +21,12 @@ $modal-inner-padding: 1rem;
 
 // Container that the modal scrolls within
 .modal {
+  width: 100%;
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: $zindex-modal;
   visibility: hidden;
   overflow: hidden;
   display: flex;
@@ -47,7 +46,7 @@ $modal-inner-padding: 1rem;
 }
 
 
-.modal.show {
+.modal.show, .modal[open] {
   visibility: visible;
 }
 
@@ -67,7 +66,7 @@ $modal-inner-padding: 1rem;
     transform: translate(0, -25%);
     opacity: 0;
   }
-  .modal.show & {
+  .modal.show &, .modal[open] & {
     transform: translate(0, 0);
     opacity: 1;
   }
@@ -98,6 +97,7 @@ $modal-inner-padding: 1rem;
   // Remove focus outline from opened modal
   outline: 0;
   background-color: white;
+  max-height: 100vh;
 }
 
 // Modal header
@@ -108,7 +108,8 @@ $modal-inner-padding: 1rem;
   justify-content: space-between; // Put modal header elements (title and dismiss) on opposite ends
   padding: $modal-header-padding;
   border-bottom: $modal-header-border-width solid $modal-header-border-color;
-  // @include border-top-radius($border-radius-lg);
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 
   h1, h2, h3, h4, h5 {
     margin: 0;
@@ -135,6 +136,8 @@ $modal-inner-padding: 1rem;
   // when should there be a fixed height on `.modal-dialog`.
   flex: 1 1 auto;
   padding: $modal-inner-padding;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 // Footer (for actions)
 .modal-footer {
@@ -143,30 +146,10 @@ $modal-inner-padding: 1rem;
   justify-content: flex-end; // Right align buttons with flex property because text-align doesn't work on flex items
   padding: $modal-inner-padding;
   border-top: $modal-footer-border-width solid $modal-footer-border-color;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 
   // Easily place margin between footer elements
   > :not(:first-child) { margin-left: .25rem; }
   > :not(:last-child) { margin-right: .25rem; }
-}
-
-
-// Modal background
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1050;
-  background-color: black;
-  visibility: hidden;
-
-  // Fade for backdrop
-  &.fade { opacity: 0; }
-  &.show {
-    opacity: .9;
-    visibility: visible;
-  }
-
-  transition: opacity .15s linear, visibility .15s;
 }

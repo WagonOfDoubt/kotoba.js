@@ -84,8 +84,8 @@ router.patch(
 // delete news
 router.delete('/api/news/:newsId?',
   [
-    param('newsId').isNumeric(),
-    param('newsId').toInt(),
+    check('newsId').isNumeric(),
+    check('newsId').toInt(),
     body('regenerate').toBoolean(),
     middlewares.adminOnly,
     middlewares.validateRequest

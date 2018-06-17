@@ -73,6 +73,11 @@ router.get('/manage/delboard/:board',
   async (req, res) => {
     const board = await Board.findOne({ uri: req.params.board }).exec();
 
+    if (!board) {
+      res.status(404).send();
+      return;
+    }
+
     res.render('manage/delboard', {
       activity: 'manage-page-delboard',
       board: board,

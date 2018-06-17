@@ -1,4 +1,5 @@
 extends managepage.pug
+include ../mixins/modals.pug
 
 block header
   h1 Delete board
@@ -8,7 +9,8 @@ block main
   div.link-button-wrapper
     a(href='/manage/boardopts') Select another board
   h2 Danger zone
-  form#form-delete-board
+  form#form-delete-board(method='post', data-method='delete', action='/api/board/')
+    input(type='hidden', name='uri', value=board.uri)
     div
       label
         input(type='checkbox', required, name='check[0]:boolean')
@@ -37,3 +39,10 @@ block main
         input(type='checkbox', required, name='check[5]:boolean')
         | No, I'm not baka
     input#btn-delete-board(type='submit', value='Delete Board')
+
+block modals
+  +confirmPrompt('dialog-delete-board-confirm', 'Delete board', 'Delete')
+    p Board /#{ board.uri }/ will be premanently deleted
+
+  +alertPrompt('dialog-delete-board-success', 'Success')
+    p Board was deleted. RIP.

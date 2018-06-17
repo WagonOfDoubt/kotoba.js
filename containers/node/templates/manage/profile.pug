@@ -13,19 +13,44 @@ block main
     p Joined: #[strong #[+date(user.addedon)]]
 
   h2 Profile info
-  form#form-update-user(method='POST', action='/api/me')
+  form#form-update-user(method='post', action='/api/me', data-method='PATCH')
     +textEdit('displayname', 'Name', 'This affects only the name that is shown to others. Your login stays the same. If left blank, your login will be used.')
     +textArea('contacts', 'Contacts', 'Write here your e-mail, jabber, twitter, or whatever. One per row. The one in the first row will be used as default e-mail when posting news.')
     input#btn-update-user(type='submit', value='Update profile')
 
   h2 Change password
-  form#form-change-password(method='POST', action='/api/me/password')
+  form#form-change-password(method='post', action='/api/me/password', data-method='patch')
     +passwordEdit('old_password', 'Old password', '', true)
     +passwordEdit('password', 'New password', '', true)
     +passwordEdit('password_confirmation', 'Confirm new password', '', true)
-    input#btn-change-password(type='submit', value='Change password')
+    input#btn-change-password(type='submit', class='btn', value='Change password')
 
   h2 Delete account
   div Once you delete your account, there is no going back. Please be certain.
-  form
-    input#btn-delete-account(type='submit', value='Delete account')
+  form#form-delete-account(data-method='open-dialog', data-target='#dialog-delete-account')
+    input#btn-delete-account(type='submit', class='btn', value='Delete account')
+  dialog#dialog-delete-account.modal.fade
+    div.modal-dialog
+      form.modal-content(method='dialog', action='/api/me', data-method='delete')
+        div.modal-header
+          h5 Delete account
+        div.modal-body
+          +textEdit('login', 'Login', '', true)
+          +passwordEdit('password[0]', 'Password', '', true)
+          +passwordEdit('password[1]', 'Confirm password', '', true)
+          +passwordEdit('password[2]', 'Confirm password one more time', '', true)
+          div
+            label
+              input(type='checkbox', required, name='check[0]:boolean')
+              | Yes, I want to delete my account
+          div
+            label
+              input(type='checkbox', required, name='check[1]:boolean')
+              | Yes, I undersand that this can not be undone
+          div
+            label
+              input(type='checkbox', required, name='check[2]:boolean')
+              | Yes, I don't care
+        div.modal-footer
+          button#btn-delete-user.btn(type='submit', value='ok') Delete Board
+          button#btn-cancel-delete-user.btn(type='reset', value='cancel') Cancel

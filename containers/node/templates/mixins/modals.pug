@@ -1,0 +1,22 @@
+mixin confirmPrompt(id, title, confirmBtnLabel)
+  dialog.modal(id=id)
+    div.modal-dialog
+      form.modal-content(method='dialog')
+        div.modal-header
+          h5= title
+        div.modal-body
+          block
+        div.modal-footer
+          button.btn(type='submit', value='ok')= confirmBtnLabel
+          button.btn(type='submit', value='cancel') Cancel
+
+mixin alertPrompt(id, title)
+  dialog.modal(id=id)
+    div.modal-dialog
+      form.modal-content(method='dialog')
+        div.modal-header
+          h5= title
+        div.modal-body
+          block
+        div.modal-footer
+          button.btn(type='submit', value='close') Close

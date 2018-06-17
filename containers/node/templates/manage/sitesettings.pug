@@ -1,6 +1,7 @@
 extends managepage.pug
 
 include ../mixins/inputs.pug
+include ../mixins/modals.pug
 
 block header
   h1 Site settings
@@ -8,7 +9,7 @@ block header
 block main
   //- pre= JSON.stringify(sitesettings, null, 2)
   //- pre= JSON.stringify(defaults, null, 2)
-  form#form-update-sitesettings(method='GET', action='/api/settings')
+  form#form-update-sitesettings(method='GET', action='/api/settings', data-method='PATCH')
     - var values = sitesettings
     h2 Common settings
     +textEdit('siteName', 'Site name', 'The name of your site.')
@@ -65,3 +66,14 @@ block main
       button(type='button', class='btn', data-action='preview-markdown', data-field='frame') Preivew
 
     input#btn-update-sitesettings(type='submit', value='Save changes')
+
+block modals
+  +confirmPrompt('dialog-update-settings', 'Update settings', 'Save changes')
+    p Following settings will be changed:
+    div.changes-list
+    label
+      input(type='checkbox', checked, name='regenerate:boolean')
+      | Regenerate main page
+
+  +alertPrompt('dialog-update-settings-success', 'Success')
+    p Settings was updated

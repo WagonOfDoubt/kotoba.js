@@ -1,6 +1,7 @@
 extends managepage.pug
 
 include ../mixins/inputs.pug
+include ../mixins/modals.pug
 
 block header
   if board
@@ -22,7 +23,8 @@ block main
       a(href='/manage/boardopts') Edit boards
 
   - var action = board ? '/api/board/' + board.uri : '/api/board/';
-  form#form-update-board(method='GET', action=action)
+  - var method = board ? 'PATCH' : 'PUT';
+  form#form-update-board(method='GET', action=action, data-method=method)
     if !board
       +textEdit('uri', 'Directory', 'The directory of the board.')
     +textEdit('name', 'Name', 'The name of the board.')
@@ -70,3 +72,17 @@ block main
     h2 Danger zone
     div.link-button-wrapper
       a(href='/manage/delboard/' + board.uri) Delete board
+
+block modals
+  +confirmPrompt('dialog-update-board', 'Update board options', 'Save changes')
+    p Following options will be changed:
+    div.changes-list
+    label
+      input(type="checkbox", checked, name="regenerate:boolean")
+      | Regenerate board
+
+  +alertPrompt('dialog-update-board-success', 'Success')
+    if board
+      p Board was updated
+    else
+      p Board was created

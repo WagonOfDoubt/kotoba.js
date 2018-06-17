@@ -36,6 +36,7 @@
     "webpack": "^3.11.0"
   },
   "dependencies": {
+    "dialog-polyfill": "^0.4.9",
     "jquery": "^3.2.1",
     "jquery-serializejson": "^2.8.1",
     "lodash.escape": "^4.0.1",

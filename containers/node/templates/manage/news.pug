@@ -2,6 +2,7 @@ extends managepage.pug
 
 include ../mixins/inputs.pug
 include ../mixins/timestamp.pug
+include ../mixins/modals.pug
 
 block header
   if news
@@ -11,7 +12,8 @@ block header
 
 block main
   - var action = news ? '/api/news/' + news.number : '/api/news/';
-  form#form-edit-news(method='GET', action=action)
+  - var method = news ? 'PATCH' : 'PUT';
+  form#form-edit-news(action=action, data-method=method)
     - var values = news ? news : { postedby: user.login };
     +textEdit('subject', 'Subject', '', true)
     +textArea('message', 'Message', '', true)
@@ -50,5 +52,27 @@ block main
                 =n.postedby
             td= n.message
             td
-              button(type='button', class='btn', data-news=n.number, data-action='edit') Edit
-              button(type='button', class='btn', data-news=n.number, data-action='delete') Delete
+              form(method='post', action='/api/news', data-method='patch')
+                input(type='hidden', name='newsId', value=n.number)
+                button(type='button', class='btn', data-news=n.number, data-action='edit') Edit
+              form(method='post', action='/api/news', data-method='delete')
+                input(type='hidden', name='newsId', value=n.number)
+                button(type='button', class='btn', data-news=n.number, data-action='delete') Delete
+
+block modals
+  +confirmPrompt('dialog-delete-news', 'Delete news', 'Delete')
+    p Are you sure want to delete this entry?
+    div.dialog-news-preview
+    label
+      input(type="checkbox", checked, name="regenerate:boolean")
+      | Regenerate main page
+
+  +confirmPrompt('dialog-news-confirm', news ? 'Add news' : 'Edit news', 'Save')
+    p News entry preview:
+    div.news-preview
+    label
+      input(type="checkbox", checked, name="regenerate:boolean")
+      | Regenerate main page
+
+  +alertPrompt('dialog-news-success', 'Success')
+    p= news ? 'News entry updated' : 'News entry added'
