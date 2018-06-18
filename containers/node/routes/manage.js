@@ -172,4 +172,26 @@ router.get('/manage/profile',
 );
 
 
+router.get('/manage/staff/:userLogin?',
+  middlewares.authRequired,
+  async (req, res, next) => {
+    try {
+      let staffMember;
+      if (req.params.userLogin) {
+        staffMember = await User.findOne({ login: req.params.userLogin });
+      }
+      const staff = await User.find();
+      res.render('manage/staff', {
+        activity: 'manage-page-staff',
+        title: 'Staff',
+        staff: staff,
+        staffMember: staffMember,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
 module.exports = router;

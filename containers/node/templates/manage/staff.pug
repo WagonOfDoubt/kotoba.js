@@ -1,0 +1,50 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+include ../mixins/modals.pug
+include ../mixins/timestamp.pug
+
+block header
+  h1 Staff
+
+block main
+  //- pre= JSON.stringify(staff, null, 2)
+  //- pre= JSON.stringify(staffMember, null, 2)
+
+  if staffMember
+    h2 #{staffMember.login} profile
+    div
+      p Login: #[strong= staffMember.login]
+      if staffMember.displayname
+        p Name: #[strong.nickname #{staffMember.displayname}]
+      p Authority: #[strong= staffMember.authority]
+      p Joined: #[strong #[+date(staffMember.addedon)]]
+      p Last active: #[strong #[+datetime(staffMember.lastactive)]]
+      if staffMember.contacts
+        p Contacts:
+        p= staffMember.contacts
+
+  table.table
+    caption
+      h2 Staff members
+    thead
+      tr
+        th Login
+        th Authority
+        th Joined
+        th Last active
+    tbody
+      for member in staff
+        tr
+          td
+            a(href=`/manage/staff/${ member.login }`)= member.login
+            if member.displayname
+              small.unimportant  (aka #[span.nickname #{member.displayname}])
+          td= member.authority
+          td
+            +date(member.addedon)
+          td
+            +datetime(member.lastactive)
+
+block modals
+  //- nothin'

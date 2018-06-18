@@ -22,7 +22,7 @@ block main
           td #{d.dirname}/
           td= d.files
           td!= filters.readableSize(d.size)
-        
+
       mixin statsCount(dir, num)
         if dir.children[num]
           +stats(dir.children[num])
