@@ -40,8 +40,7 @@ router.get('/preview/replies/:board/:thread',
   [
     param('board').isAlphanumeric(),
     param('thread').isNumeric(),
-    middlewares.validateRequest,
-    middlewares.authRequired
+    middlewares.validateRequest
   ],
   async (req, res, next) => {
     try {

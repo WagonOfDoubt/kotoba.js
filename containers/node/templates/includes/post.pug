@@ -64,7 +64,7 @@ div(
           a.post-btn.post-btn-hide(href='#', title='Hide thread')
         if site.features.favorites
           a.post-btn.post-btn-fav(href='#', title='Watch thread')
-        if site.features.expandThread
+        if site.features.expandThread && isPage
           a.post-btn.post-btn-expthr(href='#', title='Expand thread')
       else
         if site.features.hidePost
