@@ -1,0 +1,31 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+include ../mixins/modals.pug
+include ../mixins/postbody.pug
+include ../mixins/attachments.pug
+
+
+block header
+  h1 Recent uploads
+
+block main
+  div.catalog
+    div.catalog-list
+      for post in posts
+        for attachment in post.attachments
+          div.catalog-thread
+              +reflink(post)
+              figure.catalog-thread-image
+                label
+                  input.checkbox-hidden(type='checkbox')
+                  div.thumb-container
+                    +thumbnail(attachment)
+                    if attachment.duration
+                      div.file-info-duration!= filters.readableDuration(attachment.duration)
+                figcaption
+                  +filelink(attachment)
+
+  //- pre= JSON.stringify(posts, null, 2)
+
+block modals

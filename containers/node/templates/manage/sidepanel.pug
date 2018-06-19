@@ -37,14 +37,9 @@ nav
     li.list-group-item View Reports
     li.list-group-item Bans
     li.list-group-item BanDelAll
-    li.list-group-item Recent uploads
+    li.list-group-item
+      a(href='/manage/uploads') Recent uploads
 
 if user
-  div
-    | Welcome,
-    | 
-    strong #{user.login}
-  div
-    | Staff rights:
-    | 
-    strong #{user.authority}
+  div Welcome, #[strong #{user.login}]
+  div Staff rights: #[strong #{user.authority}]

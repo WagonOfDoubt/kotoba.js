@@ -8,6 +8,7 @@ const dirSizes = require('../utils/dirstats');
 const middlewares = require('../utils/middlewares');
 
 const User = require('../models/user');
+const Post = require('../models/post');
 const News = require('../models/news');
 const Board = require('../models/board');
 const Settings = require('../models/settings');
@@ -147,6 +148,29 @@ router.get('/manage/maintenance',
       res.render('manage/maintenance', {
         activity: 'manage-page-maintenance',
         title: 'Site maintenance'
+      });
+    } catch(err) {
+      next(err);
+    }
+  }
+);
+
+
+router.get('/manage/uploads',
+  middlewares.authRequired,
+  async (req, res, next) => {
+    try {
+      const posts = await Post
+        .find(
+          {'attachments.0': { $exists: true }},
+          {'attachments': 1, 'boardUri': 1, 'postId': 1, 'threadId': 1, 'timestamp': 1}
+        )
+        .sort({'timestamp': -1})
+        .limit(500);
+      res.render('manage/uploads', {
+        activity: 'manage-page-upoads',
+        title: 'Recent upoads',
+        posts: posts,
       });
     } catch(err) {
       next(err);

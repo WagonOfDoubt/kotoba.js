@@ -17,27 +17,14 @@ mixin attachment(attachment, post)
     data-duration=attachment.duration
     data-type=attachment.type
   )
-    - var fileHref = filters.encodeUri(attachment.file)
     figcaption.filesize
-      a.file-link(
-        href!= fileHref
-        target='_blank'
-        title=attachment.name)!= filters.shortFileName(attachment.name, {length: 25, placeholder: '[...]'})
+      +filelink(attachment)
       |
       |
-      if attachment.size || (attachment.width && attachment.height)
-        span.file-info
-          | (
-          if attachment.size
-            span.file-info-size
-              != filters.readableSize(attachment.size)
-          if attachment.width && attachment.height
-            | ,
-            span.file-info-resolution #{ attachment.width }x#{ attachment.height }
-          | )
+      +fileinfo(attachment)
     div.thumb-container
       a.thumb-link(
-        href!= fileHref
+        href!= filters.encodeUri(attachment.file)
         data-full-src=attachment.file
         data-full-width=attachment.width
         data-full-height=attachment.height
@@ -56,3 +43,21 @@ mixin thumbnail(attachment)
     width=attachment.thumbWidth
     height=attachment.thumbHeight
   )
+
+mixin fileinfo(attachment)
+  if attachment.size || (attachment.width && attachment.height)
+    span.file-info
+      | (
+      if attachment.size
+        span.file-info-size
+          != filters.readableSize(attachment.size)
+      if attachment.width && attachment.height
+        | ,
+        span.file-info-resolution #{ attachment.width }x#{ attachment.height }
+      | )
+
+mixin filelink(attachment)
+  a.file-link(
+    href!= filters.encodeUri(attachment.file)
+    target='_blank'
+    title=attachment.name)!= filters.shortFileName(attachment.name, {length: 25, placeholder: '[...]'})
