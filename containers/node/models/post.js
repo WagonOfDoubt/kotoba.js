@@ -1,49 +1,72 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const ObjectId = mongoose.Schema.Types.ObjectId;
+const Int32 = require('mongoose-int32');
 const bcrypt = require('bcrypt');
 const config = require('../config.json');
 
 
 const attachmentSchema = Schema({
-  file:                String,
-  hash:                Number,
-  name:                String,
-  size:                Number,
-  width:               Number,
-  height:              Number,
-  thumb:               String,
-  thumbWidth:          Number,
-  thumbHeight:         Number,
-  duration:            Number,
-  type:                String
+  /* uploaded file md5 hash (hex string) */
+  hash:                { type: String, index: true },
+  /* original file name */
+  name:                { type: String },
+  /* origina file */
+  file:                { type: String },  // path to file
+  width:               { type: Number },  // pixels
+  height:              { type: Number },  // pixels
+  /* thumbnail */
+  thumb:               { type: String },  // path to file
+  thumbWidth:          { type: Number },  // pixels
+  thumbHeight:         { type: Number },  // pixels
+  /* duration in seconds for video and audio files */
+  duration:            { type: Number },
+  /* attachment type (image, video, etc) */
+  type:                { type: String, enum: ['image', 'video', 'audio', 'document', 'archive', 'unknown'] },
+  /* attachment file size in bytes */
+  size:                { type: Number },
+  isDeleted:           { type: Boolean, default: false },
+  isNSFW:              { type: Boolean, default: false },
+  isSpoiler:           { type: Boolean, default: false },
 });
 
 const reflinkSchema = Schema({
   src: {
-    type: Schema.Types.ObjectId,
+    type: ObjectId,
     ref: 'Post'
   },
-  boardUri: String,
-  threadId: Number,
-  postId: Number,
-  isOp: Boolean
+  boardUri: { type: String },
+  postId: { type: Int32 },
+  threadId: { type: Int32 },
+  isOp:     { type: Boolean },
 });
 
 const postSchema = Schema({
-  postId:              { type: Number, default: 1, min: 1, index: true },
-  threadId:            { type: Number },
+  /* primary key for post, autoincrement, unique for each board */
+  postId: {
+    type: Int32,
+    index: true,
+    default: 1,
+    min: 1,
+  },
+  /* postId of parent thread on same board (if this post not OP) */
+  threadId: { type: Int32 },
+  /* board string */
   boardUri:            { type: String, required: true },
+  /* ref to board */
   board: {
-    type: Schema.Types.ObjectId,
+    type: ObjectId,
     required: true,
     ref: 'Board'
   },
+  /* ref to parent thread (if this post is not OP) */
   parent: {
-    type: Schema.Types.ObjectId,
+    type: ObjectId,
     ref: 'Post'
   },
+  /* refs to child posts (if this post is OP) */
   children: [{
-    type: Schema.Types.ObjectId,
+    type: ObjectId,
     ref: 'Post'
   }],
   timestamp:           { type: Date, default: Date.now },
@@ -52,8 +75,11 @@ const postSchema = Schema({
   tripcode:            { type: String, default: '' },
   email:               { type: String, default: '' },
   subject:             { type: String, default: '' },
+  /* unparsed post body as it was sent by user */
   body:                { type: String, default: '' },
+  /* parsed post body as HTML, ready for template */
   rawHtml:             { type: String, default: '' },
+  /* parsed post body with token objects to maintain references */
   parsed:              [ ],
   replies:             [ reflinkSchema ],
   references:          [ reflinkSchema ],
