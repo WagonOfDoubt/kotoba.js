@@ -4,62 +4,82 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const avconv = require('avconv');
+const crypto = require('crypto');
 
 
 const isVideo = (ext) => {
   const videos = ['.mp4', '.ogv', '.webm'];
-  return videos.includes(ext);  
+  return videos.includes(ext);
 };
+
 
 const isImage = (ext) => {
   const images = ['.jpg', '.jpeg', '.png', '.tiff', '.webp', '.gif', '.svg'];
-  return images.includes(ext);  
+  return images.includes(ext);
+};
+
+
+const getAttachmentType = (ext) => {
+  if (isImage(ext)) {
+    return 'image';
+  }
+  if (isVideo(ext)) {
+    return 'video';
+  }
+  return 'unknown';
+};
+
+
+const normalizeExxtension = (ext) => {
+  if (ext === '.jpeg') {
+    return '.jpg';
+  }
+  return ext;
+};
+
+
+const getOptimalThumbnailExtenstion = (ext) => {
+  if (['.png', '.svg', '.gif'].includes(ext)) {
+    return '.png';
+  }
+  return '.jpg';
 };
 
 
 const uploadFile = async (boardUri, file, keepFilename = true) => {
-  let ext = path.extname(file.originalname);
-  const type = isImage(ext)
-    ? 'image'
-    : isVideo(ext)
-    ? 'video'
-    : 'unknown';
-  const supported = type !== 'unknown';
-  if (!supported) {
+  const ext = normalizeExxtension(path.extname(file.originalname));
+  const type = getAttachmentType(ext);
+  if (type === 'unknown') {
     const error = new Error('Unsupported file format: ' + ext);
     error.type = 'input_error';
     error.reason = 'invalid_upload_format';
     throw error;
   }
-  ext = ext === '.jpeg'
-    ? '.jpg'
-    : ext;
-  const thumbExt = ['.png', '.svg', '.gif'].includes(ext)
-    ? '.png'
-    : '.jpg';
+  const thumbExt = getOptimalThumbnailExtenstion(ext);
 
   const randomName = `${ Date.now() }${ Math.floor(Math.random() * 100) }`;
   file.originalname = keepFilename && !/^\s+\.\w+$/.test(file.originalname)
     ? path.basename(file.originalname, ext) + ext
     : randomName + ext;
 
-  const filePath = path.join(config.html_path, boardUri, 'src',
-    randomName, file.originalname);
-  const thumbPath = path.join(config.html_path, boardUri, 'thumb',
-    randomName + 's' + thumbExt);
+  const filePath = path
+    .join(config.html_path, boardUri, 'src', randomName, file.originalname);
+  const thumbPath = path
+    .join(config.html_path, boardUri, 'thumb', randomName + 's' + thumbExt);
   const url = `/${ boardUri }/src/${ randomName }/${ file.originalname }`;
   const thumbUrl = `/${ boardUri }/thumb/${ randomName }s${ thumbExt }`;
+  const hash = crypto.createHash('md5').update(file.buffer).digest('hex');
 
   const attachment = {
     file: url,
-    hash: null,
+    hash: hash,
     name: file.originalname,
     type: type
   };
 
   let fileInfo;
   let thumbInfo;
-  if (isImage(ext)) {
+  if (type === 'image') {
     try {
       thumbInfo = await createThumbnail(thumbPath, file);
       attachment.thumbWidth = thumbInfo.width;
@@ -71,7 +91,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
       throw error;
     }
     fileInfo = await saveImage(filePath, file);
-  } else if (isVideo(ext)) {
+  } else if (type === 'video') {
     fileInfo = await saveVideo(filePath, file);
     try {
       thumbInfo = await createVideoThumbnail(thumbPath, filePath);
