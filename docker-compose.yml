@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mongo:
-    image: mongo:3.6.0
+    image: mongo:4.0
     volumes:
       - ./db:/data/db
     ports:
@@ -22,7 +22,7 @@ services:
       - ./html:/home/node/app/html
     expose:
       - 3000
-    command: npm run-script debug
+    command: node index.js
     depends_on:
       - mongo
     links:
