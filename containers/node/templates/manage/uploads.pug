@@ -10,15 +10,19 @@ block header
   h1 Recent uploads
 
 block main
-  div.catalog
+  form.admin-form.catalog(method='post', action='/api/attachment', data-method='patch')
     div.catalog-list
       for post in posts
         for attachment in post.attachments
           div.catalog-thread
               +reflink(post)
-              figure.catalog-thread-image
+              figure.catalog-thread-image(data-mongo-id=attachment._id, class={
+                deleted: attachment.isDeleted,
+                nsfw: attachment.isNSFW,
+                spoiler: attachment.isSpoiler
+              })
                 label
-                  input.checkbox-hidden(type='checkbox')
+                  input.checkbox-hidden.admin-form-checkbox(type='checkbox', name='attachments[]', value=attachment._id)
                   div.thumb-container
                     +thumbnail(attachment)
                     if attachment.duration
@@ -26,6 +30,16 @@ block main
                 figcaption
                   +filelink(attachment)
 
+    div.admin-panel.fixed-bottom
+      div.column
+        button.js-set-attachment-flag#set-deleted-flag-btn(type='submit', name='isDeleted', value='true') Delete
+        button.js-set-attachment-flag#reset-deleted-flag-btn(type='submit', name='isDeleted', value='false') Restore
+      div.column
+        button.js-set-attachment-flag#set-spoiler-flag-btn(type='submit', name='isSpoiler', value='true') Set Spoiler
+        button.js-set-attachment-flag#reset-spoiler-flag-btn(type='submit', name='isSpoiler', value='false') Unset Spoiler
+      div.column
+        button.js-set-attachment-flag#set-nsfw-flag-btn(type='submit', name='isNSFW', value='true') Set NSFW
+        button.js-set-attachment-flag#reset-nsfw-flag-btn(type='submit', name='isNSFW', value='false') Unset NSFW
   //- pre= JSON.stringify(posts, null, 2)
 
 block modals

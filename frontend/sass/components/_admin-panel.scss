@@ -1,0 +1,24 @@
+.admin-panel {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: $container-padding;
+  margin-left: -$container-padding;
+  margin-right: -$container-padding;
+  justify-content: space-between;
+}
+
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+
+body.show-admin-panel {
+  .admin-panel {
+    display: flex;
+  }
+}
+

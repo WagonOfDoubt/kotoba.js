@@ -1,3 +1,5 @@
+$container-padding: 1.5rem;
+
 @import './components/fonts.scss';
 @import './components/img_global';
 @import './components/icons';
@@ -10,6 +12,7 @@
 @import './components/adminbar';
 @import './components/modal';
 @import './components/dialog';
+@import './components/admin-panel';
 
 $sidebar-width: 20vw;
 
@@ -34,7 +37,7 @@ body.layout-sidebar {
     "sidebar main"
     "sidebar footer";
   header, footer, main {
-    padding: 0 1.5rem;
+    padding: 0 $container-padding;
   }
 }
 

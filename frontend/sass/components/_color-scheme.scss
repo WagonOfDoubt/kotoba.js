@@ -91,3 +91,8 @@ table.table {
   background: $page-title-background-color;
   color: $page-title-color;
 }
+
+.admin-panel.fixed-bottom {
+  border-top: 1px solid $border-color;
+  background-color: $background-color;
+}
