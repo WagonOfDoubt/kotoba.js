@@ -4,12 +4,11 @@ const getStoredPassword = () => localStorage.getItem('kot_postpassword');
 
 const setStoredPassword = (pass) => localStorage.setItem('kot_postpassword', pass);
 
-const getRandomPassword = (length) => {
+const getRandomPassword = (length = 8) => {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  return Array(8)
-    .fill(0)
-    .map(() => Math.floor(Math.random() * chars.length))
-    .map(rnd => chars[rnd])
+  const charsLength = chars.length;
+  return [...Array(length)]
+    .map(() => chars[Math.floor(Math.random() * charsLength)])
     .join('');
 };
 
