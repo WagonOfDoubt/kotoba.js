@@ -30,16 +30,7 @@ block main
                 figcaption
                   +filelink(attachment)
 
-    div.admin-panel.fixed-bottom
-      div.column
-        button.js-set-attachment-flag#set-deleted-flag-btn(type='submit', name='isDeleted', value='true') Delete
-        button.js-set-attachment-flag#reset-deleted-flag-btn(type='submit', name='isDeleted', value='false') Restore
-      div.column
-        button.js-set-attachment-flag#set-spoiler-flag-btn(type='submit', name='isSpoiler', value='true') Set Spoiler
-        button.js-set-attachment-flag#reset-spoiler-flag-btn(type='submit', name='isSpoiler', value='false') Unset Spoiler
-      div.column
-        button.js-set-attachment-flag#set-nsfw-flag-btn(type='submit', name='isNSFW', value='true') Set NSFW
-        button.js-set-attachment-flag#reset-nsfw-flag-btn(type='submit', name='isNSFW', value='false') Unset NSFW
+    include ../includes/adminpanel.pug
   //- pre= JSON.stringify(posts, null, 2)
 
 block modals

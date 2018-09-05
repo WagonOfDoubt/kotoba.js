@@ -78,7 +78,7 @@ router.post('/form/delpost', [
       const password = req.body.postpassword;
       const postsQuery = req.body.posts
         .map(boardAndNumber => {
-          const [boardUri, postId] = boardAndNumber.split('/');
+          const [_, boardUri, postId] = boardAndNumber.split('-');
           return { boardUri: boardUri, postId: parseInt(postId) };
         });
       if (postsQuery.length === 0) {

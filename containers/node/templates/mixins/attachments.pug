@@ -22,16 +22,17 @@ mixin attachment(attachment, post)
       |
       |
       +fileinfo(attachment)
-    div.thumb-container
-      a.thumb-link(
-        href!= filters.encodeUri(attachment.file)
-        data-full-src=attachment.file
-        data-full-width=attachment.width
-        data-full-height=attachment.height
-        data-thumb-src=attachment.thumb
-        data-thumb-width=attachment.thumbWidth
-        data-thumb-height=attachment.thumbHeight
-      )
+    a.thumb-link(
+      href!= filters.encodeUri(attachment.file)
+      data-full-src=attachment.file
+      data-full-width=attachment.width
+      data-full-height=attachment.height
+      data-thumb-src=attachment.thumb
+      data-thumb-width=attachment.thumbWidth
+      data-thumb-height=attachment.thumbHeight
+    )
+      input.checkbox-hidden.admin-form-checkbox.js-select-attachment(type='checkbox', name='attachments[]', value=attachment._id)
+      div.thumb-container
         +thumbnail(attachment)
       if attachment.duration
         div.file-info-duration!= filters.readableDuration(attachment.duration)

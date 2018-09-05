@@ -9,12 +9,13 @@ block header
 block main
   include includes/postform.pug
 
-  form#delform(action='/form/delpost', method='post')
+  form#delform.admin-form(action='/form/delpost', method='post')
     if !threads.length
       div.nothreads Nobody Here but Us Chickens
     for thread in threads
       != thread
     include includes/delpostform.pug
+    include includes/adminpanel.pug
 
 block footer
   include includes/pagination.pug

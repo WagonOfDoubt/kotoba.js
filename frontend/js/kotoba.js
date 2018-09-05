@@ -3,8 +3,7 @@ import 'jquery-serializejson';
 import '../sass/global.scss';
 import '../sass/umnochan.scss';
 
-import { initExpandVideo } from './modules/expand-video';
-import { initExpandImage } from './modules/expand-image';
+import { initExpandVideo, initExpandImage } from './modules/attachment-viewer';
 import { initHidePost } from './modules/hide-post';
 import { initExpandThread } from './modules/expand-thread';
 import { initAdminPanel } from './modules/admin-panel';

@@ -22,7 +22,7 @@ services:
       - ./html:/home/node/app/html
     expose:
       - 3000
-    command: node index.js
+    command: npm run debug
     depends_on:
       - mongo
     links:

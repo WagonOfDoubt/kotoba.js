@@ -23,9 +23,9 @@ div(
   div.post-header
     a.post-board-link(href=`/${ post.boardUri }`)= post.boardUri
     label
-      input.post-delete-checkbox(
+      input.post-delete-checkbox.js-select-post(
         name='posts[]',
-        value=`${post.boardUri}/${post.postId}`,
+        value=`post-${post.boardUri}-${post.postId}`,
         type='checkbox'
       )
       if post.subject
