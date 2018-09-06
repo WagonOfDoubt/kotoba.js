@@ -20,6 +20,7 @@ const sendSetFlagRequest = ($form, setFlags) => {
   const data = $form.serializeJSON();
   const { attachments } = data;
   data.set = setFlags;
+  console.log(data);
   modal.wait();
   sendJSON('/api/attachment', 'patch', data)
     .then((response) => {
@@ -43,8 +44,9 @@ function initAdminPanel() {
 
   $('.js-set-attachment-flag').on('click', (e) => {
     e.preventDefault();
-    const { name, value } = e.target.attributes;
+    const { name, value } = e.target;
     const setFlags = {};
+    console.log(name, value, e.target);
     setFlags[name] = value === 'true';
     sendSetFlagRequest($form, setFlags);
   });
