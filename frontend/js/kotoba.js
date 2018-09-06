@@ -10,6 +10,7 @@ import { initAdminPanel } from './modules/admin-panel';
 import { localizeTime } from './modules/time';
 import { init as initManage } from './modules/manage';
 import { init as initForms } from './modules/form';
+import { initTabs } from './modules/tabs';
 
 $(() => {
   initExpandImage();
@@ -20,4 +21,5 @@ $(() => {
   localizeTime();
   initManage();
   initForms();
+  initTabs();
 });

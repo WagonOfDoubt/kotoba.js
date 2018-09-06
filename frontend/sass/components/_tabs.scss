@@ -1,0 +1,15 @@
+// https://stackoverflow.com/questions/6867095/css-selector-when-target-empty
+.tabs-container {
+  .tab-content:not(.show) {
+    display: none;
+  }
+
+  .tab-content:target ~ .tab-content:last-child, .tab-content {
+    // display: none;
+  }
+
+  /* :last-child works, but for some reason .tab-content:last-child will not */
+  & > :last-child, .tab-content:target {
+    // display: block;
+  }
+}

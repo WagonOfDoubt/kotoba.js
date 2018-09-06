@@ -9,15 +9,15 @@ block main
   div.tabs-selector.text-center
     span.section-wrapper
       span.link-wrapper
-        a(href='#news') News
+        a.js-select-tab.active(href='#news') News
       span.link-wrapper
-        a(href='#faq') FAQ
+        a.js-select-tab(href='#faq') FAQ
       span.link-wrapper
-        a(href='#rules') Rules
+        a.js-select-tab(href='#rules') Rules
   div.tabs-container
     div#rules.tab-content!= filters.markdown(site.rules)
     div#faq.tab-content!= filters.markdown(site.faq)
-    div#news.tab-content
+    div#news.tab-content.show
       if news
         for n in news
           include includes/newsentry.pug

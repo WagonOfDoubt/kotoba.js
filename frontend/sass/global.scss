@@ -13,6 +13,7 @@ $container-padding: 1.5rem;
 @import './components/modal';
 @import './components/dialog';
 @import './components/admin-panel';
+@import './components/tabs';
 
 $sidebar-width: 20vw;
 
@@ -249,20 +250,6 @@ q {
     content: '';
   }
 }
-
-
-// https://stackoverflow.com/questions/6867095/css-selector-when-target-empty
-.tabs-container {
-  .tab-content:target ~ .tab-content:last-child, .tab-content {
-    display: none;
-  }
-
-  /* :last-child works, but for some reason .tab-content:last-child will not */
-  & > :last-child, .tab-content:target {
-    display: block;
-  }
-}
-
 
 
 // news on front page
