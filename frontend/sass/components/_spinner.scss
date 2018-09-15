@@ -44,15 +44,15 @@
 
 @keyframes color {
   0% {
-    stroke: #70c542;
+    stroke: var(--spinner-color);
   }
   40% {
-    stroke: #70c542;
+    stroke: var(--spinner-color);
   }
   66% {
-    stroke: #70c542;
+    stroke: var(--spinner-color);
   }
   80%, 90% {
-    stroke: #70c542;
+    stroke: var(--spinner-color);
   }
 }

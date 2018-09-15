@@ -2,23 +2,29 @@
   display: none;
   position: sticky;
   bottom: 0;
-  width: 100%;
-  padding: $container-padding;
-  margin-left: -$container-padding;
-  margin-right: -$container-padding;
-  justify-content: space-between;
-}
+  margin-left: var(--container-undo-padding-margin);
+  margin-right: var(--container-undo-padding-margin);
 
+  .tabs-selector {
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
 
-.column {
-  display: flex;
-  flex-direction: column;
-}
+  .tabs-container {
+    padding: var(--container-padding);
+    border-top: 1px solid var(--border-color);
+    background-color: var(--background-color);
+  }
 
-
-body.show-admin-panel {
-  .admin-panel {
+  .tab-content {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
 }
 
+body.show-admin-panel {
+  .admin-panel {
+    display: block;
+  }
+}

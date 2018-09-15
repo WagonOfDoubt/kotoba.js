@@ -13,3 +13,37 @@
     // display: block;
   }
 }
+
+.tabs-selector {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0;
+
+  li {
+    list-style: none;
+    margin-top: 0;
+    margin-bottom: -2px;
+    margin-left: -1px;
+    margin-right: 0;
+  }
+
+  a {
+    display: block;
+    padding: var(--tab-padding);
+    border: 1px solid var(--border-color);
+    border-top-left-radius: var(--tab-border-radius);
+    border-top-right-radius: var(--tab-border-radius);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--background-color);
+  }
+
+  a.active, a.active:hover {
+    color: var(--text-color);
+    text-decoration: none;
+    background: var(--background-color);
+    border-bottom: none;
+  }
+}
+

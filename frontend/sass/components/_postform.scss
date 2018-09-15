@@ -11,14 +11,16 @@
   }
 
   input[type="text"], input[type="password"], textarea {
-    border: 1px solid #AAA;
+    border: 1px solid var(--input-border-color);
+    color: var(--input-text-color);
+    background: var(--input-background);
   }
 }
 
 .postarea {
   text-align: center;
-  border-top:1px solid ;
-  border-bottom:1px solid ;
+  border-top:1px solid var(--border-color);
+  border-bottom:1px solid var(--border-color);
   padding-top: 4px;
   padding-bottom: 4px;
   margin-bottom: 4px;

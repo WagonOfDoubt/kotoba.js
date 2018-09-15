@@ -1,22 +1,35 @@
+.reply {
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
+}
+
+.postername {
+  color: var(--name-color);
+}
+
+.thread-container, .postarea {
+  border-color: var(--border-color);
+}
+
+.filetitle {
+  color: var(--subject-color);
+}
+
+.postblock {
+  color: var(--postblock-color);
+  background-color: var(--postblock-background-color);
+}
+
+.omittedposts {
+  color: var(--omitted-posts-color);
+}
+
 .postbody {
   word-wrap: break-word;
 }
 
-/* ShiftJIS-art formatting */
-.code-aa {
-  font-family: 'Mona', 'Ume P Gothic', 'MS PGothic', "ＭＳ Ｐゴシック", sans-serif;
-  display: block;
-  font-size: 12pt;
-  line-height: 1.1;
-  overflow: auto;
-}
-
-.code-multiline, .code-aa {
-  white-space: pre-wrap;
-}
-
 .reply .extrabtns::after {
-  content: '#'counter(thr-cnt);
+  content: var(--post-counter-prefix)counter(thr-cnt);
   counter-increment: thr-cnt 1;
   color: #707070;
   margin-left: 10px;
@@ -33,7 +46,7 @@
   }
 
   &::before {
-    content: '>>';
+    content: var(--post-block-prefix);
     margin-right: 4px;
   }
 }
@@ -105,50 +118,4 @@
   & ~ .omittedposts, & ~ .replies-container {
     display: none;
   }
-}
-
-
-@keyframes rainbold {
-  0% {
-    color: red;
-    text-shadow: -1px 0px orange, -2px 0px yellow, -3px 0px green, -4px 0px blue, -5px 0px indigo, -6px 0px violet;
-  }
-  14% {
-    color: orange;
-    text-shadow: -1px 0px yellow, -2px 0px green, -3px 0px blue, -4px 0px indigo, -5px 0px violet, -6px 0px red;
-  }
-  28% {
-    color: yellow;
-    text-shadow: -1px 0px green, -2px 0px blue, -3px 0px indigo, -4px 0px violet, -5px 0px red, -6px 0px orange;
-  }
-  43% {
-    color: green;
-    text-shadow: -1px 0px blue, -2px 0px indigo, -3px 0px violet, -4px 0px red, -5px 0px orange, -6px 0px yellow;
-  }
-  57% {
-    color: blue;
-    text-shadow: -1px 0px indigo, -2px 0px violet, -3px 0px red, -4px 0px orange, -5px 0px yellow, -6px 0px green;
-  }
-  71% {
-    color: indigo;
-    text-shadow: -1px 0px violet, -2px 0px red, -3px 0px orange, -4px 0px yellow, -5px 0px green, -6px 0px blue;
-  }
-  85% {
-    color: violet;
-    text-shadow: -1px 0px red, -2px 0px orange, -3px 0px yellow, -4px 0px green, -5px 0px blue, -6px 0px indigo;
-  }
-  100% {
-    color: red;
-    text-shadow: -1px 0px orange, -2px 0px yellow, -3px 0px green, -4px 0px blue, -5px 0px indigo, -6px 0px violet;
-  }
-}
-
-
-.cow {
-  animation: rainbold 1s linear infinite;
-  color: red;
-  font-size: 1.5em;
-  letter-spacing: 0.33em;
-  margin-left: 6px;
-  text-shadow: -1px 0px orange, -2px 0px yellow, -3px 0px green, -4px 0px blue, -5px 0px indigo, -6px 0px violet;
 }

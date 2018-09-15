@@ -1,11 +1,59 @@
-$container-padding: 1.5rem;
+:root {
+  --background-color: #FFFFEE;
+  --border-color: #D0AB65;
+  --primary-color: #FFECB2;
+  --secondary-color: #F9E0A8;
+  --tab-border-radius: 5px;
+  --text-color: #090E00;
+  --header-color: #800000;
+  --name-color: #310000;
+  --subject-color: #CC1105;
+  --quote-color: #789922;
+  --omitted-posts-color: #707070;
+  --postblock-color: #403C0F;
+  --postblock-background-color: #F1C984;
+  --link-color: #DD0000;
+  --link-color-hover: #0000EE;
+  --spoiler-color: #000;
+  --spoiler-bg: #000;
+  --spoiler-open-color: #fff;
+  --spoiler-open-bg: #000;
+  --page-title-color: #FFFFFF;
+  --page-title-background-color: #D0AB65;  
+  --input-border-color: #aaaaaa;
+  --input-text-color: inherit;
+  --input-background: inherit;
 
+  --tab-padding: 5px;
+  --container-padding: 1.5rem;
+  --container-undo-padding-margin: -1.5rem;
+  --sidebar-width: 20vw;
+  --post-block-prefix: '>>';
+  --post-counter-prefix: '#';
+  --adminbar-spacing: .3rem;
+
+  --modal-dialog-margin: 40px;
+  --modal-footer-border-width: 1px;
+  --modal-footer-border-color: #e9ecef;
+  --modal-header-border-width: 1px;
+  --modal-header-border-color: #e9ecef;
+  --modal-content-border-width: 1px;
+  --modal-content-border-color: #e9ecef;
+  --modal-header-padding: 1rem;
+  --modal-inner-padding: 1rem;
+  --modal-border-radius: 5px;
+
+  --spinner-color: #70c542;
+}
+
+
+@import './components/layout';
 @import './components/fonts.scss';
-@import './components/img_global';
 @import './components/icons';
 @import './components/attachments';
 @import './components/media_print';
 @import './components/posts';
+@import './components/formatting';
 @import './components/postform';
 @import './components/spinner';
 @import './components/catalog';
@@ -15,31 +63,65 @@ $container-padding: 1.5rem;
 @import './components/admin-panel';
 @import './components/tabs';
 
-$sidebar-width: 20vw;
-
-body {
-  font-family: sans-serif;
-  box-sizing: border-box;
-  min-height: 100vh;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: auto 1fr auto;
-  grid-template-areas:
-    "header"
-    "main"
-    "footer";
+.reflink a {
+  color: inherit;
+  text-decoration: none;
 }
 
-body.layout-sidebar {
-  grid-template-columns: $sidebar-width 1fr;
-  grid-template-areas:
-    "sidebar header"
-    "sidebar main"
-    "sidebar footer";
-  header, footer, main {
-    padding: 0 $container-padding;
+.reflink a:hover {
+  color: #800000;
+}
+
+
+body {
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+aside {
+  border-color: var(--border-color);
+  background-color: var(--background-color);
+}
+
+a {
+  color: var(--link-color);
+  outline: none !important;
+
+  &:hover {
+    color: var(--link-color-hover);
   }
+}
+
+h1, h2, h3, h4, h5, th {
+  color: var(--header-color);
+}
+
+
+table.table {
+  thead tr {
+    border-color: var(--border-color);
+  }
+
+  tbody tr, tfoot tr {
+    border-color: var(--border-color);
+  }
+}
+
+.news-header {
+  background: var(--border-color);
+}
+
+.catalog-thread-stats {
+  color: var(--omitted-posts-color);
+}
+
+.catalog-thread-subject {
+  color: var(--subject-color);
+}
+
+.replymode, .catalog-mode, .page-title {
+  background: var(--page-title-background-color);
+  color: var(--page-title-color);
 }
 
 .board-header {
@@ -50,22 +132,10 @@ body.layout-sidebar {
   }
 }
 
-
 .nothreads {
   font-size: 5em;
   text-align: center;
   opacity: 0.5;
-}
-
-aside {
-  grid-area: sidebar;
-  position: fixed;
-  width: $sidebar-width;
-  height: 100vh;
-  overflow: auto;
-  box-sizing: border-box;
-  padding: 0.5rem;
-  // box-shadow: 0 0 5px 2px rgba(0,0,0,0.5)
 }
 
 .list-group {
@@ -80,10 +150,6 @@ aside {
   border: 1px solid transparent;
 }
 
-main {
-  grid-area: main;
-}
-
 .logo {
   display: block;
   text-align: center;
@@ -91,24 +157,6 @@ main {
   img {
     max-width: 100%;
   }
-}
-
-header {
-  grid-area: header;
-}
-
-footer {
-  grid-area: footer;
-}
-
-main, footer, header {
-  padding: 1vh 1vw;
-}
-
-aside {
-  border-right: 1px solid transparent;
-  overflow-x: hidden;
-  overflow-y: scroll;
 }
 
 table.table {
@@ -169,9 +217,6 @@ table.table {
   margin-bottom: 1rem;
   border: 1px solid transparent;
   border-radius: .25rem;
-}
-
-.error {
   color: #721c24;
   background-color: #f8d7da;
   border-color: #f5c6cb;
@@ -184,7 +229,7 @@ table.table {
 }
 
 .thread-container {
-  border-bottom: 1px solid;
+  border-bottom: 1px solid var(--border-color);
   padding: 5px 0 15px 0;
   overflow: hidden;  // zalgo protection
 
@@ -262,4 +307,11 @@ q {
   }
 
   margin: 1rem 3rem;
+}
+
+
+.userdelete {
+  float: right;
+  text-align: center;
+  white-space: nowrap;
 }
