@@ -36,6 +36,7 @@
     "watchify": "^3.11.0"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
     "dialog-polyfill": "^0.4.10",
     "jquery": "^3.2.1",
     "jquery-serializejson": "^2.8.1",
