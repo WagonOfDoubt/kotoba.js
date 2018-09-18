@@ -31,7 +31,7 @@ mixin attachment(attachment, post)
       data-thumb-width=attachment.thumbWidth
       data-thumb-height=attachment.thumbHeight
     )
-      input.checkbox-hidden.admin-form-checkbox.js-select-attachment(type='checkbox', name='attachments[]', value=attachment._id)
+      input.checkbox-hidden.js-select-attachment(type='checkbox', name='attachments[]', value=attachment._id)
       div.thumb-container
         +thumbnail(attachment)
       if attachment.duration

@@ -286,6 +286,10 @@ table.table {
   text-align: right;
 }
 
+.flex-center {
+  justify-content: center;
+}
+
 .hidden {
   display: none;
 }
@@ -311,7 +315,6 @@ q {
 
 
 .userdelete {
-  float: right;
-  text-align: center;
+  text-align: right;
   white-space: nowrap;
 }

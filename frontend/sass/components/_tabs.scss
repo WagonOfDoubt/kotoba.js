@@ -1,43 +1,12 @@
-// https://stackoverflow.com/questions/6867095/css-selector-when-target-empty
-.tabs-container {
-  .tab-content:not(.show) {
-    display: none;
-  }
-
-  .tab-content:target ~ .tab-content:last-child, .tab-content {
-    // display: none;
-  }
-
-  /* :last-child works, but for some reason .tab-content:last-child will not */
-  & > :last-child, .tab-content:target {
-    // display: block;
-  }
+.tabs__content:not(.show) {
+  display: none;
 }
 
-.tabs-selector {
+.tab-menu {
   display: flex;
   flex-direction: row;
   margin: 0;
   padding: 0;
-
-  li {
-    list-style: none;
-    margin-top: 0;
-    margin-bottom: -2px;
-    margin-left: -1px;
-    margin-right: 0;
-  }
-
-  a {
-    display: block;
-    padding: var(--tab-padding);
-    border: 1px solid var(--border-color);
-    border-top-left-radius: var(--tab-border-radius);
-    border-top-right-radius: var(--tab-border-radius);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    background: var(--background-color);
-  }
 
   a.active, a.active:hover {
     color: var(--text-color);
@@ -47,3 +16,21 @@
   }
 }
 
+.tab-menu__item {
+  list-style: none;
+  margin-top: 0;
+  margin-bottom: -2px;
+  margin-left: -1px;
+  margin-right: 0;
+}
+
+.tab-menu__item-link {
+  display: block;
+  padding: var(--tab-padding);
+  border: 1px solid var(--border-color);
+  border-top-left-radius: var(--tab-border-radius);
+  border-top-right-radius: var(--tab-border-radius);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: var(--background-color);
+}

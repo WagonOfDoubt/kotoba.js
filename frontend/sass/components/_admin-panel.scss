@@ -1,30 +1,25 @@
 .admin-panel {
   display: none;
+  &.show {
+    display: block;
+  }
+
   position: sticky;
   bottom: 0;
   margin-left: var(--container-undo-padding-margin);
   margin-right: var(--container-undo-padding-margin);
 
-  .tabs-selector {
+  .tab-menu {
     padding-left: var(--container-padding);
     padding-right: var(--container-padding);
   }
 
-  .tabs-container {
+  .tabs__content {
     padding: var(--container-padding);
     border-top: 1px solid var(--border-color);
     background-color: var(--background-color);
-  }
-
-  .tab-content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-  }
-}
-
-body.show-admin-panel {
-  .admin-panel {
-    display: block;
   }
 }

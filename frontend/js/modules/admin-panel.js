@@ -4,15 +4,26 @@ import * as modal from './modal';
 import { serializeForm, alertErrorHandler, sendJSON, createTable, fetchChanges,
   fetchPreivew } from '../utils/api-utils';
 import { closeAllVideos, minimizeAllImages } from './attachment-viewer';
+import { selectTab } from './tabs';
 
 
 const checkAdminForm = ($form) => {
-  const itemsSelected = $form.has('.admin-form-checkbox:checked').length;
-  const hasSelected = !!itemsSelected;
-  const $adminPanel = $form.find('.admin-panel');
-  console.log(itemsSelected, hasSelected, $adminPanel);
-  $('body').toggleClass('show-admin-panel', hasSelected);
-
+  const postsSelected = !!$form.has('input[name="posts[]"]:checked').length;
+  const attachmentsSelected = !!$form.has('input[name="attachments[]"]:checked').length;
+  const hasSelected = postsSelected || attachmentsSelected;
+  const adminPanel = document.querySelector('.admin-panel');
+  if (adminPanel) {
+    adminPanel.classList.toggle('show', hasSelected);
+    const postsTab = adminPanel.querySelector('.admin-panel__item_posts');
+    const attachmentsTab = adminPanel.querySelector('.admin-panel__item_attachments');
+    postsTab.classList.toggle('hidden', !postsSelected);
+    attachmentsTab.classList.toggle('hidden', !attachmentsSelected);
+    if (attachmentsSelected) {
+      selectTab('#admin-panel__tab_attachments')
+    } else if (postsSelected) {
+      selectTab('#admin-panel__tab_posts');
+    }
+  }
 };
 
 
@@ -36,12 +47,6 @@ function initAdminPanel() {
   const $form = $('.admin-form, #delform');
 
   // add events
-  $('.admin-form, #delform')
-    .on('change input', (e) => {
-      checkAdminForm($form);
-      e.preventDefault();
-    });
-
   $('.js-set-attachment-flag').on('click', (e) => {
     e.preventDefault();
     const { name, value } = e.target;
@@ -53,14 +58,20 @@ function initAdminPanel() {
 
   $('.js-select-all-items').on('click', (e) => {
     e.preventDefault();
-    $form.find('.admin-form-checkbox').prop('checked', true);
-    checkAdminForm($form);
+    const { target } = e.target.dataset;
+    $form
+      .find(target)
+      .prop('checked', true)
+      .trigger('change');
   });
 
   $('.js-deselect-all-items').on('click', (e) => {
     e.preventDefault();
-    $form.find('.admin-form-checkbox').prop('checked', false);
-    checkAdminForm($form);
+    const { target } = e.target.dataset;
+    $form
+      .find(target)
+      .prop('checked', false)
+      .trigger('change');
   });
 
   $('.js-select-post').on('change', (e) => {
@@ -73,6 +84,7 @@ function initAdminPanel() {
       $(post).find('.js-select-attachment').prop('checked', false).change();
     }
     closeAllVideos(post);
+    checkAdminForm($form);
   });
 
   $('.js-select-attachment').on('change', (e) => {
@@ -81,6 +93,7 @@ function initAdminPanel() {
     if (attachment) {
       attachment.classList.toggle('selected', checkbox.checked);
     }
+    checkAdminForm($form);
   });
 
   // initial set on page load
@@ -91,8 +104,8 @@ function initAdminPanel() {
       .filter(attachment => attachment)
       .map(attachment => attachment.classList.add(className));
 
-  addClassToClosestParent('.js-select-post:checked', '.post', 'selected');
-  addClassToClosestParent('.js-select-attachment:checked', '.attachment', 'selected');
+  addClassToClosestParent('input[name="posts[]"]:checked', '.post', 'selected');
+  addClassToClosestParent('input[name="attachments[]"]:checked', '.attachment', 'selected');
   checkAdminForm($form);
 }
 

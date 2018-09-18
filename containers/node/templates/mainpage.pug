@@ -6,7 +6,7 @@ block header
     em= site.slogan
 
 block main
-  div.tabs-selector.text-center
+  nav.tab-menu.flex-center
     span.section-wrapper
       span.link-wrapper
         a.js-select-tab.active(href='#news') News
@@ -14,13 +14,12 @@ block main
         a.js-select-tab(href='#faq') FAQ
       span.link-wrapper
         a.js-select-tab(href='#rules') Rules
-  div.tabs-container
-    div#rules.tab-content!= filters.markdown(site.rules)
-    div#faq.tab-content!= filters.markdown(site.faq)
-    div#news.tab-content.show
-      if news
-        for n in news
-          include includes/newsentry.pug
+  div#rules.tabs__content!= filters.markdown(site.rules)
+  div#faq.tabs__content!= filters.markdown(site.faq)
+  div#news.tabs__content.show
+    if news
+      for n in news
+        include includes/newsentry.pug
 
   //- debug data
   //- pre= JSON.stringify(site, null, 2)
