@@ -16,6 +16,7 @@ const previewRouter = require('./routes/preview');
 const apiBoardRouter = require('./api/board');
 const apiNewsRouter = require('./api/news');
 const apiUserRouter = require('./api/user');
+const apiPostRouter = require('./api/post');
 const apiAttachmentRouter = require('./api/attachment');
 const apiSettingsRouter = require('./api/settings');
 const apiMaintenanceRouter = require('./api/maintenance');
@@ -37,7 +38,7 @@ const dbConn = `mongodb://${ dbAuth }${ dbHost }:${ dbPort }/${ dbName }`;
 mongoose.Promise = global.Promise;
 mongoose.set('debug', true)
 mongoose
-  .connect(dbConn, { useMongoClient: true })
+  .connect(dbConn, {})
   .then(() => {
     console.log(`Connected to database ${ dbName }`);
     const admin = new mongoose.mongo.Admin(mongoose.connection.db);
@@ -82,6 +83,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(formRouter);
 app.use(apiBoardRouter);
 app.use(apiNewsRouter);
+app.use(apiPostRouter);
 app.use(apiUserRouter);
 app.use(apiAttachmentRouter);
 app.use(apiSettingsRouter);

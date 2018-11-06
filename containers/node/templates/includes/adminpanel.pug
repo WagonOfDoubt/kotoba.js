@@ -2,24 +2,37 @@ div.admin-panel
   ul.tab-menu
     li.tab-menu__item.admin-panel__item_posts
       a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_posts') Posts
+    li.tab-menu__item.admin-panel__item_threads
+      a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_threads') Threads
     li.tab-menu__item.admin-panel__item_attachments
       a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_attachments') Attachments
   //- post tab
   div#admin-panel__tab_posts.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.js-select-post') Select All
-      button.js-deselect-all-items(type='button', data-target='.js-select-post, .js-select-attachment') Deselect All
+      button.js-select-all-items(type='button', data-target='.js-select-post') Select all posts
+      button.js-deselect-all-items(type='button', data-target='.js-select-post, .js-select-attachment') Deselect all
     div.column
       button.js-set-post-flag(type='submit', name='isDeleted', value='true') Delete
       button.js-set-post-flag(type='submit', name='isDeleted', value='false') Restore
     div.column
       button.js-set-post-flag(type='submit', name='isApproved', value='true') Set Approved
       button.js-set-post-flag(type='submit', name='isApproved', value='false') Unset Approved
+  //- thread tab
+  div#admin-panel__tab_threads.tabs__content
+    div.column
+      button.js-select-all-items(type='button', data-target='.oppost .js-select-post') Select all threads
+      button.js-deselect-all-items(type='button', data-target='.oppost .js-select-post, .js-select-attachment') Deselect all threads
+    div.column
+      button.js-set-post-flag(type='submit', name='isSticky', value='true') Set Sticky
+      button.js-set-post-flag(type='submit', name='isSticky', value='false') Unset Sticky
+    div.column
+      button.js-set-post-flag(type='submit', name='isClosed', value='true') Close Thread
+      button.js-set-post-flag(type='submit', name='isClosed', value='false') Unclose Thread
   //- attachment tab
   div#admin-panel__tab_attachments.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.js-select-attachment') Select All
-      button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect All
+      button.js-select-all-items(type='button', data-target='.js-select-attachment') Select all
+      button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect all attachments
     div.column
       button.js-set-attachment-flag(type='submit', name='isDeleted', value='true') Delete
       button.js-set-attachment-flag(type='submit', name='isDeleted', value='false') Restore

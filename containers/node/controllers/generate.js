@@ -101,7 +101,7 @@ const generateThreadPreview = async (thread) => {
   const showReplies = thread.isSticky
     ? board.showRepliesSticky
     : board.showReplies;
-  const children = thread.children;
+  const children = thread.children.filter((c) => !c.isDeleted);
   const omitted = children.slice(0, children.length - showReplies);
   const omittedPosts = omitted.length;
   const omittedAttachments = omitted.length

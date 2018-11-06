@@ -1,8 +1,17 @@
 mixin datetime(timestamp)
-  time.datetime(datetime=timestamp.toJSON())= timestamp.toLocaleString()
+  if timestamp
+    time.datetime(datetime=timestamp.toJSON())= timestamp.toLocaleString()
+  else
+    span.error Error: no timestamp
 
 mixin date(timestamp)
-  time.date(datetime=timestamp.toJSON())= timestamp.toLocaleDateString()
+  if timestamp
+    time.date(datetime=timestamp.toJSON())= timestamp.toLocaleDateString()
+  else
+    span.error Error: no timestamp
 
 mixin time(timestamp)
-  time.date(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()
+  if timestamp
+    time.date(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()
+  else
+    span.error Error: no timestamp

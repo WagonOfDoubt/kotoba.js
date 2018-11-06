@@ -70,6 +70,14 @@ boardSchema.statics.defaults = () => {
   return schemaUtils.getDefaults(boardSchema.obj);
 };
 
+/**
+ * Find boards by mongo document _id.
+ * @param {Array<ObjectId>} ids - Array of ObjectId.
+ */
+boardSchema.statics.findBoardsByIds = (ids) => {
+  return Board.find({ _id: { $in: ids } });
+};
+
 boardSchema.statics.findBoards = (boardUri, inclHidden = true) => {
   const q = {};
   if (!inclHidden) {

@@ -43,58 +43,58 @@ const reflinkSchema = Schema({
 
 const postSchema = Schema({
   /* primary key for post, autoincrement, unique for each board */
-  postId: {
+  postId: {                                               // generated
     type: Int32,
     index: true,
     default: 1,
     min: 1,
   },
   /* postId of parent thread on same board (if this post not OP) */
-  threadId: { type: Int32 },
+  threadId: { type: Int32 },                               // filled by poster
   /* board string */
-  boardUri:            { type: String, required: true },
+  boardUri:            { type: String, required: true },   // filled by poster
   /* ref to board */
-  board: {
+  board: {                                                 // generated
     type: ObjectId,
     required: true,
     ref: 'Board'
   },
   /* ref to parent thread (if this post is not OP) */
-  parent: {
+  parent: {                                                // generated (not OP)
     type: ObjectId,
     ref: 'Post'
   },
   /* refs to child posts (if this post is OP) */
-  children: [{
+  children: [{                                             // generated (OP only)
     type: ObjectId,
     ref: 'Post'
   }],
-  timestamp:           { type: Date, default: Date.now },
-  bumped:              { type: Date, default: Date.now },
-  name:                { type: String, default: '' },
-  tripcode:            { type: String, default: '' },
-  email:               { type: String, default: '' },
-  subject:             { type: String, default: '' },
+  timestamp:           { type: Date, default: Date.now },  // generated
+  bumped:              { type: Date, default: Date.now },  // generated (OP only)
+  name:                { type: String, default: '' },      // filled by poster
+  tripcode:            { type: String, default: '' },      // filled by poster
+  email:               { type: String, default: '' },      // filled by poster
+  subject:             { type: String, default: '' },      // filled by poster
   /* unparsed post body as it was sent by user */
-  body:                { type: String, default: '' },
+  body:                { type: String, default: '' },      // filled by poster
   /* parsed post body as HTML, ready for template */
-  rawHtml:             { type: String, default: '' },
+  rawHtml:             { type: String, default: '' },      // generated
   /* parsed post body with token objects to maintain references */
-  parsed:              [ ],
-  replies:             [ reflinkSchema ],
-  references:          [ reflinkSchema ],
-  attachments:         [ attachmentSchema ],
-  isOp:                { type: Boolean, default: false },
+  parsed:              [ ],                                // generated
+  replies:             [ reflinkSchema ],                  // generated
+  references:          [ reflinkSchema ],                  // generated
+  attachments:         [ attachmentSchema ],               // filled by poster
+  isOp:                { type: Boolean, default: false },  // can be changed by mod when merging threads
   // op only
-  isSticky:            { type: Boolean, default: false },
-  isClosed:            { type: Boolean, default: false },
+  isSticky:            { type: Boolean, default: false },  // can be changed by mod
+  isClosed:            { type: Boolean, default: false },  // can be changed by mod
   // replies only
-  isSage:              { type: Boolean, default: false },
-  // private fields for administrator eyes only
-  ip:                  { type: String, required: true },
-  password:            { type: String, default: '' },
-  isApproved:          { type: Boolean, default: true },
-  isDeleted:           { type: Boolean, default: false }
+  isSage:              { type: Boolean, default: false },  // filled by poster
+  // private fields
+  ip:                  { type: String, required: true },   // immutable
+  password:            { type: String, default: '' },      // immutable
+  isApproved:          { type: Boolean, default: true },   // can be changed by mod
+  isDeleted:           { type: Boolean, default: false }   // can be changed by mod
 });
 
 
@@ -159,6 +159,11 @@ postSchema.statics.findRefs = (postsQueryList) => {
 
 const cachedUniqueUserPosts = {};
 
+/**
+ * Get number of qnique ip addresses of posters on a board.
+ * @param {String} boardUri
+ * @returns {Number} Number of unique ip addresses of posters on given board.
+ */
 postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
   if (cachedUniqueUserPosts.hasOwnProperty(boardUri)) {
     return cachedUniqueUserPosts[boardUri];
@@ -182,11 +187,46 @@ postSchema.pre('save', function(next) {
 });
 
 
+/**
+ * Find all threads that match any query filter document in an array.
+ * Typical usage is to find threads by boardUri and postId.
+ * @param {Array<Object>} array - Array of mongo query filter documents.
+ */
 postSchema.statics.findThreads = (array) => {
   return Post.find({ $or: array, isOp: true });
 };
 
+/**
+ * Find all posts that match any query filter document in an array.
+ * Typical usage is to find posts by boardUri and postId.
+ * @param {Array<Object>} array - Array of mongo query filter documents.
+ */
+postSchema.statics.findPosts = (array) => {
+  return Post.find({ $or: array });
+};
 
+
+/**
+ * Find posts by mongo document _id.
+ * @param {Array<ObjectId>} ids - Array of ObjectId.
+ */
+postSchema.statics.findPostsByIds = (ids) => {
+  return Post.find({ _id: { $in: ids } });
+}
+
+/**
+ * Find threads by mongo document _id.
+ * @param {Array<ObjectId>} ids - Array of ObjectId.
+ */
+postSchema.statics.findThreadsByIds = (ids) => {
+  return Post.find({ _id: { $in: ids }, isOp: true });
+}
+
+/**
+ * Find one thread by it's boardUri and postId.
+ * @param {String} boardUri
+ * @param {Number} postId
+ */
 postSchema.statics.findThread = (boardUri, postId) => {
   return Post.findOne({
     boardUri: boardUri,
@@ -195,7 +235,11 @@ postSchema.statics.findThread = (boardUri, postId) => {
   });
 };
 
-
+/**
+ * Find one post by it's boardUri and postId.
+ * @param {String} boardUri
+ * @param {Number} postId
+ */
 postSchema.statics.findPost = (boardUri, postId) => {
   const q = {
     isApproved: true,
@@ -227,11 +271,19 @@ postSchema.statics.findPost = (boardUri, postId) => {
 };
 
 
+/**
+ * Find one post by it's boardUri and postId.
+ * @param {String} boardUri
+ * @param {Object} board - board mongoose document. It must have uri, maxPages
+ * and maxThreadsOnPage fields.
+ * @returns {Array<Object>} Array of mongoose documents.
+ */
 postSchema.statics.getSortedThreads = (board) =>
   Post
     .find({
       boardUri: board.uri,
-      parent: { $exists: false }
+      parent: { $exists: false },
+      isDeleted: false
     })
     .sort({ isSticky: -1, bumped: -1})
     .limit(board.maxPages * board.maxThreadsOnPage);

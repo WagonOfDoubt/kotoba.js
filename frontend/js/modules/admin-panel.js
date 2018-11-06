@@ -9,17 +9,22 @@ import { selectTab } from './tabs';
 
 const checkAdminForm = ($form) => {
   const postsSelected = !!$form.has('input[name="posts[]"]:checked').length;
+  const threadsSelected = !!$form.has('.oppost input[name="posts[]"]:checked').length;
   const attachmentsSelected = !!$form.has('input[name="attachments[]"]:checked').length;
   const hasSelected = postsSelected || attachmentsSelected;
   const adminPanel = document.querySelector('.admin-panel');
   if (adminPanel) {
     adminPanel.classList.toggle('show', hasSelected);
     const postsTab = adminPanel.querySelector('.admin-panel__item_posts');
+    const threadsTab = adminPanel.querySelector('.admin-panel__item_threads');
     const attachmentsTab = adminPanel.querySelector('.admin-panel__item_attachments');
     postsTab.classList.toggle('hidden', !postsSelected);
+    threadsTab.classList.toggle('hidden', !threadsSelected);
     attachmentsTab.classList.toggle('hidden', !attachmentsSelected);
     if (attachmentsSelected) {
       selectTab('#admin-panel__tab_attachments')
+    } else if (threadsSelected) {
+      selectTab('#admin-panel__tab_threads');
     } else if (postsSelected) {
       selectTab('#admin-panel__tab_posts');
     }
@@ -27,14 +32,15 @@ const checkAdminForm = ($form) => {
 };
 
 
-const sendSetFlagRequest = ($form, setFlags) => {
-  const data = $form.serializeJSON();
+const sendSetFlagRequest = (url, data, setFlags) => {
   const { attachments } = data;
   data.set = setFlags;
+  data.regenerate = true;
   console.log(data);
   modal.wait();
-  sendJSON('/api/attachment', 'patch', data)
+  sendJSON(url, 'patch', data)
     .then((response) => {
+      console.log(response);
       modal
         .alert('Success', `Flags ${ JSON.stringify(setFlags) } has been set.`)
         .finally(() => window.location.reload());
@@ -46,15 +52,20 @@ const sendSetFlagRequest = ($form, setFlags) => {
 function initAdminPanel() {
   const $form = $('.admin-form, #delform');
 
-  // add events
-  $('.js-set-attachment-flag').on('click', (e) => {
+  const onSetFlagBtn = (url, e) => {
     e.preventDefault();
     const { name, value } = e.target;
     const setFlags = {};
     console.log(name, value, e.target);
     setFlags[name] = value === 'true';
-    sendSetFlagRequest($form, setFlags);
-  });
+    const data = $form.serializeJSON();
+    sendSetFlagRequest(url, data, setFlags);
+  };
+
+  // add events
+  $('.js-set-attachment-flag').on('click', (e) => onSetFlagBtn('/api/attachment', e));
+  $('.js-set-post-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
+  $('.js-set-thread-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
 
   $('.js-select-all-items').on('click', (e) => {
     e.preventDefault();
