@@ -31,6 +31,28 @@ const checkAdminForm = ($form) => {
   }
 };
 
+const renderReflink = (reflink) => {
+  return `<a>&gt;&gt;/${ reflink.boardUri }/${ reflink.postId }</a>`;
+};
+
+
+const readableResponseReport = (response) => {
+  let report = 'Done.<br>';
+  if (response.success && response.success.length) {
+    const allSuccessReflinks = response.success
+      .map((itm) => renderReflink(itm.ref))
+      .join(', ');
+    report += `Following items was successfully changed: ${allSuccessReflinks}<br>`;
+  }
+  if (response.fail && response.fail.length) {
+    const allFailReflinks = response.fail
+      .map((itm) => `${ renderReflink(itm.ref) } (${ itm.reason })`)
+      .join(', ');
+    report += `Following items was not changed: ${allFailReflinks}<br>`;
+  }
+  return report;
+};
+
 
 const sendSetFlagRequest = (url, data, setFlags) => {
   const { attachments } = data;
@@ -42,7 +64,7 @@ const sendSetFlagRequest = (url, data, setFlags) => {
     .then((response) => {
       console.log(response);
       modal
-        .alert('Success', `Flags ${ JSON.stringify(setFlags) } has been set.`)
+        .alert('Success', readableResponseReport(response))
         .finally(() => window.location.reload());
     })
     .catch(alertErrorHandler);

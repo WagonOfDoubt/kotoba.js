@@ -138,8 +138,27 @@ postSchema.pre('save', async function(next) {
 });
 
 
+/**
+ * Compares this post's password hash with supplied password.
+ * @param {String} password - raw, unencripted password
+ * @returns {boolean} true, if password is correct
+ */
 postSchema.methods.checkPassword = async function(password) {
   return await bcrypt.compare(password, this.password);
+};
+
+
+/**
+ * @returns {Object} Reflink to this post
+ */
+postSchema.methods.toReflink = function() {
+  return {
+    src: this._id,
+    boardUri: this.boardUri,
+    postId: this.postId,
+    threadId: this.threadId,
+    isOp: this.isOp,
+  };
 };
 
 
@@ -297,7 +316,6 @@ postSchema.virtual('numberOfAttachmentsInThread').get(function () {
     return acc + (child.attachments ? child.attachments.length : 0);
   }, 0);
 });
-
 
 
 const Post = module.exports = mongoose.model('Post', postSchema);
