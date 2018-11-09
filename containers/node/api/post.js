@@ -6,21 +6,18 @@ const _ = require('lodash');
 const Post = require('../models/post');
 const middlewares = require('../utils/middlewares');
 const { postEditPermission } = require('../middlewares/permission');
+const sanitizer = require('../middlewares/sanitizer');
 const { updatePosts } = require('../controllers/posting');
 
-const filterSetObj = (req, res, next) => {
-  // boolean fields of Post mongo document that can be changed by this api
-  const flags = ['isSticky', 'isClosed', 'isSage', 'isApproved', 'isDeleted'];
-  req.body.set = _.pick(req.body.set, flags);
-  next();
-};
+const flags = ['isSticky', 'isClosed', 'isSage', 'isApproved', 'isDeleted'];
 
 router.patch(
   '/api/post',
   [
     body('posts').exists(),
-    body('set').exists(),
-    filterSetObj,
+    body('set')
+      .exists()
+      .customSanitizer(sanitizer.pick(flags)),
     body('regenerate').toBoolean(),
     middlewares.validateRequest,
     middlewares.parsePostIds,

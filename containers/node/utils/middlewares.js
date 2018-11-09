@@ -1,6 +1,3 @@
-const express = require('express');
-const router = express.Router();
-
 const filters = require('../utils/filters');
 const config = require('../config.json');
 const pkg = require('../package.json');

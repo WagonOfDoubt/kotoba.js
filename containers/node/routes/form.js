@@ -18,7 +18,7 @@ router.post('/form/post', [
     body('replythread').toInt(),
     body('email').isEmpty(),
     body('name').isLength({ max: 75 }),
-    body('em').normalizeEmail(),
+    // body('em').normalizeEmail(),
     body('captcha').trim(),
     body('subject').isLength({ max: 75 }),
     body('message').trim(),
