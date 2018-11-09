@@ -7,6 +7,8 @@ const upload = multer();
 const { createThread, createReply, deletePosts } = require('../controllers/posting.js');
 const middlewares = require('../utils/middlewares');
 const Post = require('../models/post');
+const { postEditPermission } = require('../middlewares/permission');
+const { updatePosts } = require('../controllers/posting');
 
 
 router.post('/form/post', [
@@ -71,32 +73,30 @@ router.post('/form/post', [
 router.post('/form/delpost', [
     body('posts').exists(),
     body('postpassword').exists(),
-    middlewares.validateRequest
+    middlewares.validateRequest,
+    middlewares.parsePostIds,
+    middlewares.findPosts,
+    // filters req.body.posts so only posts that can be changed by current user
+    // are present
+    postEditPermission,
   ],
   async (req, res, next) => {
     try {
-      const password = req.body.postpassword;
-      const postsQuery = req.body.posts
-        .map(boardAndNumber => {
-          const [_, boardUri, postId] = boardAndNumber.split('-');
-          return { boardUri: boardUri, postId: parseInt(postId) };
-        });
-      if (postsQuery.length === 0) {
-        throw new Error('Error: No posts selected.');
+      const status = {
+        success: res.locals.permissionGranted,
+        fail: res.locals.permissionDenied,
+      };
+      const fileonly = req.body.fileonly === 'on';
+      const { posts } = req.body;
+
+      if (!fileonly) {
+        const mongoResponse = updatePosts(posts, { isDeleted: true }, true);
+        status.mongo = mongoResponse;
+      } else {
+        // TODO attachment deletion
       }
-      const selectedPosts = await Post.find({ $or: postsQuery });
-      if (selectedPosts.length === 0) {
-        throw new Error('Error: None of selected posts exists.');
-      }
-      const mathcedPasswords = await Promise.all(
-        selectedPosts.map(post => post.checkPassword(password)));
-      const postsToDelete = selectedPosts
-        .filter((_, index) => mathcedPasswords[index]);
-      if (postsToDelete.length === 0) {
-        throw new Error('Error: Incorrect password for deletion.');
-      }
-      const delResult = await deletePosts(postsToDelete);
-      req.flash('deletion', delResult);
+
+      req.flash('deletion', status);
       res.redirect('back');
     } catch (error) {
       next(error);

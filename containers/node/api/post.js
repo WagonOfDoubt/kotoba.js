@@ -1,16 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { oneOf, body, param, validationResult } = require('express-validator/check');
-const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
+const { body } = require('express-validator/check');
 const _ = require('lodash');
 
 const Post = require('../models/post');
-const Board = require('../models/board');
 const middlewares = require('../utils/middlewares');
 const { postEditPermission } = require('../middlewares/permission');
-const { generateThreads, generateBoards } = require('../controllers/generate');
+const { updatePosts } = require('../controllers/posting');
 
 const filterSetObj = (req, res, next) => {
   // boolean fields of Post mongo document that can be changed by this api
@@ -41,39 +37,8 @@ router.patch(
       };
       const { posts, set, regenerate } = req.body;
 
-      if (!posts.length) {
-        res.json(status);
-        return;
-      }
-
-      const selectQuery = { $or: posts.map(_.partialRight(_.pick, ['_id'])) };
-      const updateQuery = { $set: set };
-      const mongoResponse = await Post.updateMany(selectQuery, updateQuery);
+      const mongoResponse = updatePosts(posts, set, regenerate);
       status.mongo = mongoResponse;
-      if (regenerate) {
-        const replies = posts.filter(r => !r.isOp);
-        const threads = posts.filter(t => t.isOp);
-
-        const threadsAffected = _.unionBy(
-          replies.map(_.property('parent')),
-          threads.map(_.property('_id')),
-          String);
-
-        const boardsAffected = _.uniqBy(
-          posts.map(_.property('board')),
-          String);
-
-        await Promise
-          .all([
-            Post.findThreadsByIds(threadsAffected).populate('children'),
-            Board.findBoardsByIds(boardsAffected)
-          ])
-          .then(([threadDocuments, boardDocuments]) => {
-            return generateThreads(threadDocuments)
-              .then(generateBoards(boardDocuments));
-          });
-        console.log('threads:', threadsAffected, 'boards:', boardsAffected);
-      }
       res.json(status);
     } catch (err) {
       return next(err);

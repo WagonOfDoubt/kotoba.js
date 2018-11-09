@@ -3,8 +3,6 @@ const _ = require('lodash');
 module.exports.postEditPermission = async (req, res, next) => {
   try {
     const { posts, set, postpassword } = req.body;
-    console.log('user:', req.user);
-    console.log('body:', postpassword);
     const checkPost = (post) =>
       checkPostPermission(post, postpassword, req.user, set);
     const checkedPostsResults = await Promise.all(posts.map(checkPost));
@@ -25,9 +23,6 @@ module.exports.postEditPermission = async (req, res, next) => {
 
 const checkPostPermission = (post, password, user, setObj) => {
   return new Promise(async (resolve, reject) => {
-    console.log('=== Checking post:', post.postId);
-    console.log('=== Post password:', password);
-    console.log('=== Current user:', user);
     const ref = post.toReflink();
 
     // TODO: temporary code, allows to do anything for logged in users
@@ -41,14 +36,12 @@ const checkPostPermission = (post, password, user, setObj) => {
     const passwordMatches = await post.checkPassword(password);
     // not mod, no password => GTFO
     if (!user && !passwordMatches) {
-      console.log('=== Incorrect password, reject');
       resolve({ ref: ref, post: post, ok: false, reason: 'Incorrect password' });
       return;
     }
 
     // user wrote this post and can edit some fields
     if (!user && passwordMatches) {
-      console.log('=== Correct password, resolve');
       // [ key, value ] pairs that can be changed by unauthorized user if
       // they have correct password
       // TODO: make this customisable

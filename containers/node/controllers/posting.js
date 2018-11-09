@@ -1,5 +1,5 @@
 const ObjectId = require('mongoose').Types.ObjectId;
-const { generateThread, generateBoardPagesAndCatalog } = require('./generate');
+const { generateThread, generateThreads, generateBoards, generateBoardPagesAndCatalog } = require('./generate');
 const { uploadFile } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
@@ -7,6 +7,7 @@ const Parser = require('./parser');
 const fs = require('fs-extra');
 const config = require('../config');
 const path = require('path');
+const _ = require('lodash');
 
 
 const InputError = (msg, reason) => {
@@ -221,4 +222,46 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
     replies: repliesToDelete.length,
     attachments: attachmentsToDelete.length
   };
+};
+
+
+/**
+ * Update fields of posts and save it to DB.
+ * @param {Array<Post>} posts - array of post mongoose documents
+ * @param {Object} set - object with fields to change in documents
+ * @param {boolean} regenerate - regenerate corresponding html files
+ * @returns result of Post.updateMany, or an emty object if no posts were updated
+ */
+module.exports.updatePosts = async (posts, set, regenerate = true) => {
+  if (!posts.length) {
+    return {};
+  }
+
+  const selectQuery = { $or: posts.map(_.partialRight(_.pick, ['_id'])) };
+  const updateQuery = { $set: set };
+  const mongoResponse = await Post.updateMany(selectQuery, updateQuery);
+  if (regenerate) {
+    const replies = posts.filter(r => !r.isOp);
+    const threads = posts.filter(t => t.isOp);
+
+    const threadsAffected = _.unionBy(
+      replies.map(_.property('parent')),
+      threads.map(_.property('_id')),
+      String);
+
+    const boardsAffected = _.uniqBy(
+      posts.map(_.property('board')),
+      String);
+
+    await Promise
+      .all([
+        Post.findThreadsByIds(threadsAffected).populate('children'),
+        Board.findBoardsByIds(boardsAffected)
+      ])
+      .then(([threadDocuments, boardDocuments]) => {
+        return generateThreads(threadDocuments)
+          .then(generateBoards(boardDocuments));
+      });
+  }
+  return mongoResponse;
 };
