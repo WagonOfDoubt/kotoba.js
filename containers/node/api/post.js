@@ -1,4 +1,5 @@
 const express = require('express');
+const ObjectId = require('mongoose').Types.ObjectId;
 const router = express.Router();
 const { body } = require('express-validator/check');
 const _ = require('lodash');
@@ -9,7 +10,14 @@ const { postEditPermission } = require('../middlewares/permission');
 const sanitizer = require('../middlewares/sanitizer');
 const { updatePosts } = require('../controllers/posting');
 
-const flags = ['isSticky', 'isClosed', 'isSage', 'isApproved', 'isDeleted'];
+const flags = [
+  // threads
+  'isSticky', 'isClosed',
+  // posts
+  'isSage', 'isApproved', 'isDeleted',
+  // attachmsnts
+  'attachment.isDeleted', 'attachment.isNSFW', 'attachment.isSpoiler'
+];
 
 router.patch(
   '/api/post',
@@ -32,9 +40,21 @@ router.patch(
         success: res.locals.permissionGranted,
         fail: res.locals.permissionDenied,
       };
-      const { posts, set, regenerate } = req.body;
+      const { posts, set, regenerate, attachments } = req.body;
+      const attachmentIds = attachments.map(ObjectId);
 
-      const mongoResponse = updatePosts(posts, set, regenerate);
+      const attachmentPropertyPrefix = 'attachment.';
+      const setPostProperties = _.pickBy(set,
+        (value, key) => !key.startsWith(attachmentPropertyPrefix));
+      let setAttachmentPropties = _.pickBy(set,
+        (value, key) => key.startsWith(attachmentPropertyPrefix));
+      setAttachmentPropties = _.mapKeys(setAttachmentPropties,
+        (value, key) => key.substring(attachmentPropertyPrefix.length));
+
+      const mongoResponse = updatePosts(
+        posts, setPostProperties,
+        attachmentIds, setAttachmentPropties,
+        regenerate);
       status.mongo = mongoResponse;
       res.json(status);
     } catch (err) {

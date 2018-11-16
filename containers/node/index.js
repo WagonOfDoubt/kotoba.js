@@ -17,7 +17,6 @@ const apiBoardRouter = require('./api/board');
 const apiNewsRouter = require('./api/news');
 const apiUserRouter = require('./api/user');
 const apiPostRouter = require('./api/post');
-const apiAttachmentRouter = require('./api/attachment');
 const apiSettingsRouter = require('./api/settings');
 const apiMaintenanceRouter = require('./api/maintenance');
 
@@ -85,7 +84,6 @@ app.use(apiBoardRouter);
 app.use(apiNewsRouter);
 app.use(apiPostRouter);
 app.use(apiUserRouter);
-app.use(apiAttachmentRouter);
 app.use(apiSettingsRouter);
 app.use(apiMaintenanceRouter);
 app.use(authRouter);

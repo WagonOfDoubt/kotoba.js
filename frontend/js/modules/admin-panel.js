@@ -85,7 +85,7 @@ function initAdminPanel() {
   };
 
   // add events
-  $('.js-set-attachment-flag').on('click', (e) => onSetFlagBtn('/api/attachment', e));
+  $('.js-set-attachment-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
   $('.js-set-post-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
   $('.js-set-thread-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
 

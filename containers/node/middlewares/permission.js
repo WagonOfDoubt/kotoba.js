@@ -52,6 +52,12 @@ const checkPostPermission = (post, password, user, setObj) => {
         [ 'isClosed', true ],
         // anonymous can add or remove sage, if they had mistaken
         [ 'isSage', true ], [ 'isSage', false ],
+        // anonymous can delete attachments in their own post, but can't restore it
+        [ 'attachment.isDeleted', true ],
+        // anonymous can set or unset NSFW, if they had mistaken
+        [ 'attachment.isNSFW', true ], [ 'attachment.isNSFW', false ],
+        // anonymous can set or unset spoiler, if they had mistaken
+        [ 'attachment.isSpoiler', true ], [ 'attachment.isSpoiler', false ],
       ];
 
       const setKV = _.toPairs(setObj);

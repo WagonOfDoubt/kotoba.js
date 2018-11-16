@@ -34,11 +34,11 @@ div.admin-panel
       button.js-select-all-items(type='button', data-target='.js-select-attachment') Select all
       button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect all attachments
     div.column
-      button.js-set-attachment-flag(type='submit', name='isDeleted', value='true') Delete
-      button.js-set-attachment-flag(type='submit', name='isDeleted', value='false') Restore
+      button.js-set-attachment-flag(type='submit', name='attachment.isDeleted', value='true') Delete
+      button.js-set-attachment-flag(type='submit', name='attachment.isDeleted', value='false') Restore
     div.column
-      button.js-set-attachment-flag(type='submit', name='isSpoiler', value='true') Set Spoiler
-      button.js-set-attachment-flag(type='submit', name='isSpoiler', value='false') Unset Spoiler
+      button.js-set-attachment-flag(type='submit', name='attachment.isSpoiler', value='true') Set Spoiler
+      button.js-set-attachment-flag(type='submit', name='attachment.isSpoiler', value='false') Unset Spoiler
     div.column
-      button.js-set-attachment-flag(type='submit', name='isNSFW', value='true') Set NSFW
-      button.js-set-attachment-flag(type='submit', name='isNSFW', value='false') Unset NSFW
+      button.js-set-attachment-flag(type='submit', name='attachment.isNSFW', value='true') Set NSFW
+      button.js-set-attachment-flag(type='submit', name='attachment.isNSFW', value='false') Unset NSFW
