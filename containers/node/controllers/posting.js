@@ -1,6 +1,12 @@
+/**
+ * This module handles post manipulation, creation of new post and threads,
+ * as well as editing and deletion
+ * @module controllers/posting
+ */
+
 const ObjectId = require('mongoose').Types.ObjectId;
 const { generateThread, generateThreads, generateBoards, generateBoardPagesAndCatalog } = require('./generate');
-const { uploadFile } = require('./upload');
+const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
 const Parser = require('./parser');
@@ -10,6 +16,9 @@ const path = require('path');
 const _ = require('lodash');
 
 
+/**
+ * @todo create custom error types for each case and move somehwere not here
+ */
 const InputError = (msg, reason) => {
   const error = Error(msg);
   error.type = 'input_error';
@@ -18,10 +27,16 @@ const InputError = (msg, reason) => {
 };
 
 
-const uploadFiles = (boardUri, files) =>
-  Promise.all(files.map(file => uploadFile(boardUri, file)));
-
-
+/**
+ * Create new thread by adding it to DB, updating all related records in DB,
+ * uplading attachments and generating all related HTML files
+ * @async
+ * @param {string} boardUri - board directory
+ * @param {object} postData - an object containg all nessessary fields according
+ * to Post schema
+ * @param {Array.<object>} files - array of files from req.files (multer)
+ * @returns {number} postId - sequential number of new thread
+ */
 module.exports.createThread = async (boardUri, postData, files = []) => {
   const board = await Board.findOne({ uri: boardUri }).exec();
   if (!board) {
@@ -67,6 +82,17 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
 };
 
 
+/**
+ * Create reply in thread by adding it to DB, updating all related records in
+ * DB, uplading attachments and generating all related HTML files
+ * @async
+ * @param {string} boardUri - board directory
+ * @param {number} threadId - sequential number of parent post on board
+ * @param {object} postData - an object containg all nessessary fields according
+ * to Post schema
+ * @param {Array.<object>} files - array of files from req.files (multer)
+ * @returns {number} postId - sequential number of new post
+ */
 module.exports.createReply = async (boardUri, threadId, postData, files = []) => {
   const [thread, board] = await Promise.all([
       Post.findThread(boardUri, threadId).exec(),
@@ -121,6 +147,15 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
 };
 
 
+/**
+ * Remove selected posts from database and corresponding attachment files
+ * @async
+ * @param {Array.<Post>} postsToDelete - array of post mongoose documents
+ * @param {boolean} regenerate - regenerate corresponding html files
+ * @returns {{ threads: number, replies: number, attachments: number }}
+ * An object with fields containing a number of how many threads, replies or
+ * attachments were deleted
+ */
 module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
   // leave only unique posts just in case
   postsToDelete = [...new Set(postsToDelete)];
@@ -227,9 +262,10 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
 
 /**
  * Update fields of posts and save it to DB.
- * @param {Array<Post>} posts - array of post mongoose documents
+ * @async
+ * @param {Array.<Post>} posts - array of post mongoose documents
  * @param {Object} setPosts - object with fields to change in documents
- * @param {Array<ObjectId>} attachmentsObjectIds - array of ObjectIds of attachments
+ * @param {Array.<ObjectId>} attachmentsObjectIds - array of ObjectIds of attachments
  * @param {Object} setAttachments - object with fields to change in attahments in posts
  * @param {boolean} regenerate - regenerate corresponding html files
  * @returns result of Post.updateMany, or an emty object if no posts were updated

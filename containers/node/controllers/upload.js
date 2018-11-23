@@ -1,3 +1,9 @@
+/**
+ * This module handles thumbnails creation and saving of both thumbnail and
+ * uploaded file
+ * @module controllers/upload
+ */
+
 const config = require('../config.json');
 const Settings = require('../models/settings');
 const fs = require('fs');
@@ -7,18 +13,34 @@ const avconv = require('avconv');
 const crypto = require('crypto');
 
 
+/**
+ * Wheter or not file extension belongs to known supported video format
+ * @param {string} ext - file extension, starting with dot (".webm", ".mp4")
+ * @returns {boolean}
+ */
 const isVideo = (ext) => {
   const videos = ['.mp4', '.ogv', '.webm'];
   return videos.includes(ext);
 };
 
 
+/**
+ * Wheter or not file extension belongs to known supported image format
+ * @param {string} ext - file extension, starting with dot (".jpg", ".png")
+ * @returns {boolean}
+ */
 const isImage = (ext) => {
   const images = ['.jpg', '.jpeg', '.png', '.tiff', '.webp', '.gif', '.svg'];
   return images.includes(ext);
 };
 
 
+/**
+ * Determine kind of file (video, image, audio, unknown) based on extension
+ * @todo add support for audio formats
+ * @param {string} ext - file extension, starting with dot (".jpg", ".png")
+ * @returns {string} "video", "image" or "unknown"
+ */
 const getAttachmentType = (ext) => {
   if (isImage(ext)) {
     return 'image';
@@ -30,7 +52,13 @@ const getAttachmentType = (ext) => {
 };
 
 
-const normalizeExxtension = (ext) => {
+/**
+ * Get rid of .jpeg instead of .jpg and potentially other inconsistent file
+ * extensions
+ * @param {string} ext - file extension, starting with dot (".jpg", ".png")
+ * @returns {string}
+ */
+const normalizeExtension = (ext) => {
   if (ext === '.jpeg') {
     return '.jpg';
   }
@@ -38,6 +66,12 @@ const normalizeExxtension = (ext) => {
 };
 
 
+/**
+ * Determine optimal format for thumbnail. For formats what support transparency
+ * returns .png, otherwise .jpg
+ * @param {string} ext - file extension, starting with dot (".jpg", ".png")
+ * @returns {string} file extension of thumbnail, starting with dot
+ */
 const getOptimalThumbnailExtenstion = (ext) => {
   if (['.png', '.svg', '.gif'].includes(ext)) {
     return '.png';
@@ -46,8 +80,44 @@ const getOptimalThumbnailExtenstion = (ext) => {
 };
 
 
+/**
+ * Generate random name where first part is current Unix time and last 2 digits
+ * are random
+ * @returns {string}
+ */
+const getRandomName = () =>
+  `${ Date.now() }${ Math.floor(Math.random() * 100) }`;
+
+
+/**
+ * Save file to filesystem and create thumbnail
+ * @alias module:controllers/upload.uploadFiles
+ * @async
+ * @param {string} boardUri - board directory
+ * @param {Array.<object>} files - array of file objects from multer package
+ * {@link https://www.npmjs.com/package/multer}
+ * @param {boolean} keepFilename - whether or not to store original file name,
+ * if false, random numbers will be used instead
+ * @returns { Array.<Promise> } array of promises resolving to attachment
+ * object according to attachment schema
+ */
+const uploadFiles = (boardUri, files, keepFilename = true) =>
+  Promise.all(files.map(file => uploadFile(boardUri, file, keepFilename)));
+
+
+/**
+ * Save file to filesystem and create thumbnail
+ * @alias module:controllers/upload.uploadFile
+ * @async
+ * @param {string} boardUri - board directory
+ * @param {object} file - file object from multer package
+ * {@link https://www.npmjs.com/package/multer}
+ * @param {boolean} keepFilename - whether or not to store original file name,
+ * if false, random numbers will be used instead
+ * @returns { object } attachment object to be saved to database
+ */
 const uploadFile = async (boardUri, file, keepFilename = true) => {
-  const ext = normalizeExxtension(path.extname(file.originalname));
+  const ext = normalizeExtension(path.extname(file.originalname));
   const type = getAttachmentType(ext);
   if (type === 'unknown') {
     const error = new Error('Unsupported file format: ' + ext);
@@ -57,7 +127,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
   }
   const thumbExt = getOptimalThumbnailExtenstion(ext);
 
-  const randomName = `${ Date.now() }${ Math.floor(Math.random() * 100) }`;
+  const randomName = getRandomName();
   file.originalname = keepFilename && !/^\s+\.\w+$/.test(file.originalname)
     ? path.basename(file.originalname, ext) + ext
     : randomName + ext;
@@ -121,6 +191,14 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
 };
 
 
+/**
+ * Save image file to path and also delete image metadata if possible
+ * @async
+ * @param {string} imagePath - path to save image to
+ * @param {object} file - multer file
+ * @returns {object} image info from sharp package
+ * {@link https://www.npmjs.com/package/sharp}
+ */
 const saveImage = async (imagePath, file) => {
   createDirIfNotExist(path.dirname(imagePath));
   try {
@@ -139,6 +217,14 @@ const saveImage = async (imagePath, file) => {
 };
 
 
+/**
+ * Save file to path
+ * @async
+ * @param {string} imagePath - path to save to
+ * @param {object} file - multer file
+ * @returns {object} object with field size equal to file size in bytes, and
+ * with and height equal to 0
+ */
 const saveFile = async (filePath, file) => {
   createDirIfNotExist(path.dirname(filePath));
   try {
@@ -154,6 +240,14 @@ const saveFile = async (filePath, file) => {
 };
 
 
+/**
+ * Generate thumbnail for image and save it to path
+ * @async
+ * @param {string} thumbPath - path to save to
+ * @param {object} file - multer file
+ * @returns {object} image info from sharp package
+ * {@link https://www.npmjs.com/package/sharp}
+ */
 const createThumbnail = async (thumbPath, file) => {
   createDirIfNotExist(path.dirname(thumbPath));
   try {
@@ -169,6 +263,14 @@ const createThumbnail = async (thumbPath, file) => {
   }
 };
 
+
+/**
+ * Save file to path
+ * @async
+ * @param {string} imagePath - path to save to
+ * @returns {object} object with field size equal to file size in bytes, and
+ * with and height equal to 0
+ */
 const saveVideo = async (filePath, file) => {
   createDirIfNotExist(path.dirname(filePath));
   try {
@@ -181,6 +283,15 @@ const saveVideo = async (filePath, file) => {
   }
 };
 
+
+/**
+ * Generate thumbnail for video and save it to path
+ * @async
+ * @param {string} thumbPath - path to save to
+ * @param {object} filePath - path to video file
+ * @returns {object} image info from sharp package
+ * {@link https://www.npmjs.com/package/sharp}
+ */
 const createVideoThumbnail = async (thumbPath, filePath) => {
   createDirIfNotExist(path.dirname(thumbPath));
   const s = await Settings.get();
@@ -228,6 +339,11 @@ const createVideoThumbnail = async (thumbPath, filePath) => {
 };
 
 
+/**
+ * Creates direcory recursively
+ * @param {string} targetDir - directory to create
+ * @returns {string} absolute path of created directory
+ */
 const createDirIfNotExist = (targetDir) => {
   const sep = path.sep;
   const initDir = path.isAbsolute(targetDir) ? sep : '';
@@ -243,3 +359,4 @@ const createDirIfNotExist = (targetDir) => {
 
 
 module.exports.uploadFile = uploadFile;
+module.exports.uploadFiles = uploadFiles;
