@@ -17,13 +17,24 @@ export const alertErrorHandler = (data) => {
   if (!data.responseJSON) {
     return modal.alert('Error', errorText);
   }
-  const errors = data.responseJSON.errors;
-  const errorsMsg = errors
-    ? Object.values(errors)
-      .map(error => error.msg)
-      .join('<br>')
-    : data.responseJSON.error || errorText;
-  return modal.alert('Error', errorsMsg);
+
+  const errorToHTML = (error) => {
+    if (error.stack) {
+      return `<pre class="error">${ error.stack }</pre>`;
+    } else {
+      return `<div class="error">${ error.name }: ${ error.message }</div>`
+    }
+  }
+
+  let alertMessage = errorText;
+  if (data.responseJSON.errors) {
+    alertMessage = Object.values(data.responseJSON.errors)
+      .map(errorToHTML)
+      .join('<br>');
+  } else if (data.responseJSON.error) {
+    alertMessage = errorToHTML(data.responseJSON.error);
+  }
+  return modal.alert('Error', alertMessage);
 };
 
 

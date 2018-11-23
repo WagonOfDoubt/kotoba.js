@@ -7,6 +7,7 @@ const MongoStore = require('connect-mongo')(session);
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const cookieParser = require('cookie-parser');
+const _ = require('lodash');
 
 const formRouter = require('./routes/form');
 const authRouter = require('./routes/auth');
@@ -125,11 +126,11 @@ app.use((err, req, res, next) => {
     console.log(err);
     const isDev = process.env.NODE_ENV === 'development';
     if (req.is('json')) {
-      if (isDev) {
-        res.json({'error': err.message, 'stack': err.stack});
-      } else {
-        res.json({'error': err.message});
-      }
+      const productionErrorFields = ['name', 'message'];
+      const debugErrorFields = ['name', 'message', 'stack'];
+      const errfields = isDev ? debugErrorFields : productionErrorFields;
+      const errobj = _.pick(err, errfields)
+      res.json({ 'error': errobj });
     } else {
       res.render('errorpage', {
         title: 'Error',
