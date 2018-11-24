@@ -5,6 +5,7 @@ const { body } = require('express-validator/check');
 const _ = require('lodash');
 
 const Post = require('../models/post');
+const ModlogEntry = require('../models/modlog');
 const middlewares = require('../utils/middlewares');
 const { postEditPermission } = require('../middlewares/permission');
 const sanitizer = require('../middlewares/sanitizer');
@@ -41,7 +42,7 @@ router.patch(
         fail: res.locals.permissionDenied,
       };
       const { posts, set, regenerate, attachments } = req.body;
-      const attachmentIds = attachments.map(ObjectId);
+      const attachmentIds = attachments ? attachments.map(ObjectId) : [];
 
       const attachmentPropertyPrefix = 'attachment.';
       const setPostProperties = _.pickBy(set,
@@ -51,11 +52,36 @@ router.patch(
       setAttachmentPropties = _.mapKeys(setAttachmentPropties,
         (value, key) => key.substring(attachmentPropertyPrefix.length));
 
-      const mongoResponse = updatePosts(
+      const mongoResponse = await updatePosts(
         posts, setPostProperties,
         attachmentIds, setAttachmentPropties,
         regenerate);
       status.mongo = mongoResponse;
+
+      const changes = [];
+      posts.forEach((post) => {
+        Object
+          .entries(setPostProperties)
+          .forEach(([key, value]) => {
+            if (post[key] !== value) {
+              changes.push({
+                target: post._id,
+                model: 'Post',
+                property: key,
+                oldValue: post[key],
+                newValue: value,
+              });
+            }
+          });
+      });
+      const modlogEntry = new ModlogEntry({
+        ip: req.ip,
+        useragent: { test: 'Netscape Navigator' },
+        user: req.user,
+        changes: changes,
+      });
+      await modlogEntry.save();
+
       res.json(status);
     } catch (err) {
       return next(err);

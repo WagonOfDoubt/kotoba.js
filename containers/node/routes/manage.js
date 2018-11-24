@@ -12,6 +12,7 @@ const Post = require('../models/post');
 const News = require('../models/news');
 const Board = require('../models/board');
 const Settings = require('../models/settings');
+const ModlogEntry = require('../models/modlog');
 
 router.use(middlewares.globalTemplateVariables);
 
@@ -20,6 +21,29 @@ router.get('/manage/',
   middlewares.authRequired,
   async (req, res) => {
     res.render('manage/managepage');
+  }
+);
+
+router.get('/manage/modlog/:before?',
+  middlewares.authRequired,
+  async (req, res, next) => {
+    try {
+      console.log(req.params);
+      const q = req.params.before ? { timestamp: { $lt: req.params.before } } : {};
+      const modlog = await ModlogEntry
+        .find(q)
+        .sort({ timestamp: -1})
+        .limit(10)
+        .populate('changes.target', null, 'Post')
+        .populate('user');
+      res.render('manage/modlog', {
+        activity: 'manage-page-modlog',
+        modlog: modlog,
+        title: 'ModLog'
+      });      
+    } catch (e) {
+      next(e);
+    }
   }
 );
 

@@ -1,0 +1,36 @@
+extends managepage.pug
+include ../mixins/timestamp.pug
+include ../mixins/postbody.pug
+
+block main
+  h1 Modlog
+  if modlog.length
+    ul
+      for item in modlog
+        li
+          +datetime(item.timestamp)
+          if item.user
+            | 
+            a(href=`/manage/staff/${ item.user.login }`)= item.user.login
+            if item.user.displayname
+              small.unimportant  (aka #[span.nickname #{item.user.displayname}])
+          else
+            | 
+            span.postername Anonymous
+            | 
+            span.posterip= item.ip
+          ul
+            if item.changes && item.changes.length
+              for change in item.changes
+                li
+                  | Changed #[strong #{ change.model }.#{ change.property }] from
+                  | #[strong #{ change.oldValue }] to #[strong #{ change.newValue }]
+                  | in 
+                  +reflink(change.target)
+            else
+              li Did nothing, actually
+  else
+    | No more entries
+  if (modlog.length)
+    - var lastEntry = modlog[modlog.length - 1]
+    a(href=`/manage/modlog/${lastEntry.timestamp.getTime()}`) More entries
