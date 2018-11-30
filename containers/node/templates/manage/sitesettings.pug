@@ -18,6 +18,7 @@ block main
     +textEdit('locale', 'Locale', 'Default locale. Locales can be assigned individually per board.')
     +textEdit('dateformat', 'Date format', 'Default date format.')
     +textEdit('imageUri', 'Header image', 'URL. Default header image. Can be overriden on each board.')
+    +checkboxEdit('startWithOne', 'Number pages starting with one', 'Traditionally pages are zero-based, like in most programming languages.')
     //- features
     h2 Engine features
     +checkboxEdit('features[expandThread]', 'Expand thread button', 'Whether or not to add expand thread buttons.')
@@ -57,7 +58,7 @@ block main
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
       button(type='button', class='btn', data-action='preview-markdown', data-field='menu') Preivew
-    +textArea('frame', '"Frame" links')
+    +textArea('frame', 'Sidebar links')
       | HTML of default tab of sidebar on the left.
       | Traditionally it's list of all boards grouped in categories.
       | Be careful and close all tags.

@@ -15,6 +15,7 @@ const settingsSchema = Schema({
   locale:        { type: String, default: 'en' },
   dateformat:    { type: String, default: '' },
   imageUri:      { type: String, default: '' },
+  startWithOne:  { type: Boolean, default: false },
   thumbSize:     {
     width:  { type: Number, default: 200 },
     height: { type: Number, default: 200 }
@@ -48,20 +49,24 @@ const settingsSchema = Schema({
   minimize: false
 });
 
-let cachedSettings = null;
+var cachedSettings = null;
 
-settingsSchema.statics.get = async () => {
+settingsSchema.statics.get = async (param) => {
+  let settings;
   if (cachedSettings) {
-    return cachedSettings;
+    settings = cachedSettings;
+  } else {
+    settings = await Settings.findOne().exec();
+    if (!settings) {
+      settings = new Settings();
+      await settings.save();
+      cachedSettings = settings;
+    }
   }
-  const s = await Settings.findOne().exec();
-  if (!s) {
-    const newSettings = new Settings();
-    await newSettings.save();
-    cachedSettings = newSettings;
-    return newSettings;
+  if (param) {
+    return settings[param];
   }
-  return s;
+  return settings;
 };
 
 settingsSchema.statics.set = async (options) => {

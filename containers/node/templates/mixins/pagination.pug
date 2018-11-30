@@ -1,0 +1,28 @@
+mixin pagination(current, pages)
+  div.pages.pagelist
+    //- "border=1" for compatibility with fhird-party code for wakaba and others
+    table(border='1')
+      tbody
+        tr
+          td
+            if current === 0
+              span ←
+            else
+              a(href=pages[current - 1].url, rel='prev') ←
+          td
+            //- pages
+            - var p = 0
+            for page in pages
+              if p === current
+                | 
+                | [#{ p }]
+              else
+                |
+                | [#[a(href=page.url)= page.label]]
+              - p++
+          td
+            //- next page button
+            if current === pages.length - 1
+              span →
+            else
+              a(href=pages[current + 1].url, rel='next') →
