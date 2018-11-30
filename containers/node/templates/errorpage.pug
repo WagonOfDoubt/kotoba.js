@@ -11,9 +11,9 @@ block header
   h1.text-center Kuso!
 
 block main
-  div.error= message
-  if error
-    pre= JSON.stringify(error, null, 2)
+  div.error #{ error.name }: #{ error.message }
+  if error.stack
+    pre.error= error.stack
 
 block scripts
   script(src='/.static/js/kotoba.js')

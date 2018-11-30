@@ -106,17 +106,16 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500);
     console.log(err);
     const isDev = process.env.NODE_ENV === 'development';
+    const productionErrorFields = ['name', 'message'];
+    const debugErrorFields = ['name', 'message', 'stack'];
+    const errfields = isDev ? debugErrorFields : productionErrorFields;
+    const errobj = _.pick(err, errfields)
     if (req.is('json')) {
-      const productionErrorFields = ['name', 'message'];
-      const debugErrorFields = ['name', 'message', 'stack'];
-      const errfields = isDev ? debugErrorFields : productionErrorFields;
-      const errobj = _.pick(err, errfields)
       res.json({ 'error': errobj });
     } else {
       res.render('errorpage', {
         title: 'Error',
-        message: err.message,
-        error: isDev ? err : {}
+        error: errobj
       });
     }
   }
