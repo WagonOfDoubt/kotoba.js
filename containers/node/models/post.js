@@ -93,6 +93,7 @@ const postSchema = Schema({
   // private fields
   ip:                  { type: String, required: true },   // immutable
   password:            { type: String, default: '' },      // immutable
+  useragent:           { type: Object, required: true },   // immutable
   isApproved:          { type: Boolean, default: true },   // can be changed by mod
   isDeleted:           { type: Boolean, default: false }   // can be changed by mod
 });

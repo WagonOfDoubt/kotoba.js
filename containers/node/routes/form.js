@@ -3,9 +3,10 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator/check');
 const multer = require('multer');
 const upload = multer();
-
+const _ = require('lodash');
 const { createThread, createReply, deletePosts } = require('../controllers/posting.js');
 const middlewares = require('../utils/middlewares');
+const reqparser = require('../middlewares/reqparser');
 const Post = require('../models/post');
 const { postEditPermission } = require('../middlewares/permission');
 const { updatePosts } = require('../controllers/posting');
@@ -35,8 +36,15 @@ router.post('/form/post', [
     const files = req.files;
     const boardUri = req.body.board;
 
+    const ua = _.pick(req.useragent, [
+      'os', 'platform',
+      'browser', 'version',
+      'isBot', 'isMobile', 'isDesktop',
+      'source']);
+
     const postData = {
       ip: ip,
+      useragent: ua,
       boardUri: boardUri,
       name: req.body.name,
       email: req.body.sage ? 'sage' : req.body.em,
@@ -74,8 +82,8 @@ router.post('/form/delpost', [
     body('posts').exists(),
     body('postpassword').exists(),
     middlewares.validateRequest,
-    middlewares.parsePostIds,
-    middlewares.findPosts,
+    reqparser.parsePostIds,
+    reqparser.findPosts,
     // filters req.body.posts so only posts that can be changed by current user
     // are present
     postEditPermission,

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const session = require('express-session');
+const useragent = require('express-useragent');
 const MongoStore = require('connect-mongo')(session);
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -38,7 +39,7 @@ const dbConn = `mongodb://${ dbAuth }${ dbHost }:${ dbPort }/${ dbName }`;
 mongoose.Promise = global.Promise;
 mongoose.set('debug', true)
 mongoose
-  .connect(dbConn, {})
+  .connect(dbConn, { useNewUrlParser: true })
   .then(() => {
     console.log(`Connected to database ${ dbName }`);
     const admin = new mongoose.mongo.Admin(mongoose.connection.db);
@@ -59,6 +60,7 @@ app.set('view engine', 'pug');
 
 // middlewares
 app.use(middlewares.globalTemplateVariables);
+app.use(useragent.express());
 app.use(cookieParser());
 app.use(session({
   name: config.session_cookie_name,

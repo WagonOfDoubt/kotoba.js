@@ -7,6 +7,7 @@ const _ = require('lodash');
 const Post = require('../models/post');
 const ModlogEntry = require('../models/modlog');
 const middlewares = require('../utils/middlewares');
+const reqparser = require('../middlewares/reqparser');
 const { postEditPermission } = require('../middlewares/permission');
 const sanitizer = require('../middlewares/sanitizer');
 const { updatePosts } = require('../controllers/posting');
@@ -29,8 +30,8 @@ router.patch(
       .customSanitizer(sanitizer.pick(flags)),
     body('regenerate').toBoolean(),
     middlewares.validateRequest,
-    middlewares.parsePostIds,
-    middlewares.findPosts,
+    reqparser.parsePostIds,
+    reqparser.findPosts,
     // filters req.body.posts so only posts that can be changed by current user
     // are present
     postEditPermission,
@@ -74,9 +75,14 @@ router.patch(
             }
           });
       });
+      const ua = _.pick(req.useragent, [
+        'os', 'platform',
+        'browser', 'version',
+        'isBot', 'isMobile', 'isDesktop',
+        'source']);
       const modlogEntry = new ModlogEntry({
         ip: req.ip,
-        useragent: { test: 'Netscape Navigator' },
+        useragent: ua,
         user: req.user,
         changes: changes,
       });
