@@ -4,13 +4,13 @@ const router = express.Router();
 const { body } = require('express-validator/check');
 const _ = require('lodash');
 
-const Post = require('../models/post');
-const ModlogEntry = require('../models/modlog');
-const middlewares = require('../utils/middlewares');
-const reqparser = require('../middlewares/reqparser');
-const { postEditPermission } = require('../middlewares/permission');
-const sanitizer = require('../middlewares/sanitizer');
-const { updatePosts } = require('../controllers/posting');
+const Post = require('../../models/post');
+const ModlogEntry = require('../../models/modlog');
+const middlewares = require('../../utils/middlewares');
+const reqparser = require('../../middlewares/reqparser');
+const { postEditPermission } = require('../../middlewares/permission');
+const sanitizer = require('../../middlewares/sanitizer');
+const { updatePosts } = require('../../controllers/posting');
 
 const flags = [
   // threads

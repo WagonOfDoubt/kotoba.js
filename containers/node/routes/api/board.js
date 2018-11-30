@@ -3,9 +3,9 @@ const router = express.Router();
 const { oneOf, body, param, validationResult } = require('express-validator/check');
 const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
 
-const boardController = require('../controllers/board');
-const Board = require('../models/board');
-const middlewares = require('../utils/middlewares');
+const boardController = require('../../controllers/board');
+const Board = require('../../models/board');
+const middlewares = require('../../utils/middlewares');
 
 
 // get board

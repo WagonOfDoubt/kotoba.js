@@ -3,10 +3,10 @@ const router = express.Router();
 const { oneOf, body, param, validationResult } = require('express-validator/check');
 const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
 
-const { regenerateAll } = require('../controllers/generate');
-const Post = require('../models/post');
-const Parser = require('../controllers/parser');
-const middlewares = require('../utils/middlewares');
+const { regenerateAll } = require('../../controllers/generate');
+const Post = require('../../models/post');
+const Parser = require('../../controllers/parser');
+const middlewares = require('../../utils/middlewares');
 
 
 router.post('/api/regenerate',

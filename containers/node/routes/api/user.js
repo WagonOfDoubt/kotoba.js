@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator/check');
 
-const User = require('../models/user');
-const userController = require('../controllers/user');
-const middlewares = require('../utils/middlewares');
+const User = require('../../models/user');
+const userController = require('../../controllers/user');
+const middlewares = require('../../utils/middlewares');
 
 
 // TODO get user

@@ -3,9 +3,9 @@ const router = express.Router();
 const { check, oneOf, body, param, validationResult } = require('express-validator/check');
 const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
 
-const News = require('../models/news');
-const middlewares = require('../utils/middlewares');
-const { generateMainPage } = require('../controllers/generate');
+const News = require('../../models/news');
+const middlewares = require('../../utils/middlewares');
+const { generateMainPage } = require('../../controllers/generate');
 
 // get news
 router.get('/api/news/:newsId?',

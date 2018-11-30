@@ -10,17 +10,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const cookieParser = require('cookie-parser');
 const _ = require('lodash');
 
-const formRouter = require('./routes/form');
-const authRouter = require('./routes/auth');
-const manageRouter = require('./routes/manage');
-const previewRouter = require('./routes/preview');
-
-const apiBoardRouter = require('./api/board');
-const apiNewsRouter = require('./api/news');
-const apiUserRouter = require('./api/user');
-const apiPostRouter = require('./api/post');
-const apiSettingsRouter = require('./api/settings');
-const apiMaintenanceRouter = require('./api/maintenance');
+const routes = require('./routes');
 
 const config = require('./config.json');
 const User = require('./models/user');
@@ -80,18 +70,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// routers
-app.use(formRouter);
-app.use(apiBoardRouter);
-app.use(apiNewsRouter);
-app.use(apiPostRouter);
-app.use(apiUserRouter);
-app.use(apiSettingsRouter);
-app.use(apiMaintenanceRouter);
-app.use(authRouter);
-app.use(manageRouter);
-app.use(previewRouter);
+app.use(routes);
 
 // configure authentification
 passport.use(new LocalStrategy({
