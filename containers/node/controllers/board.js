@@ -35,21 +35,16 @@ module.exports.removeBoard = async (boardUri) => {
 };
 
 
-module.exports.updateBoard = async (boardUri, data = {}, regenerate = false) => {
-  delete data.uri;
-  const promise = Board.findOneAndUpdate(
-  {
-    uri: boardUri
-  },
-  {
-    $set: data
-  },
-  {
-    new: true
-  }).exec();
-  if (regenerate) {
-    return promise
-      .then(generateBoard);
+module.exports.updateBoard = async (board, data = {}, regenerate = false) => {
+  let status = null;
+  try {
+    board.set(data);
+    status = await board.save({ validateBeforeSave: true });
+    if (regenerate) {
+      await generateBoard(board);    
+    }
+  } catch (error) {
+    throw error;
   }
-  return promise;
+  return status;
 };

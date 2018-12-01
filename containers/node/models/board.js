@@ -92,6 +92,10 @@ boardSchema.statics.findBoards = (boardUri, inclHidden = true) => {
   return query;
 };
 
+boardSchema.statics.findBoard = (boardUri) => {
+  return Board.findOne({ uri: boardUri });
+};
+
 boardSchema.methods.getUniqueUserPosts = async function () {
   const posts = await Post.getNumberOfUniqueUserPosts(this.uri);
   return posts;

@@ -34,8 +34,10 @@ router.get('/manage/modlog/:before?',
         .find(q)
         .sort({ timestamp: -1})
         .limit(10)
-        .populate('changes.target', null, 'Post')
-        .populate('user');
+        .populate([
+          { path: 'changes.target' },
+          { path: 'user', model: 'User' },
+        ]);
       res.render('manage/modlog', {
         activity: 'manage-page-modlog',
         modlog: modlog,

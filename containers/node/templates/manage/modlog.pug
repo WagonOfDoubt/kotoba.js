@@ -2,6 +2,30 @@ extends managepage.pug
 include ../mixins/timestamp.pug
 include ../mixins/postbody.pug
 
+mixin nothing-change
+  li Did nothing, actually
+
+mixin post-change(change)
+  | in 
+  +reflink(change.target)
+
+mixin board-change(change)
+  | in #[a(href=`/${ change.target.uri }`) /#{ change.target.uri }/]
+
+mixin generic-change(change)
+  | in #[span #{ change.target }]
+
+mixin change(change)
+  li
+    | Changed #[strong #{ change.model }.#{ change.property }] from
+    | #[strong #{ change.oldValue }] to #[strong #{ change.newValue }]
+    | 
+    if change.model === 'Post'
+      +post-change(change)
+    else if change.model === 'Board'
+      +board-change(change)
+
+
 block main
   h1 Modlog
   if modlog.length
@@ -22,13 +46,11 @@ block main
           ul
             if item.changes && item.changes.length
               for change in item.changes
-                li
-                  | Changed #[strong #{ change.model }.#{ change.property }] from
-                  | #[strong #{ change.oldValue }] to #[strong #{ change.newValue }]
-                  | in 
-                  +reflink(change.target)
+                +change(change)
             else
-              li Did nothing, actually
+              +nothing-change
+          if item.regenerate
+            | #[strong HTML regenerated]
   else
     | No more entries
   if (modlog.length)

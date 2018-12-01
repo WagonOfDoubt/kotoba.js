@@ -29,6 +29,7 @@
     "express-session": "^1.15.6",
     "express-useragent": "^1.0.12",
     "express-validator": "^5.3.0",
+    "flat": "^4.1.0",
     "fs-extra": "^7.0.1",
     "lodash": "^4.17.11",
     "markdown-it": "^8.4.2",

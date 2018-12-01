@@ -1,5 +1,5 @@
 /**
- * Models for Modlog entries.
+ * Model for Modlog entries.
  * @module models/modlog
  */
 
@@ -8,29 +8,35 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Mixed = mongoose.Schema.Types.Mixed;
 const Int32 = require('mongoose-int32');
+const flatten = require('flat');
 const useragentSchema = require('./schema/useragent');
 const changeSchema = require('./schema/change');
 
 
-// Schema representing set of actions performed by user in one request
+/**
+ * Schema representing set of actions performed by user in one request
+ */
 const modlogEntrySchema = Schema({
-  // when action was executed
-  timestamp:           { type: Date, default: Date.now },  // generated
-
-  // info about user who initiated action
-  // ip of initiator
+  /** When action was executed (filled automatically) */
+  timestamp:           { type: Date, default: Date.now },
+  /** IP of user who initiated action */
   ip:                  { type: String, required: true },
-  // useragent of initiator
+  /** useragent of user who initiated action */
   useragent:           { type: useragentSchema, required: true },
-  // if user is logged in, profile of this user
-  // can be empty if user was not logged in
+  /**
+   * If user is logged in, profile of this user.
+   * Can be empty if user was not logged in.
+   */
   user:                { type: ObjectId, ref: 'User' },
-
-  // info about target post, if action has something to do with posts
-  // list of changes that was performed on target posts
+  /**
+   * Array of changes that were made
+   * @see {@link models/schama/change}
+   */
   changes:             [ changeSchema ],
-  // whether or not initiator entered correct password for target posts
+  /** Whether or not initiator entered correct password for target posts */
   isPasswordMatched:   { type: Boolean, default: false },
+  /** Whether or not nessessary pages were regenerated */
+  regenerate:          { type: Boolean, default: false },
 },
 // options
 {
@@ -40,4 +46,48 @@ const modlogEntrySchema = Schema({
 });
 
 
-const ModlogEntry = module.exports = mongoose.model('ModlogEntry', modlogEntrySchema);
+/**
+ * Create list of changes by comparing unchanged object and object with changes
+ * @param {String} model - value of model field that will be present in each
+ * change object in list
+ * @param {ObjectId} target - id of object in database that is being changed
+ * @param {Object} oldValues - current object
+ * @param {Object} newValues - patch object, does not necessarily contains all
+ * the original object properties, just ones that must be changed
+ * @example
+ * properties of nested objects are flatten to paths, i.e.
+ * {
+ *   foo: {
+ *     bar: 'baz'
+ *   }
+ * }
+ * becomes
+ * {
+ *   'foo.bar': 'baz'
+ * }
+ * @see {@link models/schema/change}
+ * @returns {Array.<Object>} Array of objects corresponding to changeSchema:
+ * { target, modeule, property, oldValue, newValue }
+ */
+modlogEntrySchema.statics.diff = (model, target, oldValues, newValues) =>{
+  oldValues = flatten(oldValues);
+  newValues = flatten(newValues);
+  const changes = [];
+  Object
+    .entries(newValues)
+    .forEach(([key, value]) => {
+      if (oldValues[key] !== value) {
+        changes.push({
+          target: target,
+          model: model,
+          property: key,
+          oldValue: oldValues[key],
+          newValue: value,
+        });
+      }
+    });
+  return changes;
+};
+
+
+module.exports = mongoose.model('ModlogEntry', modlogEntrySchema);

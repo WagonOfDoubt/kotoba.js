@@ -4,6 +4,7 @@ const { oneOf, body, param, validationResult } = require('express-validator/chec
 const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
 
 const Settings = require('../../models/settings');
+const ModlogEntry = require('../../models/modlog');
 const middlewares = require('../../utils/middlewares');
 const { generateMainPage } = require('../../controllers/generate');
 
@@ -32,12 +33,26 @@ router.patch(
   ],
   async (req, res, next) => {
     try {
-      const result = await Settings.set(req.body.data);
-      const regenerate = req.body.regenerate;
+      const { data, regenerate } = req.body;
+      const settings = await Settings.get();
+
+      const changes = ModlogEntry.diff('Settings', settings._id, settings.toObject(), data);
+      if (!changes.length) {
+        throw new Error('Nothing to change');
+      }
+      const status = await Settings.set(data);
+      await ModlogEntry.create({
+        ip: req.ip,
+        useragent: req.useragent,
+        user: req.user,
+        changes: changes,
+        regenerate: regenerate,
+      });
+
       if (regenerate) {
         await generateMainPage();
       }
-      res.json(result);
+      res.json(status);
     } catch (err) {
       return next(err);
     }

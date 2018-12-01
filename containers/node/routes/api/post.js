@@ -53,36 +53,29 @@ router.patch(
       setAttachmentPropties = _.mapKeys(setAttachmentPropties,
         (value, key) => key.substring(attachmentPropertyPrefix.length));
 
+      const changes = posts.reduce(
+        (acc, post) => {
+          return [
+            ...acc,
+            ...ModlogEntry.diff('Post', post._id, post.toObject(), setPostProperties)
+          ];
+        }, []);
+      if (!changes.length) {
+        throw new Error('Nothing to change');
+      }
+      await ModlogEntry.create({
+        ip: req.ip,
+        useragent: req.useragent,
+        user: req.user,
+        changes: changes,
+        regenerate: false,
+      });
+
       const mongoResponse = await updatePosts(
         posts, setPostProperties,
         attachmentIds, setAttachmentPropties,
         regenerate);
       status.mongo = mongoResponse;
-
-      const changes = [];
-      posts.forEach((post) => {
-        Object
-          .entries(setPostProperties)
-          .forEach(([key, value]) => {
-            if (post[key] !== value) {
-              changes.push({
-                target: post._id,
-                model: 'Post',
-                property: key,
-                oldValue: post[key],
-                newValue: value,
-              });
-            }
-          });
-      });
-      const modlogEntry = new ModlogEntry({
-        ip: req.ip,
-        useragent: req.useragent,
-        user: req.user,
-        changes: changes,
-      });
-      await modlogEntry.save({ validateBeforeSave: true });
-
       res.json(status);
     } catch (err) {
       return next(err);
