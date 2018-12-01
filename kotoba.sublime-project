@@ -1,12 +1,12 @@
 {
-	"folders":
-	[
-		{
-			"path": ".",
+  "folders":
+  [
+    {
+      "path": ".",
       "folder_exclude_patterns": ["node_modules", "db", "html"],
       "file_exclude_patterns": ["*.map"]
-		}
-	],
+    }
+  ],
   "settings":
   {
     "tab_size": 2,
