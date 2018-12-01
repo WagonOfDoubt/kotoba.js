@@ -8,18 +8,11 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Mixed = mongoose.Schema.Types.Mixed;
 const Int32 = require('mongoose-int32');
+const useragentSchema = require('./schema/useragent');
+const changeSchema = require('./schema/change');
 
 
-// Schema representing atomic change on one document property
-const changeSchema = Schema({
-  target:              { type: ObjectId, required: true },
-  model:               { type: String, required: true },
-  property:            { type: String, required: true },
-  oldValue:            { type: Mixed, required: true },  // any type
-  newValue:            { type: Mixed, required: true },  // any type
-});
-
-// Schema representing 
+// Schema representing set of actions performed by user in one request
 const modlogEntrySchema = Schema({
   // when action was executed
   timestamp:           { type: Date, default: Date.now },  // generated
@@ -28,7 +21,7 @@ const modlogEntrySchema = Schema({
   // ip of initiator
   ip:                  { type: String, required: true },
   // useragent of initiator
-  useragent:           { type: Object, required: true },
+  useragent:           { type: useragentSchema, required: true },
   // if user is logged in, profile of this user
   // can be empty if user was not logged in
   user:                { type: ObjectId, ref: 'User' },
@@ -38,7 +31,13 @@ const modlogEntrySchema = Schema({
   changes:             [ changeSchema ],
   // whether or not initiator entered correct password for target posts
   isPasswordMatched:   { type: Boolean, default: false },
-}, { collection: 'modlog' });
+},
+// options
+{
+  collection: 'modlog',
+  strict: true,
+  minimize: true,
+});
 
 
 const ModlogEntry = module.exports = mongoose.model('ModlogEntry', modlogEntrySchema);

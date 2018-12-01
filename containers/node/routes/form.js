@@ -36,15 +36,9 @@ router.post('/form/post', [
     const files = req.files;
     const boardUri = req.body.board;
 
-    const ua = _.pick(req.useragent, [
-      'os', 'platform',
-      'browser', 'version',
-      'isBot', 'isMobile', 'isDesktop',
-      'source']);
-
     const postData = {
       ip: ip,
-      useragent: ua,
+      useragent: req.useragent,
       boardUri: boardUri,
       name: req.body.name,
       email: req.body.sage ? 'sage' : req.body.em,

@@ -4,42 +4,10 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const Int32 = require('mongoose-int32');
 const bcrypt = require('bcrypt');
 const config = require('../config.json');
+const reflinkSchema = require('./schema/reflink');
+const attachmentSchema = require('./schema/attachment');
+const useragentSchema = require('./schema/useragent');
 
-
-const attachmentSchema = Schema({
-  /* uploaded file md5 hash (hex string) */
-  hash:                { type: String, index: true },
-  /* original file name */
-  name:                { type: String },
-  /* origina file */
-  file:                { type: String },  // path to file
-  width:               { type: Number },  // pixels
-  height:              { type: Number },  // pixels
-  /* thumbnail */
-  thumb:               { type: String },  // path to file
-  thumbWidth:          { type: Number },  // pixels
-  thumbHeight:         { type: Number },  // pixels
-  /* duration in seconds for video and audio files */
-  duration:            { type: Number },
-  /* attachment type (image, video, etc) */
-  type:                { type: String, enum: ['image', 'video', 'audio', 'document', 'archive', 'unknown'] },
-  /* attachment file size in bytes */
-  size:                { type: Number },
-  isDeleted:           { type: Boolean, default: false },
-  isNSFW:              { type: Boolean, default: false },
-  isSpoiler:           { type: Boolean, default: false },
-});
-
-const reflinkSchema = Schema({
-  src: {
-    type: ObjectId,
-    ref: 'Post'
-  },
-  boardUri: { type: String },
-  postId: { type: Int32 },
-  threadId: { type: Int32 },
-  isOp:     { type: Boolean },
-});
 
 const postSchema = Schema({
   /* primary key for post, autoincrement, unique for each board */
@@ -93,7 +61,7 @@ const postSchema = Schema({
   // private fields
   ip:                  { type: String, required: true },   // immutable
   password:            { type: String, default: '' },      // immutable
-  useragent:           { type: Object, required: true },   // immutable
+  useragent:           { type: useragentSchema, required: true },   // immutable
   isApproved:          { type: Boolean, default: true },   // can be changed by mod
   isDeleted:           { type: Boolean, default: false }   // can be changed by mod
 });

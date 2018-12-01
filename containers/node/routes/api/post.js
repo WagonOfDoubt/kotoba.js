@@ -75,18 +75,13 @@ router.patch(
             }
           });
       });
-      const ua = _.pick(req.useragent, [
-        'os', 'platform',
-        'browser', 'version',
-        'isBot', 'isMobile', 'isDesktop',
-        'source']);
       const modlogEntry = new ModlogEntry({
         ip: req.ip,
-        useragent: ua,
+        useragent: req.useragent,
         user: req.user,
         changes: changes,
       });
-      await modlogEntry.save();
+      await modlogEntry.save({ validateBeforeSave: true });
 
       res.json(status);
     } catch (err) {
