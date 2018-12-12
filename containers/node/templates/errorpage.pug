@@ -11,9 +11,13 @@ block header
   h1.text-center Kuso!
 
 block main
-  div.error #{ error.name }: #{ error.message }
-  if error.stack
-    pre.error= error.stack
+  if error
+    div.error #{ error.name }: #{ error.message }
+    if error.stack
+      pre.error= error.stack
+  if errors
+    for e in errors
+      div.error #{ error.param }: #{ error.msg }
 
 block scripts
   script(src='/.static/js/kotoba.js')

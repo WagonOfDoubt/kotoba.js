@@ -21,6 +21,9 @@ export const alertErrorHandler = (data) => {
   const errorToHTML = (error) => {
     if (error.stack) {
       return `<pre class="error">${ error.stack }</pre>`;
+    } else if (error.param) {
+      // express-validator error
+      return `div class="error">${ error.param }: ${ error.msg }</div>`;
     } else {
       return `<div class="error">${ error.name }: ${ error.message }</div>`
     }
