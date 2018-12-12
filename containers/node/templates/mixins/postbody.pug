@@ -1,19 +1,22 @@
 mixin reflink(ref, type, match)
-  - var isRelative = board && ref.boardUri === board.uri;
-  if !match
-    - match = `>>${ isRelative ? '' : '/' + ref.boardUri + '/' }${ ref.postId }`;
-  a(
-    class= {
-      'reflink': true,
-      'reflink-op': ref.isOp,
-      'reflink-reply': type === 'reply',
-      'reflink-reference': type === 'reference',
-    }
-    data-post= ref.postId
-    data-board= ref.boardUri
-    data-thread= ref.threadId
-    href= `/${ ref.boardUri }/res/${ ref.threadId }.html#post-${ ref.boardUri }-${ ref.postId }`
-  )= match
+  if !ref
+    strong [post deleted]
+  else
+    - var isRelative = board && ref.boardUri === board.uri;
+    if !match
+      - match = `>>${ isRelative ? '' : '/' + ref.boardUri + '/' }${ ref.postId }`;
+    a(
+      class= {
+        'reflink': true,
+        'reflink-op': ref.isOp,
+        'reflink-reply': type === 'reply',
+        'reflink-reference': type === 'reference',
+      }
+      data-post= ref.postId
+      data-board= ref.boardUri
+      data-thread= ref.threadId
+      href= `/${ ref.boardUri }/res/${ ref.threadId }.html#post-${ ref.boardUri }-${ ref.postId }`
+    )= match
 
 
 mixin boardlink(el)

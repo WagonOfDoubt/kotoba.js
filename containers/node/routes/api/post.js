@@ -1,7 +1,7 @@
 const express = require('express');
 const ObjectId = require('mongoose').Types.ObjectId;
 const router = express.Router();
-const { body } = require('express-validator/check');
+const { body, oneOf } = require('express-validator/check');
 const _ = require('lodash');
 
 const Post = require('../../models/post');
@@ -21,10 +21,14 @@ const flags = [
   'attachment.isDeleted', 'attachment.isNSFW', 'attachment.isSpoiler'
 ];
 
+
 router.patch(
   '/api/post',
   [
-    body('posts').exists(),
+    oneOf([
+      body('posts').exists(),
+      body('attachments').exists(),
+    ]),
     body('set')
       .exists()
       .customSanitizer(sanitizer.pick(flags)),
@@ -43,7 +47,6 @@ router.patch(
         fail: res.locals.permissionDenied,
       };
       const { posts, set, regenerate, attachments } = req.body;
-      const attachmentIds = attachments ? attachments.map(ObjectId) : [];
 
       const attachmentPropertyPrefix = 'attachment.';
       const setPostProperties = _.pickBy(set,
@@ -52,23 +55,42 @@ router.patch(
         (value, key) => key.startsWith(attachmentPropertyPrefix));
       setAttachmentPropties = _.mapKeys(setAttachmentPropties,
         (value, key) => key.substring(attachmentPropertyPrefix.length));
-
+      
+      const attachmentIds = [];
       const changes = posts.reduce(
         (acc, post) => {
+          let postChanges = _.clone(setPostProperties);
+          if (post.attachments && post.attachments.length && setAttachmentPropties) {
+            const attachmentIndexes = attachments
+              .filter(att =>
+                att.boardUri === post.boardUri &&
+                att.postId === post.postId &&
+                att.attachmentIndex < post.attachments.length)
+              .map(att => att.attachmentIndex);
+
+            if (attachmentIndexes.length) {
+              postChanges.attachments = [];
+              attachmentIndexes.forEach(attachmentIndex => {
+                postChanges.attachments[attachmentIndex] = setAttachmentPropties;
+                attachmentIds.push(post.attachments[attachmentIndex]._id);
+              });
+            }
+          }
           return [
             ...acc,
-            ...ModlogEntry.diff('Post', post._id, post.toObject(), setPostProperties)
+            ...ModlogEntry.diff('Post', post._id, post.toObject(), postChanges)
           ];
         }, []);
       if (!changes.length) {
         throw new Error('Nothing to change');
       }
+
       await ModlogEntry.create({
         ip: req.ip,
         useragent: req.useragent,
         user: req.user,
         changes: changes,
-        regenerate: false,
+        regenerate: regenerate,
       });
 
       const mongoResponse = await updatePosts(

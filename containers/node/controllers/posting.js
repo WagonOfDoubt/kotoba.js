@@ -32,7 +32,7 @@ const InputError = (msg, reason) => {
  * uplading attachments and generating all related HTML files
  * @async
  * @param {string} boardUri - board directory
- * @param {object} postData - an object containg all nessessary fields according
+ * @param {object} postData - an object containg all necessary fields according
  * to Post schema
  * @param {Array.<object>} files - array of files from req.files (multer)
  * @returns {number} postId - sequential number of new thread
@@ -88,7 +88,7 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
  * @async
  * @param {string} boardUri - board directory
  * @param {number} threadId - sequential number of parent post on board
- * @param {object} postData - an object containg all nessessary fields according
+ * @param {object} postData - an object containg all necessary fields according
  * to Post schema
  * @param {Array.<object>} files - array of files from req.files (multer)
  * @returns {number} postId - sequential number of new post
@@ -307,15 +307,13 @@ module.exports.updatePosts = async (posts, setPosts, attachmentsObjectIds, setAt
       posts.map(_.property('board')),
       String);
 
-    await Promise
+    const [threadDocuments, boardDocuments] = await Promise
       .all([
         Post.findThreadsByIds(threadsAffected).populate('children'),
         Board.findBoardsByIds(boardsAffected)
-      ])
-      .then(([threadDocuments, boardDocuments]) => {
-        return generateThreads(threadDocuments)
-          .then(generateBoards(boardDocuments));
-      });
+      ]);
+    await generateThreads(threadDocuments);
+    await Promise.all(boardDocuments.map(bd => generateBoardPagesAndCatalog(bd)));
   }
   return response;
 };
