@@ -22,6 +22,8 @@ services:
       - ./html:/home/node/app/html
     expose:
       - 3000
+    ports:
+      - 9229:9229
     command: npm run debug
     depends_on:
       - mongo
