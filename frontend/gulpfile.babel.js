@@ -1,15 +1,15 @@
-const gulp = require('gulp');
-const sass = require('gulp-sass');
-const sourcemaps = require('gulp-sourcemaps');
-const uglifycss = require('gulp-uglifycss');
-const browserify = require('browserify');
-const source = require('vinyl-source-stream');
-const buffer = require('vinyl-buffer');
-const uglify = require('gulp-uglify');
-const gutil = require('gulp-util');
-const del = require('del');
-const babelify = require('babelify');
-const watchify = require('watchify');
+import babelify from 'babelify';
+import browserify from 'browserify';
+import buffer from 'vinyl-buffer';
+import del from 'del';
+import gulp from 'gulp';
+import gutil from 'gulp-util';
+import sass from 'gulp-sass';
+import source from 'vinyl-source-stream';
+import sourcemaps from 'gulp-sourcemaps';
+import uglify from 'gulp-uglify';
+import uglifycss from 'gulp-uglifycss';
+import watchify from 'watchify';
 
 
 const paths = {
@@ -24,21 +24,6 @@ const paths = {
   },
   clean: ['../html/.static/js/*', '../html/.static/css/*'],
 };
-
-
-gulp.task('styles', () => {
-  return gulp.src(paths.styles.src)
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(uglifycss())
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(paths.styles.dest));
-});
-
-
-gulp.task('styles:watch', () => {
-  gulp.watch(paths.styles.src, ['styles']);
-});
 
 
 // https://github.com/gulpjs/gulp/blob/4.0/docs/recipes/fast-browserify-builds-with-watchify.md
@@ -70,18 +55,25 @@ function bundle(bundler) {
     .pipe(gulp.dest(paths.scripts.dest));
 }
 
+export const styles = () => {
+  return gulp.src(paths.styles.src)
+    .pipe(sourcemaps.init())
+    .pipe(sass().on('error', sass.logError))
+    .pipe(uglifycss())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(paths.styles.dest));
+};
 
-gulp.task('scripts', bundle.bind(null, b));
+export const scripts = bundle.bind(null, b);
 
+export const clean = () =>  del(paths.clean, { force: true });
 
-gulp.task('scripts:watch', () => {
+export const watch = () => {
+  gulp.watch(paths.styles.src, styles);
   bundle(w);
   w.on('update', bundle.bind(null, w)); // on any dep update, runs the bundler
   w.on('log', gutil.log); // output build logs to terminal
-});
+};
 
-
-gulp.task('clean', () =>  del(paths.clean, { force: true }));
-
-gulp.task('default', ['styles', 'scripts']);
-gulp.task('watch', ['styles:watch', 'scripts:watch']);
+const build = gulp.series(clean, gulp.parallel(styles, scripts));
+export default build;
