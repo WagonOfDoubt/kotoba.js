@@ -1,19 +1,38 @@
 const _ = require('lodash');
+const { createRegExpFromArray, regExpTester } = require('../utils/regexp');
+
 
 module.exports.postEditPermission = async (req, res, next) => {
   try {
-    const { posts, set, postpassword } = req.body;
-    const checkPost = (post) =>
-      checkPostPermission(post, postpassword, req.user, set);
-    const checkedPostsResults = await Promise.all(posts.map(checkPost));
-    const [granted, denied] = _.partition(checkedPostsResults, 'ok');
-    res.locals.permissionGranted = granted.map(o => _.omit(o, 'post'));
-    res.locals.permissionDenied = denied.map(o => _.omit(o, 'post'));
-    const allowedPosts = granted.map(_.property('post'));
-    console.log('permissionGranted:', res.locals.permissionGranted);
-    console.log('permissionDenied:', res.locals.permissionDenied);
-    console.log('allowedPosts:', allowedPosts);
-    req.body.posts = allowedPosts;
+    const { items, postpassword } = req.body;
+
+    // check each operation for permission
+    const checkPost = (item) =>
+      checkPostPermission(item.target, postpassword, req.user, item.update);
+    const checkedPostsResults = await Promise.all(items.map(checkPost));
+
+    const permissionGranted = [];
+    const permissionDenied = [];
+    const updateItems = [];
+    checkedPostsResults.forEach((item) => {
+      const ref = item.target.toReflink();
+      if (!_.isEmpty(item.denied)) {
+        permissionDenied.push({ ref: ref, denied: item.denied });
+      }
+      if (!_.isEmpty(item.granted)) {
+        permissionGranted.push({ ref: ref, granted: item.granted });
+      }
+      if (!_.isEmpty(item.update)) {
+        updateItems.push(_.pick(item, [ 'target', 'update' ]));
+      }
+    });
+
+    res.locals.permissionGranted = permissionGranted;
+    res.locals.permissionDenied = permissionDenied;
+
+    // req.body.items will contain only items that are allowed for updating
+    req.body.items = updateItems;
+
     next();
   } catch (err) {
     next(err);
@@ -21,63 +40,70 @@ module.exports.postEditPermission = async (req, res, next) => {
 };
 
 
-const checkPostPermission = (post, password, user, setObj) => {
-  return new Promise(async (resolve, reject) => {
-    const ref = post.toReflink();
+const flags = [
+  // threads
+  'isSticky', 'isClosed',
+  // posts
+  'isSage', 'isApproved', 'isDeleted',
+  // attachments
+  'attachments.$[n].isDeleted', 'attachments.$[n].isNSFW', 'attachments.$[n].isSpoiler'
+];
 
-    // TODO: temporary code, allows to do anything for logged in users
-    // make proper staff permissions system
-    if (user) {
-      console.log('=== User logged in, resolve. !CHANGE ME!');
-      resolve({ ref: ref, post: post, ok: true });
-      return;
-    }
 
-    const passwordMatches = await post.checkPassword(password);
-    // not mod, no password => GTFO
-    if (!user && !passwordMatches) {
-      resolve({ ref: ref, post: post, ok: false, reason: 'Incorrect password' });
-      return;
-    }
+const isEditablePostField = regExpTester(createRegExpFromArray(flags))
 
-    // user wrote this post and can edit some fields
-    if (!user && passwordMatches) {
-      // [ key, value ] pairs that can be changed by unauthorized user if
-      // they have correct password
-      // TODO: make this customisable
-      const guestPriviliges = [
-        // anonymous can delete their own post, but can't restore it
-        [ 'isDeleted', true ],
-        // anonymous can close their own thread, but once and for all
-        [ 'isClosed', true ],
-        // anonymous can add or remove sage, if they had mistaken
-        [ 'isSage', true ], [ 'isSage', false ],
-        // anonymous can delete attachments in their own post, but can't restore it
-        [ 'attachment.isDeleted', true ],
-        // anonymous can set or unset NSFW, if they had mistaken
-        [ 'attachment.isNSFW', true ], [ 'attachment.isNSFW', false ],
-        // anonymous can set or unset spoiler, if they had mistaken
-        [ 'attachment.isSpoiler', true ], [ 'attachment.isSpoiler', false ],
-      ];
+const checkPostPermission = async (target, password, user, updateObj) => {
+  const updatesArray = _.toPairs(updateObj);
+  // TODO: temporary code, allows to do anything for logged in users
+  // make proper staff permissions system
+  if (user) {
+    const [ validFields, invalidFields ] = _.partition(updatesArray, (kv) => isEditablePostField(kv[0]));
 
-      const setKV = _.toPairs(setObj);
-      const diff = _.differenceWith(setKV, guestPriviliges, _.isEqual);
+    const update = _.fromPairs(validFields);
+    const granted = validFields
+      .map(([key, value]) => ({ key: key, value: value }));
+    const denied = invalidFields
+      .map(([key, value]) => ({ key: key, value: value, reason: 'Invalid field name' }));
+    return { target, update, granted, denied };
+  }
 
-      // if some of changed values are not editable by non-logged in user,
-      // deny to edit this post
-      if (diff.length) {
-        const deniedStuff = diff
-          .map(([key, value]) => `set ${ key } to ${ value }`)
-          .join(', ');
-        const reason = `You have no rights to ${ deniedStuff }`;
-        resolve({ ref: ref, post: post, ok: false, reason: reason })
-        return;
-      }
+  const passwordMatches = await target.checkPassword(password);
 
-      resolve({ ref: ref, post: post, ok: true });
-      return;
-    }
+  // user wrote this post and can edit some fields
+  if (passwordMatches) {
+    // [ key, value ] pairs that can be changed by unauthorized user if
+    // they have correct password
+    // TODO: make this customisable
+    // TODO: currently broken
+    const guestPriviliges = [
+      // anonymous can delete their own post, but can't restore it
+      [ 'isDeleted', true ],
+      // anonymous can close their own thread, but once and for all
+      [ 'isClosed', true ],
+      // anonymous can add or remove sage, if they had mistaken
+      [ 'isSage', true ], [ 'isSage', false ],
+      // anonymous can delete attachments in their own post, but can't restore it
+      [ 'attachments.$[n].isDeleted', true ],
+      // anonymous can set or unset NSFW, if they had mistaken
+      [ 'attachments.$[n].isNSFW', true ], [ 'attachments.$[n].isNSFW', false ],
+      // anonymous can set or unset spoiler, if they had mistaken
+      [ 'attachments.$[n].isSpoiler', true ], [ 'attachments.$[n].isSpoiler', false ],
+    ];
 
-    resolve({ ref: ref, post: post, ok: true });
-  });
+    const diff = _.differenceWith(updatesArray, guestPriviliges, _.isEqual);
+    const grantedArray = _.differenceWith(updatesArray, diff);
+
+    const update = _.fromPairs(grantedUpdate);
+    const granted = validFields
+      .map(([key, value]) => ({ key: key, value: value }));
+    const denied = diff
+      .map(([key, value]) => ({ key: key, value: value, reason: `You have no rights to set ${ key } to ${ value }`}));
+
+    return { target, update, granted, denied };
+  }
+
+  // not mod, no password => GTFO
+  const deniedUpdate = _.toPairs(update)
+    .map(([key, value]) => ({ key: key, value: value, reason: 'Incorrect password'}));
+  return { target: target, update: {}, granted: {}, denied: deniedUpdate };
 };

@@ -12,31 +12,60 @@ const { postEditPermission } = require('../../middlewares/permission');
 const sanitizer = require('../../middlewares/sanitizer');
 const { updatePosts } = require('../../controllers/posting');
 
-const flags = [
-  // threads
-  'isSticky', 'isClosed',
-  // posts
-  'isSage', 'isApproved', 'isDeleted',
-  // attachmsnts
-  'attachment.isDeleted', 'attachment.isNSFW', 'attachment.isSpoiler'
-];
+
+/**
+ * Filter and merge items in post.body.items
+ * @async
+ * @example
+ * // original
+ * req.body.items = [
+ *   { target: { boardUri: 'b', postId: 123 }, update: { 'attachments.0.isDeleted': true } },
+ *   { target: { boardUri: 'b', postId: 123 }, update: { 'attachments.1.isDeleted': true } },
+ *   { target: { boardUri: 'b', postId: 456 }, update: { 'isSticky': true, invalidField: 123 } },
+ *   { target: { boardUri: 'a', postId: 789, junk: 'some_junk' }, update: { 'isSage': true } },
+ * ];
+ * // becomes
+ * req.body.items = [
+ *   { target: { boardUri: 'b', postId: 123 }, update: { 'attachments.0.isDeleted': true, 'attachments.1.isDeleted': true } },
+ *   { target: { boardUri: 'b', postId: 456 }, update: { 'isSticky': true } },
+ *   { target: { boardUri: 'a', postId: 789 }, update: { 'isSage': true } },
+ * ];
+ */
+const filterItemsAndFindPosts = async (req, res, next)=> {
+  try {
+    const items = req.body.items;
+    // filter input and find unique posts
+    const targets = items.map(item =>
+      _.pick(item.target, ['boardUri', 'postId']));
+    const postQuery = _.uniqWith(targets, _.isEqual);
+    // get posts from DB
+    const posts = await Post.findPosts(postQuery);
+
+    const postsIsEqual = (p1, p2) =>
+      p1.postId === p2.postId && p1.boardUri === p2.boardUri;
+    // match posts with corresponding update dictionaries
+    req.body.items = posts.map(p => {
+      const updates = items
+        .filter(item => postsIsEqual(item.target, p))
+        .map(_.property('update'));
+      const update  = _.assign(...updates);
+      return { target: p, update: update }
+    });
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
 
 
 router.patch(
   '/api/post',
   [
-    oneOf([
-      body('posts').exists(),
-      body('attachments').exists(),
-    ]),
-    body('set')
-      .exists()
-      .customSanitizer(sanitizer.pick(flags)),
+    body('items').exists().isArray(),
     body('regenerate').toBoolean(),
     middlewares.validateRequest,
-    reqparser.parsePostIds,
-    reqparser.findPosts,
-    // filters req.body.posts so only posts that can be changed by current user
+    filterItemsAndFindPosts,
+    // filters req.body.items so only posts that can be changed by current user
     // are present
     postEditPermission,
   ],
@@ -46,41 +75,14 @@ router.patch(
         success: res.locals.permissionGranted,
         fail: res.locals.permissionDenied,
       };
-      const { posts, set, regenerate, attachments } = req.body;
+      const { items, regenerate } = req.body;
 
-      const attachmentPropertyPrefix = 'attachment.';
-      const setPostProperties = _.pickBy(set,
-        (value, key) => !key.startsWith(attachmentPropertyPrefix));
-      let setAttachmentPropties = _.pickBy(set,
-        (value, key) => key.startsWith(attachmentPropertyPrefix));
-      setAttachmentPropties = _.mapKeys(setAttachmentPropties,
-        (value, key) => key.substring(attachmentPropertyPrefix.length));
-      
-      const attachmentIds = [];
-      const changes = posts.reduce(
-        (acc, post) => {
-          let postChanges = _.clone(setPostProperties);
-          if (post.attachments && post.attachments.length && setAttachmentPropties) {
-            const attachmentIndexes = attachments
-              .filter(att =>
-                att.boardUri === post.boardUri &&
-                att.postId === post.postId &&
-                att.attachmentIndex < post.attachments.length)
-              .map(att => att.attachmentIndex);
+      const changes = items.reduce((acc, item) => {
+        const { target, update } = item;
+        const diffs = ModlogEntry.diff('Post', target._id, target.toObject(), update);
+        return [...acc, ...diffs];
+      }, []);
 
-            if (attachmentIndexes.length) {
-              postChanges.attachments = [];
-              attachmentIndexes.forEach(attachmentIndex => {
-                postChanges.attachments[attachmentIndex] = setAttachmentPropties;
-                attachmentIds.push(post.attachments[attachmentIndex]._id);
-              });
-            }
-          }
-          return [
-            ...acc,
-            ...ModlogEntry.diff('Post', post._id, post.toObject(), postChanges)
-          ];
-        }, []);
       if (!changes.length) {
         throw new Error('Nothing to change');
       }
@@ -93,10 +95,7 @@ router.patch(
         regenerate: regenerate,
       });
 
-      const mongoResponse = await updatePosts(
-        posts, setPostProperties,
-        attachmentIds, setAttachmentPropties,
-        regenerate);
+      const mongoResponse = await updatePosts(items, regenerate);
       status.mongo = mongoResponse;
       res.json(status);
     } catch (err) {

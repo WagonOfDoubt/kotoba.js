@@ -23,7 +23,7 @@ export const alertErrorHandler = (data) => {
       return `<pre class="error">${ error.stack }</pre>`;
     } else if (error.param) {
       // express-validator error
-      return `div class="error">${ error.param }: ${ error.msg }</div>`;
+      return `<div class="error">${ error.param }: ${ error.msg }</div>`;
     } else {
       return `<div class="error">${ error.name }: ${ error.message }</div>`
     }

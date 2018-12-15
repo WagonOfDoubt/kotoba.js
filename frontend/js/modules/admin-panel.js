@@ -54,11 +54,7 @@ const readableResponseReport = (response) => {
 };
 
 
-const sendSetFlagRequest = (url, data, setFlags) => {
-  const { attachments } = data;
-  data.set = setFlags;
-  data.regenerate = true;
-  console.log(data);
+const sendSetFlagRequest = (url, data) => {
   modal.wait();
   sendJSON(url, 'patch', data)
     .then((response) => {
@@ -78,10 +74,31 @@ function initAdminPanel() {
     e.preventDefault();
     const { name, value } = e.target;
     const setFlags = {};
-    console.log(name, value, e.target);
-    setFlags[name] = value === 'true';
-    const data = $form.serializeJSON();
-    sendSetFlagRequest(url, data, setFlags);
+    const formData = $form.serializeJSON();
+    const isAttachment = name.startsWith('attachments.$[n].');
+    const collection = isAttachment ? formData.attachments : formData.posts;
+    /**
+     * [
+     *   {
+     *     target: { boardUri: 'b', postId: 123},
+     *     update: { attachments.0.isDeleted: true }
+     *   },
+     *   ...
+     * ]
+     */
+    const items = collection.map(tragetStr => {
+      const [ post, boardUri, sPostId, attachmentIndex ] = tragetStr.split('-');
+      const postId = parseInt(sPostId);
+      const field = name.replace('$[n]', attachmentIndex);
+      const target = { boardUri, postId };
+      const update = {};
+      update[field] = value === 'true';
+      return { target, update };
+    });
+    const data = { items };
+    data.regenerate = true;
+    data.postpassword = formData.postpassword;
+    sendSetFlagRequest(url, data);
   };
 
   // add events

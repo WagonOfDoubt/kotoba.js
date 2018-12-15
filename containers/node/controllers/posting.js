@@ -263,40 +263,47 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
 /**
  * Update fields of posts and save it to DB.
  * @async
- * @param {Array.<Post>} posts - array of post mongoose documents
- * @param {Object} setPosts - object with fields to change in documents
- * @param {Array.<ObjectId>} attachmentsObjectIds - array of ObjectIds of attachments
- * @param {Object} setAttachments - object with fields to change in attahments in posts
- * @param {boolean} regenerate - regenerate corresponding html files
- * @returns result of Post.updateMany, or an emty object if no posts were updated
+ * @example
+ * const items = [
+ *   {
+ *     target: { _id: ObjectId(...), boardUri: 'b', postId: 123, ... },  // Post document
+ *     update: { 'attachments.0.isDeleted': true, 'attachments.1.isDeleted': true }
+ *   },
+ *   {
+ *     target: { _id: ObjectId(...), boardUri: 'b', postId: 456, ... },  // Post document
+ *     update: { 'isSticky': true }
+ *   },
+ *   {
+ *     target: { _id: ObjectId(...), boardUri: 'a', postId: 789, ... },  // Post document
+ *     update: { 'isSage': true }
+ *   },
+ * ];
+ * await updatePosts(items, true);
+ * @param {Array.<Object>} items - array of post mongoose documents
+ * @param {boolean} [regenerate=true] - regenerate corresponding html files
+ * @returns result of Post.bulkWrite, or an emty object if no posts were updated
  */
-module.exports.updatePosts = async (posts, setPosts, attachmentsObjectIds, setAttachments, regenerate = true) => {
-  const response = {};
-
-  if (!_.isEmpty(posts) && !_.isEmpty(setPosts)) {
-    const postsObjectIds = posts.map(_.partialRight(_.pick, ['_id']));
-    const selectQuery = { $or: postsObjectIds };
-    const updateQuery = { $set: setPosts };
-    const postResponse = await Post.updateMany(selectQuery, updateQuery);
-    response.posts = postResponse;
+module.exports.updatePosts = async (items, regenerate = true) => {
+  if (_.isEmpty(items)) {
+    return {};
   }
 
-  if (!_.isEmpty(attachmentsObjectIds) && !_.isEmpty(setAttachments)) {
-    // { attachments.$[elem].is(Deleted|NSFW|Spoiler): (true|false) }
-    const setObj = _.mapKeys(setAttachments, (value, key) => 'attachments.$[elem].' + key);
+  const query = items.map(item => {
+    const filter = item.target._id
+      ? { _id: item.target._id }
+      : _.pick(item.target, ['boardUri', 'postId']);
+    return {
+      updateOne: {
+        filter: filter,
+        update: item.update,
+      },
+    };
+  });
+  const response = await Post.bulkWrite(query);
 
-    const selectQuery = { 'attachments._id': { $in: attachmentsObjectIds } };
-    const updateQuery = { $set: setObj };
-    const arrayFilters = [{ 'elem._id': { $in: attachmentsObjectIds } }];
-    const queryOptions = { arrayFilters: arrayFilters, multi: true };
-
-    const attachmentResponse = await Post.update(selectQuery, updateQuery, queryOptions).exec();
-    response.attachments = attachmentResponse;
-  }
-
-  if (regenerate && (response.posts || response.attachments)) {
-    const replies = posts.filter(r => !r.isOp);
-    const threads = posts.filter(t => t.isOp);
+  if (regenerate) {
+    const posts = items.map(_.property('target'));
+    const [ threads, replies ] = _.partition(posts, (r) => r.isOp);
 
     const threadsAffected = _.unionBy(
       replies.map(_.property('parent')),
