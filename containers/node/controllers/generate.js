@@ -20,7 +20,7 @@ const pkg = require('../package.json');
 /**
  * Helper function.
  * Gets Settings object from database
- * and returns object with parameters nessessary for templates.
+ * and returns object with parameters necessary for templates.
  * @async
  */
 const getTemplateGlobals = async () => {

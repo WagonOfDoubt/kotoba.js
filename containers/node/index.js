@@ -110,7 +110,7 @@ app.use((err, req, res, next) => {
     const debugErrorFields = ['name', 'message', 'stack'];
     const errfields = isDev ? debugErrorFields : productionErrorFields;
     const errobj = _.pick(err, errfields)
-    if (req.is('json')) {
+    if (req.is() === 'application/json') {
       res.json({ 'error': errobj });
     } else {
       res.render('errorpage', {

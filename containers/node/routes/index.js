@@ -9,20 +9,13 @@
  */
 
 const express = require('express');
-
-const formRouter = require('./form');
-const authRouter = require('./auth');
-const manageRouter = require('./manage');
-const previewRouter = require('./preview');
-const apiRouter = require('./api');
-
 const router = express.Router();
 
-router.use(formRouter);
-router.use(authRouter);
-router.use(manageRouter);
-router.use(previewRouter);
-router.use(apiRouter);
+router.use(require('./form'));
+router.use(require('./auth'));
+router.use(require('./manage'));
+router.use(require('./preview'));
+router.use(require('./api'));
 
 /**
  * Express router.

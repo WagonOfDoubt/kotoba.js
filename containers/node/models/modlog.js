@@ -35,7 +35,7 @@ const modlogEntrySchema = Schema({
   changes:             [ changeSchema ],
   /** Whether or not initiator entered correct password for target posts */
   isPasswordMatched:   { type: Boolean, default: false },
-  /** Whether or not nessessary pages were regenerated */
+  /** Whether or not necessary pages were regenerated */
   regenerate:          { type: Boolean, default: false },
 },
 // options

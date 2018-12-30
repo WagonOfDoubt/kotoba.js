@@ -12,7 +12,7 @@ const _ = require('lodash');
  * Also allows for placeholder $[n] that will match any digits in resulting
  * expression (replaced with \d+).
  * @example
- * const fooRegExp = createRegExpFromArray(['foo', 'bar', 'baz.1.abc']);
+ * const fooRegExp = createRegExpFromArray(['foo', 'bar', 'baz.$[n].abc']);
  * // ^(foo|bar|baz\.\d+\.abc)$
  * @param {Array.<string>} array - array of strings
  * @returns {RegExp}
