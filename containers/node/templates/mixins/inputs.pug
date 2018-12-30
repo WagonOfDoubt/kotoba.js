@@ -11,7 +11,8 @@ mixin textArea(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param) #{ label }:
+    if label
+      label(for=param) #{ label }:
     textarea(data-default=def, name=param, id=param, rows='10', required=required)= val
     if block
       small.desc
@@ -23,7 +24,8 @@ mixin textEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param) #{ label }:
+    if label
+      label(for=param) #{ label }:
     input(data-default=def, name=param, id=param, type='text', value=val, required=required)
     if block
       small.desc
@@ -35,7 +37,8 @@ mixin passwordEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param) #{ label }:
+    if label
+      label(for=param) #{ label }:
     input(data-default=def, name=param, id=param, type='password', value=val, required=required)
     if block
       small.desc
@@ -47,7 +50,8 @@ mixin numberEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param) #{ label }:
+    if label
+      label(for=param) #{ label }:
     input(data-default=def, name=param+':number', id=param, type='number', value=val, required=required)
     if block
       small.desc
@@ -59,10 +63,30 @@ mixin checkboxEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   div.form-group
-    label(for=param) #{ label }:
+    if label
+      label(for=param) #{ label }:
     input(data-default=def, name=param+':boolean', id=param, type='checkbox', checked=val, required=required)
     if block
       small.desc
         block
     else if hint
       +hintText(hint, def)
+
+mixin comboboxEdit(param, label, options, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    if label
+      label(for=param) #{ label }:
+    select(data-default=def, name=param, id=param, required=required)
+      for opt in options
+        if opt.value === val
+          option(value=opt.value, selected)= opt.label
+        else
+          option(value=opt.value)= opt.label
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+

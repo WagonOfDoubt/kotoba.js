@@ -1,33 +1,46 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator/check');
+const _ = require('lodash');
 
 const User = require('../../models/user');
+const Role = require('../../models/role');
+const Board = require('../../models/board');
 const userController = require('../../controllers/user');
 const middlewares = require('../../utils/middlewares');
 
 
-// TODO get user
 router.get('/api/me', [
     middlewares.apiAuthRequired,
   ],
   async (req, res, next) => {
     try {
-      const user = await User.findById(req.user._id);
+      const userFields = [
+        'displayname',
+        'login',
+        'authority',
+        'addedon',
+        'lastactive',
+        'contacts',
+        'boardRoles',
+      ];
+      const user = _.pick(req.user.toObject(), userFields);
+      if (user.boardRoles) {
+        const roleIds = Array.from(user.boardRoles.values());
+        const roleNames = await Role.find({ _id: { $in: roleIds } }, { roleName: 1 });
+        const idToRoleName = roleNames.reduce((acc, role) => {
+          const { _id, roleName } = role.toObject();
+          return { ...acc, [_id]: roleName };
+        }, {});
+        user.boardRoles = Array.from(user.boardRoles.entries())
+          .reduce((acc, [key, value]) => {
+            return { ...acc, [key]: idToRoleName[value.toString()] };
+          }, {});
+      }
       res.json(user);
     } catch (err) {
       return next(err);
     }
-  }
-);
-
-
-// TODO create user
-router.put('/api/me', [
-    middlewares.apiAuthRequired,
-  ],
-  async (req, res, next) => {
-    res.status(501).send();
   }
 );
 
@@ -64,7 +77,7 @@ router.patch('/api/me/password', [
         }).withMessage(`Old password is incorrect`),
     body('password', `Password is required`)
       .exists(),
-    body('password', `Password must be between 6 and 72 characters long and contain one number`)
+    body('password', `Password must be between 6 and 72 characters long and contain at least one number`)
       .exists()
       .isLength({ min: 6, max: 72 })
       .matches(/\d/),
@@ -122,6 +135,151 @@ router.delete('/api/me', [
       res.clearCookie('kot.user');
       req.logout();
       res.send(status);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+router.get('/api/user', [
+    middlewares.apiAuthRequired,
+  ],
+  async (req, res, next) => {
+    try {
+      const query = _.pick(req.query || {}, ['login', 'authority', 'displayname']);
+      const users = await User.find(query, [], { sort: { lastactive: -1 } });
+      res.json(users);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+router.patch('/api/user', [
+    middlewares.apiAuthRequired,
+    middlewares.adminOnly,
+    body('user').exists().withMessage('user is required'),
+    middlewares.validateRequest,
+  ],
+  async (req, res, next) => {
+    try {
+      const selectQuery = { login: req.body.user };
+      const updateQuery = { $set: _.pick(req.body, ['authority']) };
+      const status = await User.updateOne(selectQuery, updateQuery);
+      res.json(status);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+const getStaffMember = async (req, res, next) => {
+  try {
+    const staffMember = await User.findOne({ login: req.body.user }, { authority: 1, boardRoles: 1 });
+    req.body.staffMember = staffMember;
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+const checkUserAuthority = (req, res, next) => {
+  try {
+    if (req.body.staffMember.authority === 'admin') {
+      res.status(418).json({ error: { msg: 'Admin has all permissions by default' }});
+      return;
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+router.put('/api/user/role', [
+    middlewares.apiAuthRequired,
+    middlewares.adminOnly,
+    body('user').exists().withMessage('user is required'),
+    body('role').exists().withMessage('role is required'),
+    body('board').exists().withMessage('board is required'),
+    middlewares.validateRequest,
+    getStaffMember,
+    checkUserAuthority,
+  ],
+  async (req, res, next) => {
+    try {
+      const role = await Role.findOne({ roleName: req.body.role });
+      const board = req.body.board;
+      const allBoards = await Board.distinct('uri');
+      const staffMember = req.body.staffMember;
+      if (staffMember.boardRoles && staffMember.boardRoles.has(board)) {
+        res.status(418).json({ error: { msg: `Role for board /${board}/ already exist`, param: 'board' }});
+        return;
+      }
+      if (!allBoards.includes(board)) {
+        res.status(418).json({ error: { msg: `Board /${board}/ does not exist`, param: 'board' }});
+        return;
+      }
+      const updateQuery = _.fromPairs([[`boardRoles.${ board }`, role._id]]);
+      const status = await User.findByIdAndUpdate(staffMember._id, updateQuery, { runValidators: true, rawResult: true });
+      res.json(_.pick(status, ['ok']));
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+router.patch('/api/user/role', [
+    middlewares.apiAuthRequired,
+    middlewares.adminOnly,
+    body('user').exists().withMessage('user is required'),
+    body('role').exists().withMessage('role is required'),
+    body('board').exists().withMessage('board is required'),
+    middlewares.validateRequest,
+    getStaffMember,
+    checkUserAuthority,
+  ],
+  async (req, res, next) => {
+    try {
+      const role = await Role.findOne({ roleName: req.body.role });
+      const board = req.body.board;
+      const staffMember = req.body.staffMember;
+      if (staffMember.boardRoles && !staffMember.boardRoles.has(board)) {
+        res.status(418).json({ error: { msg: `Role for board /${board}/ does not exist`, param: 'board' }});
+        return;
+      }
+      const updateQuery = _.fromPairs([[`boardRoles.${ board }`, role._id]]);
+      const status = await User.findByIdAndUpdate(staffMember._id, updateQuery, { runValidators: true, rawResult: true });
+      res.json(_.pick(status, ['ok']));
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+router.delete('/api/user/role', [
+    middlewares.apiAuthRequired,
+    middlewares.adminOnly,
+    body('user').exists().withMessage('user is required'),
+    body('board').exists().withMessage('board is required'),
+    middlewares.validateRequest,
+    getStaffMember,
+    checkUserAuthority,
+  ],
+  async (req, res, next) => {
+    try {
+      const board = req.body.board;
+      const updateQuery = { $unset: { [`boardRoles.${ board }`]: 1 } };
+      console.log(updateQuery);
+      const staffMember = req.body.staffMember;
+      const status = await User.findByIdAndUpdate(staffMember._id, updateQuery, { runValidators: true, rawResult: true });
+      res.json(_.pick(status, ['ok']));
     } catch (err) {
       next(err);
     }

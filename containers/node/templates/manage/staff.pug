@@ -3,6 +3,7 @@ extends managepage.pug
 include ../mixins/inputs.pug
 include ../mixins/modals.pug
 include ../mixins/timestamp.pug
+include ../mixins/text.pug
 
 block header
   h1 Staff
@@ -10,6 +11,8 @@ block header
 block main
   //- pre= JSON.stringify(staff, null, 2)
   //- pre= JSON.stringify(staffMember, null, 2)
+  -var allRoles= roles.map(role => ({ value: role.roleName, label: role.roleName }))
+  -var allBoards= boards.map(board => ({ value: board.uri, label: `/${ board.uri }/` }))
 
   if staffMember
     h2 #{staffMember.login} profile
@@ -18,11 +21,92 @@ block main
       if staffMember.displayname
         p Name: #[strong.nickname #{staffMember.displayname}]
       p Authority: #[strong= staffMember.authority]
+      if staffMember.authority === 'admin'
+        -var authorities = [{ value: 'admin', label: 'admin' }, { value: 'staff-member', label: 'staff-member' }, { value: 'guest', label: 'guest' }]
+        -var values = staffMember
+        form#form-cahnge-authority.js-api-form.js-reload-on-success(action='/api/user', 'data-method'='PATCH')
+          input(type='hidden', name='user', value=staffMember.login)
+          +comboboxEdit('authority', 'Auhority', authorities, '', true)
+          input(type='submit', value='Change authority')
       p Joined: #[strong #[+date(staffMember.addedon)]]
       p Last active: #[strong #[+datetime(staffMember.lastactive)]]
       if staffMember.contacts
         p Contacts:
         p= staffMember.contacts
+
+    if staffMember.authority === 'admin'
+      h3 Roles
+      div.info Site administarator has all permissions by default.
+    else
+      if staffMember.boardRoles
+        h3 Roles
+        table.table
+          thead
+            tr
+              th.table__header Delete
+              th.table__header Board
+              th.table__header Role
+              th.table__header Change role
+              th.table__header_vertical thread.isSticky
+              th.table__header_vertical thread.isClosed
+              th.table__header_vertical post.isSage
+              th.table__header_vertical post.isApproved
+              th.table__header_vertical post.isDeleted
+              th.table__header_vertical attachment.isDeleted
+              th.table__header_vertical attachment.isNSFW
+              th.table__header_vertical attachment.isSpoiler
+          tbody
+            for role, board in staffMember.boardRoles
+              tr
+                td
+                  form.js-api-form.js-reload-on-success(action='/api/user/role', 'data-method'='DELETE')
+                    input(type='hidden', name='user', value=staffMember.login)
+                    input(type='hidden', name='board', value=board)
+                    input(type='submit', value='Delete')
+                td
+                  a(href=`/${board}/`) /#{board}/
+                td
+                  a(href=`/manage/roles/${role.roleName}/`)= role.roleName
+                td
+                  form.form_inline.js-api-form.js-reload-on-success(action='/api/user/role', 'data-method'='PATCH')
+                    input(type='hidden', name='user', value=staffMember.login)
+                    input(type='hidden', name='board', value=board)
+                    -values = { role: role.roleName }
+                    +comboboxEdit('role', '', allRoles, '', true)
+                    input(type='submit', value='Save')
+                td
+                  +shortAccess(role, 'postPermissions', 'isSticky')
+                td
+                  +shortAccess(role, 'postPermissions', 'isClosed')
+                td
+                  +shortAccess(role, 'postPermissions', 'isSage')
+                td
+                  +shortAccess(role, 'postPermissions', 'isApproved')
+                td
+                  +shortAccess(role, 'postPermissions', 'isDeleted')
+                td
+                  +shortAccess(role, 'attachmentPermissions', 'isDeleted')
+                td
+                  +shortAccess(role, 'attachmentPermissions', 'isNSFW')
+                td
+                  +shortAccess(role, 'attachmentPermissions', 'isSpoiler')
+      else
+        h3 Roles
+        div.info This user has no permissions on any board.
+
+      if staffMember.boardRoles
+        -var currentUserRoles = Object.entries(staffMember.boardRoles)
+        for userRole in currentUserRoles
+          if userRole
+            -var board = userRole[0]
+            -var role = userRole[1]
+
+      h3 Add role
+      form#form-add-role.form_inline.js-api-form.js-reload-on-success(action='/api/user/role', 'data-method'='PUT')
+        input(type='hidden', name='user', value=staffMember.login)
+        +comboboxEdit('board', 'Board', allBoards, '', true)
+        +comboboxEdit('role', 'Role', allRoles, '', true)
+        input(type='submit', value='Add role')
 
   table.table
     caption
@@ -31,6 +115,7 @@ block main
       tr
         th Login
         th Authority
+        th Boards
         th Joined
         th Last active
     tbody
@@ -41,6 +126,14 @@ block main
             if member.displayname
               small.unimportant  (aka #[span.nickname #{member.displayname}])
           td= member.authority
+          td
+            -var fst=true
+            for r, b in member.boardRoles
+              if (!fst)
+                | ,
+                |
+              -fst = false
+              a(href=`/${b}/`, title=r.roleName) /#{b}/
           td
             +date(member.addedon)
           td

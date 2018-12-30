@@ -51,11 +51,12 @@ module.exports.apiAuthRequired = (req, res, next) => {
       .status(401)  // 401 Unauthorized
       .json({
         ok: 0,
-        errors: {
-          'login_required': {
+        errors: [
+          {
+            name: 'auth_required',
             msg: `You must be logged in to perform this action`
           }
-        }
+        ]
       });
   }
   next();
@@ -69,7 +70,7 @@ module.exports.apiAuthRequired = (req, res, next) => {
 module.exports.validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.mapped() });
+    return res.status(422).json({ errors: errors.array() });
   }
   next();
 };
@@ -102,11 +103,12 @@ module.exports.adminOnly = (req, res, next) => {
       .status(401)  // 401 Unauthorized
       .json({
         ok: 0,
-        errors: {
-          'staff_rights_required': {
+        errors: [
+          {
+            name: 'staff_rights_required',
             msg: `You don't have rights to perform this action`
           }
-        }
+        ]
       });
   }
   next();

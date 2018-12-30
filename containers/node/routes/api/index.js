@@ -10,22 +10,15 @@
  */
 
 const express = require('express');
-
-const apiBoardRouter = require('./board');
-const apiNewsRouter = require('./news');
-const apiUserRouter = require('./user');
-const apiPostRouter = require('./post');
-const apiSettingsRouter = require('./settings');
-const apiMaintenanceRouter = require('./maintenance');
-
 const router = express.Router();
 
-router.use(apiBoardRouter);
-router.use(apiNewsRouter);
-router.use(apiPostRouter);
-router.use(apiUserRouter);
-router.use(apiSettingsRouter);
-router.use(apiMaintenanceRouter);
+router.use(require('./board'));
+router.use(require('./maintenance'));
+router.use(require('./news'));
+router.use(require('./post'));
+router.use(require('./role'));
+router.use(require('./settings'));
+router.use(require('./user'));
 
 /**
  * Express router.

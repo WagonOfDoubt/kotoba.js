@@ -1,6 +1,7 @@
 const path = require('path');
 const MarkdownIt = require('markdown-it');
 const md = new MarkdownIt({ html: true });
+const flatten = require('flat');
 
 const filters = {};
 
@@ -22,6 +23,9 @@ filters.getParam = (key, obj) => {
     .map(key => key.replace(/\]/g, ''))
     .reduce(evalPath, obj);
 };
+
+
+filters.flatObj = (obj) => flatten(obj);
 
 
 filters.readableSize = (text, options) => {

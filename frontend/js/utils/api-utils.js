@@ -7,7 +7,7 @@ import * as modal from '../modules/modal';
 
 
 export const serializeForm = ($form) =>
-  $form.serializeJSON({checkboxUncheckedValue: "false"});
+  $form.serializeJSON({checkboxUncheckedValue: 'false'});
 
 
 export const alertErrorHandler = (data) => {
@@ -24,20 +24,22 @@ export const alertErrorHandler = (data) => {
     } else if (error.param) {
       // express-validator error
       return `<div class="error">${ error.param }: ${ error.msg }</div>`;
+    } else if (error.name) {
+      return `<div class="error">${ error.name }: ${ error.msg || error.message }</div>`
     } else {
-      return `<div class="error">${ error.name }: ${ error.message }</div>`
+      return `<div class="error">${ error.msg || error.message }</div>`
     }
   }
 
-  let alertMessage = errorText;
+  let alertMessage = `${ status } ${ statusText }`;
   if (data.responseJSON.errors) {
-    alertMessage = Object.values(data.responseJSON.errors)
+    alertMessage = `${Object.values(data.responseJSON.errors)
       .map(errorToHTML)
-      .join('<br>');
+      .join('<br>')}`;
   } else if (data.responseJSON.error) {
-    alertMessage = errorToHTML(data.responseJSON.error);
+    alertMessage = `${errorToHTML(data.responseJSON.error)}`;
   }
-  return modal.alert('Error', alertMessage);
+  return modal.alert(`Error: ${ status } ${ statusText }`, alertMessage);
 };
 
 

@@ -113,7 +113,7 @@ const managePage_siteSettings = () => {
 };
 
 
-const mangePage_news = () => {
+const managePage_news = () => {
   $('button[data-action="edit"]').click(e => {
     const btn = e.currentTarget;
     const newsId = parseInt(btn.dataset.news);
@@ -159,6 +159,15 @@ const mangePage_news = () => {
 };
 
 
+const managePage_roles = () => {
+  const onDone = (data) => {
+    modal.alert('Success', JSON.stringify(data))
+      .then(() => window.location.reload());
+  };
+  addSubmitListener($('.js-api-form'), onDone);
+};
+
+
 const addSubmitListener = ($form, callback) => {
   $form.submit((e) => {
     const $form = $(e.target);
@@ -179,6 +188,15 @@ const managePage_maintenance = () => {
     modal.alert('Success', message);
   };
   addSubmitListener($('#form-regenerate-all'), onDone);
+};
+
+
+const managePage_staff = () => {
+  const onDone = (data) => {
+    modal.alert('Success', JSON.stringify(data))
+      .then(() => window.location.reload());
+  };
+  addSubmitListener($('.js-api-form'), onDone);
 };
 
 
@@ -227,8 +245,10 @@ export const init = () => {
     'manage-page-delboard': managePage_deleteBoard,
     'manage-page-boardopts': managePage_updateBoard,
     'manage-page-sitesettings': managePage_siteSettings,
-    'manage-page-addnews': mangePage_news,
-    'manage-page-editnews': mangePage_news,
+    'manage-page-addnews': managePage_news,
+    'manage-page-editnews': managePage_news,
+    'manage-page-roles': managePage_roles,
+    'manage-page-staff': managePage_staff,
     'manage-page-maintenance': managePage_maintenance,
     'manage-page-profile': managePage_profile,
   };

@@ -105,6 +105,15 @@ table.table {
   tbody tr, tfoot tr {
     border-color: var(--border-color);
   }
+
+  .table__header {
+    vertical-align: bottom;
+  }
+
+  .table__header_vertical {
+    writing-mode: vertical-lr;
+    vertical-align: bottom;
+  }
 }
 
 .news-header {
@@ -178,38 +187,46 @@ table.table {
   }
 }
 
-.form-group {
-  display: grid;
-  grid-template-columns: 12rem auto 1fr;
-
-  :target {
-    outline: 2px solid red;
+.form_inline {
+  .form-group {
+    display: inline-block;
   }
+}
 
-  label {
-    text-align: right;
-    align-self: center;
-    padding: .75rem;
-  }
+form {
+  .form-group {
+    display: grid;
+    grid-template-columns: 12rem auto 1fr;
 
-  input {
-    align-self: center;
-  }
+    :target {
+      outline: 2px solid red;
+    }
 
-  small {
-    align-self: center;
-    padding: .75rem;
-  }
+    label {
+      text-align: right;
+      align-self: center;
+      padding: .75rem;
+    }
 
-  textarea {
-    grid-column-start: 2;
-    grid-column-end: 4;
-  }
+    input {
+      align-self: center;
+    }
 
-  textarea + small {
-    grid-column-start: 2;
-    grid-column-end: 4;
-  }
+    small {
+      align-self: center;
+      padding: .75rem;
+    }
+
+    textarea {
+      grid-column-start: 2;
+      grid-column-end: 4;
+    }
+
+    textarea + small {
+      grid-column-start: 2;
+      grid-column-end: 4;
+    }
+  }  
 }
 
 .error {

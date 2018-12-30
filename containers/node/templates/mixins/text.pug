@@ -1,0 +1,12 @@
+mixin shortAccess(role, permissions, prop)
+  -var access = role && role[permissions] && role[permissions][prop] && role[permissions][prop].access
+  if (access)
+    if (access === 'no-access')
+      abbr(title='no access') 🚫 n
+    else if (access === 'read-only')
+      abbr(title='read only') 👁️ r
+    else
+      abbr(title='write') ✔️ r/w
+  else
+    abbr.error(title='undefined') ❓ n/a
+
