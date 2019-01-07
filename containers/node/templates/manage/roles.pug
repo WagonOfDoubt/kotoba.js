@@ -43,22 +43,22 @@ block main
 
   table.table
     thead
-      tr
+      tr.table__row.table__row_header
         th.table__header Delete
-        th.table__header Role
-        th.table__header Hierarchy
-        th.table__header Used
-        th.table__header_vertical thread.isSticky
-        th.table__header_vertical thread.isClosed
-        th.table__header_vertical post.isSage
-        th.table__header_vertical post.isApproved
-        th.table__header_vertical post.isDeleted
-        th.table__header_vertical attachment.isDeleted
-        th.table__header_vertical attachment.isNSFW
-        th.table__header_vertical attachment.isSpoiler
+        th.table__header.table__header_sortable(data-sort-field='role', data-sort-type='string') Role
+        th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='hierarchy', data-sort-type='number', data-sort-order='descending') Hierarchy
+        th.table__header.table__header_sortable(data-sort-field='used', data-sort-type='number') Used
+        th.table__header.table__header_vertical thread.isSticky
+        th.table__header.table__header_vertical thread.isClosed
+        th.table__header.table__header_vertical post.isSage
+        th.table__header.table__header_vertical post.isApproved
+        th.table__header.table__header_vertical post.isDeleted
+        th.table__header.table__header_vertical attachment.isDeleted
+        th.table__header.table__header_vertical attachment.isNSFW
+        th.table__header.table__header_vertical attachment.isSpoiler
     tbody
       for role in roles
-        tr
+        tr.table__row(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes)
           td
             if (role.usedTimes === 0)
               form.js-api-form.js-reload-on-success(action='/api/role', 'data-method'='DELETE')

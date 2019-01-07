@@ -26,21 +26,30 @@ block main
     else
       input#btn-add-news(type='submit', value='Add')
 
+  if news
+    h2 Add news post
+    span.link-button-wrapper
+      a(href=`/manage/news/`) Add news post
+
   if newsList.length
     h2 Edit/Delete News
     table.table
       thead
-        tr
-          th #
-          th Date Added
-          th Subject
-          th Posted by
-          th Message
-          th Edit/Delete
+        tr.table__row.table__row_header
+          th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='number', data-sort-type='number', data-sort-order='descending') #
+          th.table__header.table__header_sortable(data-sort-field='added', data-sort-type='date') Date Added
+          th.table__header Subject
+          th.table__header.table__header_sortable(data-sort-field='postedby', data-sort-type='string') Posted by
+          th.table__header Message
+          th.table__header Delete
       tbody
         for n in newsList
-          tr
-            td= n.number
+          tr.table__row(data-number=n.number, data-added=n.postedDate, data-postedby=n.postedby)
+            td
+              span= n.number
+              | 
+              span.link-button-wrapper
+                a(href=`/manage/news/${n.number}`) Edit
             td
               if n.postedDate
                 +datetime(n.postedDate)
@@ -52,9 +61,6 @@ block main
                 =n.postedby
             td= n.message
             td
-              form(method='post', action='/api/news', data-method='patch')
-                input(type='hidden', name='newsId', value=n.number)
-                button(type='button', class='btn', data-news=n.number, data-action='edit') Edit
               form(method='post', action='/api/news', data-method='delete')
                 input(type='hidden', name='newsId', value=n.number)
                 button(type='button', class='btn', data-news=n.number, data-action='delete') Delete

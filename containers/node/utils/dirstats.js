@@ -7,6 +7,11 @@ const dirStats = async (rootDir) => {
   let stats = await ls(rootDir);
   stats = await Promise.all(stats.map(async (dirstat) => {
     dirstat.children = await ls(dirstat.dir);
+    dirstat.total = dirstat.children.reduce((acc, child) => {
+      acc.size += child.size;
+      acc.files += child.files;
+      return acc;
+    }, { size: 0, files: 0});
     return dirstat;
   }));
   return stats;

@@ -5,62 +5,62 @@ block header
 
 block main
   table.table
-    caption Disk Space Used
     thead
-      tr
-        th Board
-        th Area
-        th Files
-        th Space Used
+      tr.table__row.table__row_header
+        th.table__header.table__header_sortable.table__header_sort-descending(rowspan=2, data-sort-type='string', data-sort-field='board', data-sort-order='descending') Board
+        th.table__header(colspan=2) res
+        th.table__header(colspan=2) src
+        th.table__header(colspan=2) thumb
+        th.table__header(colspan=2) Total
+      tr.table__row.table__row_header
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='resFiles') Files
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='resSize') Space
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='srcFiles') Files
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='srcSize') Space
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='thumbFiles') Files
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='thumbSize') Space
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='totalFiles') Files
+        th.table__header.table__header_sortable(data-sort-type='number', data-sort-field='totalSize') Space
     tbody
-      - var totalSize = 0
-      - var totalFiles = 0
-      - var dirTotals = [{ files: 0, size: 0}, { files: 0, size: 0}, { files: 0, size: 0} ]
-
       mixin stats(d)
         if d
-          td #{d.dirname}/
           td= d.files
           td!= filters.readableSize(d.size)
-
-      mixin statsCount(dir, num)
-        if dir.children[num]
-          +stats(dir.children[num])
-          - dirTotals[num].files += dir.children[num].files
-          - dirTotals[num].size += dir.children[num].size
-          - dirTotals[num].dirname = dir.children[num].dirname
+        else
+          td -
+          td -
 
       for dir in dirStats
-        tr
-          th(rowspan='4') /#{dir.dirname}/
-          +statsCount(dir, 0)
-        tr
-          +statsCount(dir, 1)
-        tr
-          +statsCount(dir, 2)
-        tr
+        -var resSize = dir.children[0] && dir.children[0].size;
+        -var resFiles = dir.children[0] && dir.children[0].files;
+        -var srcSize = dir.children[1] && dir.children[1].size;
+        -var srcFiles = dir.children[1] && dir.children[1].files;
+        -var thumbSize = dir.children[2] && dir.children[2].size;
+        -var thumbFiles = dir.children[2] && dir.children[2].files;
+        -var totalSize = dir.total && dir.total.size;
+        -var totalFiles = dir.total && dir.total.files;
+        tr.table__row(data-board=dir.dirname, data-res-size=resSize, data-res-files=resFiles, data-src-size=srcSize, data-src-files=srcFiles, data-thumb-size=thumbSize, data-thumb-files=resFiles, data-total-size=totalSize, data-total-files=totalFiles)
+          th /#{dir.dirname}/
+          +stats(dir.children[0])
+          +stats(dir.children[1])
+          +stats(dir.children[2])
           td
-            strong Total
-          td
-            - var dirFiles = dir.children.reduce((sum, child) => sum + child.files, 0)
+            - var dirFiles = dir.total.files;
             - totalFiles += dirFiles
             strong= dirFiles
           td
-            - var dirSize = dir.children.reduce((sum, child) => sum + child.size, 0)
+            - var dirSize = dir.total.size;
             - totalSize += dirSize
             strong!= filters.readableSize(dirSize)
     tfoot
-      tr
-        th(rowspan='4')
+      -var totalSize = dirStats.reduce((acc, dir) => acc + dir.total.size, 0);
+      -var totalFiles = dirStats.reduce((acc, dir) => acc + dir.total.files, 0);
+      tr.table__row
+        th
           strong All boards
         +stats(dirTotals[0])
-      tr
         +stats(dirTotals[1])
-      tr
         +stats(dirTotals[2])
-      tr
-        td
-          strong Total
         td
           strong= totalFiles
         td

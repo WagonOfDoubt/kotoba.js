@@ -62,6 +62,7 @@
 @import './components/dialog';
 @import './components/admin-panel';
 @import './components/tabs';
+@import './components/table';
 
 .reflink a {
   color: inherit;
@@ -100,25 +101,6 @@ h1, h2, h3, h4, h5, th {
   color: var(--header-color);
 }
 
-
-table.table {
-  thead tr {
-    border-color: var(--border-color);
-  }
-
-  tbody tr, tfoot tr {
-    border-color: var(--border-color);
-  }
-
-  .table__header {
-    vertical-align: bottom;
-  }
-
-  .table__header_vertical {
-    writing-mode: vertical-lr;
-    vertical-align: bottom;
-  }
-}
 
 .news-header {
   background: var(--border-color);
@@ -169,25 +151,6 @@ table.table {
 
   img {
     max-width: 100%;
-  }
-}
-
-table.table {
-  width: 100%;
-  max-width: 100%;
-  margin-bottom: 1rem;
-  border-collapse: collapse;
-
-  td, th {
-    padding: 0.75rem;
-  }
-
-  thead tr {
-    border-bottom: 2px solid grey;
-  }
-
-  tbody tr, tfoot tr {
-    border-bottom: 1px solid grey;
   }
 }
 
