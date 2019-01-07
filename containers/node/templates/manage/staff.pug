@@ -5,6 +5,58 @@ include ../mixins/modals.pug
 include ../mixins/timestamp.pug
 include ../mixins/text.pug
 
+mixin showOmittedBtn(nomitted, target, what)
+  if what
+    span.omitted (#{nomitted} #{what} omitted #[span.link-button-wrapper #[a.js-toggle-visibility(href=`#`, 'data-target'=target 'data-visible'='false') show]])
+  else
+    span.omitted (#{nomitted} omitted #[span.link-button-wrapper #[a.js-toggle-visibility(href=`#`, 'data-target'=target 'data-visible'='false') show]])
+
+mixin userRole(b, r)
+  span(class=`user__role`)
+    a(href=`/${b}/`, title='Go to board', class='user__role__board', class={'highlight': b === query.board}) /#{b}/
+    | :
+    a(href=`/manage/roles/${r.roleName}`, title='Edit role', class='user__role__name', class={'highlight': r.roleName === query.role}) #{r.roleName}
+
+mixin userRow(u)
+  - var userClass = `user_${u.login}`;
+  td
+    a.user__login(href=`/manage/staff/${ u.login }` title='Edit user', class=userClass, class={'highlight': u.login === query.login})= u.login
+    if u.displayname
+      small.unimportant  (aka #[span.user__displayname #{u.displayname}])
+  td
+    span.user__authority(class=userClass, class={'highlight': u.authority === query.authority})= u.authority
+  td
+    -var omitFilter = ([b, r]) => (query.role && query.role !== r.roleName) || (query.board && query.board !== b);
+    -var rolesArr = Array.from(Object.entries(u.boardRoles));
+    -var omittedRoles = rolesArr.filter(omitFilter);
+    -var notOmittedRoles = rolesArr.filter(o => !omittedRoles.includes(o));
+    span.user__roles(class=userClass)
+      for boardrole, i in notOmittedRoles
+        -var b = boardrole[0];
+        -var r = boardrole[1];
+        if i !== 0
+          | ,
+          |
+        +userRole(b, r)
+    if omittedRoles.length
+      div
+        +showOmittedBtn(omittedRoles.length, `.${userClass}.user__roles_omitted`)
+      span.user__roles_omitted.hidden(class=userClass)
+        for boardrole, i in omittedRoles
+          -var b = boardrole[0];
+          -var r = boardrole[1];
+          if i !== 0
+            | ,
+            |
+          +userRole(b, r)
+  td
+    span.user__addedon(class=userClass)
+      +date(u.addedon)
+  td
+    span.user__lastactive(class=userClass)
+    +datetime(u.lastactive)
+
+
 block header
   h1 Staff
 
@@ -108,9 +160,29 @@ block main
         +comboboxEdit('role', 'Role', allRoles, '', true)
         input(type='submit', value='Add role')
 
+  -var queryArr = Array.from(Object.entries(query))
+
   table.table
     caption
       h2 Staff members
+      if (queryArr.length)
+        div.query-filters
+          span.query-filters__title Active filters:
+          | 
+          for q, i in queryArr
+            -var fname= q[0]
+            -var fvalue= q[1]
+            -var delquery = queryArr.filter(([qn, qv]) => qn !== fname && qv !== fvalue).map((qarr) => qarr.join('=')).join('&')
+            span.query-filter
+              if i !== 0
+                | ,
+                |
+              span.query-filter__field= fname
+              | :
+              span.query-filter__value= fvalue
+              | 
+              span.link-button-wrapper
+                a(href=`?${delquery}`) ✕
     thead
       tr
         th Login
@@ -119,25 +191,14 @@ block main
         th Joined
         th Last active
     tbody
-      for member in staff
+      -var staffNotOmitted = staff.filter(sm => !staffOmitted.includes(sm))
+      for notOmittedMember in staffNotOmitted
         tr
-          td
-            a(href=`/manage/staff/${ member.login }`)= member.login
-            if member.displayname
-              small.unimportant  (aka #[span.nickname #{member.displayname}])
-          td= member.authority
-          td
-            -var fst=true
-            for r, b in member.boardRoles
-              if (!fst)
-                | ,
-                |
-              -fst = false
-              a(href=`/${b}/`, title=r.roleName) /#{b}/
-          td
-            +date(member.addedon)
-          td
-            +datetime(member.lastactive)
-
-block modals
-  //- nothin'
+          +userRow(notOmittedMember)
+      if staffOmitted.length
+        tr
+          td(colspan=3)
+            +showOmittedBtn(staffOmitted.length, '.table__row_omitted', 'users')
+      for OmittedMember in staffOmitted
+        tr.table__row_omitted.hidden
+          +userRow(OmittedMember)

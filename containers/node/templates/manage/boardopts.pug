@@ -18,6 +18,8 @@ block main
       a(href='/manage/boardopts') Select another board
     div.link-button-wrapper
       a(href='/' + board.uri) Browse board
+    div.link-button-wrapper
+      a(href='/manage/staff?board=' + board.uri) Board staff
   else
     div.link-button-wrapper
       a(href='/manage/boardopts') Edit boards

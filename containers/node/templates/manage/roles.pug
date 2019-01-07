@@ -67,9 +67,13 @@ block main
             else
               | -
           td
-            a(href=`/manage/roles/${ role.roleName }/`)= role.roleName
+            a(href=`/manage/roles/${ role.roleName }/` title='Edit this role')= role.roleName
           td= role.hierarchy
-          td= role.usedTimes
+          td
+            if (role.usedTimes)
+              a(href=`/manage/staff?role=${role.roleName}` title='Find users with this role')= role.usedTimes
+            else
+              | 0
           td
             +shortAccess(role, 'postPermissions', 'isSticky')
           td
