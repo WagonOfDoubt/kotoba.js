@@ -1,15 +1,25 @@
 const { validationResult } = require('express-validator/check');
 
 /**
- * Middleware that returns 422 status and JSON response with express-validator
+ * Middleware that returns 400 status and JSON response with express-validator
  * errors object, if there are any errors.
  */
 module.exports.validateRequest = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+  try {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      errors.forEach(e => e.type = 'RequestValidationError');
+      if (errors.length === 1) {
+        return res.status(400).json({ error: errors[0] });
+      } else {
+        return res.status(400).json({ errors: errors });
+      }
+    }
+    next();
+  } catch (errorWhileProcessingError) {
+    next(errorWhileProcessingError);
   }
-  next();
 };
 
 
@@ -22,9 +32,13 @@ module.exports.validateRequest = (req, res, next) => {
  */
 module.exports.validateRedirect = (redirect) =>
   (req, res, next) => {
-    if (validationResult(req).isEmpty()) {
-      next();
-    } else {
-      return res.redirect(redirect);
+    try {
+      if (validationResult(req).isEmpty()) {
+        next();
+      } else {
+        return res.redirect(redirect);
+      }
+    } catch (errorWhileProcessingError) {
+      next(errorWhileProcessingError);
     }
   };
