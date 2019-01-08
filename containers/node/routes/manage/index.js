@@ -16,10 +16,11 @@
 
 const express = require('express');
 const router = express.Router();
-const middlewares = require('../../utils/middlewares');
+const { authRequired } = require('../../middlewares/permission');
+const { globalTemplateVariables } = require('../../middlewares/params');
 
-router.use(middlewares.authRequired);
-router.use(middlewares.globalTemplateVariables);
+router.use(authRequired);
+router.use(globalTemplateVariables);
 router.use('/manage/', require('./addboard'));
 router.use('/manage/', require('./boardopts'));
 router.use('/manage/', require('./delboard'));

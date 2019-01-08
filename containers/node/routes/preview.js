@@ -3,14 +3,14 @@ const router = express.Router();
 const { param } = require('express-validator/check');
 
 const Post = require('../models/post');
-const middlewares = require('../utils/middlewares');
+const { authRequired } = require('../middlewares/permission');
+const { validateRequest } = require('../middlewares/validation');
 
-router.use(middlewares.globalTemplateVariables);
 
 router.post('/preview/news',
   [
-    middlewares.validateRequest,
-    middlewares.authRequired
+    validateRequest,
+    authRequired
   ],
   async (req, res, next) => {
     try {
@@ -24,8 +24,8 @@ router.post('/preview/news',
 
 router.post('/preview/markdown',
   [
-    middlewares.validateRequest,
-    middlewares.authRequired
+    validateRequest,
+    authRequired
   ],
   async (req, res, next) => {
     try {
@@ -40,7 +40,7 @@ router.get('/preview/replies/:board/:thread',
   [
     param('board').isAlphanumeric(),
     param('thread').isNumeric(),
-    middlewares.validateRequest
+    validateRequest
   ],
   async (req, res, next) => {
     try {

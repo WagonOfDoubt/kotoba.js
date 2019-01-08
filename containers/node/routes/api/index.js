@@ -2,11 +2,11 @@
  * Routes for REST JSON API
  * @module routes/api
  * @see module:routes/api/board
+ * @see module:routes/api/maintenance
  * @see module:routes/api/news
- * @see module:routes/api/user
  * @see module:routes/api/post
  * @see module:routes/api/settings
- * @see module:routes/api/maintenance
+ * @see module:routes/api/user
  */
 
 const express = require('express');

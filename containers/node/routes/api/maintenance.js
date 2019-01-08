@@ -6,11 +6,11 @@ const { matchedData, sanitize, sanitizeBody } = require('express-validator/filte
 const { regenerateAll } = require('../../controllers/generate');
 const Post = require('../../models/post');
 const Parser = require('../../controllers/parser');
-const middlewares = require('../../utils/middlewares');
+const { adminOnly } = require('../../middlewares/permission');
 
 
 router.post('/api/regenerate',
-  middlewares.adminOnly,
+  adminOnly,
   async (req, res, next) => {
     try {
       const start = new Date();
@@ -28,7 +28,7 @@ router.post('/api/regenerate',
 
 
 router.post('/api/parseposts',
-  middlewares.adminOnly,
+  adminOnly,
   async (req, res, next) => {
     try {
       const start = new Date();

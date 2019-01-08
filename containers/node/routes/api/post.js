@@ -3,14 +3,20 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const router = express.Router();
 const { body, oneOf } = require('express-validator/check');
 const _ = require('lodash');
+const multer = require('multer');
+const upload = multer();
 
 const Post = require('../../models/post');
 const ModlogEntry = require('../../models/modlog');
-const middlewares = require('../../utils/middlewares');
+
+const { updatePosts } = require('../../controllers/posting');
+
 const reqparser = require('../../middlewares/reqparser');
+const { validateRequest } = require('../../middlewares/validation');
 const { postEditPermission } = require('../../middlewares/permission');
 const sanitizer = require('../../middlewares/sanitizer');
-const { updatePosts } = require('../../controllers/posting');
+
+const { createPostHandler } = require('../handlers/post');
 
 
 /**
@@ -58,12 +64,15 @@ const filterItemsAndFindPosts = async (req, res, next)=> {
 };
 
 
+router.post('/api/post', createPostHandler);
+
+
 router.patch(
   '/api/post',
   [
     body('items').exists().isArray(),
     body('regenerate').toBoolean(),
-    middlewares.validateRequest,
+    validateRequest,
     filterItemsAndFindPosts,
     // filters req.body.items so only posts that can be changed by current user
     // are present

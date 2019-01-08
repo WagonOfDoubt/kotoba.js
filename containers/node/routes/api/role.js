@@ -5,11 +5,12 @@ const { matchedData, sanitize, sanitizeBody } = require('express-validator/filte
 const _ = require('lodash');
 
 const Role = require('../../models/role');
-const middlewares = require('../../utils/middlewares');
+const { adminOnly } = require('../../middlewares/permission');
+const { validateRequest } = require('../../middlewares/validation');
 
 
 router.get('/api/role/',
-  middlewares.adminOnly,
+  adminOnly,
   async (req, res, next) => {
     try {
       const roles = await Role.findAllAndSort();
@@ -31,8 +32,8 @@ router.put(
     body('hierarchy')
       .isInt({ min: 0, max: 9999 })
       .withMessage('value must be between 0 and 9999'),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {
@@ -66,8 +67,8 @@ router.patch(
     body('hierarchy')
       .isInt({ min: 0, max: 9999 })
       .withMessage('value must be between 0 and 9999'),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {
@@ -114,12 +115,12 @@ router.patch(
 
 router.delete('/api/role/',
   [
-    middlewares.adminOnly,
+    adminOnly,
     body('roleName')
       .exists()
       .withMessage('roleName is required')
       .isAlphanumeric(),
-    middlewares.validateRequest
+    validateRequest
   ],
   async (req, res, next) => {
     try {

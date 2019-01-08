@@ -5,12 +5,13 @@ const { matchedData, sanitize, sanitizeBody } = require('express-validator/filte
 
 const Settings = require('../../models/settings');
 const ModlogEntry = require('../../models/modlog');
-const middlewares = require('../../utils/middlewares');
+const { adminOnly } = require('../../middlewares/permission');
+const { validateRequest } = require('../../middlewares/validation');
 const { generateMainPage } = require('../../controllers/generate');
 
 // get settings
 router.get('/api/settings',
-  middlewares.adminOnly,
+  adminOnly,
   async (req, res, next) => {
     try {
       const settings = await Settings.get();
@@ -28,8 +29,8 @@ router.patch(
   [
     body('data', 'Request body is empty').exists(),
     body('regenerate').toBoolean(),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {

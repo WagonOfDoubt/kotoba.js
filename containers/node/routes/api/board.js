@@ -7,12 +7,13 @@ const boardController = require('../../controllers/board');
 const Board = require('../../models/board');
 const ModlogEntry = require('../../models/modlog');
 const reqparser = require('../../middlewares/reqparser');
-const middlewares = require('../../utils/middlewares');
+const { adminOnly } = require('../../middlewares/permission');
+const { validateRequest } = require('../../middlewares/validation');
 
 
 // get board
 router.get('/api/board/:boardUri?',
-  middlewares.adminOnly,
+  adminOnly,
   async (req, res, next) => {
     try {
       const boardUri = req.params.boardUri;
@@ -34,8 +35,8 @@ router.put(
       .exists(),
     body('data.uri', 'Board uri must not be empty')
       .isLength({ min: 1 }),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {
@@ -62,8 +63,8 @@ router.patch(
     ], 'Board uri must not be empty'),
     body('data').exists(),
     body('regenerate').exists().toBoolean(),
-    middlewares.adminOnly,
-    middlewares.validateRequest,
+    adminOnly,
+    validateRequest,
     reqparser.findBoard,
   ],
   async (req, res, next) => {
@@ -98,8 +99,8 @@ router.delete('/api/board/:boardUri?',
       body('uri').isLength({ min: 1 }),
       param('boardUri').isLength({ min: 1 })
     ], 'Board uri must not be empty'),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {

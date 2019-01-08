@@ -7,11 +7,12 @@ const User = require('../../models/user');
 const Role = require('../../models/role');
 const Board = require('../../models/board');
 const userController = require('../../controllers/user');
-const middlewares = require('../../utils/middlewares');
+const { apiAuthRequired, adminOnly } = require('../../middlewares/permission');
+const { validateRequest } = require('../../middlewares/validation');
 
 
 router.get('/api/me', [
-    middlewares.apiAuthRequired,
+    apiAuthRequired,
   ],
   async (req, res, next) => {
     try {
@@ -47,7 +48,7 @@ router.get('/api/me', [
 
 // modify user
 router.patch('/api/me', [
-    middlewares.apiAuthRequired,
+    apiAuthRequired,
   ],
   async (req, res, next) => {
     try {
@@ -62,7 +63,7 @@ router.patch('/api/me', [
 
 // change user password
 router.patch('/api/me/password', [
-    middlewares.apiAuthRequired,
+    apiAuthRequired,
     body('old_password')
       .exists().withMessage(`Old password is required`)
       // check if old password is correct
@@ -87,7 +88,7 @@ router.patch('/api/me/password', [
       .exists()
       // check if password confirmation matches password
       .custom((password_confirmation, { req }) => password_confirmation === req.body.password),
-    middlewares.validateRequest,
+    validateRequest,
   ],
   async (req, res, next) => {
     try {
@@ -101,7 +102,7 @@ router.patch('/api/me/password', [
 
 
 router.delete('/api/me', [
-    middlewares.apiAuthRequired,
+    apiAuthRequired,
     body('login')
       .custom((login, { req }) => req.user.login === login)
       .withMessage('Login is incorrect'),
@@ -127,7 +128,7 @@ router.delete('/api/me', [
             return true;
           });
         }),
-    middlewares.validateRequest,
+    validateRequest,
   ],
   async (req, res, next) => {
     try {
@@ -143,7 +144,7 @@ router.delete('/api/me', [
 
 
 router.get('/api/user', [
-    middlewares.apiAuthRequired,
+    apiAuthRequired,
   ],
   async (req, res, next) => {
     try {
@@ -158,10 +159,10 @@ router.get('/api/user', [
 
 
 router.patch('/api/user', [
-    middlewares.apiAuthRequired,
-    middlewares.adminOnly,
+    apiAuthRequired,
+    adminOnly,
     body('user').exists().withMessage('user is required'),
-    middlewares.validateRequest,
+    validateRequest,
   ],
   async (req, res, next) => {
     try {
@@ -201,12 +202,12 @@ const checkUserAuthority = (req, res, next) => {
 
 
 router.put('/api/user/role', [
-    middlewares.apiAuthRequired,
-    middlewares.adminOnly,
+    apiAuthRequired,
+    adminOnly,
     body('user').exists().withMessage('user is required'),
     body('role').exists().withMessage('role is required'),
     body('board').exists().withMessage('board is required'),
-    middlewares.validateRequest,
+    validateRequest,
     getStaffMember,
     checkUserAuthority,
   ],
@@ -235,12 +236,12 @@ router.put('/api/user/role', [
 
 
 router.patch('/api/user/role', [
-    middlewares.apiAuthRequired,
-    middlewares.adminOnly,
+    apiAuthRequired,
+    adminOnly,
     body('user').exists().withMessage('user is required'),
     body('role').exists().withMessage('role is required'),
     body('board').exists().withMessage('board is required'),
-    middlewares.validateRequest,
+    validateRequest,
     getStaffMember,
     checkUserAuthority,
   ],
@@ -264,11 +265,11 @@ router.patch('/api/user/role', [
 
 
 router.delete('/api/user/role', [
-    middlewares.apiAuthRequired,
-    middlewares.adminOnly,
+    apiAuthRequired,
+    adminOnly,
     body('user').exists().withMessage('user is required'),
     body('board').exists().withMessage('board is required'),
-    middlewares.validateRequest,
+    validateRequest,
     getStaffMember,
     checkUserAuthority,
   ],

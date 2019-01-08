@@ -3,12 +3,8 @@ const passport = require('passport');
 const router = express.Router();
 const { body, validationResult } = require('express-validator/check');
 
-const middlewares = require('../utils/middlewares');
 const User = require('../models/user');
 const config = require('../config.json');
-
-
-router.use(middlewares.globalTemplateVariables);
 
 
 /*

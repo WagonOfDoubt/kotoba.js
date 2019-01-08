@@ -1,5 +1,5 @@
 const express = require('express');
-const middlewares = require('../../utils/middlewares');
+const { validateRedirect } = require('../../middlewares/validation');
 const { body, param, validationResult } = require('express-validator/check');
 const News = require('../../models/news');
 
@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/news/:newsId?',
   [
     param('newsId').optional().isNumeric(),
-    middlewares.validateRedirect('/manage/news'),
+     validateRedirect('/manage/news'),
   ],
   async (req, res, next) => {
     try {

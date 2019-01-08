@@ -4,12 +4,13 @@ const { check, oneOf, body, param, validationResult } = require('express-validat
 const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
 
 const News = require('../../models/news');
-const middlewares = require('../../utils/middlewares');
+const { adminOnly } = require('../../middlewares/permission');
+const { validateRequest } = require('../../middlewares/validation');
 const { generateMainPage } = require('../../controllers/generate');
 
 // get news
 router.get('/api/news/:newsId?',
-  middlewares.adminOnly,
+  adminOnly,
   async (req, res, next) => {
     try {
       const newsId = req.body.newsId || req.params.newsId;
@@ -31,8 +32,8 @@ router.put(
     body('data', 'Request body is empty')
       .exists(),
     body('regenerate').toBoolean(),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {
@@ -59,8 +60,8 @@ router.patch(
     check('newsId').toInt(),
     body('data', 'Request body is empty').exists(),
     body('regenerate').toBoolean(),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {
@@ -87,8 +88,8 @@ router.delete('/api/news/:newsId?',
     check('newsId').isNumeric(),
     check('newsId').toInt(),
     body('regenerate').toBoolean(),
-    middlewares.adminOnly,
-    middlewares.validateRequest
+    adminOnly,
+    validateRequest
   ],
   async (req, res, next) => {
     try {

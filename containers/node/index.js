@@ -14,7 +14,7 @@ const routes = require('./routes');
 
 const config = require('./config.json');
 const User = require('./models/user');
-const middlewares = require('./utils/middlewares');
+const { globalTemplateVariables } = require('./middlewares/params');
 
 // connect to database
 const dbHost = process.env.DATABASE_HOST || 'mongo';
@@ -49,7 +49,7 @@ app.set('views', './templates');
 app.set('view engine', 'pug');
 
 // middlewares
-app.use(middlewares.globalTemplateVariables);
+app.use(globalTemplateVariables);
 app.use(useragent.express());
 app.use(cookieParser());
 app.use(session({

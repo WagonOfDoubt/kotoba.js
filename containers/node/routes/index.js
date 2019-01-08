@@ -11,11 +11,11 @@
 const express = require('express');
 const router = express.Router();
 
-router.use(require('./form'));
+router.use(require('./api'));
 router.use(require('./auth'));
+router.use(require('./form'));
 router.use(require('./manage'));
 router.use(require('./preview'));
-router.use(require('./api'));
 
 /**
  * Express router.
