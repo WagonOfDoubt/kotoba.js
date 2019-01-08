@@ -11,13 +11,13 @@ services:
       - environment-development.env
 
   node:
-    build: ./containers/node
+    build: ./app/src
     user: node
     working_dir: /home/node/app
     env_file:
       - environment-development.env
     volumes:
-      - ./containers/node:/home/node/app
+      - ./app/src:/home/node/app
       - /home/node/app/node_modules
       - ./html:/home/node/app/html
     expose:
@@ -31,10 +31,10 @@ services:
       - mongo
 
   nginx:
-    build: ./containers/nginx
+    build: ./nginx
     volumes:
       - ./html:/var/www/html
-      - ./containers/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
     env_file:
       - environment-development.env
     ports:
