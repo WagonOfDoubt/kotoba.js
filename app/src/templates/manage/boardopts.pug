@@ -31,7 +31,8 @@ block main
       +textEdit('uri', 'Directory', 'The directory of the board.')
     +textEdit('name', 'Name', 'The name of the board.')
     +textEdit('desc', 'Description', 'Short description of board for meta.')
-    +textEdit('locale', 'Locale', 'Locale to use on this board. Leave blank to use the locale defined in site settings.')
+    -var localeOptions = locales.map(([lang, code]) => ({value: code, label: `${ lang } (${ code })`}));
+    +comboboxEdit('locale', 'Locale', localeOptions, 'Locale to use on this board. Leave blank to use the locale defined in site settings.')
     +textArea('header', 'Include header')
       | HTML under board title in page header.
       | Be careful and close all tags.
@@ -42,7 +43,7 @@ block main
     +numberEdit('maxFileSize', 'Maximum file size', 'Maxmimum size of uploaded images, in bytes.')
     +numberEdit('maxFilesPerPost', 'Maximum files per post', '0 forbids any uploads making board text only.')
     +numberEdit('maxThreadsOnPage', 'Threads per page', 'How many threads are shown on page by default.')
-    +numberEdit('maxPages', 'Maximum board pages.')
+    +numberEdit('maxPages', 'Maximum board pages.', 'Number of pages that are displayed on board. This option does not mean that threads after last page are deleted, they are still available via api and can be bumped. More pages means more load on server as all pages are rendered after each post on board.')
     +numberEdit('autosage', 'Maximum thread replies', 'The number of replies a thread can have before autosaging to the back of the board.')
     +numberEdit('showReplies', 'Show replies', 'Number of replies to show on a board page.')
     +numberEdit('showRepliesSticky', 'Show replies sticky', 'Number of replies to show on a board page when the thread is sticked.')

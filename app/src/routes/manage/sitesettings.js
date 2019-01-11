@@ -1,5 +1,6 @@
 const express = require('express');
 const Settings = require('../../models/settings');
+const locales = require('../../utils/locales');
 
 const router = express.Router();
 
@@ -11,7 +12,8 @@ router.get('/sitesettings',
         activity: 'manage-page-sitesettings',
         sitesettings: settings.toObject({ minimized: false }),
         defaults: Settings.defaults(),
-        title: 'Site settings'
+        title: 'Site settings',
+        locales: locales,
       });
     } catch(err) {
       next(err);

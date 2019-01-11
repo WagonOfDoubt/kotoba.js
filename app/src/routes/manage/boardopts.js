@@ -1,5 +1,6 @@
 const express = require('express');
 const Board = require('../../models/board');
+const locales = require('../../utils/locales');
 
 const router = express.Router();
 
@@ -13,7 +14,8 @@ router.get('/boardopts/:board?',
           activity: 'manage-page-boardopts',
           board: board,
           boardDefaults: Board.defaults(),
-          title: 'Board administration'
+          title: 'Board administration',
+          locales: locales,
         });
       } else {
         const boards = await Board
@@ -23,7 +25,8 @@ router.get('/boardopts/:board?',
         res.render('manage/boardselect', {
           activity: 'manage-page-boardselect',
           boards: boards,
-          title: 'Board options'
+          title: 'Board options',
+          locales: locales,
         });
       }
     } catch (err) {

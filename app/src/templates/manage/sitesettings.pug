@@ -15,7 +15,10 @@ block main
     +textEdit('siteName', 'Site name', 'The name of your site.')
     +textEdit('slogan', 'Slogan', 'Site slogan, set to nothing to disable its display.')
     +textEdit('desc', 'Site description', 'Short description for metadata.')
-    +textEdit('locale', 'Locale', 'Default locale. Locales can be assigned individually per board.')
+
+    -var localeOptions = locales.map(([lang, code]) => ({value: code, label: `${ lang } (${ code })`}));
+    +comboboxEdit('locale', 'Locale', localeOptions, 'Site locale. Locales can be assigned individually per board.')
+
     +textEdit('dateformat', 'Date format', 'Default date format.')
     +textEdit('imageUri', 'Header image', 'URL. Default header image. Can be overriden on each board.')
     +checkboxEdit('startWithOne', 'Number pages starting with one', 'Traditionally pages are zero-based, like in most programming languages.')
