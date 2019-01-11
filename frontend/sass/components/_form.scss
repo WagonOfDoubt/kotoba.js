@@ -1,0 +1,88 @@
+.form_inline {
+  .form-group {
+    display: inline-block;
+  }
+}
+
+form {
+  .form-group {
+    display: grid;
+    grid-template-columns: 12rem auto 1fr;
+
+    :target {
+      outline: 2px solid red;
+    }
+
+    label {
+      text-align: right;
+      align-self: center;
+      padding: .75rem;
+    }
+
+    input {
+      align-self: center;
+    }
+
+    small {
+      align-self: center;
+      padding: .75rem;
+    }
+
+    select {
+      align-self: center;
+    }
+
+    textarea {
+      grid-column-start: 2;
+      grid-column-end: 4;
+    }
+
+    textarea + small {
+      grid-column-start: 2;
+      grid-column-end: 4;
+    }
+  }  
+}
+
+
+@media (max-width: 1000px) {
+  form {
+    .form-group {
+      grid-template-columns: auto;
+
+      & + .form-group {
+        border-top: 1px solid var(--border-color);
+      }
+
+      label {
+        text-align: left;
+      }
+
+      input, select, textarea {
+        margin-left: .75rem;
+      }
+
+      input[type="checkbox"], input[type="number"] {
+        grid-column-start: 2;
+        grid-column-end: 2;
+        justify-self: end;
+
+        & + small {
+          grid-column-start: 1;
+          grid-column-end: 3;
+          padding-top: 0;
+        }
+      }
+
+      textarea {
+        grid-column-start: 1;
+        grid-column-end: 4;
+      }
+
+      textarea + small {
+        grid-column-start: 1;
+        grid-column-end: 4;
+      }
+    }
+  }
+}

@@ -56,6 +56,7 @@
 @import './components/formatting';
 @import './components/postform';
 @import './components/spinner';
+@import './components/form';
 @import './components/catalog';
 @import './components/adminbar';
 @import './components/modal';
@@ -154,47 +155,6 @@ h1, h2, h3, h4, h5, th {
   }
 }
 
-.form_inline {
-  .form-group {
-    display: inline-block;
-  }
-}
-
-form {
-  .form-group {
-    display: grid;
-    grid-template-columns: 12rem auto 1fr;
-
-    :target {
-      outline: 2px solid red;
-    }
-
-    label {
-      text-align: right;
-      align-self: center;
-      padding: .75rem;
-    }
-
-    input {
-      align-self: center;
-    }
-
-    small {
-      align-self: center;
-      padding: .75rem;
-    }
-
-    textarea {
-      grid-column-start: 2;
-      grid-column-end: 4;
-    }
-
-    textarea + small {
-      grid-column-start: 2;
-      grid-column-end: 4;
-    }
-  }  
-}
 
 .error {
   padding: .75rem 1.25rem;
