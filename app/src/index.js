@@ -13,6 +13,7 @@ const _ = require('lodash');
 const routes = require('./routes');
 
 const config = require('./config.json');
+const pkg = require('./package.json');
 const User = require('./models/user');
 const { globalTemplateVariables } = require('./middlewares/params');
 
@@ -33,7 +34,7 @@ mongoose
   .then(() => {
     console.log(`Connected to database ${ dbName }`);
     const admin = new mongoose.mongo.Admin(mongoose.connection.db);
-    admin.buildInfo((err, info) => console.log('MongoDB version:', info.version));
+    admin.buildInfo((err, info) => app.set('kot_mongo_version', info.version));
   })
   .catch((err) => console.log(err));
 
@@ -122,5 +123,9 @@ app.use((err, req, res, next) => {
 );
 
 app.get('/', (req, res) => res.sendStatus(418));
+
+app.set('kot_routes', require('./utils/routes')(routes.stack));
+app.set('kot_mongoose_version', mongoose.version);
+app.set('kot_sharp_versions', require('sharp').versions);
 
 app.listen(3000, () => console.log('kotoba listening on port 3000!'));

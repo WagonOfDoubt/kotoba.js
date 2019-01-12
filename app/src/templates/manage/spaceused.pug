@@ -40,7 +40,7 @@ block main
         -var totalSize = dir.total && dir.total.size;
         -var totalFiles = dir.total && dir.total.files;
         tr.table__row(data-board=dir.dirname, data-res-size=resSize, data-res-files=resFiles, data-src-size=srcSize, data-src-files=srcFiles, data-thumb-size=thumbSize, data-thumb-files=resFiles, data-total-size=totalSize, data-total-files=totalFiles)
-          th /#{dir.dirname}/
+          th #[a(href=`/${dir.dirname}/`) /#{dir.dirname}/]
           +stats(dir.children[0])
           +stats(dir.children[1])
           +stats(dir.children[2])

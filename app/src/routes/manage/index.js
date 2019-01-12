@@ -18,6 +18,11 @@ const express = require('express');
 const router = express.Router();
 const { authRequired } = require('../../middlewares/permission');
 const { globalTemplateVariables } = require('../../middlewares/params');
+const Post = require('../../models/post');
+const Board = require('../../models/board');
+const du = require('du');
+const config = require('../../config.json');
+
 
 router.use(authRequired);
 router.use(globalTemplateVariables);
@@ -35,8 +40,34 @@ router.use('/manage/', require('./staff'));
 router.use('/manage/', require('./uploads'));
 
 router.get('/manage/',
-  async (req, res) => {
-    res.render('manage/managepage');
+  async (req, res, next) => {
+    try {
+      const [postcount, boardcount, spaceused] = await Promise.all([
+        Post.estimatedDocumentCount(),
+        Board.estimatedDocumentCount(),
+        new Promise((resolve, reject) => {
+          du(config.html_path, (err, size) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(size);
+          });
+        }),
+      ]);
+      console.log(postcount);
+      res.render('manage/managepage', {
+        kot_routes: req.app.get('kot_routes'),
+        kot_mongo_version: req.app.get('kot_mongo_version'),
+        kot_mongoose_version: req.app.get('kot_mongoose_version'),
+        kot_sharp_versions: req.app.get('kot_sharp_versions'),
+        postcount: postcount,
+        boardcount: boardcount,
+        spaceused: spaceused,
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 

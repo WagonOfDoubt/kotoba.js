@@ -6,5 +6,35 @@ block bodyClass
 block aside
   include sidepanel.pug
 
+block main
+  h2 Welcome!
+  p Welcome, #[a(href='/manage/profile') #{user.login}]!
+  p Your authority: #[a(href=`/manage/staff/${user.login}`) #{user.authority}]
+  p Currently there are #[strong= postcount] posts on #[strong= boardcount] #[a(href='/manage/boardopts') boards]
+  p #[a(href='/manage/spaceused') Disk space used] is #[strong= filters.readableSize(spaceused)]
+
+  h2 Info
+  h3 Mongo version
+  p MongoDB version: #{kot_mongo_version}
+  p Mongoose version: #{kot_mongoose_version}
+  h3 Sharp libraries versions
+  ul
+    for value, key in kot_sharp_versions
+      li #[strong= key]: #{value}
+  h3 Routes
+  ul
+   for methods, route in kot_routes
+    li
+      | [
+      for method, i in methods
+        if (i !== 0)
+          |, 
+        strong= method
+      |] 
+      if methods.includes('get') && !route.includes(':')
+        | #[a(href=route)= route]
+      else
+        | #{route}
+
 block scripts
   script(src='/.static/js/kotoba.js')

@@ -9,7 +9,7 @@ nav
     li.list-group-item
       a(href='/manage/profile') Change account password
     li.list-group-item
-      a(href='/manage/dashboard') Dashboard
+      a(href='/manage/') Dashboard
     li.list-group-item
       a(href='/manage/spaceused') Disk space used
     li.list-group-item
@@ -42,7 +42,3 @@ nav
     li.list-group-item BanDelAll
     li.list-group-item
       a(href='/manage/uploads') Recent uploads
-
-if user
-  div Welcome, #[strong #{user.login}]
-  div Staff rights: #[strong #{user.authority}]
