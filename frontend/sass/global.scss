@@ -44,6 +44,23 @@
   --modal-border-radius: 5px;
 
   --spinner-color: #70c542;
+
+  --semantic-color-primary-text: #fff;
+  --semantic-color-primary-background: #007bff;
+  --semantic-color-secondary-text: #fff;
+  --semantic-color-secondary-background: #6c757d;
+  --semantic-color-success-text: #fff;
+  --semantic-color-success-background: #28a745;
+  --semantic-color-danger-text: #fff;
+  --semantic-color-danger-bacground: #dc3545;
+  --semantic-color-warning-text: #212529;
+  --semantic-color-warning-background: #ffc107;
+  --semantic-color-info-text: #fff;
+  --semantic-color-info-background: #17a2b8;
+  --semantic-color-light-text: #212529;
+  --semantic-color-light-background: #f8f9fa;
+  --semantic-color-dark-text: #fff;
+  --semantic-color-dark-background: #343a40;
 }
 
 
@@ -64,6 +81,7 @@
 @import './components/admin-panel';
 @import './components/tabs';
 @import './components/table';
+@import './components/badge';
 
 .reflink a {
   color: inherit;

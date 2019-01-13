@@ -1,0 +1,44 @@
+.badge {
+  display: inline-block;
+  padding: .25em .4em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25rem;
+}
+
+.badge_primary {
+  color: var(--semantic-color-primary-text);
+  background-color: var(--semantic-color-primary-background);
+}
+.badge_secondary {
+  color: var(--semantic-color-secondary-text);
+  background-color: var(--semantic-color-secondary-background);
+}
+.badge_success {
+  color: var(--semantic-color-success-text);
+  background-color: var(--semantic-color-success-background);
+}
+.badge_danger {
+  color: var(--semantic-color-danger-text);
+  background-color: var(--semantic-color-danger-bacground);
+}
+.badge_warning {
+  color: var(--semantic-color-warning-text);
+  background-color: var(--semantic-color-warning-background);
+}
+.badge_info {
+  color: var(--semantic-color-info-text);
+  background-color: var(--semantic-color-info-background);
+}
+.badge_light {
+  color: var(--semantic-color-light-text);
+  background-color: var(--semantic-color-light-background);
+}
+.badge_dark {
+  color: var(--semantic-color-dark-text);
+  background-color: var(--semantic-color-dark-background);
+}

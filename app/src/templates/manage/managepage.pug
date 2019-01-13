@@ -25,16 +25,19 @@ block main
   ul
    for methods, route in kot_routes
     li
-      | [
       for method, i in methods
-        if (i !== 0)
-          |, 
-        strong= method
-      |] 
+        span.badge(class={
+          'badge_success': method === 'get',
+          'badge_primary': method === 'post',
+          'badge_danger': method === 'delete',
+          'badge_warning': method === 'patch',
+          'badge_secondary': !['get', 'post', 'delete', 'patch'].includes(method)
+        })= method.toUpperCase()
+        | 
       if methods.includes('get') && !route.includes(':')
         | #[a(href=route)= route]
       else
-        | #{route}
+        | #[span.unkfunc= route]
 
 block scripts
   script(src='/.static/js/kotoba.js')
