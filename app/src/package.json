@@ -17,6 +17,9 @@
   ],
   "author": "WagonOfDoubt",
   "license": "MIT",
+  "apidoc": {
+    "title": "kotoba.js API"
+  },
   "dependencies": {
     "avconv": "^3.1.0",
     "bcrypt": "^3.0.3",

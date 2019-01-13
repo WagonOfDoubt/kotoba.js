@@ -61,18 +61,18 @@ export const sendJSON = (url, type, data) => {
 
 export const createTable = (rows = [], head = []) => {
   const truncHTML = str => escape(truncate(str, { length: 100 }));
-  const wrapInTags = (tag, str) => `<${ tag }>${ str }</${ tag }>`;
+  const wrapInTags = (tag, str, classes='') => `<${ tag } class="${ classes }">${ str }</${ tag }>`;
   const createCols = (cols, tdTag) => cols
     .map(col => wrapInTags(tdTag, truncHTML(col)))
     .join('');
-  const createRows = (rows, tdTag) => rows
-    .map(row => wrapInTags('tr', createCols(row, tdTag)))
+  const createRows = (rows, tdTag, classes) => rows
+    .map(row => wrapInTags('tr', createCols(row, tdTag), classes))
     .join('');
-  const createBody = (rows, bodyTag, tdTag) =>
-    wrapInTags(bodyTag, createRows(rows, tdTag));
+  const createBody = (rows, bodyTag, tdTag, rowClasses) =>
+    wrapInTags(bodyTag, createRows(rows, tdTag, rowClasses));
 
-  const thead = createBody([head], 'thead', 'th');
-  const tbody = createBody(rows, 'tbody', 'td');
+  const thead = createBody([head], 'thead', 'th', 'table__row table__row_header');
+  const tbody = createBody(rows, 'tbody', 'td', 'table__row');
   return $(`<table class="table">${ thead }${ tbody }</table>`);
 };
 
@@ -80,7 +80,7 @@ export const createTable = (rows = [], head = []) => {
 export const fetchChanges = ($form, $populateContainer) => {
   const formData = serializeForm($form);
   $populateContainer.text('Loading...');
-  const getRoute = $form.attr('action');
+  const getRoute = $form.data('getUrl') || $form.attr('action');
   $.getJSON(getRoute)
     .done((data) => {
       const diff = objectDiff(formData, data);

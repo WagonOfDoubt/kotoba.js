@@ -24,11 +24,12 @@ block main
     div.link-button-wrapper
       a(href='/manage/boardopts') Edit boards
 
-  - var action = board ? '/api/board/' + board.uri : '/api/board/';
-  - var method = board ? 'PATCH' : 'PUT';
-  form#form-update-board(method='GET', action=action, data-method=method)
+  - var action = board ? `/api/board/${board.uri}` : '/api/board/';
+  - var getUrl = board ? `/api/board/${board.uri}?select=!all` : null;
+  - var method = board ? 'PATCH' : 'POST';
+  form#form-update-board(method='POST', action=action, data-method=method, data-get-url=getUrl)
     if !board
-      +textEdit('uri', 'Directory', 'The directory of the board.')
+      +textEdit('uri', 'Directory', 'The directory of the board.', true)
     +textEdit('name', 'Name', 'The name of the board.')
     +textEdit('desc', 'Description', 'Short description of board for meta.')
     -var localeOptions = locales.map(([lang, code]) => ({value: code, label: `${ lang } (${ code })`}));

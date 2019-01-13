@@ -1,7 +1,23 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const schemaUtils = require('../utils/schema');
+const boardparams = require('../json/boardparams');
 const Post = require('./post');
+
+const uriValidators = [
+  {
+    validator: function(v) {
+      return !boardparams.uriBlacklist.includes(v);
+    },
+    message: 'Illegal value for board uri'
+  },
+  {
+    validator: function(v) {
+      return /^[a-z0-9_]*$/.test(v);
+    },
+    message: 'board uri can contain only letters and numbers'
+  },
+];
 
 const boardSchema = Schema({
   uri: {
@@ -10,12 +26,7 @@ const boardSchema = Schema({
     unique: true,
     lowercase: true,
     minlength: 1,
-    validate: {
-      validator: function(v) {
-        return /^[a-z0-9_]*$/.test(v);
-      },
-      message: 'board uri can contain only letters and numbers'
-    }
+    validate: uriValidators
   },
   name:                { type: String, default: '' },
   desc:                { type: String, default: '' },

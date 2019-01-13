@@ -127,21 +127,21 @@ module.exports.authRequired = (req, res, next) => {
  * not authenticated.
  */
 module.exports.apiAuthRequired = (req, res, next) => {
-  const isLoginned = req.isAuthenticated();
-  if (!isLoginned) {
-    return res
-      .status(401)  // 401 Unauthorized
-      .json({
-        ok: 0,
-        errors: [
-          {
-            name: 'auth_required',
-            msg: `You must be logged in to perform this action`
+  try {
+    if (!req.isAuthenticated() || !req.user) {
+      return res
+        .status(401)
+        .json({
+          'error': {
+            'msg': `User must be logged in to perform this action`,
+            'type': 'AuthRequired'
           }
-        ]
-      });
+        });
+    }
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 };
 
 
@@ -150,18 +150,29 @@ module.exports.apiAuthRequired = (req, res, next) => {
  * admin rights
  */
 module.exports.adminOnly = (req, res, next) => {
-  if (!req.isAuthenticated() || !req.user || req.user.authority !== 'admin') {
-    return res
-      .status(401)  // 401 Unauthorized
-      .json({
-        ok: 0,
-        errors: [
-          {
-            name: 'staff_rights_required',
-            msg: `You don't have rights to perform this action`
+  try {
+    if (!req.isAuthenticated() || !req.user) {
+      return res
+        .status(401)
+        .json({
+          'error': {
+            'msg': `User must be logged in to perform this action`,
+            'type': 'AuthRequired'
           }
-        ]
-      });
+        });
+    }
+    if (req.user.authority !== 'admin') {
+      return res
+        .status(403)
+        .json({
+          'error': {
+            'msg': `User don't have rigths to perform this action`,
+            'type': 'PermissionDenied'
+          }
+        });
+    }
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 };

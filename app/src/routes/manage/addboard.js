@@ -1,5 +1,6 @@
 const express = require('express');
 const Board = require('../../models/board');
+const locales = require('../../utils/locales');
 
 const router = express.Router();
 
@@ -9,7 +10,8 @@ router.get('/addboard',
       res.render('manage/boardopts', {
         activity: 'manage-page-addboard',
         boardDefaults: Board.defaults(),
-        title: 'Add board'
+        title: 'Add board',
+        locales: locales,
       });
     } catch (err) {
       next(err);

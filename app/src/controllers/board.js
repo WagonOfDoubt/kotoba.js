@@ -14,24 +14,14 @@ module.exports.createBoard = async (data) => {
 };
 
 
-module.exports.removeBoard = async (boardUri) => {
-  const boardDir = path.join(config.html_path, boardUri);
-  // remove all posts from this board first
-  return Post.find({
-    boardUri: boardUri
-  })
-    .remove()
-    .exec()
-    // remove board from database
-    .then(
-      Board.findOne({
-        uri: boardUri
-      })
-      .remove()
-      .exec()
-    )
-    // remove board directory and all its contents
-    .then(fs.remove(boardDir));
+module.exports.removeBoard = async (board) => {
+  const boardDir = path.join(config.html_path, board.uri);
+  const [ postsDeleted, boardsDeleted ] = await Promise.all([
+      Post.deleteMany({ boardUri: board.uri }),
+      Board.deleteOne({ uri: board.uri }),
+      fs.remove(boardDir),
+    ]);
+  return [postsDeleted.n, boardsDeleted.n ];
 };
 
 
