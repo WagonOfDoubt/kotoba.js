@@ -2,20 +2,19 @@ mixin attachments(post)
   if post.attachments && post.attachments.length
     //- only one file
     if post.attachments.length === 1
-      +attachment(post.attachments[0], post, 0)
+      +attachment(post.attachments[0], post, 0)(class='attachment_expandable')
     //- more than one file
     else
       div.attachments-container
-        -var n = 0
-        each attachment in post.attachments
-          +attachment(attachment, post, n)
-          -n++
+        for attachment, n in post.attachments
+          +attachment(attachment, post, n)(class='attachment_expandable')
 
 mixin attachment(attachment, post, n)
   -var id = `post-${ post.boardUri }-${ post.postId }-${ n }`;
   figure(
     id=id
-    class=['attachment', 'attachment-' + attachment.type]
+    class=attributes.class
+    class=['attachment', 'attachment_' + attachment.type]
     data-attachment-number=n
     data-board-uri=post.boardUri
     data-post-id=post.postId
@@ -40,8 +39,8 @@ mixin attachment(attachment, post, n)
       input.checkbox-hidden.js-select-attachment(type='checkbox', name='attachments[]', value=id)
       div.thumb-container
         +thumbnail(attachment)
-      if attachment.duration
-        div.file-info-duration!= filters.readableDuration(attachment.duration)
+        if attachment.duration
+          div.file-info-duration!= filters.readableDuration(attachment.duration)
 
 mixin thumbnail(attachment)
   img.thumb(

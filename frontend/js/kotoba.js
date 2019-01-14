@@ -2,7 +2,7 @@ import '@babel/polyfill';
 import $ from 'jquery';
 import 'jquery-serializejson';
 
-import { initExpandVideo, initExpandImage } from './modules/attachment-viewer';
+import { initExpandVideo, initExpandImage, initSelectAttachment } from './modules/attachment-viewer';
 import { initHidePost } from './modules/hide-post';
 import { initExpandThread } from './modules/expand-thread';
 import { initAdminPanel } from './modules/admin-panel';
@@ -14,6 +14,7 @@ import { initToggleVisibility } from './modules/toggle-visibility';
 import { initTables } from './modules/table';
 
 $(() => {
+  initSelectAttachment();
   initExpandImage();
   initExpandVideo();
   initHidePost();

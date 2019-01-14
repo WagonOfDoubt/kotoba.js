@@ -30,13 +30,13 @@ export const toggleImage = (a) => {
 
 export const minimizeAllImages = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment-image a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_image a.thumb-link'))
     .map(minimizeImage);
 };
 
 export const maximizeAllImages = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment-image a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_image a.thumb-link'))
     .map(maximizeImage);
 };
 
@@ -57,27 +57,27 @@ export const showVideo = (a) => {
     .attr('width', fullWidth)
     .attr('height', fullHeight);
 
-  $container.addClass('thumb-video-playing');
+  $container.addClass('attachment_video_playing');
   $container.append($player);
   a.dataset.maximized = 'true';
 };
 
 export const closeVideo = (a) => {
   const $container = $(a).parent();
-  $container.removeClass('thumb-video-playing');
+  $container.removeClass('attachment_video_playing');
   $container.find('.video-player').remove();
   a.dataset.maximized = 'false';
 };
 
 export const closeAllVideos = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment-video a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_video a.thumb-link'))
     .map(closeVideo);
 };
 
 export const showAllVideos = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment-video a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_video a.thumb-link'))
     map(closeVideo);
 };
 
@@ -89,9 +89,20 @@ export const toggleVideo = (a) => {
   }
 };
 
+export const initSelectAttachment = () => {
+  $('body')
+    .on('click', '.attachment_selectable a.thumb-link', (e) => {
+      const a = e.currentTarget;
+      const cb = a.querySelector('.js-select-attachment');
+      cb.checked = !cb.checked;
+      $(cb).change();
+      e.preventDefault();
+    });
+};
+
 export const initExpandImage = () => {
   $('body')
-    .on('click', '.attachment a.thumb-link', (e) => {
+    .on('click', '.attachment_image.attachment_expandable a.thumb-link', (e) => {
       const a = e.currentTarget;
       const $parentPost = $(a).closest('.post');
       if (!$parentPost.hasClass('selected')) {
@@ -107,11 +118,15 @@ export const initExpandImage = () => {
 
 export const initExpandVideo = () => {
   $('body')
-    .on('click', '.attachment-video a.thumb-link', (e) => {
+    .on('click', '.attachment_video.attachment_expandable a.thumb-link', (e) => {
       const a = e.currentTarget;
       const $parentPost = $(a).closest('.post');
       if (!$parentPost.hasClass('selected')) {
         toggleVideo(a);
+      } else {
+        const cb = a.querySelector('.js-select-attachment');
+        cb.checked = !cb.checked;
+        $(cb).change();
       }
       e.preventDefault();
     });

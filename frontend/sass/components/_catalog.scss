@@ -12,27 +12,6 @@
   align-items: center;
 }
 
-input.checkbox-hidden {
-  display: none;
-}
-
-input.checkbox-hidden:checked + .thumb-container::after {
-  content: '✔';
-  background: rgba(255, 255, 255, 0.8);
-  position: absolute;
-  top: 2px;
-  bottom: 2px;
-  left: 20px;
-  vertical-align: middle;
-  color: deepskyblue;
-  font-size: 50px;
-  right: 20px;
-  font-weight: bold;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .catalog-thread-link {
   display: flex;
   flex-direction: column;

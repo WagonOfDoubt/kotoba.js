@@ -8,27 +8,27 @@ include ../mixins/attachments.pug
 
 block header
   h1 Recent uploads
+  -var numEntries = posts.reduce((acc, val) => acc + val.attachments.length, 0);
+  p Showing #[strong= numEntries] latest uploads.
 
 block main
   form.admin-form.catalog(method='post', action='/api/attachment', data-method='patch')
     div.catalog-list
       for post in posts
-        for attachment in post.attachments
-          div.catalog-thread
-              +reflink(post)
-              figure.catalog-thread-image(data-mongo-id=attachment._id, class={
-                deleted: attachment.isDeleted,
-                nsfw: attachment.isNSFW,
-                spoiler: attachment.isSpoiler
-              })
-                label
-                  input.checkbox-hidden.js-select-attachment(type='checkbox', name='attachments[]', value=attachment._id)
-                  div.thumb-container
-                    +thumbnail(attachment)
-                    if attachment.duration
-                      div.file-info-duration!= filters.readableDuration(attachment.duration)
-                figcaption
-                  +filelink(attachment)
+        for attachment, n in post.attachments
+          div.catalog-thread.attachments-container
+            +attachment(attachment, post, n)(class='attachment_selectable')
+            div.badges
+              if attachment.isDeleted
+                span.badge.badge_danger DELETED
+                | 
+              if attachment.isNSFW
+                span.badge.badge_warning NSFW
+                | 
+              if attachment.isSpoiler
+                span.badge.badge_dark SPOILER
+                | 
+            +reflink(post)
 
     include ../includes/adminpanel.pug
   //- pre= JSON.stringify(posts, null, 2)
