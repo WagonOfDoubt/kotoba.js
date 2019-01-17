@@ -1,0 +1,5 @@
+mixin showOmittedBtn(nomitted, target, what)
+  if what
+    span.omitted (#{nomitted} #{what} omitted #[span.link-button-wrapper #[a.js-toggle-visibility(href=`#`, 'data-target'=target 'data-visible'='false') show]])
+  else
+    span.omitted (#{nomitted} omitted #[span.link-button-wrapper #[a.js-toggle-visibility(href=`#`, 'data-target'=target 'data-visible'='false') show]])

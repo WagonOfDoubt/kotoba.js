@@ -21,7 +21,6 @@
     "title": "kotoba.js API"
   },
   "dependencies": {
-    "avconv": "^3.1.0",
     "bcrypt": "^3.0.3",
     "body-parser": "^1.18.2",
     "connect-flash": "^0.1.1",
@@ -32,7 +31,10 @@
     "express-session": "^1.15.6",
     "express-useragent": "^1.0.12",
     "express-validator": "^5.3.1",
+    "ffmpeg-static": "^2.4.0",
+    "ffprobe-static": "^3.0.0",
     "flat": "^4.1.0",
+    "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^7.0.1",
     "lodash": "^4.17.11",
     "markdown-it": "^8.4.2",

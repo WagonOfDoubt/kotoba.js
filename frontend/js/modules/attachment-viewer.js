@@ -43,6 +43,7 @@ export const maximizeAllImages = (parentElement = document.body) => {
 export const showVideo = (a) => {
   const { fullSrc, fullWidth, fullHeight, thumbSrc } = a.dataset;
   const $container = $(a).parent();
+  const $playerContainer = $('<div class="video-container">')
   const $player = $('<video>', {
     class: 'video-player',
     poster: thumbSrc,
@@ -58,7 +59,8 @@ export const showVideo = (a) => {
     .attr('height', fullHeight);
 
   $container.addClass('attachment_video_playing');
-  $container.append($player);
+  $playerContainer.append($player);
+  $container.append($playerContainer);
   a.dataset.maximized = 'true';
 };
 

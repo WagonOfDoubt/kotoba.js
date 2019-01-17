@@ -17,6 +17,10 @@ const pkg = require('./package.json');
 const User = require('./models/user');
 const { globalTemplateVariables } = require('./middlewares/params');
 
+// add ffmpeg path to env
+process.env.FFMPEG_PATH = require('ffmpeg-static').path;
+process.env.FFPROBE_PATH = require('ffprobe-static').path;
+
 // connect to database
 const dbHost = process.env.DATABASE_HOST || 'mongo';
 const dbPort = process.env.DATABASE_PORT || 27017;

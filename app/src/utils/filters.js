@@ -44,11 +44,9 @@ filters.readableSize = (text, options) => {
 
 
 filters.readableDuration = (text, options) => {
-  const milliseconds = parseInt(text);
-  const date = new Date(milliseconds);
-  let seconds = Math.floor((milliseconds / 1000) % 60);
-  let minutes = Math.floor((milliseconds / 60000) % 60);
-  const hours = Math.floor((milliseconds / 3600000) % 24);
+  let seconds = Math.round(parseFloat(text)) % 60;
+  let minutes = Math.floor((seconds / 60)) % 60;
+  const hours = Math.floor((seconds / 3600)) % 24;
   if (seconds < 10) {
     seconds = '0' + seconds;
   }

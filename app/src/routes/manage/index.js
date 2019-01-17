@@ -15,6 +15,7 @@
  */
 
 const express = require('express');
+const ffmpeg = require('fluent-ffmpeg');
 const router = express.Router();
 const { authRequired } = require('../../middlewares/permission');
 const { globalTemplateVariables } = require('../../middlewares/params');
@@ -42,20 +43,34 @@ router.use('/manage/', require('./uploads'));
 router.get('/manage/',
   async (req, res, next) => {
     try {
-      const [postcount, boardcount, spaceused] = await Promise.all([
-        Post.estimatedDocumentCount(),
-        Board.estimatedDocumentCount(),
-        new Promise((resolve, reject) => {
-          du(config.html_path, (err, size) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(size);
-          });
-        }),
-      ]);
-      console.log(postcount);
+      const promisify = (fn) =>
+        new Promise((resolve, reject) =>
+          fn((err, data) => err ? reject(err) : resolve(data)));
+
+      const [
+        formats, codecs, encoders, filters, postcount, boardcount, spaceused
+        ] = await Promise.all([
+          promisify(ffmpeg.getAvailableFormats),
+          promisify(ffmpeg.getAvailableCodecs),
+          promisify(ffmpeg.getAvailableEncoders),
+          promisify(ffmpeg.getAvailableFilters),
+          Post.estimatedDocumentCount(),
+          Board.estimatedDocumentCount(),
+          new Promise((resolve, reject) => {
+            du(config.html_path, (err, size) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(size);
+            });
+          }),
+        ]);
+
+      const ffmpegPath = process.env.FFMPEG_PATH;
+      const ffprobePath = process.env.FFPROBE_PATH;
+      const ffmpegData = {formats, codecs, encoders, filters, ffmpegPath, ffprobePath};
+
       res.render('manage/managepage', {
         kot_routes: req.app.get('kot_routes'),
         kot_mongo_version: req.app.get('kot_mongo_version'),
@@ -64,6 +79,7 @@ router.get('/manage/',
         postcount: postcount,
         boardcount: boardcount,
         spaceused: spaceused,
+        ffmpegData: ffmpegData,
       });
     } catch (err) {
       next(err);

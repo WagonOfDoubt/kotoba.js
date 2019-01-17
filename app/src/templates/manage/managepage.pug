@@ -1,4 +1,5 @@
 extends ../layouts/sidebar.pug
+include ../mixins/controls.pug
 
 block bodyClass
   - var bodyClass = 'manage-page ' + activity
@@ -13,31 +14,64 @@ block main
   p Currently there are #[strong= postcount] posts on #[strong= boardcount] #[a(href='/manage/boardopts') boards]
   p #[a(href='/manage/spaceused') Disk space used] is #[strong= filters.readableSize(spaceused)]
 
-  h2 Info
-  h3 Mongo version
-  p MongoDB version: #{kot_mongo_version}
-  p Mongoose version: #{kot_mongoose_version}
-  h3 Sharp libraries versions
-  ul
-    for value, key in kot_sharp_versions
-      li #[strong= key]: #{value}
-  h3 Routes
-  ul
-   for methods, route in kot_routes
-    li
-      for method, i in methods
-        span.badge(class={
-          'badge_success': method === 'get',
-          'badge_primary': method === 'post',
-          'badge_danger': method === 'delete',
-          'badge_warning': method === 'patch',
-          'badge_secondary': !['get', 'post', 'delete', 'patch'].includes(method)
-        })= method.toUpperCase()
-        | 
-      if methods.includes('get') && !route.includes(':')
-        | #[a(href=route)= route]
-      else
-        | #[span.unkfunc= route]
+  h2 Technical Info
+  section#manage-info-mongo
+    h3 Mongo version
+    p MongoDB version: #{kot_mongo_version}
+    p Mongoose version: #{kot_mongoose_version}
+
+  section#manage-info-ffmpeg
+    h3 ffmpeg
+    mixin ffmpegFeature(key, data)
+      abbr(title=data.description)= key
+    mixin ffmpegFeatureList(list)
+      for v, i in Object.entries(list)
+        if i !== 0
+          |, 
+        +ffmpegFeature(v[0], v[1])
+    p Available Formats: 
+      +showOmittedBtn(Object.keys(ffmpegData.formats).length, `#manage-info-ffmpeg-formats`)
+    div#manage-info-ffmpeg-formats.hidden
+      +ffmpegFeatureList(ffmpegData.formats)
+    p Available Codecs: 
+      +showOmittedBtn(Object.keys(ffmpegData.codecs).length, `#manage-info-ffmpeg-codecs`)
+    div#manage-info-ffmpeg-codecs.hidden
+      +ffmpegFeatureList(ffmpegData.codecs)
+    p Available Encoders: 
+      +showOmittedBtn(Object.keys(ffmpegData.encoders).length, `#manage-info-ffmpeg-encoders`)
+    div#manage-info-ffmpeg-encoders.hidden
+      +ffmpegFeatureList(ffmpegData.encoders)
+    p Available Filters: 
+      +showOmittedBtn(Object.keys(ffmpegData.filters).length, `#manage-info-ffmpeg-filters`)
+    div#manage-info-ffmpeg-filters.hidden
+      +ffmpegFeatureList(ffmpegData.filters)
+    p ffmpeg path: #[span= ffmpegData.ffmpegPath]
+    p ffprobe path: #[span= ffmpegData.ffprobePath]
+
+  section#manage-info-sharp
+    h3 Sharp libraries versions
+    ul
+      for value, key in kot_sharp_versions
+        li #[strong= key]: #{value}
+
+  section#manage-info-routes
+    h3 Routes
+    ul
+     for methods, route in kot_routes
+      li
+        for method, i in methods
+          span.badge(class={
+            'badge_success': method === 'get',
+            'badge_primary': method === 'post',
+            'badge_danger': method === 'delete',
+            'badge_warning': method === 'patch',
+            'badge_secondary': !['get', 'post', 'delete', 'patch'].includes(method)
+          })= method.toUpperCase()
+          | 
+        if methods.includes('get') && !route.includes(':')
+          | #[a(href=route)= route]
+        else
+          | #[span.unkfunc= route]
 
 block scripts
   script(src='/.static/js/kotoba.js')

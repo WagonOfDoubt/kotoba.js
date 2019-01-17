@@ -4,12 +4,7 @@ include ../mixins/inputs.pug
 include ../mixins/modals.pug
 include ../mixins/timestamp.pug
 include ../mixins/text.pug
-
-mixin showOmittedBtn(nomitted, target, what)
-  if what
-    span.omitted (#{nomitted} #{what} omitted #[span.link-button-wrapper #[a.js-toggle-visibility(href=`#`, 'data-target'=target 'data-visible'='false') show]])
-  else
-    span.omitted (#{nomitted} omitted #[span.link-button-wrapper #[a.js-toggle-visibility(href=`#`, 'data-target'=target 'data-visible'='false') show]])
+include ../mixins/controls.pug
 
 mixin userRole(b, r)
   span(class=`user__role`)

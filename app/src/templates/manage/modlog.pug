@@ -6,14 +6,22 @@ mixin nothing-change
   li Did nothing, actually
 
 mixin post-change(change)
-  | in 
-  +reflink(change.target)
+  if change && change.target
+    | in #[+reflink(change.target)]
+  else
+    | in #[span.badge.badge_danger DELETED]
 
 mixin board-change(change)
-  | in #[a(href=`/${ change.target.uri }`) /#{ change.target.uri }/]
+  if change && change.target
+    | in #[a(href=`/${ change.target.uri }`) /#{ change.target.uri }/]
+  else
+    | in #[span.badge.badge_danger DELETED]
 
 mixin generic-change(change)
-  | in #[span #{ change.target }]
+  if change && change.target
+    | in #[span #{ change.target }]
+  else
+    | in #[span.badge.badge_danger DELETED]
 
 mixin change(change)
   li

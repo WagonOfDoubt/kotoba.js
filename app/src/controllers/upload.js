@@ -6,11 +6,11 @@
 
 const config = require('../config.json');
 const Settings = require('../models/settings');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const sharp = require('sharp');
-const avconv = require('avconv');
 const crypto = require('crypto');
+const ffmpeg = require('fluent-ffmpeg');
 
 
 /**
@@ -155,6 +155,10 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
       attachment.thumbWidth = thumbInfo.width;
       attachment.thumbHeight = thumbInfo.height;
     } catch (err) {
+      await Promise.all([
+        fs.remove(path.dirname(filePath)),
+        fs.remove(thumbPath),
+      ]);
       const error = new Error('Cannot create thumbnail');
       error.type = 'input_error';
       error.reason = 'thumbnail_generation_fail';
@@ -169,6 +173,10 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
         attachment[key] = thumbInfo[key];
       }
     } catch (err) {
+      await Promise.all([
+        fs.remove(path.dirname(filePath)),
+        fs.remove(thumbPath),
+      ]);
       const error = new Error('Cannot create thumbnail');
       error.type = 'input_error';
       error.reason = 'thumbnail_generation_fail';
@@ -200,8 +208,8 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
  * {@link https://www.npmjs.com/package/sharp}
  */
 const saveImage = async (imagePath, file) => {
-  createDirIfNotExist(path.dirname(imagePath));
   try {
+    await fs.ensureDir(path.dirname(imagePath));
     if (['.gif', '.svg'].includes(path.extname(imagePath))) {
       await fs.writeFile(imagePath, file.buffer);
       // return image info
@@ -226,8 +234,8 @@ const saveImage = async (imagePath, file) => {
  * with and height equal to 0
  */
 const saveFile = async (filePath, file) => {
-  createDirIfNotExist(path.dirname(filePath));
   try {
+    await fs.ensureDir(path.dirname(filePath));
     await fs.writeFile(filePath, file.buffer);
     return {
       size: file.buffer.length,
@@ -249,8 +257,8 @@ const saveFile = async (filePath, file) => {
  * {@link https://www.npmjs.com/package/sharp}
  */
 const createThumbnail = async (thumbPath, file) => {
-  createDirIfNotExist(path.dirname(thumbPath));
   try {
+    await fs.ensureDir(path.dirname(thumbPath));
     const s = await Settings.get();
     const { width, height } = s.thumbSize;
     return await sharp(file.buffer)
@@ -272,8 +280,8 @@ const createThumbnail = async (thumbPath, file) => {
  * with and height equal to 0
  */
 const saveVideo = async (filePath, file) => {
-  createDirIfNotExist(path.dirname(filePath));
   try {
+    await fs.ensureDir(path.dirname(filePath));
     await fs.writeFile(filePath, file.buffer);
     return {
       size: file.buffer.length
@@ -281,6 +289,31 @@ const saveVideo = async (filePath, file) => {
   } catch (error) {
     throw error;
   }
+};
+
+
+const getVideoMetadata = (filePath) => {
+  return new Promise((resolve, reject) => {
+    ffmpeg(filePath)
+      .ffprobe((err, metadata) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (!(metadata && metadata.streams && metadata.format && metadata.format.duration)) {
+          reject(new Error(`Fail to parse metadata`));
+          return;
+        }
+        const video = metadata.streams.find((s) => s.codec_type === 'video');
+        if (!video) {
+          reject(new Error(`No video stream found`));
+          return;
+        }
+        const audio = metadata.streams.find((s) => s.codec_type === 'audio');
+        const duration = metadata.format.duration;
+        resolve({ audio, video, duration });
+      })
+  });
 };
 
 
@@ -293,68 +326,43 @@ const saveVideo = async (filePath, file) => {
  * {@link https://www.npmjs.com/package/sharp}
  */
 const createVideoThumbnail = async (thumbPath, filePath) => {
-  createDirIfNotExist(path.dirname(thumbPath));
+  const sd = 1/0;
+  await fs.ensureDir(path.dirname(thumbPath));
   const s = await Settings.get();
   const { width, height } = s.thumbSize;
-  const params = [
-    '-i', filePath,
-    '-frames:v', '1',
-    '-f', 'image2',
-    // scale="w=trunc(min(200/iw,200/ih)*iw):h=trunc(min(200/iw,200/ih)*ih)"
-    '-vf', `scale=w=trunc('min(${width}/iw,${height}/ih)'*iw):h=trunc('min(${width}/iw,${height}/ih)'*ih)`,
-    // '-s', `${ w }x${ h }`,
-    thumbPath
-  ];
-  console.log('avconv', params.join(' '));
-  const avconvStream = avconv(params);
-  return await new Promise((resolve, reject) => {
-    avconvStream.on('error', data => console.log('error', data));
-    avconvStream.on('message', data => console.log(data));
-    avconvStream.once('exit', (exitCode, signal, metadata) => {
-      console.log('metadata', JSON.stringify(metadata));
-      const {input, output} = metadata;
-      const inputStream = input.stream[0] || [];
-      const outputStream = output.stream[0] || [];
-      const inputVideoMeta = inputStream.find(
-        (track) => track.type === 'video');
-      const [w, h] = inputVideoMeta.resolution;
-      const outputVideoMeta = outputStream.find(
-        (track) => track.type === 'video');
-      const [tw, th] = outputVideoMeta.resolution;
-      console.log(input, output);
-      if (exitCode === 0) {
-        resolve({
-          width: w,
-          height: h,
-          thumbWidth: tw,
-          thumbHeight: th,
-          duration: input.duration
-        });
-      } else {
-        console.log(exitCode, signal, metadata);
-        reject(exitCode);
-      }
-    });
+
+  const metadata = await getVideoMetadata(filePath);
+  const inputWidth = metadata.video.width;
+  const inputHeight = metadata.video.height;
+  const aspect = Math.min(width / inputWidth, height / inputHeight);
+  const tw = Math.floor(aspect * inputWidth);
+  const th = Math.floor(aspect * inputHeight);
+
+  const stdout = await new Promise((resolve, reject) => {
+    ffmpeg(filePath)
+      .on('error', (err) => reject(err))
+      .on('end', function(stdout, stderr) {
+        console.log('Transcoding succeeded !', 'stdout:', stdout, 'stderr', stderr);
+        resolve();
+      })
+      .screenshots({
+        count: 1,
+        folder: path.dirname(thumbPath),
+        filename: path.basename(thumbPath),
+        timemarks: [1],
+        size: `${tw}x${th}`,
+      });
   });
-};
 
+  console.log('METADATA', metadata);
 
-/**
- * Creates direcory recursively
- * @param {string} targetDir - directory to create
- * @returns {string} absolute path of created directory
- */
-const createDirIfNotExist = (targetDir) => {
-  const sep = path.sep;
-  const initDir = path.isAbsolute(targetDir) ? sep : '';
-  targetDir.split(sep).reduce((parentDir, childDir) => {
-    const curDir = path.resolve(parentDir, childDir);
-    if (!fs.existsSync(curDir)) {
-      fs.mkdirSync(curDir);
-    }
-
-    return curDir;
-  }, initDir);
+  return {
+    width: inputWidth,
+    height: inputHeight,
+    thumbWidth: tw,
+    thumbHeight: th,
+    duration: metadata.duration,
+  };
 };
 
 
