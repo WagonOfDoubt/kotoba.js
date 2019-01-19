@@ -6,6 +6,8 @@ div.admin-panel
       a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_threads') Threads
     li.tab-menu__item.admin-panel__item_attachments
       a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_attachments') Attachments
+    li.tab-menu__item.admin-panel__item_modlog
+      a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_modlog') ModLog
   //- post tab
   div#admin-panel__tab_posts.tabs__content
     div.column
@@ -42,3 +44,19 @@ div.admin-panel
     div.column
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='true') Set NSFW
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='false') Unset NSFW
+  //- attachment tab
+  div#admin-panel__tab_modlog.tabs__content
+    div.column
+      button.js-select-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Select all
+      button.js-deselect-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Deselect all
+    div.column
+      button.js-send-form(type='button', data-target='#modlog-form') Undo selected actions
+
+    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='true') Delete
+    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='false') Restore
+    //- div.column
+    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isSpoiler', value='true') Set Spoiler
+    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isSpoiler', value='false') Unset Spoiler
+    //- div.column
+    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='true') Set NSFW
+    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='false') Unset NSFW

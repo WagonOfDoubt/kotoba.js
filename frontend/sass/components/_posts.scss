@@ -51,6 +51,10 @@
   }
 }
 
+.reply:target {
+  box-shadow: 0 0 3px 1px var(--semantic-color-primary-background);
+}
+
 .reply, .board-page, .thread-page {
   .post-board-link {
     display: none;

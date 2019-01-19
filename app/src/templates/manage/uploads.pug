@@ -4,6 +4,7 @@ include ../mixins/inputs.pug
 include ../mixins/modals.pug
 include ../mixins/postbody.pug
 include ../mixins/attachments.pug
+include ../mixins/timestamp.pug
 
 
 block header
@@ -15,20 +16,21 @@ block main
   form.admin-form.catalog(method='post', action='/api/attachment', data-method='patch')
     div.catalog-list
       for post in posts
-        for attachment, n in post.attachments
-          div.catalog-thread.attachments-container
-            +attachment(attachment, post, n)(class='attachment_selectable')
-            div.badges
-              if attachment.isDeleted
-                span.badge.badge_danger DELETED
-                | 
-              if attachment.isNSFW
-                span.badge.badge_warning NSFW
-                | 
-              if attachment.isSpoiler
-                span.badge.badge_dark SPOILER
-                | 
-            +reflink(post)
+        if post.attachments && post.attachments.length
+          for attachment, n in post.attachments
+            div.catalog-thread.attachments-container
+              +attachment(attachment, post, n)(class='attachment_selectable')
+              div.badges
+                if attachment.isDeleted
+                  span.badge.badge_danger DELETED
+                  | 
+                if attachment.isNSFW
+                  span.badge.badge_warning NSFW
+                  | 
+                if attachment.isSpoiler
+                  span.badge.badge_dark SPOILER
+                  | 
+              +reflink(post)
 
     include ../includes/adminpanel.pug
   //- pre= JSON.stringify(posts, null, 2)

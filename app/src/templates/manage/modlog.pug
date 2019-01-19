@@ -5,60 +5,127 @@ include ../mixins/postbody.pug
 mixin nothing-change
   li Did nothing, actually
 
-mixin post-change(change)
-  if change && change.target
-    | in #[+reflink(change.target)]
+mixin attachment-del-msg(change)
+  -const attachmentNum = change.property.match(/\d+/);
+  if (change.newValue)
+    | #[strong Deleted] attachment ##[strong= attachmentNum] in #[+reflink(change.target)]
   else
-    | in #[span.badge.badge_danger DELETED]
+    | #[strong Restored] attachment ##[strong= attachmentNum] in #[+reflink(change.target)]
 
-mixin board-change(change)
-  if change && change.target
-    | in #[a(href=`/${ change.target.uri }`) /#{ change.target.uri }/]
+mixin post-del-msg(change)
+  if (change.newValue)
+    | #[strong Deleted] post #[+reflink(change.target)]
   else
-    | in #[span.badge.badge_danger DELETED]
+    | #[strong Restored] post #[+reflink(change.target)]
 
-mixin generic-change(change)
-  if change && change.target
-    | in #[span #{ change.target }]
+mixin post-boolean-msg(change)
+  | Set #[strong #{ change.property }]
+  | to #[strong #{ change.newValue }]    
+  | in #[+reflink(change.target)]
+
+mixin post-change(change, entryId, timestamp)
+  if change
+    label
+      if change.target
+        -
+          const undoData = {
+            target: { postId: change.target.postId, boardUri: change.target.boardUri, threadId: change.target.threadId },
+            update: { [change.property]: { value: change.oldValue, ts: timestamp } },
+          }
+        input.modlog-entry__change-entry__checkbox.js-checkbox-slave(
+          type='checkbox',
+          data-target=`#${entryId} .modlog-entry__checkbox`
+          name='items[]',
+          value=undoData)
+      else
+        input.input_disabled(disabled=true, type='checkbox')
+      if (change.property.endsWith('isDeleted'))
+        if (change.property.startsWith('attachments'))
+          +attachment-del-msg(change)
+        else
+          +post-del-msg(change)
+      else
+        if (typeof change.oldValue === 'boolean' && typeof change.newValue === 'boolean')
+          +post-boolean-msg(change)
+        else
+          | Changed #[strong #{ change.property }] from
+          | #[strong "#{ change.oldValue }"] to #[strong "#{ change.newValue }"]
+          | in #[+reflink(change.target)]
+
+mixin boardref(board)
+  if board
+    | #[a(href=`/${ board.uri }`) /#{ board.uri }/] 
   else
-    | in #[span.badge.badge_danger DELETED]
+    | #[span.badge.badge_danger BOARD DELETED]
 
-mixin change(change)
-  li
-    | Changed #[strong #{ change.model }.#{ change.property }] from
-    | #[strong #{ change.oldValue }] to #[strong #{ change.newValue }]
-    | 
+mixin board-boolean-msg(change)
+  | Set #[strong #{ change.model }.#{ change.property }]
+  | to #[strong #{ change.newValue }]    
+  | in #[+boardref(change.target)]
+
+mixin board-change(change, entryId)
+  if change
+    label
+      if (typeof change.oldValue === 'boolean' && typeof change.newValue === 'boolean')
+        +board-boolean-msg(change)
+      else
+        | Changed #[strong #{ change.model }.#{ change.property }] from
+        | #[strong "#{ change.oldValue }"] to #[strong "#{ change.newValue }"]    
+        | in #[+boardref(change.target)]
+
+mixin generic-boolean-msg(change)
+  | Set #[strong #{ change.model }.#{ change.property }] to #[strong= change.newValue]
+
+mixin generic-change(change, entryId)
+  if change
+    if (typeof change.oldValue === 'boolean' && typeof change.newValue === 'boolean')
+      +generic-boolean-msg(change)
+    else
+      | Changed #[strong #{ change.model }.#{ change.property }] from
+      | #[strong #{ change.oldValue }] to #[strong #{ change.newValue }]
+
+mixin change(change, entryId, timestamp)
+  li.modlog-entry__change-entry
     if change.model === 'Post'
-      +post-change(change)
+      +post-change(change, entryId, timestamp)
     else if change.model === 'Board'
-      +board-change(change)
+      +board-change(change, entryId, timestamp)
+    else
+      +generic-change(change, entryId, timestamp)
 
 
 block main
   h1 Modlog
   if modlog.length
-    ul
-      for item in modlog
-        li
-          +datetime(item.timestamp)
-          if item.user
-            | 
-            a(href=`/manage/staff/${ item.user.login }`)= item.user.login
-            if item.user.displayname
-              small.unimportant  (aka #[span.nickname #{item.user.displayname}])
-          else
-            | 
-            span.postername Anonymous
-            | 
-            span.posterip= item.ip
-          ul
-            if item.changes && item.changes.length
-              for change in item.changes
-                +change(change)
+    form#modlog-form.admin-form.modlog__form
+      ul.list.list_unmarked
+        for item in modlog
+          -const entryId = `${item.timestamp.getTime()}_${item.changes && item.changes.length || 0}`;
+          li.modlog-entry(id=entryId)
+            label
+              input.modlog-entry__checkbox.js-checkbox-master(
+                type='checkbox',
+                data-target=`#${entryId} .modlog-entry__change-entry__checkbox`)
+              +datetime(item.timestamp)
+            if item.user
+              | 
+              a(href=`/manage/staff/${ item.user.login }`)= item.user.login
+              //- if item.user.displayname
+              //-   small.unimportant  (aka #[span.nickname #{item.user.displayname}])
             else
-              +nothing-change
-          if item.regenerate
-            | #[strong HTML regenerated]
+              | 
+              span.postername Anonymous
+              | 
+              span.posterip= item.ip
+            ul.list_unmarked
+              if item.changes && item.changes.length
+                for change in item.changes
+                  +change(change, entryId, item.timestamp.getTime())
+              else
+                +nothing-change
+              if item.regenerate
+                li #[small HTML regenerated]
+      include ../includes/adminpanel.pug
   else
     | No more entries
   if (modlog.length)

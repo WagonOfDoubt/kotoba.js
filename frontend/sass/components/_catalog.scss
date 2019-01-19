@@ -1,15 +1,19 @@
 .catalog-list {
   margin: 20px 0;
   display: grid;
-  grid-gap: 30px;
+  grid-gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  grid-auto-flow: row dense;
+  grid-auto-flow: row;
 }
 
 .catalog-thread {
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  &.attachments-container {
+    padding-left: 0;
+  }
 }
 
 .catalog-thread-link {
@@ -20,6 +24,12 @@
     text-decoration: none;
     color: inherit;
   }
+}
+
+.catalog__separator {
+  grid-column-end: -1;
+  grid-column-start: 1;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .catalog-thread-image {

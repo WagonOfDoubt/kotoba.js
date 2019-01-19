@@ -1,6 +1,6 @@
 mixin reflink(ref, type, match)
   if !ref
-    strong [post deleted]
+    strong #[span.badge.badge_danger POST DELETED]
   else
     - var isRelative = board && ref.boardUri === board.uri;
     if !match

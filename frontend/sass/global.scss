@@ -157,11 +157,26 @@ h1, h2, h3, h4, h5, th {
   flex-direction: column;
   padding: 0;
   margin: 0 -1.5rem;
+  .list__separator {
+    border-bottom: 1px solid var(--border-color);
+  }
 }
 
 .list-group-item {
   padding: .5rem 1.25rem;
   border: 1px solid transparent;
+}
+
+.list_unmarked {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.list {
+  .list__separator {
+    margin-top: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
 }
 
 .logo {

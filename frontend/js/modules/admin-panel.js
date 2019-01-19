@@ -8,31 +8,43 @@ import { selectTab } from './tabs';
 
 
 const checkAdminForm = ($form) => {
-  const postsSelected = !!$form.has('input[name="posts[]"]:checked').length;
-  const threadsSelected = !!$form.has('.oppost input[name="posts[]"]:checked').length;
-  const attachmentsSelected = !!$form.has('input[name="attachments[]"]:checked').length;
-  const hasSelected = postsSelected || attachmentsSelected;
   const adminPanel = document.querySelector('.admin-panel');
-  if (adminPanel) {
-    adminPanel.classList.toggle('show', hasSelected);
-    const postsTab = adminPanel.querySelector('.admin-panel__item_posts');
-    const threadsTab = adminPanel.querySelector('.admin-panel__item_threads');
-    const attachmentsTab = adminPanel.querySelector('.admin-panel__item_attachments');
-    postsTab.classList.toggle('hidden', !postsSelected);
-    threadsTab.classList.toggle('hidden', !threadsSelected);
-    attachmentsTab.classList.toggle('hidden', !attachmentsSelected);
-    if (attachmentsSelected) {
-      selectTab('#admin-panel__tab_attachments')
-    } else if (threadsSelected) {
-      selectTab('#admin-panel__tab_threads');
-    } else if (postsSelected) {
-      selectTab('#admin-panel__tab_posts');
-    }
+  if (!adminPanel) {
+    return;
   }
+  
+  const toggleTabVisibility = (tabId, formConditionSelector) => {
+    const hasSelectedItems = !!$form.has(formConditionSelector).length;
+    const tab = adminPanel.querySelector(`.admin-panel__item_${tabId}`);
+    if (tab) {
+      // if current tab was selected, but now hidden
+      if (!hasSelectedItems && tab.querySelector(`.active`)) {
+        // try to select some other tab
+        const tabLink = adminPanel.querySelector(`.tab-menu__item:not(.hidden) a.js-select-tab`);
+        if (tabLink) {
+          selectTab(tabLink.getAttribute('href'));
+        }
+      }
+      // if no tabs on panel shown, select this tab
+      if (!adminPanel.querySelector('.tabs__content.show')) {
+        selectTab(`#admin-panel__tab_${tabId}`);
+      }
+      tab.classList.toggle('hidden', !hasSelectedItems);
+    }
+    return tab && hasSelectedItems;
+  };
+
+  let hasSelected = false;
+  hasSelected = toggleTabVisibility('modlog', 'input[name="items[]"]:checked') || hasSelected;
+  hasSelected = toggleTabVisibility('posts', 'input[name="posts[]"]:checked') || hasSelected;
+  hasSelected = toggleTabVisibility('threads', '.oppost input[name="posts[]"]:checked') || hasSelected;
+  hasSelected = toggleTabVisibility('attachments', 'input[name="attachments[]"]:checked') || hasSelected;
+
+  adminPanel.classList.toggle('show', hasSelected);
 };
 
-const renderReflink = (reflink) => {
-  return `<a>&gt;&gt;/${ reflink.boardUri }/${ reflink.postId }</a>`;
+const renderReflink = ({ boardUri, threadId, postId }) => {
+  return `<a href="/${boardUri}/res/${threadId}.html#post-${boardUri}-${postId}">&gt;&gt;/${boardUri}/${postId}</a>`;
 };
 
 
@@ -64,6 +76,46 @@ const sendSetFlagRequest = (url, data) => {
         .finally(() => window.location.reload());
     })
     .catch(alertErrorHandler);
+};
+
+
+function initCheckboxes() {
+  const $form = $('.admin-form, #delform');
+  const updateMasterState = ($master) => {
+    const $slaves = $($master.data('target'));
+    const checkboxesTotal = $slaves.length;
+    const $checked = $slaves.filter(':checked');
+    const checkboxesChecked = $checked.length;
+    if (checkboxesChecked === 0) {
+      $master.prop('checked', false);
+      $master.prop('indeterminate', false);
+    } else if (checkboxesTotal === checkboxesChecked) {
+      $master.prop('checked', true);
+      $master.prop('indeterminate', false);
+    } else {
+      $master.prop('checked', false);
+      $master.prop('indeterminate', true);
+    }
+  };
+  // checkboxes that control group of checkboxes
+  $('.js-checkbox-master').on('change', (e) => {
+    const checked = e.target.checked;
+    const $slaves = $(e.target.dataset.target);
+    $slaves.prop('checked', checked);
+    checkAdminForm($form);
+  });
+  // checkboxes that are controlled by checkbox
+  $('.js-checkbox-slave').on('change', (e) => {
+    const $master = $(e.target.dataset.target);
+    updateMasterState($master);
+    checkAdminForm($form);
+  });
+  // init checkboxes
+  $('.js-checkbox-master').each((i, el) => {
+    const $master = $(el);
+    updateMasterState($master);
+    checkAdminForm($form);
+  });
 };
 
 
@@ -146,6 +198,67 @@ function initAdminPanel() {
     checkAdminForm($form);
   });
 
+  $('.js-send-form').click((e) => {
+    const $targetForm = $(e.target.dataset.target);
+    $targetForm.trigger('send');
+  });
+
+  $('#modlog-form').on('send', (e) => {
+    const $targetForm = $(e.target);
+    const formData = $targetForm.serializeJSON();
+    const items = formData.items.map(JSON.parse);
+    const updates = items.reduce((acc, val) => {
+      const { postId, boardUri } = val.target;
+      const timestamp = val.target.timestamp;
+      const targetKey = `${boardUri}-${postId}`;
+      if (!acc[targetKey]) {
+        acc[targetKey] = {
+          target: val.target,
+          update: {},
+        }
+      }
+      for (let [key, value] of Object.entries(val.update)) {
+        if (!(key in acc[targetKey].update)) {
+          acc[targetKey].update[key] = value;
+        } else {
+          const currentValue = acc[targetKey].update[key];
+          const newValue = currentValue.ts > value.ts ? currentValue : value;
+          acc[targetKey].update[key] = newValue;
+        }
+      }
+      return acc;
+    }, {});
+    const groupedItems = Object.values(updates).map((u) => {
+      for (let [key, value] of Object.entries(u.update)) {
+        u.update[key] = value.value;
+      }
+      return u;
+    });
+    const renderItem = (item) => {
+      const reflink = renderReflink(item.target);
+      const updateList = Object
+        .entries(item.update)
+        .map(([k, v]) => `<li><strong>${k}</strong> = <strong>${v}</strong></li>`)
+        .join('');
+      return `<li>${reflink}<ul class="list_unmarked">${updateList}</ul></li>`;
+    };
+    const modalBody = groupedItems.map(renderItem).join('');
+    const modalPrompt = `Following items will be changed:`;
+    const modalForm = `<label><input type="checkbox" checked="" name="regenerate:boolean">Regenerate HTML</label>`;
+    modal
+      .confirmPrompt('Confirm action', `${modalPrompt}<ul class="list_unmarked">${modalBody}</ul>${modalForm}`)
+      .then(({returnValue, formData}) => {
+        console.log(groupedItems, returnValue, formData);
+        const regenerate = formData.regenerate;
+        const requestData = {
+          items: groupedItems,
+          regenerate: regenerate,
+        };
+        sendSetFlagRequest('/api/post', requestData);
+      });
+    e.preventDefault();
+  });
+
   // initial set on page load
   const addClassToClosestParent = (sourceSelector, parentSelector, className) =>
     Array
@@ -157,6 +270,8 @@ function initAdminPanel() {
   addClassToClosestParent('input[name="posts[]"]:checked', '.post', 'selected');
   addClassToClosestParent('input[name="attachments[]"]:checked', '.attachment', 'selected');
   checkAdminForm($form);
+
+  initCheckboxes();
 }
 
 export { initAdminPanel };

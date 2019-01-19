@@ -12,6 +12,6 @@ mixin date(timestamp)
 
 mixin time(timestamp)
   if timestamp
-    time.date(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()
+    time.time(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()
   else
     span.error Error: no timestamp

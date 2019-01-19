@@ -44,6 +44,10 @@ form {
   }  
 }
 
+.input_disabled {
+  cursor: not-allowed;
+}
+
 
 @media (max-width: 1000px) {
   form {
