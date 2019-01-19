@@ -133,15 +133,23 @@ postSchema.methods.toReflink = function() {
 
 postSchema.statics.findRefs = (postsQueryList) => {
   return Post
-    .aggregate({ $match: { $or: postsQueryList } })
-    .project({
-        src: '$_id',
-        _id: 0,
-        postId: 1,
-        boardUri: 1,
-        isOp: 1,
-        threadId: 1
-      });
+    .aggregate([
+      {
+        $match: {
+          $or: postsQueryList
+        }
+      },
+      {
+        $project: {
+          src: '$_id',
+          _id: 0,
+          postId: 1,
+          boardUri: 1,
+          isOp: 1,
+          threadId: 1
+        }
+      }
+    ]);
 };
 
 
@@ -158,9 +166,24 @@ postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
   }
 
   const queryResult = await Post.aggregate([
-    { $match: {boardUri: boardUri} },
-    { $group: { _id: "$ip"} },
-    { $group: { _id: 1, unique: { $sum: 1 } } }
+    {
+      $match: {
+        boardUri: boardUri
+      }
+    },
+    {
+      $group: {
+        _id: "$ip"
+      }
+    },
+    {
+      $group: {
+        _id: 1,
+        unique: {
+          $sum: 1
+        }
+      }
+    }
   ]);
   if (!queryResult.length || !queryResult[0].unique) {
     return 0;
