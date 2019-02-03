@@ -27,15 +27,18 @@ table.table {
     }
 
     .table__header_sortable::after {
-      content: ' ◊';
+      content: '\00a0\00a0▾▴';
+      opacity: .25;
     }
 
     .table__header_sort-ascending::after {
-      content: ' ▴';
+      content: '\00a0\00a0▴';
+      opacity: 1;
     }
 
     .table__header_sort-descending::after {
-      content: ' ▾';
+      content: '\00a0\00a0▾';
+      opacity: 1;
     }    
   }
 
