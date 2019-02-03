@@ -33,8 +33,6 @@ const modlogEntrySchema = Schema({
    * @see {@link models/schama/change}
    */
   changes:             [ changeSchema ],
-  /** Whether or not initiator entered correct password for target posts */
-  isPasswordMatched:   { type: Boolean, default: false },
   /** Whether or not necessary pages were regenerated */
   regenerate:          { type: Boolean, default: false },
 },
@@ -55,6 +53,8 @@ const modlogEntrySchema = Schema({
  * @param {Object} newValues - patch object, does not necessarily contains all
  * the original object properties, just ones that must be changed
  * @example
+ * @param {Object} priorities - priorities for new values
+ * @param {Object} roleNames - priorities for new values
  * properties of nested objects are flatten to paths, i.e.
  * {
  *   foo: {
@@ -69,23 +69,25 @@ const modlogEntrySchema = Schema({
  * @returns {Array.<Object>} Array of objects corresponding to changeSchema:
  * { target, modeule, property, oldValue, newValue }
  */
-modlogEntrySchema.statics.diff = (model, target, oldValues, newValues) =>{
-  oldValues = flatten(oldValues);
-  newValues = flatten(newValues);
-  const changes = [];
-  Object
+modlogEntrySchema.statics.diff = (model, target, oldValues, newValues, priorities, roleNames, prevChanges) => {
+  oldValues = flatten(oldValues || {});
+  newValues = flatten(newValues || {});
+  priorities = flatten(priorities || {});
+  roleNames = flatten(roleNames || {});
+  prevChanges = flatten(prevChanges || {});
+  const changes = Object
     .entries(newValues)
-    .forEach(([key, value]) => {
-      if (oldValues[key] !== value) {
-        changes.push({
-          target: target,
-          model: model,
-          property: key,
-          oldValue: oldValues[key],
-          newValue: value,
-        });
-      }
-    });
+    .filter(([key, value]) =>
+      oldValues[key] !== value && (prevChanges[key] === undefined || priorities[key] !== prevChanges[key]))
+    .map(([key, value]) => ({
+        target:   target,
+        model:    model,
+        property: key,
+        oldValue: oldValues[key],
+        newValue: value,
+        priority: priorities[key],
+        roleName: roleNames[key],
+    }));
   return changes;
 };
 

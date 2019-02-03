@@ -4,6 +4,7 @@
  */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Mixed = mongoose.Schema.Types.Mixed;
 
 
 const propertyAccessSchema = Schema({
@@ -11,7 +12,6 @@ const propertyAccessSchema = Schema({
     type: Number,
     min: 0,
     max: 9999,
-    required: true,
     default: 10,
     get: v => Math.round(v),
     set: v => Math.round(v),
@@ -22,12 +22,30 @@ const propertyAccessSchema = Schema({
     required: true,
     default: 'no-access',
   },
-  values: {
-    trueValue: { type: Boolean, default: true },
-    falseValue: { type: Boolean, default: true },
-    minimum: { type: Number },
-    maximum: { type: Number },
-  }
+  /**
+   * If access is "wite-value", this array specifies priorities for each
+   * individual value, range or pattern
+   * @type {Array}
+   */
+  values: [
+    {
+      // value priority
+      priority: {
+        type: Number,
+        min: 0,
+        max: 9999,
+        required: true,
+        default: 10,
+        get: v => Math.round(v),
+        set: v => Math.round(v),
+      },
+      // value constarints
+      eq:     { type: Mixed },
+      min:    { type: Number },
+      max:    { type: Number },
+      regexp: { type: String },
+    }
+  ]
 });
 
 

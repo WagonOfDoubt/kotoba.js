@@ -7,63 +7,191 @@ const config = require('../config.json');
 const reflinkSchema = require('./schema/reflink');
 const attachmentSchema = require('./schema/attachment');
 const useragentSchema = require('./schema/useragent');
+const { createRegExpFromArray, regExpTester } = require('../utils/regexp');
 
 
 const postSchema = Schema({
-  /* primary key for post, autoincrement, unique for each board */
-  postId: {                                               // generated
+  /**
+   * READ ONLY. Sequential number of post unique to post's board.
+   * @type {Int32}
+   */
+  postId: {
     type: Int32,
     index: true,
     default: 1,
     min: 1,
   },
-  /* postId of parent thread on same board (if this post not OP) */
-  threadId: { type: Int32 },                               // filled by poster
-  /* board string */
-  boardUri:            { type: String, required: true },   // filled by poster
-  /* ref to board */
-  board: {                                                 // generated
+  /**
+   * READ ONLY. Sequential number of parent thread unique to thread's board.
+   * @type {Int32}
+   */
+  threadId: { type: Int32 },
+  /**
+   * Uri of board this post is posted on.
+   * @see  models/board
+   * @type {String}
+   */
+  boardUri:            { type: String, required: true },
+  // todo redundant. delete?
+  board: {
     type: ObjectId,
     required: true,
     ref: 'Board'
   },
-  /* ref to parent thread (if this post is not OP) */
-  parent: {                                                // generated (not OP)
+  /**
+   * READ ONLY. REPLY ONLY. Ref to parent thread.
+   * @type {ObjectId}
+   */
+  parent: {
     type: ObjectId,
     ref: 'Post'
   },
-  /* refs to child posts (if this post is OP) */
-  children: [{                                             // generated (OP only)
+  /**
+   * READ ONLY. OP ONLY. Ref to replies to thread.
+   * @type {Array[ObjectId]}
+   */
+  children: [{
     type: ObjectId,
     ref: 'Post'
   }],
-  timestamp:           { type: Date, default: Date.now },  // generated
-  bumped:              { type: Date, default: Date.now },  // generated (OP only)
-  name:                { type: String, default: '' },      // filled by poster
-  tripcode:            { type: String, default: '' },      // filled by poster
-  email:               { type: String, default: '' },      // filled by poster
-  subject:             { type: String, default: '' },      // filled by poster
-  /* unparsed post body as it was sent by user */
-  body:                { type: String, default: '' },      // filled by poster
-  /* parsed post body as HTML, ready for template */
-  rawHtml:             { type: String, default: '' },      // generated
-  /* parsed post body with token objects to maintain references */
-  parsed:              [ ],                                // generated
-  replies:             [ reflinkSchema ],                  // generated
-  references:          [ reflinkSchema ],                  // generated
-  attachments:         [ attachmentSchema ],               // filled by poster
-  isOp:                { type: Boolean, default: false },  // can be changed by mod when merging threads
-  // op only
-  isSticky:            { type: Boolean, default: false },  // can be changed by mod
-  isClosed:            { type: Boolean, default: false },  // can be changed by mod
-  // replies only
-  isSage:              { type: Boolean, default: false },  // filled by poster
-  // private fields
-  ip:                  { type: String, required: true },   // immutable
-  password:            { type: String, default: '' },      // immutable
-  useragent:           { type: useragentSchema, required: true },   // immutable
-  isApproved:          { type: Boolean, default: true },   // can be changed by mod
-  isDeleted:           { type: Boolean, default: false }   // can be changed by mod
+  /**
+   * READ ONLY. Date of post creation.
+   * @type {Date}
+   */
+  timestamp:           { type: Date, default: Date.now },
+  /**
+   * OP ONLY. READ ONLY. Date of last non-sage reply to thread for sorting
+   * threads.
+   * @type {Date}
+   */
+  bumped:              { type: Date, default: Date.now },
+  /**
+   * INPUT. Poster name. Can be edited by original poster with password or by
+   * user with role with permission to edit other's posts.
+   * @type {String}
+   */
+  name:                { type: String, default: '' },
+  /**
+   * INPUT. Poster tripcode.
+   * @type {String}
+   */
+  tripcode:            { type: String, default: '' },
+  /**
+   * INPUT. Poster link or e-mail. Can be edited by original poster with
+   * password or by user with role with permission to edit other's posts.
+   * @type {String}
+   */
+  email:               { type: String, default: '' },
+  /**
+   * INPUT. Post subject. Can be edited by original poster with password or by
+   * user with role with permission to edit other's posts.
+   * @type {String}
+   */
+  subject:             { type: String, default: '' },
+  /**
+   * INPUT. Unparsed original post body as it was written by poster. Can be
+   * edited by original poster with password or by user with role with
+   * permission to edit other's posts.
+   * @type {String}
+   */
+  body:                { type: String, default: '' },
+  /**
+   * READ ONLY. Parsed post body for using in resulting template.
+   * @type {String}
+   */
+  rawHtml:             { type: String, default: '' },
+  /**
+   * READ ONLY. Intermediate parsing result with HTML strirngs and token
+   * objects. Post can be reparsed to update references to moved posts.
+   * @type {Array[String, Object]}
+   */
+  parsed:              [ ],
+  /**
+   * READ ONLY. Refs to posts that are referencing this post. Replies
+   * are reflinks on separate line, and threrefore can be used to divide post
+   * into sections.
+   * @see models/schema/reflink
+   * @type {Array[ReflinkSchema]}
+   */
+  replies:             [ reflinkSchema ],
+  /**
+   * READ ONLY. Refs to posts that are referencing this post. References are
+   * inline reflinks.
+   * @see models/schema/reflink
+   * @type {Array[ReflinkSchema]}
+   */
+  references:          [ reflinkSchema ],
+  /**
+   * INPUT. Array of post's attachments.
+   * @see models/schema/attachment
+   * @type {Array[AttachmentSchema]}
+   */
+  attachments:         [ attachmentSchema ],
+  /**
+   * READ ONLY. Is this post a thread-starting. Can be changed by user who
+   * have role with permission to merge threads.
+   * @type {Boolean}
+   */
+  isOp:                { type: Boolean, default: false },
+  /**
+   * OP ONLY. Is thread always on top. This field can be changed by user with
+   * role with write permission which assigned on board to which this posts
+   * belongs.
+   * @type {Boolean}
+   */
+  isSticky:            { type: Boolean, default: false },
+  /**
+   * OP ONLY. Is thread closed for posting. This field can be changed by user
+   * with role with write permission which assigned on board to which this
+   * posts belongs.
+   * @type {Boolean}
+   */
+  isClosed:            { type: Boolean, default: false },
+  /**
+   * INPUT. Do not bump thread. This field can be changed by user with role
+   * with write permission which assigned on board to which this posts belongs
+   * or by password.
+   * @type {Boolean}
+   */
+  isSage:              { type: Boolean, default: false },
+  /**
+   * READ ONLY. Poster IP. Users are reuired to have role on post's board with
+   * permission.
+   * @type {String}
+   */
+  ip:                  { type: String, required: true },
+  /**
+   * READ ONLY. Hash of poster posting password (for edition/deletion)
+   * @type {String}
+   */
+  password:            { type: String, default: '' },
+  /**
+   * INPUT. Parsed useragent of poster.
+   * @see models/schema/useragent
+   * @type {UseragentSchema}
+   */
+  useragent:           { type: useragentSchema, required: true },
+  /**
+   * Reserved for future use. This field can be changed by user with role with
+   * write permission which assigned on board to which this post belongs.
+   * @type {Boolean}
+   */
+  isApproved:          { type: Boolean, default: true },
+  /**
+   * Is post marked as deleted. Deleted posts are not shown and can be
+   * either resored by changing this flag or be deleted permanently. This
+   * field can be changed by user with role with write permission which
+   * assigned on board to which this posts belongs or by password.
+   * @type {Boolean}
+   */
+  isDeleted:           { type: Boolean, default: false },
+  /**
+   * READ ONLY. Priorities for previous changes to lock property from changing
+   * by user with lower priority. Object contains paths as keys and values are
+   * Int32.
+   * @type {Object}
+   */
+  changes:             { type: Object }
 });
 
 
@@ -151,6 +279,27 @@ postSchema.statics.findRefs = (postsQueryList) => {
       }
     ]);
 };
+
+const attachmentFields = [
+  // attachments
+  'attachments.$[n].isDeleted', 'attachments.$[n].isNSFW', 'attachments.$[n].isSpoiler'
+];
+
+
+const postFields = [
+  // threads
+  'isSticky', 'isClosed',
+  // posts
+  'isSage', 'isApproved', 'isDeleted',
+];
+
+
+const allEditableFields = [...postFields, ...attachmentFields];
+
+postSchema.statics.isPostField = regExpTester(createRegExpFromArray(postFields));
+postSchema.statics.isAttachmentField = regExpTester(createRegExpFromArray(attachmentFields));
+postSchema.statics.isEditablePostField = regExpTester(createRegExpFromArray(allEditableFields));
+postSchema.statics.toKey = ({boardUri, postId}) => `post-${boardUri}-${postId}`;
 
 
 const cachedUniqueUserPosts = {};

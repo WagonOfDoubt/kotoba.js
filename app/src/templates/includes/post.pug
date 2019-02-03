@@ -58,7 +58,7 @@ div(
         if post.isAutosage
           span.post-icon.post-icon-autosage(title='Autosage')
       if post.isDeleted
-        span.post-icon.post-icon-deleted(title='Deleted')
+        span.badge.badge_danger(title='Deleted') DELETED
       if post.isOp
         if site.features.hideThread
           a.post-btn.post-btn-hide(href='#', title='Hide thread')

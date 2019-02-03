@@ -14,6 +14,9 @@ div.admin-panel
       button.js-select-all-items(type='button', data-target='.js-select-post') Select all posts
       button.js-deselect-all-items(type='button', data-target='.js-select-post, .js-select-attachment') Deselect all
     div.column
+      button.js-set-post-flag(type='submit', name='isSage', value='true') Set sage
+      button.js-set-post-flag(type='submit', name='isSage', value='false') Unset sage
+    div.column
       button.js-set-post-flag(type='submit', name='isDeleted', value='true') Delete
       button.js-set-post-flag(type='submit', name='isDeleted', value='false') Restore
     div.column

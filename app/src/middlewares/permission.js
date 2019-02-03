@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { createRegExpFromArray, regExpTester } = require('../utils/regexp');
+const Post = require('../models/post');
 
 
 module.exports.postEditPermission = async (req, res, next) => {
@@ -8,30 +9,20 @@ module.exports.postEditPermission = async (req, res, next) => {
 
     // check each operation for permission
     const checkPost = (item) =>
-      checkPostPermission(item.target, postpassword, req.user, item.update);
+      checkPostPermission(item.target, postpassword, item.update, req.userRoles, req.user);
     const checkedPostsResults = await Promise.all(items.map(checkPost));
 
-    const permissionGranted = [];
-    const permissionDenied = [];
-    const updateItems = [];
+    // req.body.items will contain only items that are allowed for updating
+    req.body.items = [];
+    res.locals.fail = res.locals.fail || [];
     checkedPostsResults.forEach((item) => {
-      const ref = item.target.toReflink();
       if (!_.isEmpty(item.denied)) {
-        permissionDenied.push({ ref: ref, denied: item.denied });
-      }
-      if (!_.isEmpty(item.granted)) {
-        permissionGranted.push({ ref: ref, granted: item.granted });
+        res.locals.fail.push(...item.denied);
       }
       if (!_.isEmpty(item.update)) {
-        updateItems.push(_.pick(item, [ 'target', 'update' ]));
+        req.body.items.push(_.pick(item, [ 'target', 'update' ]));
       }
     });
-
-    res.locals.permissionGranted = permissionGranted;
-    res.locals.permissionDenied = permissionDenied;
-
-    // req.body.items will contain only items that are allowed for updating
-    req.body.items = updateItems;
 
     next();
   } catch (err) {
@@ -40,72 +31,244 @@ module.exports.postEditPermission = async (req, res, next) => {
 };
 
 
-const flags = [
-  // threads
-  'isSticky', 'isClosed',
-  // posts
-  'isSage', 'isApproved', 'isDeleted',
-  // attachments
-  'attachments.$[n].isDeleted', 'attachments.$[n].isNSFW', 'attachments.$[n].isSpoiler'
-];
+const checkPostPermission = async (target, password, updateObj, roles, user) => {
+  const passwordMatches = password && await target.checkPassword(password);
 
-
-const isEditablePostField = regExpTester(createRegExpFromArray(flags))
-
-const checkPostPermission = async (target, password, user, updateObj) => {
+  const boardRole = roles ? roles[target.boardUri] : null;
+  const roleName = boardRole
+    ? boardRole.roleName
+    : passwordMatches
+      ? '__poster'
+      : '';
+  const getRelevantPriority = (field, value) => {
+    if (user.authority === 'admin') {
+      return 10000;
+    }
+    if (boardRole && passwordMatches) {
+      return Math.max(
+        getPriorityForUpdatingPostField(field, value, boardRole),
+        getPriorityForUpdatingPostFieldByPassword(field, value));
+    }
+    if (boardRole) {
+      return getPriorityForUpdatingPostField(field, value, boardRole);
+    }
+    if (passwordMatches) {
+      return getPriorityForUpdatingPostFieldByPassword(field, value);
+    }
+    // not mod, no password => GTFO
+    return PRIORITY_NO_PASSWORD;
+  };
   const updatesArray = _.toPairs(updateObj);
-  // TODO: temporary code, allows to do anything for logged in users
-  // make proper staff permissions system
-  if (user) {
-    const [ validFields, invalidFields ] = _.partition(updatesArray, (kv) => isEditablePostField(kv[0]));
+  const weightedUpdates = updatesArray
+    .map(([field, value]) => [
+      field,
+      value,
+      _.get(target, ['changes', field]),
+      getRelevantPriority(field, value),
+    ]);
+  const isHigherPriority = (oldPriority, newPriority) => {
+    if (_.isNumber(oldPriority)) {
+      return _.isNumber(newPriority) && newPriority >= oldPriority;
+    }
+    return _.isNumber(newPriority) && newPriority > 0;
+  };
+  const [ validFields, invalidFields ] =
+    _.partition(weightedUpdates, ([f, v, oldPriority, newPriority]) => isHigherPriority(oldPriority, newPriority));
 
-    const update = _.fromPairs(validFields);
-    const granted = validFields
-      .map(([key, value]) => ({ key: key, value: value }));
-    const denied = invalidFields
-      .map(([key, value]) => ({ key: key, value: value, reason: 'Invalid field name' }));
-    return { target, update, granted, denied };
+  const update = _.fromPairs(
+    validFields.map(([key, value, oldPriority, newPriority]) =>
+      [key, { value, priority: newPriority, roleName }]));
+
+  const ref = _.omit(target.toReflink(), 'src');
+  const denied = invalidFields
+    .map(([key, value, oldPriority, newPriority]) =>
+      ({
+        ref: ref,
+        status: 403,
+        update: { [key]: value },
+        error: {
+          type: 'PermissionDeniedError',
+          msg: getReason(oldPriority, newPriority),
+          roleName: roleName,
+          userPriority: newPriority,
+          currentPriority: oldPriority,
+        },
+      })
+    );
+  return { target, update, denied };
+};
+
+
+/** @type {Number} User has no write access */
+const PRIORITY_NO_ACCESS        = -1;
+/** @type {Number} User has no role assigned for this board */
+const PRIORITY_NO_ROLE          = -10;
+/** @type {Number} Invalid field name */
+const PRIORITY_INVALID_FIELD    = -20;
+/** @type {Number} User permissions for this action is undefined */
+const PRIORITY_EMPTY_PERMISSION = -30;
+/** @type {Number} User has no permission to set field to this value */
+const PRIORITY_INVALID_VALUE = -40;
+/** @type {Number} User is not logged in and post password is incorrect */
+const PRIORITY_NO_PASSWORD  = -50;
+
+
+/**
+ * Decode invalid priority code to human-readable message
+ * @param  {Number} priority Invalid priority (negative number)
+ * @return {String}          Human-readable error message
+ */
+const getReason = (oldPriority, newPriority) => {
+  if (newPriority === PRIORITY_NO_ACCESS) {
+    return `User has no write access for this field`;
   }
+  if (newPriority === PRIORITY_NO_ROLE) {
+    return `User has no role assigned for this board`;
+  }
+  if (newPriority === PRIORITY_INVALID_FIELD) {
+    return `Field is not editable or invalid`;
+  }
+  if (newPriority === PRIORITY_EMPTY_PERMISSION) {
+    return `User permissions for this action is undefined`;
+  }
+  if (newPriority === PRIORITY_INVALID_VALUE) {
+    return `User has no permission to set field to this value`;
+  }
+  if (newPriority === PRIORITY_NO_PASSWORD) {
+    return `User is not logged in and post password is incorrect`;
+  }
+  if (newPriority < oldPriority) {
+    return `User priority ${newPriority} is less than current priority ${oldPriority}`;
+  }
+  return '';
+};
 
-  const passwordMatches = await target.checkPassword(password);
 
-  // user wrote this post and can edit some fields
-  if (passwordMatches) {
-    // [ key, value ] pairs that can be changed by unauthorized user if
-    // they have correct password
-    // TODO: make this customisable
-    // TODO: currently broken
-    const guestPriviliges = [
+/**
+ * Get priority for modifying specific Post field with new value from User
+ * role
+ * @param  {String} field     Name of Post field that is being modified
+ * @param  {Mixed}  value     New value for Post field
+ * @param  {Role}   boardRole Mongoose document or plain object implementing
+ * RoleSchema
+ * @return {Number}           Priority for modifying Post field. Negative
+ * values indicate various cases of invalid priority.
+ */
+const getPriorityForUpdatingPostField = (field, value, boardRole) => {
+  if (!boardRole) {
+    // user has no role assigned to this board
+    return PRIORITY_NO_ROLE;
+  }
+  let permission = null;
+  if (Post.isPostField(field)) {
+    permission = boardRole.postPermissions[field];
+  } else if (Post.isAttachmentField(field)) {
+    field = field.match(/(?<=\.)\w+$/)[0];
+    permission = boardRole.attachmentPermissions[field];
+  } else {
+    // invalid field
+    return PRIORITY_INVALID_FIELD;
+  }
+  if (!permission) {
+    // permission is empty
+    return PRIORITY_EMPTY_PERMISSION;
+  }
+  if (permission.access === 'write-value') {
+    const condition = permission.values.find((v) => {
+      if (_.has(v, 'eq')) {
+        return v.eq === value;
+      }
+      if (_.has(v, 'regexp')) {
+        return v.regexp.test(value);
+      }
+      if (_.has(v, 'min') && _.has(v, 'max')) {
+        return v.min <= value && v.max >= value;
+      }
+      if (_.has(v, 'min')) {
+        return v.min <= value;
+      }
+      if (_.has(v, 'max')) {
+        return v.max >= value;
+      }
+      return false;
+    });
+    if (condition) {
+      return condition.priority;
+    }
+    return PRIORITY_INVALID_VALUE;
+  }
+  if (permission.access === 'wirte-any') {
+    return permission.priority;
+  }
+  // user has no write permission
+  return PRIORITY_NO_ACCESS;
+};
+
+
+const getPriorityForUpdatingPostFieldByPassword = (field, value) => {
+  const acceptableAccess = ['wirte-any', 'write-value'];
+  const anonRole = {
+    roleName: '__poster',
+    hierarchy: 0,
+    postPermissions: {
       // anonymous can delete their own post, but can't restore it
-      [ 'isDeleted', true ],
-      // anonymous can close their own thread, but once and for all
-      [ 'isClosed', true ],
-      // anonymous can add or remove sage, if they had mistaken
-      [ 'isSage', true ], [ 'isSage', false ],
+      // and only admin can restore it
+      isDeleted: {
+        access: 'write-value',
+        values: [
+          { eq: true,  priority: 9999 },
+        ]
+      },
+      // anonymous can close their own thread (but only once)
+      // and any staff member with permission can un-close it
+      isClosed: {
+        access: 'write-value',
+        values: [
+          { eq: true,  priority: 1 },
+        ]
+      },
+      // anonymous can add sage (but only once)
+      // and only admin can un-sage it
+      // anonymous can remove sage
+      // and any staff member with permission can add sage
+      isSage: {
+        access: 'write-value',
+        values: [
+          { eq: true,  priority: 9999 },
+          { eq: false, priority: 1 },
+        ]
+      },
+    },
+    attachmentPermissions: {
       // anonymous can delete attachments in their own post, but can't restore it
-      [ 'attachments.$[n].isDeleted', true ],
-      // anonymous can set or unset NSFW, if they had mistaken
-      [ 'attachments.$[n].isNSFW', true ], [ 'attachments.$[n].isNSFW', false ],
-      // anonymous can set or unset spoiler, if they had mistaken
-      [ 'attachments.$[n].isSpoiler', true ], [ 'attachments.$[n].isSpoiler', false ],
-    ];
-
-    const diff = _.differenceWith(updatesArray, guestPriviliges, _.isEqual);
-    const grantedArray = _.differenceWith(updatesArray, diff);
-
-    const update = _.fromPairs(grantedUpdate);
-    const granted = validFields
-      .map(([key, value]) => ({ key: key, value: value }));
-    const denied = diff
-      .map(([key, value]) => ({ key: key, value: value, reason: `You have no rights to set ${ key } to ${ value }`}));
-
-    return { target, update, granted, denied };
+      // and only admin can restore it
+      isDeleted: {
+        access: 'write-value',
+        values: [
+          { eq: true,  priority: 9999 },
+        ]
+      },
+      // anonymous can set or unset NSFW (but only once)
+      // and any staff member with permission can undo it
+      isNSFW: {
+        access: 'write-value',
+        values: [
+          { eq: true,  priority: 2 },
+          { eq: false, priority: 1 },
+        ]
+      },
+      // anonymous can set or unset spoiler (but only once)
+      // and any staff member with permission can undo it
+      isSpoiler: {
+        access: 'write-value',
+        values: [
+          { eq: true,  priority: 2 },
+          { eq: false, priority: 1 },
+        ]
+      },
+    },
   }
-
-  // not mod, no password => GTFO
-  const deniedUpdate = _.toPairs(update)
-    .map(([key, value]) => ({ key: key, value: value, reason: 'Incorrect password'}));
-  return { target: target, update: {}, granted: {}, denied: deniedUpdate };
+  return getPriorityForUpdatingPostField(field, value, anonRole);
 };
 
 

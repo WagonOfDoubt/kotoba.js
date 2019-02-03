@@ -48,19 +48,42 @@ const renderReflink = ({ boardUri, threadId, postId }) => {
 };
 
 
+const renderTarget = ({ boardUri, postId }) => {
+  return `<a href="#post-${boardUri}-${postId}">&gt;&gt;/${boardUri}/${postId}</a>`;
+};
+
+
 const readableResponseReport = (response) => {
-  let report = 'Done.<br>';
+  let report = 'Done.';
+  if (response.error) {
+    report = response.error.type;
+  }
+  report += '<br>';
   if (response.success && response.success.length) {
     const allSuccessReflinks = response.success
       .map((itm) => renderReflink(itm.ref))
       .join(', ');
-    report += `Following items was successfully changed: ${allSuccessReflinks}<br>`;
+    report += `Successfully changed: ${allSuccessReflinks}<br>`;
   }
   if (response.fail && response.fail.length) {
     const allFailReflinks = response.fail
-      .map((itm) => `${ renderReflink(itm.ref) } (${ itm.reason })`)
+      .map((itm) => {
+        let ref = '';
+        if (itm.ref) {
+          ref = renderReflink(itm.ref);
+        } else {
+          ref = renderTarget(itm.target);
+        }
+        let hint = '';
+        if (itm.status === 204) {
+          hint = '(Nothing to change)';
+        } else if (itm.error) {
+          hint = `(${itm.error.msg})`;
+        }
+        return `${ref} ${hint}`;
+      })
       .join(', ');
-    report += `Following items was not changed: ${allFailReflinks}<br>`;
+    report += `Not changed: ${allFailReflinks}<br>`;
   }
   return report;
 };
@@ -68,14 +91,20 @@ const readableResponseReport = (response) => {
 
 const sendSetFlagRequest = (url, data) => {
   modal.wait();
+  const onDone = (response) => {
+    console.log(response);
+    let status = 'Success';
+    if (response.responseJSON) {
+      status = `${response.status} ${response.statusText}`;
+      response = response.responseJSON;
+    }
+    modal
+      .alert(status, readableResponseReport(response))
+      .finally(() => window.location.reload());
+  };
   sendJSON(url, 'patch', data)
-    .then((response) => {
-      console.log(response);
-      modal
-        .alert('Success', readableResponseReport(response))
-        .finally(() => window.location.reload());
-    })
-    .catch(alertErrorHandler);
+    .then(onDone)
+    .catch(onDone);
 };
 
 

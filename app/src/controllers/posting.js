@@ -9,11 +9,13 @@ const { generateThread, generateThreads, generateBoards, generateBoardPagesAndCa
 const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
+const ModlogEntry = require('../models/modlog');
 const Parser = require('./parser');
 const fs = require('fs-extra');
 const config = require('../config');
 const path = require('path');
 const _ = require('lodash');
+const fp = require('lodash/fp');
 
 
 /**
@@ -264,45 +266,142 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
  * Update fields of posts and save it to DB.
  * @async
  * @example
+ *
  * const items = [
  *   {
  *     target: { _id: ObjectId(...), boardUri: 'b', postId: 123, ... },  // Post document
- *     update: { 'attachments.0.isDeleted': true, 'attachments.1.isDeleted': true }
+ *     update: {
+ *       'attachments.0.isDeleted': { value: true, priority: 100, roleName: 'moderator' },
+ *       'attachments.1.isDeleted': { value: true, priority: 100, roleName: 'moderator' }
+ *     }
  *   },
  *   {
  *     target: { _id: ObjectId(...), boardUri: 'b', postId: 456, ... },  // Post document
- *     update: { 'isSticky': true }
+ *     update: {
+ *       'isSticky': { value: true, priority: 100, roleName: 'moderator' }
+ *     }
  *   },
  *   {
  *     target: { _id: ObjectId(...), boardUri: 'a', postId: 789, ... },  // Post document
- *     update: { 'isSage': true }
+ *     update: {
+ *       'isSage': { value: true, priority: 100, roleName: 'moderator' }
+ *     }
  *   },
  * ];
  * await updatePosts(items, true);
+ *
  * @param {Array.<Object>} items - array of post mongoose documents
  * @param {boolean} [regenerate=true] - regenerate corresponding html files
- * @returns result of Post.bulkWrite, or an emty object if no posts were updated
+ * @returns result of Post.bulkWrite, or an empty object if no posts were
+ * updated
  */
-module.exports.updatePosts = async (items, regenerate = true) => {
+module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=false) => {
   if (_.isEmpty(items)) {
     return {};
   }
 
-  const query = items.map(item => {
-    const filter = item.target._id
-      ? { _id: item.target._id }
-      : _.pick(item.target, ['boardUri', 'postId']);
-    return {
+  const invalidItems = [];
+  const validItems = [];
+  const changesList = [];
+  for (let item of items) {
+    const post = item.target;
+    let updateValues = _.mapValues(item.update, 'value');
+    let updatePriorities = _.mapValues(item.update, 'priority');
+
+    const notChanged = Object
+      .keys(updateValues)
+      .filter((key) => {
+        const sameValue = post.get(key) === updateValues[key];
+        const samePriority = updatePriorities[key] === post.get(`changes.${key}`);
+        return sameValue && samePriority;
+      });
+
+    if (notChanged.length) {
+      const notChangedUpdates = _.pick(updateValues, notChanged);
+      const notChangedItem = {
+        target: _.pick(post, ['boardUri', 'postId']),
+        update: notChangedUpdates,
+        status: 204,
+      };
+      invalidItems.push(notChangedItem);
+      updateValues = _.omit(updateValues, notChanged);
+      updatePriorities = _.omit(updatePriorities, notChanged);
+    }
+
+    if (_.isEmpty(updateValues)) {
+      continue;
+    }
+
+    const originalPost = post.toObject();
+    post.set(updateValues);
+    const validationError = post.validateSync();
+
+    if (validationError) {
+      const errorPaths = _.filter(_.map(_.values(validationError.errors), 'path'));
+      const invalidUpdates = _.pick(updateValues, errorPaths);
+
+      updateValues = _.omit(updateValues, errorPaths);
+      updatePriorities = _.omit(updatePriorities, errorPaths);
+
+      for (let errorPath of errorPaths) {
+        const errorAtPath = validationError.errors[errorPath];
+        const invalidItem = {
+          target: _.pick(post, ['boardUri', 'postId']),
+          update: invalidUpdates,
+          status: 400,
+          error: { type: errorAtPath.name, msg: errorAtPath.message },
+        };
+        invalidItems.push(invalidItem);
+      }
+    }
+
+    const newChanges = Object.keys(updateValues).map((key) =>
+      ({
+        target: item.target._id,
+        model: 'Post',
+        property: key,
+        oldValue: _.get(originalPost, key),
+        newValue: _.get(updateValues, key),
+        oldPriority: _.get(originalPost, ['changes', key]),
+        newPriority: _.get(updatePriorities, key),
+        roleName: item.update[key].roleName,
+      })
+    );
+    changesList.push(newChanges);
+
+    updatePriorities = _.mapKeys(updatePriorities, (value, key) => `changes.${key}`);
+    const update = { ...updateValues, ...updatePriorities };
+    if (!_.isEmpty(update)) {
+      item.update = update;
+      validItems.push(item);
+    }
+  }
+
+  if (!validItems.length) {
+    return { success: [], fail: invalidItems };
+  }
+
+  const updatePostQuery = validItems.map(item =>
+    ({
       updateOne: {
-        filter: filter,
+        filter: { _id: item.target._id },
         update: item.update,
       },
-    };
-  });
-  const response = await Post.bulkWrite(query);
+    }));
+  const modlog = {
+    ip: ip,
+    useragent: useragent,
+    user: user,
+    changes: _.flatten(changesList),
+    regenerate: regenerate,
+  }
+  const response = await Promise.all([
+    Post.bulkWrite(updatePostQuery),
+    ModlogEntry.create(modlog),
+  ]);
 
   if (regenerate) {
-    const posts = items.map(_.property('target'));
+    const posts = validItems.map(_.property('target'));
     const [ threads, replies ] = _.partition(posts, (r) => r.isOp);
 
     const threadsAffected = _.unionBy(
@@ -322,5 +421,13 @@ module.exports.updatePosts = async (items, regenerate = true) => {
     await generateThreads(threadDocuments);
     await Promise.all(boardDocuments.map(bd => generateBoardPagesAndCatalog(bd)));
   }
-  return response;
+
+  return {
+    fail: invalidItems,
+    success: validItems.map(item => ({
+        ref: _.omit(item.target.toReflink(), 'src'),
+        updated: _.pickBy(item.update, (val, key) => !key.startsWith('changes.')),
+        status: 200,
+      })),
+  };
 };

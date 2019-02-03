@@ -23,6 +23,15 @@ mixin post-boolean-msg(change)
   | to #[strong #{ change.newValue }]    
   | in #[+reflink(change.target)]
 
+mixin change-priority(change)
+  if change.roleName
+    if change.oldPriority !== change.newPriority
+      |
+      small (as #[a(href=`/manage/roles/${change.roleName}`)= change.roleName], priority increased from #[strong= change.oldPriority] to #[strong= change.newPriority])
+    else
+      | 
+      small (as #[a(href=`/manage/roles/${change.roleName}`)= change.roleName], priority: #[strong= change.priority])
+
 mixin post-change(change, entryId, timestamp)
   if change
     label
@@ -51,6 +60,9 @@ mixin post-change(change, entryId, timestamp)
           | Changed #[strong #{ change.property }] from
           | #[strong "#{ change.oldValue }"] to #[strong "#{ change.newValue }"]
           | in #[+reflink(change.target)]
+      if change.roleName
+        | 
+        small (as #[a(href=`/manage/roles/${change.roleName}`)= change.roleName], priority: #[strong= change.priority])
 
 mixin boardref(board)
   if board
@@ -109,7 +121,7 @@ block main
               +datetime(item.timestamp)
             if item.user
               | 
-              a(href=`/manage/staff/${ item.user.login }`)= item.user.login
+              a.postername(href=`/manage/staff/${ item.user.login }`)= item.user.login
               //- if item.user.displayname
               //-   small.unimportant  (aka #[span.nickname #{item.user.displayname}])
             else
