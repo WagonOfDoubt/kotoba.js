@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const { checkSchema } = require('express-validator/check');
 
 const upload = require('../../controllers/upload');
-const config = require('../../config.json');
+const config = require('../../json/config.json');
 const Asset = require('../../models/asset');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');

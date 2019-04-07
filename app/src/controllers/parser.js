@@ -1,6 +1,6 @@
 const format = require('util').format;
 const Post = require('../models/post');
-const wakabamark = require('../parser.json');
+const wakabamark = require('../json/parser.json');
 
 
 const linkRegexps = [
@@ -69,7 +69,7 @@ class Parser {
 
   async parseThreads(threads) {
     return await Promise.all(threads.map(this.parseThread));
-  };
+  }
 
   async parseThread(thread) {
     const promises = [thread].concat(thread.children)
@@ -77,7 +77,7 @@ class Parser {
         .then(result => post.parsed = result));
     await Promise.all(promises);
     return thread;
-  };
+  }
 
   async parsePost(post) {
     post.parsed = await this.parseBody(post.body, post.boardUri);

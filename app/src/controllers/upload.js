@@ -4,7 +4,7 @@
  * @module controllers/upload
  */
 
-const config = require('../config.json');
+const config = require('../json/config.json');
 const Settings = require('../models/settings');
 const fs = require('fs-extra');
 const path = require('path');
@@ -15,7 +15,7 @@ const _ = require('lodash');
 
 
 /**
- * Wheter or not file extension belongs to known supported video format
+ * Whether or not file extension belongs to known supported video format
  * @param {string} ext - file extension, starting with dot (".webm", ".mp4")
  * @returns {boolean}
  */
@@ -26,7 +26,7 @@ const isVideo = (ext) => {
 
 
 /**
- * Wheter or not file extension belongs to known supported image format
+ * Whether or not file extension belongs to known supported image format
  * @param {string} ext - file extension, starting with dot (".jpg", ".png")
  * @returns {boolean}
  */
@@ -54,10 +54,8 @@ const getAttachmentType = (ext) => {
 
 
 /**
-
-/**
- * Determine optimal format for thumbnail. For formats what support transparency
- * returns .png, otherwise .jpg
+ * Determine optimal format for thumbnail. For formats what support
+ * transparency returns .png, otherwise .jpg
  * @param {string} ext - file extension, starting with dot (".jpg", ".png")
  * @returns {string} file extension of thumbnail, starting with dot
  */
@@ -118,7 +116,7 @@ const getRandomName = () =>
 
 
 /**
- * Save file to filesystem and create thumbnail
+ * Save file to file system and create thumbnail
  * @alias module:controllers/upload.uploadFiles
  * @async
  * @param {string} boardUri - board directory
@@ -134,7 +132,7 @@ const uploadFiles = (boardUri, files, keepFilename = true) =>
 
 
 /**
- * Save file to filesystem and create thumbnail
+ * Save file to file system and create thumbnail
  * @alias module:controllers/upload.uploadFile
  * @async
  * @param {string} boardUri - board directory

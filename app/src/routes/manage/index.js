@@ -24,7 +24,7 @@ const { globalTemplateVariables } = require('../../middlewares/params');
 const Post = require('../../models/post');
 const Board = require('../../models/board');
 const du = require('du');
-const config = require('../../config.json');
+const config = require('../../json/config.json');
 
 
 router.use(authRequired);

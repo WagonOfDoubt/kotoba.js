@@ -1,8 +1,36 @@
+/**
+ * Utilities for retrieving directory or file info
+ * @module utils/dirstats
+ */
+
 const du = require('du');
 const fs = require('fs');
 const path = require('path');
 
 
+/**
+ * Get directory info (total size, number of files, etc)
+ * @async
+ * @param  {String} rootDir Path to directory
+ * @return {Object}         Object with directory info
+ * @example
+ * const stats = dirStats('/home/username/');
+ * // stats => {
+ * //   total: {
+ * //     size: 1234567,
+ * //     files: 123
+ * //   },
+ * //   children: [
+ * //     {
+ * //       size: 1234567,
+ * //       files: 123,
+ * //       dirname: 'pictures',
+ * //       dir: '/home/username/pictures'
+ * //     },
+ * //     ...
+ * //   ]
+ * // }
+ */
 const dirStats = async (rootDir) => {
   let stats = await ls(rootDir);
   stats = await Promise.all(stats.map(async (dirstat) => {

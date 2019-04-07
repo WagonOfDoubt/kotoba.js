@@ -17,7 +17,7 @@ router.get('/news/:newsId?',
       if (newsId) {
         const news = await News.findOne({ number: newsId });
         if (!news) {
-          return res.redirect('/manage/news')
+          return res.redirect('/manage/news');
         }
         res.render('manage/news', {
           activity: 'manage-page-editnews',

@@ -1,6 +1,15 @@
+/**
+ * Shortened thread expanding
+ * @module modules/expand-thread
+ */
+
 import $ from 'jquery';
 import { localizeTime } from './time';
 
+
+/**
+ * Initialize module
+ */
 export const initExpandThread = () => {
   $('body').on('click', '.post-btn-expthr', e => {
     const thread = $(e.currentTarget).closest('.thread-container');

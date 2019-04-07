@@ -1,6 +1,6 @@
 const express = require('express');
 const dirSizes = require('../../utils/dirstats');
-const config = require('../../config.json');
+const config = require('../../json/config.json');
 
 const router = express.Router();
 

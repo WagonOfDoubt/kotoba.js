@@ -30,12 +30,12 @@ const boardparams = require('../../json/boardparams');
 
 /**
  * @apiDefine PermissionDeniedError
- * @apiError PermissionDenied User dont't have necessary permission
+ * @apiError PermissionDenied User don't have necessary permission
  * @apiErrorExample PermissionDenied
  *     HTTP/1.1 403 Forbidden
  *     {
  *       "error": {
- *         "msg": "User don't have rigths to perform this action",
+ *         "msg": "User don't have rights to perform this action",
  *         "type": "PermissionDenied"
  *       }
  *     }
@@ -66,7 +66,7 @@ const boardparams = require('../../json/boardparams');
  * @apiParam (Board data) {String} data.name="" Board title. If empty, board
  * uri will be used.
  * 
- * @apiParam (Board data) {String} data.desc="" Board descriptsion.
+ * @apiParam (Board data) {String} data.desc="" Board description.
  * 
  * @apiParam (Board data) {String} data.header="" HTML under board title in
  * page header.
@@ -78,7 +78,7 @@ const boardparams = require('../../json/boardparams');
  * @apiParam (Board data) {String} data.faviconUri Board favicon. Overrides
  * default favicon. Leave blank to use default favicon.
  * 
- * @apiParam (Board data) {Number} data.maxFileSize=10485760 Maxmimum size of
+ * @apiParam (Board data) {Number} data.maxFileSize=10485760 Maximum size of
  * uploaded images, in bytes.
  * 
  * @apiParam (Board data) {Number} data.maxFilesPerPost=4 Maximum uploads in
@@ -98,16 +98,16 @@ const boardparams = require('../../json/boardparams');
  * @apiParam (Board data) {Number} data.autosage=500 The number of replies a
  * thread can have before autosaging. Also known as bump limit.
  * 
- * @apiParam (Board data) {Number} data.maxMessageLength=9001 Maximum nuber of
+ * @apiParam (Board data) {Number} data.maxMessageLength=9001 Maximum number of
  * characters in post.
  * 
  * @apiParam (Board data) {String} data.defaultPosterName="Anonymous" Name to
  * display when a name is not attached to a post.
  * 
  * @apiParam (Board data) {Boolean} data.isLocked=false Only moderators of the
- * board and admins can make new posts/replies.
+ * board and admin can make new posts/replies.
  * 
- * @apiParam (Board data) {Boolean} data.isHidden=false Do not dispaly this
+ * @apiParam (Board data) {Boolean} data.isHidden=false Do not display this
  * board in navigation menu.
  * 
  * @apiParam (Board data) {Boolean} data.isForcedAnon=false If true, users
@@ -132,7 +132,7 @@ const boardparams = require('../../json/boardparams');
  * true, new threads will require subject.
  * 
  * @apiParam (Board data) {Object} data.features Object with boolean values
- * representing which features on board turend on or off.
+ * representing which features on board turned on or off.
  * 
  * @apiParam (Board data) {Boolean} data.features.reporting=true Allow users
  * to report posts.
@@ -211,7 +211,7 @@ const boardparams = require('../../json/boardparams');
  * @apiUse BoardNotFoundError
  *
  * @apiError RequestValidationError Board uri has wrong format (must contain
- * only latin letters or numbers and underscore).
+ * only Latin letters or numbers and underscore).
  *
  * @apiErrorExample RequestValidationError
  *     HTTP/1.1 400 Bad Request
@@ -291,7 +291,7 @@ router.get(
  * @apiGroup Board
  * @apiPermission admin
  * @apiDescription Create new board with parameters defined by object *data*.
- * Only data.uri is requiread to create board, other fields are optional and
+ * Only data.uri is required to create board, other fields are optional and
  * can be changed later.
  * 
  * @apiParam (Board data) {Object} data Object with board data. Required.
@@ -434,10 +434,10 @@ router.post(
  * element is original value and second is new value. If no changes were made,
  * returns 204 No Content status. All changes are recorded to ModLog.
  * 
- * @apiParam {Boolean} regenerate Wheteher or not to update assossiated HTML
+ * @apiParam {Boolean} regenerate Whether or not to update associated HTML
  * files. Board pages are updated on every post, while thread pages are
  * updated only on reply to each thread. Choosing regenerate will update all
- * threads and bpard pages instantly.
+ * threads and board pages instantly.
  * 
  * @apiParam (Board data) {Object} data Object with board data.
  * 
@@ -555,7 +555,7 @@ router.patch(
  * @apiUse PermissionDeniedError
  *
  * @apiError RequestValidationError Board uri has wrong format (must contain
- * only latin letters or numbers and underscore).
+ * only Latin letters or numbers and underscore).
  *
  * @apiErrorExample RequestValidationError
  *     HTTP/1.1 400 Bad Request

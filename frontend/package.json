@@ -48,6 +48,6 @@
     "lodash.truncate": "^4.4.2"
   },
   "jshintConfig": {
-    "esversion": 8
+    "esversion": 9
   }
 }

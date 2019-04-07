@@ -50,6 +50,6 @@
   },
   "devDependencies": {},
   "jshintConfig": {
-    "esversion": 8
+    "esversion": 9
   }
 }

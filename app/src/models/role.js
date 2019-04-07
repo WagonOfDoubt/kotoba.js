@@ -18,12 +18,12 @@ const propertyAccessSchema = Schema({
   },
   access: {
     type: String,
-    enum: ['no-access', 'read-only', 'wirte-any', 'write-value'],
+    enum: ['no-access', 'read-only', 'write-any', 'write-value'],
     required: true,
     default: 'no-access',
   },
   /**
-   * If access is "wite-value", this array specifies priorities for each
+   * If access is "write-value", this array specifies priorities for each
    * individual value, range or pattern
    * @type {Array}
    */
@@ -124,11 +124,11 @@ roleSchema.statics.findAllAndSort = () => {
         usedTimes: {
           $let: {
             vars: {
-              frst: {
+              first: {
                   "$arrayElemAt": ["$usedTimes", 0]
               }
             },
-            in: { $max: ["$$frst.total", 0] }
+            in: { $max: ["$$first.total", 0] }
           },
         }
       }

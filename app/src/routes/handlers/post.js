@@ -30,7 +30,7 @@ module.exports.createPostHandler = [
   async (req, res, next) => {
     // TODO check ban
     const ip = req.ip;
-    // TODO check capthca
+    // TODO check captcha
     const capthca = req.body.capthca;
     const files = req.files;
     const boardUri = req.body.board;
@@ -63,14 +63,14 @@ module.exports.createPostHandler = [
       return;
     }
 
-    const redirectUri = noko
-      ? `/${ boardUri }/res/${ threadId }.html`
-      : `/${ boardUri }`;
-
     if (req.is('json')) {
       res.status(201).json({ ok: 1 });
     } else {
-      res.redirect(302, redirectUri);
+      if (noko) {
+        res.redirect(302, `/${ boardUri }/res/${ threadId }.html`);
+      } else {
+        res.redirect(302, `/${ boardUri }`);
+      }
     }
   }
 ];

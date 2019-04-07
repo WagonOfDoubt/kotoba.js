@@ -1,6 +1,6 @@
 /**
- * Modal module.
- * @module modal
+ * Modal module
+ * @module modules/modal
  */
 
 import $ from 'jquery';
@@ -10,7 +10,7 @@ import dialogPolyfill from 'dialog-polyfill';
 
 /**
  * Create modal with Close button.
- * @return {Pomise}
+ * @return {Promise}
  * @see {@link prompt}
  */
 export const alert = (title, message) =>
@@ -22,14 +22,16 @@ export const alert = (title, message) =>
 
 
 /**
- * Create modal prompt with Ok and Cancel button.
- * @param {string} title - dialog title (can be HTML)
- * @param {string} message - dialog body (can be HTML)
- * @param {string} confirmBtnLabel - label of confirmation button. Default is 'Ok'
- * @return {Pomise} promise - promise that only resolved when 'Ok' button is clicked.
+ * Create modal prompt with OK and Cancel button.
+ * @param {string} title Dialog title (can be HTML)
+ * @param {string} message Dialog body (can be HTML)
+ * @param {string} confirmBtnLabel Label of confirmation button. Default is
+ *    'OK'
+ * @return {Promise} promise Promise that only resolved when 'OK' button is
+ *    clicked.
  * @see {@link prompt}
  */
-export const confirmPrompt = (title, message, confirmBtnLabel = 'Ok') => {
+export const confirmPrompt = (title, message, confirmBtnLabel = 'OK') => {
   const okBtn = {
     label: confirmBtnLabel,
     type: 'submit',
@@ -45,17 +47,17 @@ export const confirmPrompt = (title, message, confirmBtnLabel = 'Ok') => {
 
 
 /**
- * Create modal prompt with buttons.
- * The dialog will be removed from DOM automaticaly when it's closed.
- * @param {string} title - dialog title (can be HTML)
- * @param {string} message - dialog body (can be HTML)
- * @param {Object[]} buttons - array of button object.
- * @param {string} buttons[].type - button type attribute.
- * @param {string} buttons[].value - button return value.
- * @param {string} buttons[].label - button caption.
- * @param {string[]} acceptValues - this argument is passed to dialogPromise
- * @param {boolean} ignoreReject - this argument is passed to dialogPromise.
- * @return {Pomise} {@link dialogPromise}
+ * Create modal prompt with buttons. The dialog will be removed from DOM
+ *    automatically when it's closed.
+ * @param {string} title Dialog title (can be HTML)
+ * @param {string} message Dialog body (can be HTML)
+ * @param {Object[]} buttons Array of button object.
+ * @param {string} buttons[].type Button type attribute.
+ * @param {string} buttons[].value Button return value.
+ * @param {string} buttons[].label Button caption.
+ * @param {string[]} acceptValues This argument is passed to dialogPromise
+ * @param {boolean} ignoreReject This argument is passed to dialogPromise.
+ * @return {Promise} {@link dialogPromise}
  */
 export const prompt = (title, message, buttons = [], acceptValues = [], ignoreReject = true) => {
   closeAllModals();
@@ -85,13 +87,15 @@ export const prompt = (title, message, buttons = [], acceptValues = [], ignoreRe
 
 /**
  * Show modal dialog and return Promise that will be resolved when dialog will
- * be closed or rejected if dialog was cancelled by hitting Esc key.
- * Promise resolves and rejecs with { returnValue, formData }.
- * @param {HTMLDialogElement} dialog - dialog to show.
- * @param {string[]} acceptValues - array of dialog.returnValue with which promise should be resolved.
- * If returnValue is not in array, promise will be rejected. If array is empty, promise resolved regardless of returnValue.
- * @param {boolean} ignoreReject - if true, Promise will newer be rejected.
- * @return {Pomise}
+ *    be closed or rejected if dialog was canceled by hitting Esc key. Promise
+ *    resolves and rejects with { returnValue, formData }.
+ * @param {HTMLDialogElement} dialog Dialog to show.
+ * @param {string[]} acceptValues Array of dialog.returnValue with which
+ *    promise should be resolved. If returnValue is not in array, promise will
+ *    be rejected. If array is empty, promise resolved regardless of
+ *    returnValue.
+ * @param {boolean} ignoreReject If true, Promise will newer be rejected.
+ * @return {Promise}
  */
 export const dialogPromise = (dialog, acceptValues = [], ignoreReject = true) => {
   return new Promise((resolve, reject) => {
@@ -165,8 +169,8 @@ export const wait = () => {
  */
 export const closeAllModals = () => {
   $('dialog[open]').each((i, dialog) => {
-    dialog.close()
-    // remove disposabe modals
+    dialog.close();
+    // remove disposable modals
     if ($(dialog).hasClass('dispose')) {
       $(dialog).remove();
     }
@@ -177,7 +181,7 @@ export const closeAllModals = () => {
 
 /**
  * Enter modal mode. This removes scrollbars from page, so only modal content
- * will be scrollable.
+ *    will be scrollable.
  */
 export const enterModalMode = () => document.body.classList.add('modal-open');
 
@@ -190,7 +194,7 @@ export const exitModalMode = () => document.body.classList.remove('modal-open');
 
 /**
  * Show modal dialog. This also removes scrollbar from page.
- * @param {HTMLDialogElement} dialog - dialog to show.
+ * @param {HTMLDialogElement} dialog Dialog to show.
  */
 export const showModal = (dialog) => {
   closeAllModals();
@@ -200,9 +204,11 @@ export const showModal = (dialog) => {
 
 
 /**
- * Initialize either all dialog elements on page, or one dialog supplied as argument.
- * Call this without arguments once when page is loaded, and each time dialog is added on page.
- * @param {HTMLDialogElement} dialog - dialog to initialize. If null, all dialogs will be initialized.
+ * Initialize either all dialog elements on page, or one dialog supplied as
+ *    argument. Call this without arguments once when page is loaded, and each
+ *    time dialog is added on page.
+ * @param {HTMLDialogElement} dialog Dialog to initialize. If null, all
+ *    dialogs will be initialized.
  */
 export const init = (dialog = null) => {
   if (dialog) {

@@ -1,6 +1,6 @@
 const Settings = require('../models/settings');
 const pkg = require('../package.json');
-const config = require('../config.json');
+const config = require('../json/config.json');
 const filters = require('../utils/filters');
 
 /**

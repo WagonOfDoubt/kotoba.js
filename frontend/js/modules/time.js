@@ -1,3 +1,8 @@
+/**
+ * Time conversion and formatting
+ * @module modules/time
+ */
+
 import $ from 'jquery';
 
 const getLocaleDateTime = datetime =>
@@ -9,6 +14,9 @@ const getLocaleDate = datetime =>
 const getLocaleTime = datetime =>
   (new Date(datetime)).toLocaleTimeString();
 
+/**
+ * Convert all time on page to local time with locale formatting
+ */
 export const localizeTime = (container) => {
   $('time.time', container)
     .each((i, el) => $(el).text(getLocaleTime(el.dateTime)));

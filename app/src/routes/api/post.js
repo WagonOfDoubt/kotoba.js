@@ -1,11 +1,9 @@
 const express = require('express');
 const ObjectId = require('mongoose').Types.ObjectId;
 const router = express.Router();
-const { body, oneOf } = require('express-validator/check');
+const { body } = require('express-validator/check');
 const _ = require('lodash');
 const fp = require('lodash/fp');
-const multer = require('multer');
-const upload = multer();
 const flattenObject = require('flat');
 
 const Post = require('../../models/post');
@@ -13,12 +11,8 @@ const Role = require('../../models/role');
 const ModlogEntry = require('../../models/modlog');
 
 const { updatePosts } = require('../../controllers/posting');
-
-const reqparser = require('../../middlewares/reqparser');
 const { validateRequest } = require('../../middlewares/validation');
 const { postEditPermission } = require('../../middlewares/permission');
-const sanitizer = require('../../middlewares/sanitizer');
-
 const { createPostHandler } = require('../handlers/post');
 
 
@@ -56,7 +50,7 @@ const assignError = (status, errorType, errorMsg) =>
 
 /**
  * Express middleware to filter and merge items in post.body.items, can return
- * response with status 400 (BAD REQUEST) if no valid entirs are present in
+ * response with status 400 (BAD REQUEST) if no valid entires are present in
  * req.body.items. Invalid items will be added to res.locals.fail if there are
  * any.
  *
@@ -281,7 +275,7 @@ const populatePostUpdateItems = async (req, res, next) => {
 
 
 /**
- * Filters update items for array elements whitch are out of bounds for
+ * Filters update items for array elements which are out of bounds for
  * respective array for target post, i.e. "attachments.5.isDeleted" for Post
  * that has only 4 attachments.
  * @async
@@ -315,7 +309,7 @@ const filterOutOfBoundItems = (req, res, next) => {
       res.locals.fail = [
         ...res.locals.fail,
         ...assignError(400, 'RequestValidationError',
-          `Array index is out of boudns`)(outOfBounds)
+          `Array index is out of bounds`)(outOfBounds)
       ];
       if (!inBounds.length) {
         return res
@@ -400,14 +394,14 @@ router.post('/api/post', createPostHandler);
  * 
  * @apiDescription Partially update posts. This endpoint tries to apply each
  * update separately, therefore if some updates are invalid, other updates
- * will be applied, if posssible. Each update action has its own HTTP status.
+ * will be applied, if possible. Each update action has its own HTTP status.
  * HTTP 4xx errors shown below are returned only if there was no successful
  * updates, if at least one update was applied, HTTP status 200 will be
  * returned with success and fail arrays. Posts can be changed by original
  * poster by supplying post password as proof or by logged in user who has
  * role on board with respective permission.
  *
- * @apiParam {Boolean}  regenerate Wheteher or not to update assossiated HTML
+ * @apiParam {Boolean}  regenerate Whether or not to update associated HTML
  * 
  * @apiParam {String}   postpassword Password that user entered when posting
  * 
@@ -442,7 +436,7 @@ router.post('/api/post', createPostHandler);
  * @apiParam {Boolean}  items.update.attachments.isSpoiler Is attachment set
  * as spoiler
  * 
- * @apiSuccess {Object[]} success List of successfull updates
+ * @apiSuccess {Object[]} success List of successful updates
  * 
  * @apiSuccess {Object}  success.ref Reflink to post
  * 
@@ -561,7 +555,7 @@ router.post('/api/post', createPostHandler);
  *           "status": 400,
  *           "error": {
  *             "type": "RequestValidationError",
- *             "msg": "Array index is out of boudns"
+ *             "msg": "Array index is out of bounds"
  *           },
  *           "ref": {
  *             "boardUri": "b",

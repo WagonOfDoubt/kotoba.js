@@ -1,3 +1,8 @@
+/**
+ * Admin interfaces
+ * @module modules/manage
+ */
+
 import $ from 'jquery';
 import * as modal from './modal';
 import { serializeForm, alertErrorHandler, successErrorHandler, sendJSON,
@@ -382,6 +387,10 @@ const managePage_trash = () => {
   });
 };
 
+
+/**
+ * Initialize module
+ */
 export const init = () => {
   const body = document.body;
   if (!body.classList.contains('manage-page')) {

@@ -28,7 +28,7 @@ Kotoba.js principles:
 - [x] posts deletion
 - [ ] staff permissions system
 - [ ] bans and moderation features
-- [ ] autoupdate and notifications
+- [ ] auto-update and notifications
 - [x] replies map
 - [ ] personal settings stored on server
 
@@ -49,7 +49,7 @@ Note that kotoba.js will run in development mode. Do not try to use this in prod
 
 ## How it works
 
-This containerized application consists of 3 main containers: nginx webserver, node application, and mongo database. Relationships between containers are shown below.
+This containerized application consists of 3 main containers: nginx web server, node application, and mongo database. Relationships between containers are shown below.
 
 ```
 +----------------------------------------------------------------------+
@@ -84,4 +84,4 @@ This containerized application consists of 3 main containers: nginx webserver, n
 
 ```
 
-The main node app handles api requests, modifies database and generates static html files which are saved to `/html` folder and served to end user by nginx webserver.
+The main node app handles api requests, modifies database and generates static html files which are saved to `/html` folder and served to end user by nginx web server.

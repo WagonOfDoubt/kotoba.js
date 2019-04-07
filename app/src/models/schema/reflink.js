@@ -1,6 +1,6 @@
 /**
- * Reflink schema, does not have collection on it's own, used as subdocument
- * @module models/shcema/reflink
+ * Reflink schema, does not have collection on it's own, used as sub-document
+ * @module models/schema/reflink
  */
 
 const mongoose = require('mongoose');

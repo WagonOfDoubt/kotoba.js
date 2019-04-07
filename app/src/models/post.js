@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Int32 = require('mongoose-int32');
 const bcrypt = require('bcrypt');
-const config = require('../config.json');
+const config = require('../json/config.json');
 const reflinkSchema = require('./schema/reflink');
 const attachmentSchema = require('./schema/attachment');
 const useragentSchema = require('./schema/useragent');
@@ -102,13 +102,13 @@ const postSchema = Schema({
   rawHtml:             { type: String, default: '' },
   /**
    * READ ONLY. Intermediate parsing result with HTML strirngs and token
-   * objects. Post can be reparsed to update references to moved posts.
+   * objects. Post can be re-parsed to update references to moved posts.
    * @type {Array[String, Object]}
    */
   parsed:              [ ],
   /**
    * READ ONLY. Refs to posts that are referencing this post. Replies
-   * are reflinks on separate line, and threrefore can be used to divide post
+   * are reflinks on separate line, and therefore can be used to divide post
    * into sections.
    * @see models/schema/reflink
    * @type {Array[ReflinkSchema]}
@@ -155,7 +155,7 @@ const postSchema = Schema({
    */
   isSage:              { type: Boolean, default: false },
   /**
-   * READ ONLY. Poster IP. Users are reuired to have role on post's board with
+   * READ ONLY. Poster IP. Users are required to have role on post's board with
    * permission.
    * @type {String}
    */
@@ -179,7 +179,7 @@ const postSchema = Schema({
   isApproved:          { type: Boolean, default: true },
   /**
    * Is post marked as deleted. Deleted posts are not shown and can be
-   * either resored by changing this flag or be deleted permanently. This
+   * either restored by changing this flag or be deleted permanently. This
    * field can be changed by user with role with write permission which
    * assigned on board to which this posts belongs or by password.
    * @type {Boolean}
@@ -237,7 +237,7 @@ postSchema.pre('save', async function(next) {
 
 /**
  * Compares this post's password hash with supplied password.
- * @param {String} password - raw, unencripted password
+ * @param {String} password - raw, unencrypted password
  * @returns {boolean} true, if password is correct
  */
 postSchema.methods.checkPassword = async function(password) {
@@ -305,9 +305,9 @@ postSchema.statics.toKey = ({boardUri, postId}) => `post-${boardUri}-${postId}`;
 const cachedUniqueUserPosts = {};
 
 /**
- * Get number of qnique ip addresses of posters on a board.
+ * Get number of unique IP addresses of posters on a board.
  * @param {String} boardUri
- * @returns {Number} Number of unique ip addresses of posters on given board.
+ * @returns {Number} Number of unique IP addresses of posters on given board.
  */
 postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
   if (cachedUniqueUserPosts.hasOwnProperty(boardUri)) {
@@ -372,7 +372,7 @@ postSchema.statics.findPosts = (array) => {
  */
 postSchema.statics.findPostsByIds = (ids) => {
   return Post.find({ _id: { $in: ids } });
-}
+};
 
 /**
  * Find threads by mongo document _id.
@@ -380,7 +380,7 @@ postSchema.statics.findPostsByIds = (ids) => {
  */
 postSchema.statics.findThreadsByIds = (ids) => {
   return Post.find({ _id: { $in: ids }, isOp: true });
-}
+};
 
 /**
  * Find one thread by it's boardUri and postId.

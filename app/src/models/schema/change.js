@@ -1,6 +1,6 @@
 /**
  * Schema representing atomic change on one document property
- * @module models/shcema/change
+ * @module models/schema/change
  */
 
 const mongoose = require('mongoose');

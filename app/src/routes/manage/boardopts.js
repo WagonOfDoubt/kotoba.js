@@ -1,6 +1,6 @@
 const express = require('express');
 const Board = require('../../models/board');
-const locales = require('../../utils/locales');
+const locales = require('../../json/locales');
 
 const router = express.Router();
 

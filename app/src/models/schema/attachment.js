@@ -1,6 +1,6 @@
 /**
- * Attachment schema, does not have collection on it's own, used as subdocument
- * @module models/shcema/attachment
+ * Attachment schema, does not have collection on it's own, used as sub-document
+ * @module models/schema/attachment
  */
 
 const mongoose = require('mongoose');

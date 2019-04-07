@@ -16,7 +16,7 @@ router.get('/uploads',
         .limit(uploadsLimit);
       res.render('manage/uploads', {
         activity: 'manage-page-upoads',
-        title: 'Recent upoads',
+        title: 'Recent uploads',
         posts: posts,
       });
     } catch(err) {

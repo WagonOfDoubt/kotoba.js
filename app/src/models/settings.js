@@ -49,9 +49,9 @@ const settingsSchema = Schema({
   ] },
   /** Default style for site */
   defaultStyle:   { type: String, default: 'umnochan' },
-  /** Minimum time in seonds a user must wait before posting a new thread again */
+  /** Minimum time in seconds a user must wait before posting a new thread again */
   newThreadDelay: { type: Number, default: 30 },
-  /** Minimum time in seonds a user must wait before posting a reply again */
+  /** Minimum time in seconds a user must wait before posting a reply again */
   replyDelay:     { type: Number, default: 7 },
   /** Optional engine features */
   features: {
@@ -90,9 +90,10 @@ var cachedSettings = null;
  * @alias module:models/settings.get
  * @async
  * @param {string=} param - if this argument is present, only value of this
- * parameter will be returned
- * @retrns {(*|object)} If called without any arguments, whole settings document
- * will be returned, otherwise, returns value of corresponding property
+ *    parameter will be returned
+ * @returns {(*|object)} If called without any arguments, whole settings
+ *    document will be returned, otherwise, returns value of corresponding
+ *    property
  */
 settingsSchema.statics.get = async (param) => {
   let settings;

@@ -1,3 +1,8 @@
+/**
+ * Bottom admin panel features
+ * @module modules/admin-panel
+ */
+
 import $ from 'jquery';
 import 'jquery-serializejson';
 import * as modal from './modal';
@@ -108,7 +113,7 @@ const sendSetFlagRequest = (url, data) => {
 };
 
 
-function initCheckboxes() {
+const initCheckboxes = () => {
   const $form = $('.admin-form, #delform');
   const updateMasterState = ($master) => {
     const $slaves = $($master.data('target'));
@@ -148,7 +153,10 @@ function initCheckboxes() {
 };
 
 
-function initAdminPanel() {
+/**
+ * Initialize module
+ */
+const initAdminPanel = () => {
   const $form = $('.admin-form, #delform');
 
   const onSetFlagBtn = (url, e) => {
@@ -244,7 +252,7 @@ function initAdminPanel() {
         acc[targetKey] = {
           target: val.target,
           update: {},
-        }
+        };
       }
       for (let [key, value] of Object.entries(val.update)) {
         if (!(key in acc[targetKey].update)) {
@@ -301,6 +309,6 @@ function initAdminPanel() {
   checkAdminForm($form);
 
   initCheckboxes();
-}
+};
 
 export { initAdminPanel };

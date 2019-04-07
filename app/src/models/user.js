@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Int32 = require('mongoose-int32');
 const bcrypt = require('bcrypt');
-const config = require('../config.json');
+const config = require('../json/config.json');
 const Mixed = mongoose.Schema.Types.Mixed;
 
 const Role = require('./role');
@@ -36,6 +36,6 @@ userSchema.methods.checkPassword = async function(password) {
 
 userSchema.statics.hashPassword = async function(password) {
   return await bcrypt.hash(password, config.salt_rounds);
-}
+};
 
 const User = module.exports = mongoose.model('User', userSchema);

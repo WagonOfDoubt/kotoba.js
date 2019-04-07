@@ -10,7 +10,7 @@ const _ = require('lodash');
 
 const Settings = require('../models/settings');
 const filters = require('../utils/filters');
-const config = require('../config.json');
+const config = require('../json/config.json');
 const Board = require('../models/board');
 const Post = require('../models/post');
 const News = require('../models/news');
@@ -105,25 +105,25 @@ const generateThreadPage = async (thread) => {
  * When thread is bumped, threads on board are shuffled, so each page of board
  * must be regenerated. But there is no need to render each thread fragment
  * since none of them was changed. Keeping rendered thread fragments lets avoid
- * unnesessary database queries and increaces overall performance.
+ * unnecessary database queries and increases overall performance.
  * Saves file board/res/[postId]-preview.html
  * @async
  * @param {Post} thread - The op-post mongoose document.
  */
 const generateThreadPreview = async (thread) => {
   const board = await Board.findBoards(thread.boardUri).exec();
-  const showReplies = thread.isSticky
-    ? board.showRepliesSticky
-    : board.showReplies;
+  const showReplies =
+    thread.isSticky ? board.showRepliesSticky : board.showReplies;
   const children = thread.children.filter((c) => !c.isDeleted);
   const omitted = children.slice(0, children.length - showReplies);
   const omittedPosts = omitted.length;
-  const omittedAttachments = omitted.length
-    ? omitted
+  let omittedAttachments = 0;
+  if (omitted.length) {
+    omittedAttachments = omitted
       .reduce((acc, reply) => {
         return acc + (reply.attachments ? reply.attachments.length : 0);
-      }, 0)
-    : 0;
+      }, 0);
+  }
   const notOmitted = children.slice(-showReplies);
 
   const data = {
@@ -186,7 +186,7 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
         if (err) {
           reject(err);
         } else {
-          resolve(fileData)
+          resolve(fileData);
         }
       });
     });

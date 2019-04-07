@@ -30,7 +30,7 @@ const modlogEntrySchema = Schema({
   user:                { type: ObjectId, ref: 'User' },
   /**
    * Array of changes that were made
-   * @see {@link models/schama/change}
+   * @see {@link models/schema/change}
    */
   changes:             [ changeSchema ],
   /** Whether or not necessary pages were regenerated */
@@ -67,7 +67,7 @@ const modlogEntrySchema = Schema({
  * }
  * @see {@link models/schema/change}
  * @returns {Array.<Object>} Array of objects corresponding to changeSchema:
- * { target, modeule, property, oldValue, newValue }
+ * { target, model, property, oldValue, newValue }
  */
 modlogEntrySchema.statics.diff = (model, target, oldValues, newValues, priorities, roleNames, prevChanges) => {
   oldValues = flatten(oldValues || {});

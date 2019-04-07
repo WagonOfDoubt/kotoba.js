@@ -1,7 +1,7 @@
 /**
  * Useragent schema, provides useful parsed useragent data, does not have a
  * collection on it's own
- * @module models/shcema/useragent
+ * @module models/schema/useragent
  */
 
 const mongoose = require('mongoose');
@@ -19,9 +19,9 @@ module.exports = Schema({
   version:             { type: String, required: true },
   /**  Original useragent: "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.79..." */
   source:              { type: String, required: true },
-  /** Is client is kreml^W^W^W^W^W search engine bot */
+  /** Is client bot */
   isBot:               { type: Boolean, required: true },
-  /** Is client on moblie */
+  /** Is client on mobile */
   isMobile:            { type: Boolean, required: true },
   /** Is client on desktop */
   isDesktop:           { type: Boolean, required: true },

@@ -1,3 +1,8 @@
+/**
+ * Utils for Mongoose Schema
+ * @module utils/schema
+ */
+
 const hasDefault = (obj) => obj && obj.hasOwnProperty('default');
 const isObject = (obj) => typeof obj === 'object' && obj.constructor === Object;
 const isEmpty = (obj) => Object.keys(obj).length === 0;

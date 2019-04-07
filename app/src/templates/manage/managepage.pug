@@ -68,8 +68,13 @@ block main
             'badge_secondary': !['get', 'post', 'delete', 'patch'].includes(method)
           })= method.toUpperCase()
           | 
-        if methods.includes('get') && !route.includes(':')
-          | #[a(href=route)= route]
+        if methods.includes('get')
+          - let r = route.split(':');
+          - let p = r.slice(1);
+          if p.every((param) => param.includes('?'))
+            | #[a(href=r[0])= r[0]]#[span.unkfunc= ['', ...p].join(':')]
+          else
+            | #[span.unkfunc= route]
         else
           | #[span.unkfunc= route]
 

@@ -108,7 +108,7 @@ don't work*
 
 #### Code
 
-Multiline code sould be enclosed in <span><code>&#96;&#96;&#96;</code></span>:
+Multiline code should be enclosed in <span><code>&#96;&#96;&#96;</code></span>:
 
 ~~~
 ```
@@ -164,7 +164,7 @@ Result will be with Mona font:
 </code>
 </div>
 
-Parser is highly customisable, you can easily add new tags or change default.
+Parser is highly customizable, you can easily add new tags or change default.
 Read [wiki](https://github.com/WagonOfDoubt/kotoba.js/wiki/Markup-language-customization) to find out how.
 
 

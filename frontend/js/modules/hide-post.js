@@ -1,3 +1,8 @@
+/**
+ * Post or thread hide buttons
+ * @module  modules/hide-post
+ */
+
 import $ from 'jquery';
 
 
@@ -35,11 +40,14 @@ const toggleHidden = (post) => {
   if (post.hasClass('post-hidden')) {
     addToHidden(postKey);
   } else {
-    removeFromHidden(postKey)
+    removeFromHidden(postKey);
   }
 };
 
 
+/**
+ * Initialize module
+ */
 export const initHidePost = () => {
   hideAllHidden();
   $('body').on('click', '.post-btn-hide', e => {

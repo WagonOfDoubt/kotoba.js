@@ -1,3 +1,8 @@
+/**
+ * Tabbed components
+ * @module modules/tabs
+ */
+
 export const selectTab = (tabHref) => {
   let allTabsInControlGroup = Array
     .from(document.querySelectorAll(`.js-select-tab[href="${ tabHref }"]`))
@@ -21,6 +26,9 @@ export const selectTab = (tabHref) => {
     });
 };
 
+/**
+ * Initialize module
+ */
 export const initTabs = () => {
   Array
     .from(document.querySelectorAll('.js-select-tab'))

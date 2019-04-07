@@ -1,6 +1,6 @@
 /**
- * This module handles post manipulation, creation of new post and threads,
- * as well as editing and deletion
+ * This module handles post manipulation, creation of new post and threads, as
+ *    well as editing and deletion
  * @module controllers/posting
  */
 
@@ -12,14 +12,15 @@ const Post = require('../models/post');
 const ModlogEntry = require('../models/modlog');
 const Parser = require('./parser');
 const fs = require('fs-extra');
-const config = require('../config');
+const config = require('../json/config');
 const path = require('path');
 const _ = require('lodash');
 const fp = require('lodash/fp');
 
 
 /**
- * @todo create custom error types for each case and move somehwere not here
+ *
+ * @todo create custom error types for each case and move somewhere not here
  */
 const InputError = (msg, reason) => {
   const error = Error(msg);
@@ -31,11 +32,11 @@ const InputError = (msg, reason) => {
 
 /**
  * Create new thread by adding it to DB, updating all related records in DB,
- * uplading attachments and generating all related HTML files
+ *    uploading attachments and generating all related HTML files
  * @async
  * @param {string} boardUri - board directory
- * @param {object} postData - an object containg all necessary fields according
- * to Post schema
+ * @param {object} postData - an object containing all necessary fields
+ *    according to Post schema
  * @param {Array.<object>} files - array of files from req.files (multer)
  * @returns {number} postId - sequential number of new thread
  */
@@ -86,12 +87,12 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
 
 /**
  * Create reply in thread by adding it to DB, updating all related records in
- * DB, uplading attachments and generating all related HTML files
+ *    DB, uploading attachments and generating all related HTML files
  * @async
  * @param {string} boardUri - board directory
  * @param {number} threadId - sequential number of parent post on board
- * @param {object} postData - an object containg all necessary fields according
- * to Post schema
+ * @param {object} postData - an object containing all necessary fields
+ *    according to Post schema
  * @param {Array.<object>} files - array of files from req.files (multer)
  * @returns {number} postId - sequential number of new post
  */
@@ -136,7 +137,7 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
   await Parser.parsePost(post);
   await post.save();
   await Post
-    .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams, { new: true })
+    .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams, { new: true });
   await Post
     .findThread(boardUri, threadId)
     .populate('children')
@@ -154,9 +155,9 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
  * @async
  * @param {Array.<Post>} postsToDelete - array of post mongoose documents
  * @param {boolean} regenerate - regenerate corresponding html files
- * @returns {{ threads: number, replies: number, attachments: number }}
- * An object with fields containing a number of how many threads, replies or
- * attachments were deleted
+ * @returns {{ threads: number, replies: number, attachments: number }} An
+ *    object with fields containing a number of how many threads, replies or
+ *    attachments were deleted
  */
 module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
   // leave only unique posts just in case
@@ -215,7 +216,7 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
 
   // prelude ends here, now actually do stuff
   if (postsToDelete.length) {
-    // delte posts from database
+    // delete posts from database
     const deleteMongoIds = postsToDelete.map(p => p._id);
     await Post.deleteMany({
       _id: { $in: deleteMongoIds }
@@ -394,7 +395,7 @@ module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=fal
     user: user,
     changes: _.flatten(changesList),
     regenerate: regenerate,
-  }
+  };
   const response = await Promise.all([
     Post.bulkWrite(updatePostQuery),
     ModlogEntry.create(modlog),

@@ -8,7 +8,7 @@ import { initExpandThread } from './modules/expand-thread';
 import { initAdminPanel } from './modules/admin-panel';
 import { localizeTime } from './modules/time';
 import { init as initManage } from './modules/manage';
-import { init as initForms } from './modules/form';
+import { init as initForms } from './modules/postform';
 import { initTabs } from './modules/tabs';
 import { initToggleVisibility } from './modules/toggle-visibility';
 import { initTables } from './modules/table';

@@ -10,8 +10,8 @@ block main
   - var isNewRole = !role
   form#form-edit-role.js-api-form.js-reload-on-success(action=action, data-method=method)
     -var values = role ? filters.flatObj(role) : {}
-    -var accessOpts = [ { value: 'no-access', label: 'No access' }, { value: 'read-only', label: 'Read only' }, { value: 'wirte-any', label: 'Write' } ]
-    -var publicAccessOpts = [ { value: 'read-only', label: 'Read only' }, { value: 'wirte-any', label: 'Write' } ]
+    -var accessOpts = [ { value: 'no-access', label: 'No access' }, { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
+    -var publicAccessOpts = [ { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
     if (isNewRole)
       h2 Create role
     else

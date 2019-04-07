@@ -1,3 +1,8 @@
+/**
+ * Event utils module
+ * @module utils/event-utils
+ */
+
 function* parentNodeGenerator(rootElement, targetElement) {
   if (!rootElement.contains(targetElement)) {
     throw new Error('rootElement is not an ancestor of targetElement');
@@ -23,7 +28,7 @@ const addListener = (type, target, selector, listener) => {
       }
     }
   });
-}
+};
 
 
 const on = (types, target, selector, listener) => {

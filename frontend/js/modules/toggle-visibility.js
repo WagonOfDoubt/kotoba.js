@@ -1,5 +1,13 @@
+/**
+ * Spoilers and other show-able/hide-able content
+ * @module modules/toggle-visibility
+ */
+
 import $ from 'jquery';
 
+/**
+ * Initialize module
+ */
 export const initToggleVisibility = () => {
   $('body').on('click', '.js-toggle-visibility', e => {
     const btn = e.currentTarget;

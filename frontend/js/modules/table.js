@@ -1,3 +1,8 @@
+/**
+ * Tables with sorting and filtering features
+ * @module modules/table
+ */
+
 import $ from 'jquery';
 
 const isSeparator = (el) => el.classList.contains('table__row_separator');
@@ -52,6 +57,9 @@ const sortTable = (th) => {
 };
 
 
+/**
+ * Initialize module
+ */
 export const initTables = () => {
   $('body').on('click', '.table__header_sortable', (e) => {
     const th = e.target;

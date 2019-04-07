@@ -66,7 +66,6 @@ const boardSchema = Schema({
   },
   filetypes: [{
     type: Schema.Types.ObjectId,
-    ref: 'Filetype'
   }],
   postcount: {
     type: Number,
@@ -96,11 +95,9 @@ boardSchema.statics.findBoards = (boardUri, inclHidden = true) => {
   }
   if (boardUri) {
     q.uri = boardUri;
+    return Board.findOne(q);
   }
-  const query = boardUri
-    ? Board.findOne(q)
-    : Board.find(q);
-  return query;
+  return Board.find(q);
 };
 
 boardSchema.statics.findBoard = (boardUri) => {

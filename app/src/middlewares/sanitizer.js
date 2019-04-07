@@ -3,8 +3,8 @@ const _ = require('lodash');
 /**
  * Creates express middleware that deletes all fields in req.body that are not
  * in filterPaths array.
- * @param {string[]} filterPaths - The object proprties to pick
- * @param {string} [path] - Path to object inside req.body to filter, if not
+ * @param {string[]} filterPaths - The object properties to pick
+ * @param {string} path - Path to object inside req.body to filter, if not
  * specified, req.body itself will be filtered. If value at path is not an
  * object, middleware returns to client HTTP status 400 with error in JSON.
  *
@@ -21,8 +21,8 @@ const _ = require('lodash');
  * request:
  * {
  *   "data": {
- *     "foo": "inluded 1",
- *     "bar": "inluded 2",
+ *     "foo": "included 1",
+ *     "bar": "included 2",
  *     "baz": "not included"
  *   },
  *   "param1": "some value",
@@ -33,15 +33,15 @@ const _ = require('lodash');
  *     },
  *     "nested2": "other field that is included because only param2.nested is filtered"
  *   },
- *   "junk": "this param is omitted",
- *   "garbage": "this param is omitted too"
+ *   "junk": "this parameter is omitted",
+ *   "garbage": "this parameter is omitted too"
  * }
  * 
  * response:
  * {
  *   "data": {
- *     "foo": "inluded 1",
- *     "bar": "inluded 2"
+ *     "foo": "included 1",
+ *     "bar": "included 2"
  *   },
  *   "param1": "some value",
  *   "param2": {

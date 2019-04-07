@@ -1,3 +1,8 @@
+/**
+ * Posting form features
+ * @module modules/postform
+ */
+
 import $ from 'jquery';
 
 const getStoredPassword = () => localStorage.getItem('kot_postpassword');
@@ -23,6 +28,10 @@ const getPassword = () => {
   return randomPass;
 };
 
+
+/**
+ * Initialize module
+ */
 export const init = () => {
   $('[name=redirectHash]').val(window.location.hash);
   $('input[name="postpassword"]').val(getPassword());

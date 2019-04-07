@@ -1,3 +1,8 @@
+/**
+ * Api utils module
+ * @module utils/api-utils
+ */
+
 import $ from 'jquery';
 import 'jquery-serializejson';
 import escape from 'lodash.escape';

@@ -76,7 +76,7 @@ describe('utils', () => {
         },
         d: [42],
         e: {},
-      }
+      };
       const paths = {
         'a': 1,
         'b.b1': [1, 2, 3],

@@ -14,10 +14,13 @@ router.get('/api/news/:newsId?',
   async (req, res, next) => {
     try {
       const newsId = req.body.newsId || req.params.newsId;
-      const news = newsId
-        ? await News.findOne({ number: newsId }).exec()
-        : await News.find().exec();
-      res.json(news);
+      if (newsId) {
+        const news = await News.findOne({ number: newsId }).exec();
+        res.json(news);
+      } else {
+        const newsArr = await News.find().exec();
+        res.json(newsArr);
+      }
     } catch (err) {
       return next(err);
     }

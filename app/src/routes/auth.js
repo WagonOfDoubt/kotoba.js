@@ -4,7 +4,7 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator/check');
 
 const User = require('../models/user');
-const config = require('../config.json');
+const config = require('../json/config.json');
 
 
 /*
@@ -116,9 +116,7 @@ router.post('/manage/registration', [
 
     // if no users was created, first user will be admin
     const numberOfUsers = await User.count().exec();
-    const authority = numberOfUsers === 0
-      ? 'admin'
-      : 'guest';
+    const authority = numberOfUsers === 0 ? 'admin' : 'guest';
 
     // create new user
     const user = new User({ login, password, authority });

@@ -1,4 +1,9 @@
 /**
+ * Utils for express routes
+ * @module utils/routes
+ */
+
+/**
  * Returns object with all routes in stack of given express router, where keys
  * are paths and values are arrays of supported methods.
  * @module utils/routes
@@ -35,7 +40,7 @@ const findRoutes = module.exports = (stack, routesMap={}, parent=null) => {
     if (layer.route && layer.route.path) {
       let path = layer.route.path;
       // /^\/(path)\/?(?=\/|$)/i
-      const parentRe = /\^\\\/(.*)\\\/\?\(\?\=\\\/\|\$\)/i
+      const parentRe = /\^\\\/(.*)\\\/\?\(\?\=\\\/\|\$\)/i;
       if (parent) {
         const parentPath = parent.regexp.source.match(parentRe);
         if (parentPath) {

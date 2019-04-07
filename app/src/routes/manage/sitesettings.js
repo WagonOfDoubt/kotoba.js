@@ -1,6 +1,6 @@
 const express = require('express');
 const Settings = require('../../models/settings');
-const locales = require('../../utils/locales');
+const locales = require('../../json/locales');
 
 const router = express.Router();
 

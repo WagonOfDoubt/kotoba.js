@@ -35,11 +35,12 @@ const checkPostPermission = async (target, password, updateObj, roles, user) => 
   const passwordMatches = password && await target.checkPassword(password);
 
   const boardRole = roles ? roles[target.boardUri] : null;
-  const roleName = boardRole
-    ? boardRole.roleName
-    : passwordMatches
-      ? '__poster'
-      : '';
+  let roleName = '';
+  if (boardRole) {
+    roleName = boardRole.roleName;
+  } else if (passwordMatches) {
+    roleName = '__poster';
+  }
   const getRelevantPriority = (field, value) => {
     if (user.authority === 'admin') {
       return 10000;
@@ -197,7 +198,7 @@ const getPriorityForUpdatingPostField = (field, value, boardRole) => {
     }
     return PRIORITY_INVALID_VALUE;
   }
-  if (permission.access === 'wirte-any') {
+  if (permission.access === 'write-any') {
     return permission.priority;
   }
   // user has no write permission
@@ -206,7 +207,7 @@ const getPriorityForUpdatingPostField = (field, value, boardRole) => {
 
 
 const getPriorityForUpdatingPostFieldByPassword = (field, value) => {
-  const acceptableAccess = ['wirte-any', 'write-value'];
+  const acceptableAccess = ['write-any', 'write-value'];
   const anonRole = {
     roleName: '__poster',
     hierarchy: 0,
@@ -267,7 +268,7 @@ const getPriorityForUpdatingPostFieldByPassword = (field, value) => {
         ]
       },
     },
-  }
+  };
   return getPriorityForUpdatingPostField(field, value, anonRole);
 };
 
