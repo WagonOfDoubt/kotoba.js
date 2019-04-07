@@ -1,5 +1,5 @@
 const assert = require('assert');
-const utils = require('../js/modules/utils');
+const utils = require('../js/utils/object-utils');
 
 describe('utils', () => {
   describe('#isSimpleObject()', () => {
@@ -171,6 +171,131 @@ describe('utils', () => {
         'b': { new: undefined, old: 'new value' },
       };
       assert.deepEqual(utils.objectDiff(origObj, newObj, true), diff2);
+    });
+  });
+
+  describe('#assignDeep()', () => {
+    it('should assign to objects in arrays', () => {
+      const data = {
+        assets: [
+          {_id: 123},
+          {_id: 456},
+          {_id: 789},
+        ],
+      };
+      const payload = {
+        'assets[][isDeleted]': true,
+      };
+      const payload2 = {
+        'assets[].isDeleted': true,
+      };
+      const result = {
+        assets: [
+          {_id: 123, isDeleted: true },
+          {_id: 456, isDeleted: true },
+          {_id: 789, isDeleted: true },
+        ],
+      };
+      assert.deepEqual(utils.assignDeep(data, payload), result);
+      // assert.deepEqual(utils.assignDeep(data, payload2), result);
+    });
+
+    it('should create nested objects if missing', () => {
+      const data = {
+        foo: [
+          {_id: 123},
+          {_id: 456},
+          {_id: 789},
+        ],
+        bar: {
+          chocolate: false
+        },
+      };
+      const payload = {
+        'foo[][settings][size]': 42,
+        'bar[info][sizes]': [1,2,3],
+        'baz': 'index',
+      };
+      const payload2 = {
+        'foo[].settings.size': 42,
+        'bar.info.sizes': [1,2,3],
+        'baz': 'index',
+      };
+      const result = {
+        foo: [
+          {_id: 123, settings: { size: 42 }},
+          {_id: 456, settings: { size: 42 }},
+          {_id: 789, settings: { size: 42 }},
+        ],
+        bar: {
+          chocolate: false,
+          info: { sizes: [1,2,3] },
+        },
+        'baz': 'index',
+      };
+      assert.deepEqual(utils.assignDeep(data, payload), result);
+      assert.deepEqual(utils.assignDeep(data, payload2), result);
+      assert.deepEqual(data, data);
+    });
+
+    it('should override values', () => {
+      const data = {
+        foo: [
+          {value: 1},
+          {value: 2},
+          {value: 3},
+        ],
+        bar: {
+          chocolate: false
+        },
+      };
+      const payload = {
+        'foo[][value]': 'banana',
+        'bar[chocolate]': 'space ninja',
+      };
+      const payload2 = {
+        'foo[].value': 'banana',
+        'bar.chocolate': 'space ninja',
+      };
+      const result = {
+        foo: [
+          {value: 'banana'},
+          {value: 'banana'},
+          {value: 'banana'},
+        ],
+        bar: {
+          chocolate: 'space ninja'
+        },
+      };
+      assert.deepEqual(utils.assignDeep(data, payload), result);
+      assert.deepEqual(utils.assignDeep(data, payload2), result);
+      assert.deepEqual(data, data);
+    });
+
+    it('should handle nested arrays', () => {
+      const data = {
+        foo: [
+          {bar: [{ baz: { val: 1 } }, { baz: { val: 4 } }]},
+          {bar: [{ baz: { val: 2 } }, { baz: { val: 5 } }]},
+          {bar: [{ baz: { val: 3 } }, { baz: { val: 6 } }]},
+        ],
+      };
+      const payload = {
+        'foo[][bar][][baz][val2]': 'banana',
+      };
+      const payload2 = {
+        'foo[].bar[].baz.val2': 'banana',
+      };
+      const result = {
+        foo: [
+          {bar: [{ baz: { val: 1, val2: 'banana' } }, { baz: { val: 4, val2: 'banana' } }]},
+          {bar: [{ baz: { val: 2, val2: 'banana' } }, { baz: { val: 5, val2: 'banana' } }]},
+          {bar: [{ baz: { val: 3, val2: 'banana' } }, { baz: { val: 6, val2: 'banana' } }]},
+        ],
+      };
+      assert.deepEqual(utils.assignDeep(data, payload), result);
+      assert.deepEqual(utils.assignDeep(data, payload2), result);
+      assert.deepEqual(data, data);
     });
   });
 });

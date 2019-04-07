@@ -1,6 +1,7 @@
 /**
  * Routes for REST JSON API
  * @module routes/api
+ * @see module:routes/api/assets
  * @see module:routes/api/board
  * @see module:routes/api/maintenance
  * @see module:routes/api/news
@@ -12,6 +13,7 @@
 const express = require('express');
 const router = express.Router();
 
+router.use(require('./assets'));
 router.use(require('./board'));
 router.use(require('./maintenance'));
 router.use(require('./news'));

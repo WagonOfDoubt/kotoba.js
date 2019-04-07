@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npx gulp",
     "watch": "npx gulp watch",
-    "test": "mocha-webpack \"test/**/*.js\" --reporter nyan"
+    "test": "mocha \"test/**/*.js\" --reporter nyan --require @babel/register"
   },
   "keywords": [
     "imageboard",
@@ -17,8 +17,8 @@
   "author": "WagonOfDoubt",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.2.0",
-    "@babel/preset-env": "^7.2.0",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
     "@babel/register": "^7.0.0",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
@@ -30,20 +30,24 @@
     "gulp-uglifycss": "^1.1.0",
     "gulp-util": "^3.0.8",
     "mocha": "^5.2.0",
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.11.0",
     "uglify-es": "^3.3.9",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
-    "watchify": "^3.11.0"
+    "watchify": "^3.11.1"
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "dialog-polyfill": "^0.4.10",
     "jquery": "^3.2.1",
     "jquery-serializejson": "^2.8.1",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.escape": "^4.0.1",
     "lodash.isempty": "^4.4.0",
     "lodash.isequal": "^4.5.0",
     "lodash.truncate": "^4.4.2"
+  },
+  "jshintConfig": {
+    "esversion": 8
   }
 }

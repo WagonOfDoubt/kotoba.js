@@ -48,5 +48,8 @@
     "sharp": "^0.21.1",
     "streamifier": "^0.1.1"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "jshintConfig": {
+    "esversion": 8
+  }
 }

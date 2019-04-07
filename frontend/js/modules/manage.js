@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import * as modal from './modal';
-import { serializeForm, alertErrorHandler, sendJSON, createTable, fetchChanges,
-  fetchPreivew } from '../utils/api-utils';
+import { serializeForm, alertErrorHandler, successErrorHandler, sendJSON,
+  sendFormData, createTable, fetchChanges, fetchPreivew } from '../utils/api-utils';
+import { assignDeep } from '../utils/object-utils';
 
 const initPreviewBtns = () => {
   $('button[data-action="preview-markdown"]')
@@ -205,7 +206,7 @@ const managePage_profile = () => {
     modal.alert('Success', 'Profile updated');
   };
   const onPasswordChanged = () => {
-    modal.alert('Success', 'Passord successfully changed');
+    modal.alert('Success', 'Password successfully changed');
   };
   addSubmitListener($('#form-update-user'), onUserUpdated);
   addSubmitListener($('#form-change-password'), onPasswordChanged);
@@ -232,6 +233,155 @@ const managePage_profile = () => {
 };
 
 
+const managePage_assets = () => {
+  const $form = $('#form-upload-assets');
+  const $fileInput = $('#form-upload-assets__file');
+  const $previewContainer = $('#upload-assets-items');
+
+  const previewTemplate = (n, name) => {
+    return `
+    <li class="asset-upload__item">
+      <div class="asset-upload__preview">
+        <img class="asset-upload__thumb">
+      </div>
+      <div class="asset-upload__inputs">
+        <div class="form-group">
+          <label for="assets[${n}][name]">File name:</label>
+          <input type="text" value="${name}" name="assets[${n}][name]" id="assets[${n}][name]">
+        </div>
+        <div class="form-group asset-upload__width">
+          <label for="assets[${n}][thumbWidth]">Width:</label>
+          <input type="number" name="assets[${n}][thumbWidth]" id="assets[${n}][thumbWidth]">
+          <small>Resize image. Original file will be preserved.</small>
+        </div>
+        <div class="form-group asset-upload__height">
+          <label for="assets[${n}][thumbHeight]">Height:</label>
+          <input type="number" name="assets[${n}][thumbHeight]" id="assets[${n}][thumbHeight]">
+          <small>Resize image. Original file will be preserved.</small>
+        </div>
+        <div class="form-group">
+          <label for="assets[${n}][category]">Category:</label>
+          <select name="assets[${n}][category]" id="assets[${n}][category]">
+            <option value="misc">Miscellaneous</option>
+            <option value="banner">Banners</option>
+            <option value="bg">Background</option>
+            <option value="favicon">Favicons</option>
+            <option value="logo">Logo</option>
+            <option value="news">News assets</option>
+            <option value="placeholder">Attachment placeholders</option>
+            <option value="style">Style assets</option>
+          </select>
+        </div>
+      </div>
+    </li>
+    `;
+  };
+
+  const dummyImage = document.createElement('img');
+
+  const isImageFile = (file) => file.type.startsWith('image/');
+
+  const handleFiles = (files) => {
+    $previewContainer.empty();
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (!isImageFile(file)) {
+        continue;
+      }
+
+      const $previewItem = $(previewTemplate(i, file.name));
+      const img = $previewItem.find("img")[0];
+      const $wInput = $previewItem.find(`.asset-upload__width input`);
+      const $hInput = $previewItem.find(`.asset-upload__height input`);
+      img.file = file;
+      $previewContainer.append($previewItem); // Assuming that "preview" is the div output where the content will be displayed.
+
+      const reader = new FileReader();
+      reader.onload = ((aImg) => {
+        return (e) => {
+          aImg.src = e.target.result;
+          aImg.onload = () => {
+            $wInput.val(aImg.naturalWidth);
+            $hInput.val(aImg.naturalHeight);
+          };
+        };
+      })(img);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  $fileInput.on('change', (e) => {
+    const fileList = e.target.files;
+    handleFiles(fileList);
+  });
+
+  if ($fileInput[0].files.length) {
+    handleFiles($fileInput[0].files);
+  }
+
+  $form.submit((e) => {
+    const data = serializeForm($form);
+    const formData = new FormData($form[0]);
+    const action = $form.attr('action');
+    const method = $form.data('method');
+    modal
+      .confirmPrompt('Confirm upload', `<p>Upload files?</p>`, 'Upload')
+      .then(({ modalData }) => {
+        sendFormData(action, method, formData)
+          .then(successErrorHandler('Files uploaded'))
+          .then(() => window.location.reload())
+          .catch(alertErrorHandler);
+      });
+    e.preventDefault();
+  });
+
+  const $updateForm = $('#form-update-assets');
+  $updateForm.submit((e) => {
+    const action = $updateForm.attr('action');
+    const method = $updateForm.data('method');
+    const data = serializeForm($updateForm);
+    modal
+      .confirmPrompt('Confirm update', 'Save changes?', 'Save')
+      .then(() => {
+        sendJSON(action, method, data)
+          .then(successErrorHandler(`Changes saved`))
+          .then(() => window.location.reload())
+          .catch(alertErrorHandler);
+      });
+    e.preventDefault();
+  });
+};
+
+
+const managePage_trash = () => {
+  $('.js-modify-and-send-form').click((e) => {
+    const btn = e.target;
+    const $form = $(btn.dataset.target);
+    let data = $form.serializeJSON();
+    const f = $form[0];
+    const method = btn.dataset.method || f.dataset.method;
+    const action = btn.dataset.action || f.dataset.action || f.action;
+    const payload = JSON.parse(btn.dataset.payload || '{}');
+    const modalQuery = btn.dataset.prompt;
+    const prompt = modalQuery ? document.querySelector(modalQuery) : null;
+    data = assignDeep(data, payload);
+    if (prompt) {
+      modal
+        .dialogPromise(prompt, ['ok'])
+        .then(({ returnValue, formData }) => {
+          data = Object.assign(data, formData);
+          sendJSON(action, method, data)
+            .then(successErrorHandler(`Changes saved`))
+            .then(() => window.location.reload())
+            .catch(alertErrorHandler);
+        });
+    }
+    e.preventDefault();
+  });
+};
+
 export const init = () => {
   const body = document.body;
   if (!body.classList.contains('manage-page')) {
@@ -251,6 +401,8 @@ export const init = () => {
     'manage-page-staff': managePage_staff,
     'manage-page-maintenance': managePage_maintenance,
     'manage-page-profile': managePage_profile,
+    'manage-page-assets': managePage_assets,
+    'manage-page-trash': managePage_trash,
   };
   const currentActivity = Object
     .keys(activities)
@@ -258,4 +410,4 @@ export const init = () => {
   if (currentActivity) {
     activities[currentActivity].call();
   }
-}
+};

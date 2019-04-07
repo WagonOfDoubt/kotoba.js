@@ -1,0 +1,37 @@
+extends managepage.pug
+include ../mixins/timestamp.pug
+include ../mixins/inputs.pug
+include ../mixins/modals.pug
+
+mixin assetEdit(asset)
+  td
+    input(type='checkbox', name=`assets[][_id]`, value=`${asset._id}`)
+  td
+    img.asset-upload__thumb(src=asset.thumb)
+  td
+    div= asset.name
+    div= asset.category
+    div #[span.badge.badge_primary #{asset.width}x#{asset.height}] #[a(href=asset.file)= asset.file]
+    div #[span.badge.badge_primary #{asset.thumbWidth}x#{asset.thumbHeight}] #[a(href=asset.thumb)= asset.thumb]
+
+block header
+  h1 Recycle Bin
+
+block main
+  if (deletedAssets && deletedAssets.length)
+    section
+      h2 Deleted Assets
+      form#form-recycle-assets(method='POST', action='/api/assets', enctype='multipart/form-data')
+        table
+          tbody
+            for asset in deletedAssets
+              tr
+                +assetEdit(asset)
+        button.js-modify-and-send-form(data-target='#form-recycle-assets', data-method='DELETE', data-prompt='#modal-confirm-delete') Delete
+        button.js-modify-and-send-form(data-target='#form-recycle-assets', data-method='PATCH', data-payload='{"assets[][isDeleted]": false}', data-prompt='#modal-confirm-restore') Restore
+
+block modals
+  +confirmPrompt('modal-confirm-delete', 'Delete items', 'Delete')
+    | Delete selected items?
+  +confirmPrompt('modal-confirm-restore', 'Restore items', 'Restore')
+    | Restore selected items?

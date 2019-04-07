@@ -9,6 +9,18 @@ import * as modal from '../modules/modal';
 export const serializeForm = ($form) =>
   $form.serializeJSON({checkboxUncheckedValue: 'false'});
 
+const errorToHTML = (error) => {
+  if (error.stack) {
+    return `<pre class="error">${ error.stack }</pre>`;
+  } else if (error.param) {
+    // express-validator error
+    return `<div class="error">${ error.param }: ${ error.msg }</div>`;
+  } else if (error.name) {
+    return `<div class="error">${ error.name }: ${ error.msg || error.message }</div>`;
+  } else {
+    return `<div class="error">${ error.msg || error.message }</div>`;
+  }
+};
 
 export const alertErrorHandler = (data) => {
   console.error(data);
@@ -16,19 +28,6 @@ export const alertErrorHandler = (data) => {
   const errorText = `Something went wrong (${ status } ${ statusText })`;
   if (!data.responseJSON) {
     return modal.alert('Error', errorText);
-  }
-
-  const errorToHTML = (error) => {
-    if (error.stack) {
-      return `<pre class="error">${ error.stack }</pre>`;
-    } else if (error.param) {
-      // express-validator error
-      return `<div class="error">${ error.param }: ${ error.msg }</div>`;
-    } else if (error.name) {
-      return `<div class="error">${ error.name }: ${ error.msg || error.message }</div>`
-    } else {
-      return `<div class="error">${ error.msg || error.message }</div>`
-    }
   }
 
   let alertMessage = `${ status } ${ statusText }`;
@@ -43,15 +42,51 @@ export const alertErrorHandler = (data) => {
 };
 
 
-export const sendJSON = (url, type, data) => {
+export const successErrorHandler = (successMessage) => {
+  return (data) => {
+    console.log(data);
+    const { success, fail } = data;
+    let alertMessage = `No changes were made<br>`;
+    if (success && success.length) {
+      alertMessage = `${successMessage} (${success.length})<br>`;
+    }
+    if (fail && fail.length) {
+      alertMessage += '<br>';
+      alertMessage += fail.map((f) => errorToHTML(f.error)).join('');
+    }
+
+    return modal.alert('Success', alertMessage);
+  };
+};
+
+export const sendJSON = (url, method, data) => {
   return new Promise((resolve, reject) => {
     modal.wait();
     $.ajax({
       url: url,
-      type: type,
+      method: method,
+      type: method,
       data: JSON.stringify(data),
       contentType: 'application/json; charset=utf-8',
       dataType: 'json'
+    })
+      .done(resolve)
+      .fail(reject);
+  });
+};
+
+
+export const sendFormData = (url, method, data) => {
+  return new Promise((resolve, reject) => {
+    modal.wait();
+    $.ajax({
+      url: url,
+      data: data,
+      cache: false,
+      contentType: false,
+      processData: false,
+      method: method,
+      type: method,
     })
       .done(resolve)
       .fail(reject);

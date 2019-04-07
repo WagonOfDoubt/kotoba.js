@@ -1,9 +1,11 @@
-a.logo(href='/')
+// a.logo(href='/')
   img(src='/.static/img/kotoba_logo_sm.png', alt='Home', title='Home')
 nav
   ul.list-group
     li.list-group-item
       a(href='/') Home
+    li.list-group-item
+      a(href='/manage/') Dashboard
     li.list-group-item.list__separator Profile
     li.list-group-item
       a(href='/manage/profile') My Profile
@@ -14,9 +16,13 @@ nav
       a(href='/manage/modlog') ModLog
     li.list-group-item
       a(href='/manage/uploads') Recent uploads
+    li.list-group-item Bans
+    li.list-group-item BanDelAll
+    li.list-group-item Move thread
+    li.list-group-item Wordfilter
+    li.list-group-item View Reports
+    li.list-group-item Ban proxy list
     li.list-group-item.list__separator Site management
-    li.list-group-item
-      a(href='/manage/') Dashboard
     li.list-group-item
       a(href='/manage/spaceused') Disk space used
     li.list-group-item
@@ -25,7 +31,7 @@ nav
       a(href='/manage/maintenance') Site maintenance
     li.list-group-item
       a(href=pkg.homepage, target='_blank') Check for new version
-    li.list-group-item.list__separator Administraion
+    li.list-group-item.list__separator Administration
     li.list-group-item
       a(href='/manage/staff') Staff
     li.list-group-item
@@ -34,15 +40,12 @@ nav
       a(href='/manage/boardopts') Manage boards
     li.list-group-item
       a(href='/manage/news') News
-    li.list-group-item Ban proxy list
+    li.list-group-item
+      a(href='/manage/assets') Assets
+    li.list-group-item
+      a(href='/manage/trash') Recycle Bin
     li.list-group-item Blotter
-    li.list-group-item Wordfilter
-    li.list-group-item Move thread
-    li.list-group-item Move Search posts
+    li.list-group-item Search posts
     li.list-group-item View deleted thread
     li.list-group-item Edit filetypes
     li.list-group-item Edit sections
-    li.list-group-item Moderation
-    li.list-group-item View Reports
-    li.list-group-item Bans
-    li.list-group-item BanDelAll

@@ -19,8 +19,8 @@ filters.getPath = (key, obj) => {
 
 filters.getParam = (key, obj) => {
   return obj && key
-    .split('[')
-    .map(key => key.replace(/\]/g, ''))
+    .split(/[\[\]]/)
+    .filter(s => s !== '')
     .reduce(evalPath, obj);
 };
 

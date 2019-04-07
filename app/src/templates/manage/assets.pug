@@ -1,0 +1,86 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+include ../mixins/modals.pug
+
+mixin assetEdit(asset)
+  - values = { assets: { [n]: asset } };
+  li.asset-upload__item
+    input(type='hidden', name=`assets[${n}][_id]`, value=asset._id)
+    .asset-upload__preview
+      img.asset-upload__thumb(src=asset.thumb)
+    .asset-upload__inputs
+      +textEdit(`assets[${n}][name]`, 'File name', 'Without extension')
+      +numberEdit(`assets[${n}][thumbWidth]`, 'Width', 'Resize image. Original file will be preserved.')
+      +numberEdit(`assets[${n}][thumbHeight]`, 'Height', 'Resize image. Original file will be preserved.')
+      +comboboxEdit(`assets[${n}][category]`, 'Category', categoryOptions)
+      +checkboxEdit(`assets[${n}][isDeleted]`, 'Delete')
+        | Mark for deletion. Deleted items can be cleared in #[a(href='/manage/trash') Recycle Bin]
+    .asset-upload__info
+      div #[span.badge.badge_primary #{asset.width}x#{asset.height}] #[a.link_long(href=asset.file)= asset.file]
+      div #[span.badge.badge_primary #{asset.thumbWidth}x#{asset.thumbHeight}] #[a.link_long(href=asset.thumb)= asset.thumb]
+
+mixin assetList(assets)
+  if !assets || assets.length === 0
+    .badge.badge_info No assets in this category
+  else
+    for asset in assets
+      ul#update-assets-items
+        if !asset.isDeleted
+          +assetEdit(asset)
+        else
+          li.asset-upload__item_deleted
+            div #[span.badge.badge_danger DELETED] Look in #[a(href='/manage/trash') Recycle Bin] to restore/purge asset.
+      - n++;
+
+block header
+  h1 Assets
+
+block main
+  - const categories = Object.keys(groupedAssets);
+  - var values;
+  - var n = 0;
+  if categories.length === 0
+    .badge.badge_info Site has no assets
+  else
+    h2 Edit assets
+    form#form-update-assets(method='POST', data-method='PATCH', action='/api/assets', enctype='multipart/form-data')
+      section
+        h3 Banners
+        +assetList(groupedAssets['banner'])
+      section
+        h3 Attachment placeholders
+        +assetList(groupedAssets['placeholder'])
+      section
+        h3 News assets
+        +assetList(groupedAssets['news'])
+      section
+        h3 Background
+        +assetList(groupedAssets['bg'])
+      section
+        h3 Style assets
+        +assetList(groupedAssets['style'])
+      section
+        h3 Favicons
+        +assetList(groupedAssets['favicon'])
+      section
+        h3 Logo
+        +assetList(groupedAssets['logo'])
+      section
+        h3 Miscellaneous
+        +assetList(groupedAssets['misc'])
+      hr
+      input(type='submit', value='Save changes')
+  h2 Upload
+  form#form-upload-assets(method='POST', data-method='POST', action='/api/assets', enctype='multipart/form-data')
+    input#form-upload-assets__file.from-input(
+      name=`files[]`
+      size='35'
+      accesskey='f'
+      type='file'
+      multiple,
+      required,
+    )
+    ul#upload-assets-items
+    hr
+    input(type='submit', value='Upload files', accept='image/*')

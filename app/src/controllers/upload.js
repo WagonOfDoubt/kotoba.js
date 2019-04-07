@@ -11,6 +11,7 @@ const path = require('path');
 const sharp = require('sharp');
 const crypto = require('crypto');
 const ffmpeg = require('fluent-ffmpeg');
+const _ = require('lodash');
 
 
 /**
@@ -30,7 +31,7 @@ const isVideo = (ext) => {
  * @returns {boolean}
  */
 const isImage = (ext) => {
-  const images = ['.jpg', '.jpeg', '.png', '.tiff', '.webp', '.gif', '.svg'];
+  const images = ['.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp', '.gif', '.svg'];
   return images.includes(ext);
 };
 
@@ -53,18 +54,6 @@ const getAttachmentType = (ext) => {
 
 
 /**
- * Get rid of .jpeg instead of .jpg and potentially other inconsistent file
- * extensions
- * @param {string} ext - file extension, starting with dot (".jpg", ".png")
- * @returns {string}
- */
-const normalizeExtension = (ext) => {
-  if (ext === '.jpeg') {
-    return '.jpg';
-  }
-  return ext;
-};
-
 
 /**
  * Determine optimal format for thumbnail. For formats what support transparency
@@ -77,6 +66,45 @@ const getOptimalThumbnailExtenstion = (ext) => {
     return '.png';
   }
   return '.jpg';
+};
+
+const mimes = {
+  // images
+  'image/gif': '.gif',
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/svg+xml': '.svg',
+  'image/tiff': '.tif',
+  'image/x-tiff': '.tif',
+  // video
+  'video/ogg': '.ogv',
+  'video/mp4': '.mp4',
+  'video/webm': '.webm',
+};
+
+const extensions = _.invert(mimes);
+
+/**
+ * Determine file extension by mime type.
+ * @param  {String} mime MIME type
+ * @return {String}      File extension with leading dot, or empty string if
+ * file type not supported
+ * @example getExtensionByMime('image/png');  // => '.png'
+ */
+const getExtensionByMime = (mime) => {
+  return mimes[mime] || '';
+};
+
+
+/**
+ * Determine mime type by file extension.
+ * @param  {String} ext File extension with leading dot
+ * @return {String}     MIME type, or empty string if file type not supported
+ * @example getMimeByExtension('.png');  // => 'image/png'
+ */
+const getMimeByExtension = (ext) => {
+  return extensions[ext] || '';
 };
 
 
@@ -117,7 +145,7 @@ const uploadFiles = (boardUri, files, keepFilename = true) =>
  * @returns { object } attachment object to be saved to database
  */
 const uploadFile = async (boardUri, file, keepFilename = true) => {
-  const ext = normalizeExtension(path.extname(file.originalname));
+  const ext = getExtensionByMime(file.mimetype);
   const type = getAttachmentType(ext);
   if (type === 'unknown') {
     const error = new Error('Unsupported file format: ' + ext);
@@ -128,9 +156,9 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
   const thumbExt = getOptimalThumbnailExtenstion(ext);
 
   const randomName = getRandomName();
-  file.originalname = keepFilename && !/^\s+\.\w+$/.test(file.originalname)
-    ? path.basename(file.originalname, ext) + ext
-    : randomName + ext;
+  file.originalname = (keepFilename && !/^\s+\.\w+$/.test(file.originalname)) ?
+    (path.basename(file.originalname, path.extname(file.originalname)) + ext) :
+    (randomName + ext);
 
   const filePath = path
     .join(config.html_path, boardUri, 'src', randomName, file.originalname);
@@ -149,9 +177,10 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
 
   let fileInfo;
   let thumbInfo;
+  const s = await Settings.get();
   if (type === 'image') {
     try {
-      thumbInfo = await createThumbnail(thumbPath, file);
+      thumbInfo = await createThumbnail(thumbPath, file, s.thumbSize.width, s.thumbSize.height);
       attachment.thumbWidth = thumbInfo.width;
       attachment.thumbHeight = thumbInfo.height;
     } catch (err) {
@@ -168,7 +197,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
   } else if (type === 'video') {
     fileInfo = await saveVideo(filePath, file);
     try {
-      thumbInfo = await createVideoThumbnail(thumbPath, filePath);
+      thumbInfo = await createVideoThumbnail(thumbPath, filePath, s.thumbSize.width, s.thumbSize.height);
       for (const key in thumbInfo) {
         attachment[key] = thumbInfo[key];
       }
@@ -208,17 +237,24 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
  * {@link https://www.npmjs.com/package/sharp}
  */
 const saveImage = async (imagePath, file) => {
+  const ext = getExtensionByMime(file.mimetype);
+  if (!isImage(ext)) {
+    const err = new Error(`Invalid image format: ${ext}`);
+    err.type = 'InvalidImageFormatError';
+    throw err;
+  }
   try {
     await fs.ensureDir(path.dirname(imagePath));
+    let s;
     if (['.gif', '.svg'].includes(path.extname(imagePath))) {
       await fs.writeFile(imagePath, file.buffer);
-      // return image info
-      return await sharp(file.buffer).metadata();
+      s = await sharp(file.buffer).metadata();
     } else {
       // this also strips EXIF
-      return await sharp(file.buffer)
-        .toFile(imagePath);
+      s = await sharp(file.buffer).toFile(imagePath);
     }
+    // return image info
+    return s;
   } catch (error) {
     throw error;
   }
@@ -241,7 +277,7 @@ const saveFile = async (filePath, file) => {
       size: file.buffer.length,
       width: 0,
       height: 0
-    }
+    };
   } catch (error) {
     throw error;
   }
@@ -256,15 +292,17 @@ const saveFile = async (filePath, file) => {
  * @returns {object} image info from sharp package
  * {@link https://www.npmjs.com/package/sharp}
  */
-const createThumbnail = async (thumbPath, file) => {
+const createThumbnail = async (thumbPath, file, width, height) => {
+  const ext = getExtensionByMime(file.mimetype);
+  if (!isImage(ext)) {
+    const err = new Error(`Invalid image format: ${ext}`);
+    err.type = 'InvalidImageFormatError';
+    throw err;
+  }
   try {
     await fs.ensureDir(path.dirname(thumbPath));
-    const s = await Settings.get();
-    const { width, height } = s.thumbSize;
     return await sharp(file.buffer)
-      .resize(width, height)
-      .max()
-      .withoutEnlargement()
+      .resize(width, height, { fit: 'inside', withoutEnlargement: true })
       .toFile(thumbPath);
   } catch (error) {
     throw error;
@@ -285,7 +323,7 @@ const saveVideo = async (filePath, file) => {
     await fs.writeFile(filePath, file.buffer);
     return {
       size: file.buffer.length
-    }
+    };
   } catch (error) {
     throw error;
   }
@@ -312,7 +350,7 @@ const getVideoMetadata = (filePath) => {
         const audio = metadata.streams.find((s) => s.codec_type === 'audio');
         const duration = metadata.format.duration;
         resolve({ audio, video, duration });
-      })
+      });
   });
 };
 
@@ -322,49 +360,61 @@ const getVideoMetadata = (filePath) => {
  * @async
  * @param {string} thumbPath - path to save to
  * @param {object} filePath - path to video file
+ * @param {Number} width Maximum thumbnail width
+ * @param {Number} height Maximum thumbnail height
  * @returns {object} image info from sharp package
  * {@link https://www.npmjs.com/package/sharp}
  */
-const createVideoThumbnail = async (thumbPath, filePath) => {
-  const sd = 1/0;
-  await fs.ensureDir(path.dirname(thumbPath));
-  const s = await Settings.get();
-  const { width, height } = s.thumbSize;
+const createVideoThumbnail = async (thumbPath, filePath, width, height) => {
+  try {
+    await fs.ensureDir(path.dirname(thumbPath));
 
-  const metadata = await getVideoMetadata(filePath);
-  const inputWidth = metadata.video.width;
-  const inputHeight = metadata.video.height;
-  const aspect = Math.min(width / inputWidth, height / inputHeight);
-  const tw = Math.floor(aspect * inputWidth);
-  const th = Math.floor(aspect * inputHeight);
+    const metadata = await getVideoMetadata(filePath);
+    const inputWidth = metadata.video.width;
+    const inputHeight = metadata.video.height;
+    const aspect = Math.min(width / inputWidth, height / inputHeight);
+    const tw = Math.floor(aspect * inputWidth);
+    const th = Math.floor(aspect * inputHeight);
 
-  const stdout = await new Promise((resolve, reject) => {
-    ffmpeg(filePath)
-      .on('error', (err) => reject(err))
-      .on('end', function(stdout, stderr) {
-        console.log('Transcoding succeeded !', 'stdout:', stdout, 'stderr', stderr);
-        resolve();
-      })
-      .screenshots({
-        count: 1,
-        folder: path.dirname(thumbPath),
-        filename: path.basename(thumbPath),
-        timemarks: [1],
-        size: `${tw}x${th}`,
-      });
-  });
+    const stdout = await new Promise((resolve, reject) => {
+      ffmpeg(filePath)
+        .on('error', (err) => reject(err))
+        .on('end', function(stdout, stderr) {
+          console.log('Transcoding succeeded !', 'stdout:', stdout, 'stderr', stderr);
+          resolve();
+        })
+        .screenshots({
+          count: 1,
+          folder: path.dirname(thumbPath),
+          filename: path.basename(thumbPath),
+          timemarks: [1],
+          size: `${tw}x${th}`,
+        });
+    });
 
-  console.log('METADATA', metadata);
+    console.log('METADATA', metadata);
 
-  return {
-    width: inputWidth,
-    height: inputHeight,
-    thumbWidth: tw,
-    thumbHeight: th,
-    duration: metadata.duration,
-  };
+    return {
+      width: inputWidth,
+      height: inputHeight,
+      thumbWidth: tw,
+      thumbHeight: th,
+      duration: metadata.duration,
+    };
+  } catch (err) {
+    throw err;
+  }
 };
 
 
 module.exports.uploadFile = uploadFile;
 module.exports.uploadFiles = uploadFiles;
+module.exports.saveImage = saveImage;
+module.exports.createThumbnail = createThumbnail;
+module.exports.getRandomName = getRandomName;
+module.exports.getOptimalThumbnailExtenstion = getOptimalThumbnailExtenstion;
+module.exports.getExtensionByMime = getExtensionByMime;
+module.exports.isVideo = isVideo;
+module.exports.isImage = isImage;
+module.exports.getAttachmentType = getAttachmentType;
+module.exports.getMimeByExtension = getMimeByExtension;
