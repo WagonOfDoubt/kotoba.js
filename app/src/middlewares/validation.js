@@ -1,4 +1,6 @@
 const { validationResult } = require('express-validator/check');
+const { RequestValidationError } = require('../errors');
+
 
 /**
  * Middleware that returns 400 status and JSON response with express-validator
@@ -8,12 +10,14 @@ module.exports.validateRequest = (req, res, next) => {
   try {
     const result = validationResult(req);
     if (!result.isEmpty()) {
-      const errors = result.array();
-      errors.forEach(e => e.type = 'RequestValidationError');
+      const errors = result
+        .formatWith(RequestValidationError.fromExpressValidator)
+        .array()
+        .map(e => e.toObject());
       if (errors.length === 1) {
-        return res.status(400).json({ error: errors[0] });
+        return res.status(400).json({ status: 400, error: errors[0] });
       } else {
-        return res.status(400).json({ errors: errors });
+        return res.status(400).json({ status: 400, errors: errors });
       }
     }
     next();

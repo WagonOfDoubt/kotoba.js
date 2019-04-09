@@ -350,7 +350,7 @@ module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=fal
           target: _.pick(post, ['boardUri', 'postId']),
           update: invalidUpdates,
           status: 400,
-          error: { type: errorAtPath.name, msg: errorAtPath.message },
+          error: { code: errorAtPath.name, message: errorAtPath.message },
         };
         invalidItems.push(invalidItem);
       }

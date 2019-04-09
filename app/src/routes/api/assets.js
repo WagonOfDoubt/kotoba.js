@@ -13,26 +13,10 @@ const Asset = require('../../models/asset');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
 const sanitizer = require('../../middlewares/sanitizer');
+const { BaseError, RequestValidationError, DocumentNotFoundError, AuthRequiredError, PermissionDeniedError, FileFormatNotSupportedError } = require('../../errors');
 
 const validCategories = ['banner', 'bg', 'favicon', 'logo', 'misc', 'news', 'placeholder', 'style'];
 const validFileNameRegExp = /^(?!\\.)(?!com[0-9]$)(?!con$)(?!lpt[0-9]$)(?!nul$)(?!prn$)[^\\|\\*\?\\:<>\/$"]*[^\\.\\|\\*\\?\\\:<>\/$"]+$/i;
-
-/**
- * @apiDefine AssetNotFoundError
- * @apiError AssetNotFoundError Asset with specified ObjectId was not found
- *
- * @apiErrorExample AssetNotFoundError
- *     HTTP/1.1 404 Not Found
- *     {
- *       "error": {
- *         "type": "AssetNotFoundError",
- *         "msg": "Asset \"<ObjectId>\" doesn't exist.",
- *         "param": "_id",
- *         "value": "<ObjectId>",
- *         "location": "body",
- *       }
- *     }
- */
 
 
 /**
@@ -69,10 +53,10 @@ const validFileNameRegExp = /^(?!\\.)(?!com[0-9]$)(?!con$)(?!lpt[0-9]$)(?!nul$)(
  *       ...
  *     ]
  *
- * @apiError RequestValidationError
- * @apiError AssetNotFoundError
- * @apiError AuthRequiredError
- * @apiError PermissionDeniedError
+ * @apiUse RequestValidationError
+ * @apiUse DocumentNotFoundError
+ * @apiUse AuthRequiredError
+ * @apiUse PermissionDeniedError
  */
 router.get(
   '/api/assets/:mongoId?',
@@ -98,17 +82,8 @@ router.get(
             .status(200)
             .json(asset);
         } else {
-          return res
-            .status(404)
-            .json({
-              error: {
-                'type': 'AssetNotFoundError',
-                'msg': `Asset "${_id}" doesn't exist.`,
-                'param': '_id',
-                'value': _id,
-                'location': 'params',
-              }
-            });
+          const notFound = new DocumentNotFoundError('Asset', '_id', _id, 'params');
+          return notFound.respond(res);
         }
       }
       const assets = await Asset.find({});
@@ -140,9 +115,10 @@ router.get(
  * @apiParam {String} assets.category Asset category, can be one of: "banner",
  * "bg", "favicon", "logo", "misc", "news", "placeholder", "style"
  * 
- * @apiError RequestValidationError Request did not pass validation
- * @apiError PermissionDeniedError  User has no permission for this action
- * @apiError FileAlreadyExists  File was already uploaded
+ * @apiUse RequestValidationError
+ * @apiUse PermissionDeniedError
+ * @apiUse FileAlreadyExistsError
+ * @apiUse FileFormatNotSupportedError
  *
  * @apiSuccess {Object[]} success Array of successfully uploaded Asset documents
  * @apiSuccess {Object[]} fail Array of not completed for various reasons tasks
@@ -181,9 +157,9 @@ router.get(
  *         {
  *           error: {
  *             location: "body",
- *             msg: "File with hash "..." already exists.",
+ *             message: "File with hash "..." already exists.",
  *             param: "files[]",
- *             type: "FileAlreadyExists",
+ *             code: "FileAlreadyExists",
  *             value: "..."
  *           },
  *           status: 409
@@ -251,32 +227,15 @@ router.post(
         const fileExt = upload.getExtensionByMime(file.mimetype);
         
         if (!upload.isImage(fileExt)) {
-          return {
-            status: 415,
-            error: {
-              type: 'FileFormatNotSupported',
-              msg: `File type ${fileExt} not supported for this upload`,
-              value: fileExt,
-              param: 'files[]',
-              location: 'body',
-            }
-          };
+          const usupportedMedia = new FileFormatNotSupportedError('files[]', fileExt, 'body');
+          return usupportedMedia.respond(res);
         }
 
         const hash = crypto.createHash('md5').update(file.buffer).digest('hex');
         const duplicate = await Asset.findOne({ hash });
 
         if (duplicate) {
-          return {
-            status: 409,
-            error: {
-              type: 'FileAlreadyExists',
-              msg: `File with hash "${ hash }" already exists.`,
-              param: 'files[]',
-              value: hash,
-              location: 'body',
-            }
-          };
+          return new FileAlreadyExistsError('files[]', hash, 'body');
         }
 
         const name = assetDesc.name || file.originalname;
@@ -319,19 +278,19 @@ router.post(
 
       const assets = _.zip(req.files, req.body.assets);
       const assetsDocs = await Promise.all(assets.map(processAsset));
-      const [validAssets, invalidAssets] = _.partition(assetsDocs, doc => !doc.error);
+      const [validAssets, invalidAssets] = _.partition(assetsDocs, doc => !(doc instanceof BaseError));
 
       if (validAssets.length) {
         await Asset.insertMany(validAssets);
         return res
           .status(201).json({
             success: validAssets,
-            fail: invalidAssets,
+            fail: invalidAssets.map(BaseError.convertToResponse),
           });
       }
       return res
         .status(200).json({
-          fail: invalidAssets,
+          fail: invalidAssets.map(BaseError.convertToResponse),
         });
     } catch (err) {
       return next(err);
@@ -345,8 +304,8 @@ router.post(
  * @apiName UpdateAssets
  * @apiGroup Assets
  * @apiPermission admin
- * @apiError RequestValidationError Request did not pass validation
- * @apiError PermissionDeniedError  User has no permission for this action
+ * @apiUse RequestValidationError Request did not pass validation
+ * @apiUse PermissionDeniedError  User has no permission for this action
  */
 router.patch(
   '/api/assets/',
@@ -416,15 +375,8 @@ router.patch(
     try {
       const assets = req.body.assets;
       if (!assets.length) {
-        return res.status(400).json({
-          error: {
-            msg: `Array is empty`,
-            type: 'RequestValidationError',
-            param: 'assets',
-            value: assets,
-            location: 'body',
-          }
-        });
+        const validationError = new RequestValidationError('Array is empty', 'assets', assets, 'body');
+        return validationError.respond(res);
       }
 
       const assetIds = _.map(assets, '_id');
@@ -432,20 +384,12 @@ router.patch(
       const foundAssetsById = _.mapValues(_.groupBy(foundAssets, '_id'), (arr) => arr[0].toObject());
       const notFoundAssets = assetIds
         .filter(id => !_.has(foundAssetsById, id))
-        .map(id => ({
-          id: id,
-          status: 404,
-          error: {
-            msg: `Assets not found`,
-            type: 'DocumentNotFound',
-            value: id,
-            param: 'assets',
-            location: 'body',
-          }
-        }));
+        .map(id => ({ id: id }));
+      const notFoundAssetError = new DocumentNotFoundError('Asset', 'assets', null, 'body');
+      const notFoundAssetsErrors = notFoundAssetError.assignToArray(notFoundAssets);
 
       if (!foundAssets.length) {
-        return res.status(404).json(notFoundAssets);
+        return res.status(404).json({ fail: notFoundAssetsErrors });
       }
 
       const assetTasks = assets.filter((asset) => _.has(foundAssetsById, asset._id));
@@ -536,16 +480,7 @@ router.patch(
       return res.status(200).json({
         success: Object.values(foundAssetsById),
         fail: [
-          ...notFoundAssets.map((notfound) => ({
-              status: 404,
-              error: {
-                'type': 'AssetNotFoundError',
-                'msg': `Asset "${notfound._id}" doesn't exist.`,
-                'param': '_id',
-                'value': notfound._id,
-                'location': 'body',
-              },
-            })),
+          ...notFoundAssetsErrors,
         ],
       });
     } catch (err) {
@@ -579,10 +514,10 @@ router.patch(
  *         ...
  *       ]
  *     }
- * @apiError AuthRequiredError
- * @apiError AssetNotFoundError
- * @apiError RequestValidationError
- * @apiError PermissionDeniedError
+ * @apiUse AuthRequiredError
+ * @apiUse DocumentNotFoundError
+ * @apiUse RequestValidationError
+ * @apiUse PermissionDeniedError
  */
 router.delete(
   '/api/assets/',
@@ -610,21 +545,17 @@ router.delete(
       const ids = req.body.assets.map(asset => asset._id);
       const assets = await Asset.find({ _id: { $in: ids } });
       const foundIds = assets.map(asset => asset._id.toString());
-      const notFoundAssets = ids.filter(id => !foundIds.includes(id));
+      const notFoundAssets = ids
+        .filter(id => !foundIds.includes(id))
+        .map(id => ({ id: id }));
+      const notFoundAssetError = new DocumentNotFoundError('Asset', 'assets', null, 'body');
+      const notFoundAssetsErrors = notFoundAssetError.assignToArray(notFoundAssets);
+
       let fail = [];
       if (notFoundAssets.length) {
         fail = [
           ...fail,
-          ...notFoundAssets.map(_id => ({
-            status: 404,
-            error: {
-              'type': 'AssetNotFoundError',
-              'msg': `Asset "${_id}" doesn't exist.`,
-              'param': 'assets._id',
-              'value': _id,
-              'location': 'body',
-            }
-          }))
+          ...notFoundAssetsErrors
         ];
       }
       if (!foundIds.length) {

@@ -14,38 +14,7 @@ const { updatePosts } = require('../../controllers/posting');
 const { validateRequest } = require('../../middlewares/validation');
 const { postEditPermission } = require('../../middlewares/permission');
 const { createPostHandler } = require('../handlers/post');
-
-
-/**
- * Helper function that returns function that assigns status and error to each
- * object in collection.
- * @param  {Number} status     HTTP status code, i.e. 404
- * @param  {String} errorType  Error code, i.e. "PostNotFoundError"
- * @param  {String} errorMsg   Error message, i.e. "Post not found"
- * @return {function}          fp.map function to apply to collection
- * @example
- * const assign404 = assignError(404, 'PostNotFoundError', 'Post not found');
- * const notFoundItems = [{ id: 265 }, { id: 228 }];
- * const errors = assign404(notFoundItems);
- * // errors:
- * [
- *   {
- *     id: 265,
- *     status: 404,
- *     error: { type: 'PostNotFoundError', msg: 'Post not found'}
- *   },
- *   {
- *     id: 228,
- *     status: 404,
- *     error: {
- *       type: 'PostNotFoundError',
- *       msg: 'Post not found'
- *     }
- *   }
- * ]
- */
-const assignError = (status, errorType, errorMsg) =>
-  fp.map(fp.assign({ status, error: { type: errorType, msg: errorMsg } }));
+const { RequestValidationError, DocumentNotFoundError } = require('../../errors');
 
 
 /**
@@ -85,16 +54,8 @@ const filterPostUpdateItems = (req, res, next) => {
     res.locals.fail = res.locals.fail || [];
 
     if (!items.length) {
-      return res
-        .status(400)
-        .json({
-          error: {
-            type: 'RequestValidationError',
-            msg: `No items specified`,
-            param: 'items',
-            location: 'body',
-          }
-        });
+      const noItemsError = new RequestValidationError('No items specified', 'items', null, 'body');
+      return noItemsError.respond(res);
     }
 
     // filter input and find unique posts
@@ -105,20 +66,16 @@ const filterPostUpdateItems = (req, res, next) => {
     );
 
     if (invalidTargets.length) {
+      const invalidTargetError = new RequestValidationError('item.target is invalid', 'items', null, 'body');
+
       res.locals.fail = [
         ...res.locals.fail,
-        ...assignError(400, 'RequestValidationError',
-          `item.target is invalid`)(invalidTargets)
+        ...invalidTargetError.assignToArray(invalidTargets, 'target')
       ];
       if (!validTargets.length) {
         return res
           .status(400)
           .json({
-            error: {
-              type: 'RequestValidationError',
-              param: 'items',
-              location: 'body',
-            },
             fail: res.locals.fail,
           });
       }
@@ -152,20 +109,17 @@ const filterPostUpdateItems = (req, res, next) => {
       isUpdatesNonEmpty);
 
     if (emptyUpdates.length) {
+      const invalidUpdateError = new RequestValidationError('item.target is invalid', 'items', null, 'body');
+
       res.locals.fail = [
         ...res.locals.fail,
-        ...assignError(400, 'RequestValidationError',
-          `item.update has no valid fields`)(emptyUpdates)
+        ...invalidUpdateError.assignToArray(emptyUpdates, 'update')
       ];
+
       if (!nonEmptyUpdates.length) {
         return res
           .status(400)
           .json({
-            error: {
-              type: 'RequestValidationError',
-              param: 'items',
-              location: 'body',
-            },
             fail: res.locals.fail,
           });
       }
@@ -188,20 +142,17 @@ const filterPostUpdateItems = (req, res, next) => {
       .filter(isUpdatesNonEmpty);
 
     if (updatesWithDuplicates.length) {
+      const duplicateError = new RequestValidationError('item.update has conflicts', 'items', null, 'body');
+
       res.locals.fail = [
         ...res.locals.fail,
-        ...assignError(400, 'RequestValidationError',
-          `item.update has conflicts`)(updatesWithDuplicates)
+        ...duplicateError.assignToArray(updatesWithDuplicates, 'update')
       ];
+
       if (!updatesWithoutDuplicates.length) {
         return res
           .status(400)
           .json({
-            error: {
-              type: 'RequestValidationError',
-              param: 'items',
-              location: 'body',
-            },
             fail: res.locals.fail,
           });
       }
@@ -244,21 +195,16 @@ const populatePostUpdateItems = async (req, res, next) => {
 
     const notFoundItems = _.values(notFoundTargets);
     if (notFoundItems.length) {
+      const notFoundError = new DocumentNotFoundError('Post', 'items', null, 'body');
       res.locals.fail = [
         ...res.locals.fail,
-        ...assignError(404, 'PostNotFoundError',
-          `Post not found`)(notFoundItems)
+        ...notFoundError.assignToArray(notFoundItems)
       ];
 
       if (!_.values(foundTargets).length) {
         return res
           .status(404)
           .json({
-            error: {
-              type: 'PostNotFoundError',
-              param: 'items',
-              location: 'body',
-            },
             fail: res.locals.fail,
           });
       }
@@ -306,20 +252,16 @@ const filterOutOfBoundItems = (req, res, next) => {
     }
 
     if (outOfBounds.length) {
+      const outOfBoundsError = new RequestValidationError('Array index is out of bounds', 'items', null, 'body');
+
       res.locals.fail = [
         ...res.locals.fail,
-        ...assignError(400, 'RequestValidationError',
-          `Array index is out of bounds`)(outOfBounds)
+        ...outOfBoundsError.assignToArray(outOfBounds)
       ];
       if (!inBounds.length) {
         return res
           .status(400)
           .json({
-            error: {
-              type: 'RequestValidationError',
-              param: 'items',
-              location: 'body',
-            },
             fail: res.locals.fail,
           });
       }
@@ -517,7 +459,7 @@ router.post('/api/post', createPostHandler);
  *     HTTP/1.1 400 Bad Request
  *     {
  *       "error": {
- *         "type": "RequestValidationError",
+ *         "code": "RequestValidationError",
  *         "param": "items",
  *         "location": "body"
  *       },
@@ -525,8 +467,8 @@ router.post('/api/post', createPostHandler);
  *         {
  *           "status": 400,
  *           "error": {
- *             "type": "RequestValidationError",
- *             "msg": "item.update has conflicts"
+ *             "code": "RequestValidationError",
+ *             "message": "item.update has conflicts"
  *           },
  *           "target": {
  *             "boardUri": "b",
@@ -546,7 +488,7 @@ router.post('/api/post', createPostHandler);
  *     HTTP/1.1 400 Bad Request
  *     {
  *       "error": {
- *         "type": "RequestValidationError",
+ *         "code": "RequestValidationError",
  *         "param": "items",
  *         "location": "body"
  *       },
@@ -554,8 +496,8 @@ router.post('/api/post', createPostHandler);
  *         {
  *           "status": 400,
  *           "error": {
- *             "type": "RequestValidationError",
- *             "msg": "Array index is out of bounds"
+ *             "code": "RequestValidationError",
+ *             "message": "Array index is out of bounds"
  *           },
  *           "ref": {
  *             "boardUri": "b",
@@ -574,7 +516,7 @@ router.post('/api/post', createPostHandler);
  *     HTTP/1.1 400 Bad Request
  *     {
  *       "error": {
- *         "type": "RequestValidationError",
+ *         "code": "RequestValidationError",
  *         "param": "items",
  *         "location": "body"
  *       },
@@ -582,8 +524,8 @@ router.post('/api/post', createPostHandler);
  *         {
  *           "status": 400,
  *           "error": {
- *             "type": "RequestValidationError",
- *             "msg": "item.update has no valid fields"
+ *             "code": "RequestValidationError",
+ *             "message": "item.update has no valid fields"
  *           },
  *           "target": {
  *             "boardUri": "b",
@@ -598,7 +540,7 @@ router.post('/api/post', createPostHandler);
  *     HTTP/1.1 400 Bad Request
  *     {
  *       "error": {
- *         "type": "RequestValidationError",
+ *         "code": "RequestValidationError",
  *         "param": "items",
  *         "location": "body"
  *       },
@@ -606,8 +548,8 @@ router.post('/api/post', createPostHandler);
  *         {
  *           "status": 400,
  *           "error": {
- *             "type": "RequestValidationError",
- *             "msg": "item.target is invalid"
+ *             "code": "RequestValidationError",
+ *             "message": "item.target is invalid"
  *           },
  *           "target": {
  *             "postId": 4444
@@ -620,7 +562,7 @@ router.post('/api/post', createPostHandler);
  *     HTTP/1.1 404 Not Found
  *     {
  *       "error": {
- *         "type": "PostNotFoundError",
+ *         "code": "PostNotFoundError",
  *         "param": "items",
  *         "location": "body"
  *       },
@@ -628,8 +570,8 @@ router.post('/api/post', createPostHandler);
  *         {
  *           "status": 404,
  *           "error": {
- *             "type": "PostNotFoundError",
- *             "msg": "Post not found"
+ *             "code": "PostNotFoundError",
+ *             "message": "Post not found"
  *           },
  *           "target": {
  *             "boardUri": "b",
@@ -646,7 +588,7 @@ router.post('/api/post', createPostHandler);
  *     HTTP/1.1 403 Forbidden
  *     {
  *       "error": {
- *         "type": "PermissionDeniedError",
+ *         "code": "PermissionDeniedError",
  *         "location": "body",
  *         "param": "items"
  *       },
@@ -663,8 +605,8 @@ router.post('/api/post', createPostHandler);
  *             "isSage": true
  *           },
  *           "error": {
- *             "type": "PermissionDeniedError",
- *             "msg": "User priority 100 is less than current priority 200",
+ *             "code": "PermissionDeniedError",
+ *             "message": "User priority 100 is less than current priority 200",
  *             "roleName": "moderator",
  *             "userPriority": 100,
  *             "currentPriority": 200
@@ -695,15 +637,10 @@ router.patch(
         if (_.isEmpty(res.locals.fail)) {
           return res.status(418);
         }
-        const { status, error } = _.pick(res.locals.fail[0], 'status', 'error.type');
+        const { status, error } = _.pick(res.locals.fail[0], 'status');
         return res
           .status(status)
           .json({
-            error: {
-              ...error,
-              location: 'body',
-              param: 'items',
-            },
             fail: res.locals.fail
           });
       }

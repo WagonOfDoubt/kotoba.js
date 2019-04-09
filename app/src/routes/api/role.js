@@ -7,6 +7,8 @@ const _ = require('lodash');
 const Role = require('../../models/role');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
+const { DocumentAlreadyExistsError } = require('../../errors');
+const { ConflictError } = require('../../errors/base-error');
 
 
 router.get('/api/role/',
@@ -125,30 +127,17 @@ router.delete('/api/role/',
   async (req, res, next) => {
     try {
       const allRoles = await Role.findAllAndSort();
-      const currentRole = allRoles.find((r) => r.roleName === req.body.roleName);
+      const roleName = req.body.roleName;
+      const currentRole = allRoles.find((r) => r.roleName === roleName);
       if (!currentRole) {
-        res.status(422).json({
-          error: {
-            location: 'body',
-            param: 'roleName',
-            value: req.body.roleName,
-            msg: 'Role does not exist'
-          }
-        });
-        return;
+        const e = new DocumentAlreadyExistsError('Role', 'roleName', roleName, 'body');
+        return e.respond(res);
       }
       if (currentRole.usedTimes > 0) {
-        res.status(422).json({
-          error: {
-            location: 'body',
-            param: 'roleName',
-            value: req.body.roleName,
-            msg: `This role is currently assigned ${currentRole.usedTimes} times. Revoke role from all users before deleting it.`
-          }
-        });
-        return;
+        const e = new ConflictError(`This role is currently assigned ${currentRole.usedTimes} times. Revoke role from all users before deleting it.`, 'roleName', roleName, 'body');
+        return e.respond(res);
       }
-      const response = await Role.findOneAndDelete({ roleName: req.body.roleName });
+      const response = await Role.findOneAndDelete({ roleName: roleName });
       res.json(response);
     } catch (err) {
       return next(err);

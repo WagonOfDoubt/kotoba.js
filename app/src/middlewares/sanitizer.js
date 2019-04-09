@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const { RequestValidationError } = require('../errors');
 
 /**
  * Creates express middleware that deletes all fields in req.body that are not
@@ -61,15 +62,8 @@ module.exports.filterBody = (filterPaths, path) => {
       if (path) {
         obj = _.get(req.body, path);
         if (!_.isObject(obj)) {
-          return res.status(400).json({
-            error: {
-              type: 'RequestValidationError',
-              msg: `${ path } is not an object`,
-              param: path,
-              value: obj,
-              location: 'body',
-            }
-          });
+          const validationError = new RequestValidationError(`${ path } is not an object`, path, obj, 'body');
+          return validationError.respond(res);
         }
       }
       obj = _.pick(obj, filterPaths);
@@ -98,15 +92,8 @@ module.exports.filterArray = (filterPaths, path) => {
     try {
       let arr = _.get(req.body, path);
       if (!_.isArray(arr)) {
-        return res.status(400).json({
-          error: {
-            type: 'RequestValidationError',
-            msg: `${ path } is not an array`,
-            param: path,
-            value: arr,
-            location: 'body',
-          }
-        });
+        const validationError = new RequestValidationError(`${ path } is not an array`, path, arr, 'body');
+        return validationError.respond(res);
       }
       arr = arr.map((obj) => _.pick(obj, filterPaths));
       _.set(req.body, path, arr);
@@ -132,15 +119,8 @@ module.exports.toArray = (path) => {
       }
       if (!_.isArray(obj)) {
         if (!_.isObject(obj)) {
-          return res.status(400).json({
-            error: {
-              type: 'RequestValidationError',
-              msg: `${ path } is not an array or object`,
-              param: path,
-              value: obj,
-              location: 'body',
-            }
-          });
+          const validationError = new RequestValidationError(`${ path } is not an array or object`, path, obj, 'body');
+          return validationError.respond(res);
         }
         let arr = Array.from(Object.values(obj));
         if (path) {

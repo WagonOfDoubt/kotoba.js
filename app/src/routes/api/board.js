@@ -12,52 +12,7 @@ const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
 const sanitizer = require('../../middlewares/sanitizer');
 const boardparams = require('../../json/boardparams');
-
-
-/**
- * @apiDefine AuthRequiredError
- * @apiError AuthRequired User is not authenticated
- * @apiErrorExample AuthRequired
- *     HTTP/1.1 401 Unauthorized
- *     {
- *       "error": {
- *         "msg": "User must be logged in to perform this action",
- *         "type": "AuthRequired"
- *       }
- *     }
- */
-
-
-/**
- * @apiDefine PermissionDeniedError
- * @apiError PermissionDenied User don't have necessary permission
- * @apiErrorExample PermissionDenied
- *     HTTP/1.1 403 Forbidden
- *     {
- *       "error": {
- *         "msg": "User don't have rights to perform this action",
- *         "type": "PermissionDenied"
- *       }
- *     }
- */
-
-
-/**
- * @apiDefine BoardNotFoundError
- * @apiError BoardNotFound Board with specified uri was not found
- *
- * @apiErrorExample BoardNotFound
- *     HTTP/1.1 404 Not Found
- *     {
- *       "error": {
- *         "type": "BoardNotFound",
- *         "msg": "Board \"foo\" doesn't exist.",
- *         "param": "uri",
- *         "value": "foo",
- *         "location": "params",
- *       }
- *     }
- */
+const { DocumentNotFoundError, AuthRequiredError, PermissionDeniedError, RequestValidationError, DocumentAlreadyExistsError } = require('../../errors');
 
 
 /**
@@ -208,20 +163,19 @@ const boardparams = require('../../json/boardparams');
  *       "createdDate": "2019-01-12T17:37:55.337Z"
  *     }
  *
- * @apiUse BoardNotFoundError
- *
- * @apiError RequestValidationError Board uri has wrong format (must contain
- * only Latin letters or numbers and underscore).
+ * @apiUse DocumentNotFoundError
+ * @apiUse RequestValidationError
  *
  * @apiErrorExample RequestValidationError
  *     HTTP/1.1 400 Bad Request
  *     {
+ *       "status": 400,
  *       "error": {
  *         "location": "params",
  *         "param": "uri",
  *         "value": "фгсфдс",
- *         "msg": "Board uri can contain only letters and numbers or underscore",
- *         "type": "RequestValidationError"
+ *         "message": "Board uri can contain only letters and numbers or underscore",
+ *         "code": "RequestValidationError"
  *       }
  *     }
  */
@@ -259,17 +213,8 @@ router.get(
             .status(200)
             .json(board.toObject({ minimize: false }));
         } else {
-          return res
-            .status(404)
-            .json({
-              error: {
-                type: 'BoardNotFound',
-                msg: `Board "${ boardUri }" doesn't exist`,
-                param: 'uri',
-                value: boardUri,
-                location: 'params',
-              }
-            });
+          const e = new DocumentNotFoundError('Board', 'uri', boardUri, 'params');
+          return e.respond(res);
         }
       } else {
         const boards = await Board.find(q, selectQuery).exec();
@@ -353,13 +298,15 @@ router.get(
  * 
  * @apiUse AuthRequiredError
  * @apiUse PermissionDeniedError
+ * @apiUse DocumentAlreadyExistsError
  * 
- * @apiErrorExample BoardAlreadyExists
+ * @apiErrorExample DocumentAlreadyExists
  *     HTTP/1.1 409 Conflict
  *     {
+ *       "status": 409,
  *       "error": {
- *         "type": "BoardAlreadyExists",
- *         "msg": "Board \"b\" already exists.",
+ *         "code": "DocumentAlreadyExists",
+ *         "message": "Board \"b\" already exists",
  *         "param": "data.uri",
  *         "value": "b",
  *         "location": "body"
@@ -369,12 +316,13 @@ router.get(
  * @apiErrorExample RequestValidationError
  *     HTTP/1.1 400 Bad Request
  *     {
+ *       "status": 400,
  *       "error": {
  *         "location": "body",
  *         "param": "data.uri",
  *         "value": "!@#$%^&*",
- *         "msg": "Board uri must not be empty and can contain only letters and numbers or underscore",
- *         "type": "RequestValidationError"
+ *         "message": "Board uri must not be empty and can contain only letters and numbers or underscore",
+ *         "code": "RequestValidation"
  *       }
  *     }
  *
@@ -402,15 +350,8 @@ router.post(
       const boardUri = boardData.uri;
       const boardExists = await Board.countDocuments({ uri: boardUri });
       if (boardExists) {
-        return res.status(409).json({
-          error: {
-            type: 'BoardAlreadyExists',
-            msg: `Board "${ boardUri }" already exists.`,
-            param: 'data.uri',
-            value: boardUri,
-            location: 'body',
-          }
-        });
+        const e = new DocumentAlreadyExistsError('Board', 'data.uri', boardUri, 'body');
+        return e.respond(res);
       }
       const board = await boardController.createBoard(req.body.data);
       return res.status(201)
@@ -457,18 +398,20 @@ router.post(
  * @apiErrorExample RequestValidationError
  *     HTTP/1.1 400 Bad Request
  *     {
+ *       "status": 400,
  *       "error": {
  *         "location": "params",
  *         "param": "uri",
  *         "value": "!@#$%^&*",
- *         "msg": "Board uri must not be empty and can contain only letters and numbers or underscore",
- *         "type": "RequestValidationError"
+ *         "message": "Board uri must not be empty and can contain only letters and numbers or underscore",
+ *         "type": "RequestValidation"
  *       }
  *     }
  * 
  * @apiUse AuthRequiredError
  * @apiUse PermissionDeniedError
- * @apiUse BoardNotFoundError
+ * @apiUse RequestValidationError
+ * @apiUse DocumentNotFoundError
  */
 router.patch(
   '/api/board/:uri?',
@@ -490,17 +433,8 @@ router.patch(
       const boardUri = req.params.uri || req.body.uri;
       const board = await Board.findOne({ uri: boardUri });
       if (!board) {
-        return res
-          .status(404)
-          .json({
-            error: {
-              type: 'BoardNotFound',
-              msg: `Board "${ boardUri }" doesn't exist`,
-              param: 'uri',
-              value: boardUri,
-              location: req.params.uri ? 'params' : 'body',
-            }
-          });
+        const e = new DocumentNotFoundError('Board', 'uri', boardUri, req.params.uri ? 'params' : 'body');
+        return e.respond(res);
       }
       const {data, regenerate} = req.body;
 
@@ -550,9 +484,10 @@ router.patch(
  *       "boardsDeleted": 1
  *     }
  *
- * @apiUse BoardNotFoundError
+ * @apiUse DocumentNotFoundError
  * @apiUse AuthRequiredError
  * @apiUse PermissionDeniedError
+ * @apiUse RequestValidationError
  *
  * @apiError RequestValidationError Board uri has wrong format (must contain
  * only Latin letters or numbers and underscore).
@@ -560,12 +495,13 @@ router.patch(
  * @apiErrorExample RequestValidationError
  *     HTTP/1.1 400 Bad Request
  *     {
+ *       "status": 400,
  *       "error": {
  *         "location": "params",
  *         "param": "uri",
  *         "value": "фгсфдс",
- *         "msg": "Board uri can contain only letters and numbers or underscore",
- *         "type": "RequestValidationError"
+ *         "message": "Board uri can contain only letters and numbers or underscore",
+ *         "code": "RequestValidationError"
  *       }
  *     }
  */
@@ -588,17 +524,8 @@ router.delete('/api/board/:uri?',
       const uri = req.params.uri || req.body.uri;
       const board = await Board.findOne({ uri }, 'uri');
       if (!board) {
-        return res
-          .status(404)
-          .json({
-            error: {
-              type: 'BoardNotFound',
-              msg: `Board "${ uri }" doesn't exist`,
-              param: 'uri',
-              value: uri,
-              location: req.params.uri ? 'params' : 'body',
-            }
-          });
+        const e = new DocumentNotFoundError('Board', 'uri', uri, req.params.uri ? 'params' : 'body');
+        return e.respond(res);
       }
       const [ postsDeleted, boardsDeleted ] = await boardController.removeBoard(board);
       return res

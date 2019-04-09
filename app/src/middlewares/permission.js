@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const { createRegExpFromArray, regExpTester } = require('../utils/regexp');
 const Post = require('../models/post');
+const { PermissionDeniedError } = require('../errors');
 
 
 module.exports.postEditPermission = async (req, res, next) => {
@@ -87,13 +88,12 @@ const checkPostPermission = async (target, password, updateObj, roles, user) => 
         ref: ref,
         status: 403,
         update: { [key]: value },
-        error: {
-          type: 'PermissionDeniedError',
-          msg: getReason(oldPriority, newPriority),
-          roleName: roleName,
-          userPriority: newPriority,
-          currentPriority: oldPriority,
-        },
+        roleName: roleName,
+        userPriority: newPriority,
+        currentPriority: oldPriority,
+        error:
+          (new PermissionDeniedError(getReason(oldPriority, newPriority)))
+            .toObject(),
       })
     );
   return { target, update, denied };

@@ -9,6 +9,8 @@ const Board = require('../../models/board');
 const userController = require('../../controllers/user');
 const { apiAuthRequired, adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
+const { DocumentAlreadyExistsError, DocumentNotFoundError } = require('../../errors');
+const { ConflictError } = require('../../errors/base-error');
 
 
 router.get('/api/me', [
@@ -191,8 +193,8 @@ const getStaffMember = async (req, res, next) => {
 const checkUserAuthority = (req, res, next) => {
   try {
     if (req.body.staffMember.authority === 'admin') {
-      res.status(418).json({ error: { msg: 'Admin has all permissions by default' }});
-      return;
+      const userIsAdminError = new ConflictError('Admin does not require any permissions');
+      return userIsAdminError.respond(res);
     }
     next();
   } catch (err) {
@@ -218,12 +220,12 @@ router.put('/api/user/role', [
       const allBoards = await Board.distinct('uri');
       const staffMember = req.body.staffMember;
       if (staffMember.boardRoles && staffMember.boardRoles.has(board)) {
-        res.status(418).json({ error: { msg: `Role for board /${board}/ already exist`, param: 'board' }});
-        return;
+        const roleAlreadyDefined = new DocumentAlreadyExistsError('Role for board', 'board', board, 'body');
+        return roleAlreadyDefined.respond(res);
       }
       if (!allBoards.includes(board)) {
-        res.status(418).json({ error: { msg: `Board /${board}/ does not exist`, param: 'board' }});
-        return;
+        const noSuchBoard = new DocumentNotFoundError('Board', 'board', board, 'body');
+        return noSuchBoard.respond(res);
       }
       const updateQuery = _.fromPairs([[`boardRoles.${ board }`, role._id]]);
       const status = await User.findByIdAndUpdate(staffMember._id, updateQuery, { runValidators: true, rawResult: true });
@@ -251,8 +253,8 @@ router.patch('/api/user/role', [
       const board = req.body.board;
       const staffMember = req.body.staffMember;
       if (staffMember.boardRoles && !staffMember.boardRoles.has(board)) {
-        res.status(418).json({ error: { msg: `Role for board /${board}/ does not exist`, param: 'board' }});
-        return;
+        const noSuchRole = new DocumentNotFoundError('Role for board', 'board', board, 'body');
+        return noSuchRole.respond(res);
       }
       const updateQuery = _.fromPairs([[`boardRoles.${ board }`, role._id]]);
       const status = await User.findByIdAndUpdate(staffMember._id, updateQuery, { runValidators: true, rawResult: true });

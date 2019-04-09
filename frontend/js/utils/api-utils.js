@@ -19,7 +19,7 @@ const errorToHTML = (error) => {
     return `<pre class="error">${ error.stack }</pre>`;
   } else if (error.param) {
     // express-validator error
-    return `<div class="error">${ error.param }: ${ error.msg }</div>`;
+    return `<div class="error">${ error.param }: ${ error.msg || error.message }</div>`;
   } else if (error.name) {
     return `<div class="error">${ error.name }: ${ error.msg || error.message }</div>`;
   } else {
