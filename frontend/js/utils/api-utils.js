@@ -9,6 +9,7 @@ import escape from 'lodash.escape';
 import truncate from 'lodash.truncate';
 import { objectDiff } from './object-utils';
 import * as modal from '../modules/modal';
+import tableTemplate from '../templates-compiled/table';
 
 
 export const serializeForm = ($form) =>
@@ -100,20 +101,11 @@ export const sendFormData = (url, method, data) => {
 
 
 export const createTable = (rows = [], head = []) => {
-  const truncHTML = str => escape(truncate(str, { length: 100 }));
-  const wrapInTags = (tag, str, classes='') => `<${ tag } class="${ classes }">${ str }</${ tag }>`;
-  const createCols = (cols, tdTag) => cols
-    .map(col => wrapInTags(tdTag, truncHTML(col)))
-    .join('');
-  const createRows = (rows, tdTag, classes) => rows
-    .map(row => wrapInTags('tr', createCols(row, tdTag), classes))
-    .join('');
-  const createBody = (rows, bodyTag, tdTag, rowClasses) =>
-    wrapInTags(bodyTag, createRows(rows, tdTag, rowClasses));
-
-  const thead = createBody([head], 'thead', 'th', 'table__row table__row_header');
-  const tbody = createBody(rows, 'tbody', 'td', 'table__row');
-  return $(`<table class="table">${ thead }${ tbody }</table>`);
+  return $(tableTemplate({
+    head: [head],
+    body: rows,
+    filter: str => truncate(str, { length: 100 })
+  }));
 };
 
 
@@ -127,7 +119,7 @@ export const fetchChanges = ($form, $populateContainer) => {
       const table = createTable(
         Object.entries(diff)
           .map(([key, value]) => [key, value.old, value.new ]),
-        ['property', 'current value', 'new value']
+        ['Property', 'Current value', 'New value']
       );
       $populateContainer.text('').append(table);
     })

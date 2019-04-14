@@ -1,0 +1,9 @@
+dialog.modal.fade.dispose
+  div.modal-dialog
+    form.modal-content(method="dialog")
+      div.modal-header
+        h5= title
+      div.modal-body!= message
+      div.modal-footer
+        for btn in buttons
+          button.btn(type=`${ btn.type || 'button' }` value=btn.value)= btn.label

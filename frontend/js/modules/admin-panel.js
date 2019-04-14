@@ -10,6 +10,8 @@ import { serializeForm, alertErrorHandler, sendJSON, createTable, fetchChanges,
   fetchPreivew } from '../utils/api-utils';
 import { closeAllVideos, minimizeAllImages } from './attachment-viewer';
 import { selectTab } from './tabs';
+import modlogModalBodyTemplate from '../templates-compiled/modlog-modal-body';
+import actionResultReportTemplate from '../templates-compiled/action-result-report';
 
 
 const checkAdminForm = ($form) => {
@@ -48,51 +50,6 @@ const checkAdminForm = ($form) => {
   adminPanel.classList.toggle('show', hasSelected);
 };
 
-const renderReflink = ({ boardUri, threadId, postId }) => {
-  return `<a href="/${boardUri}/res/${threadId}.html#post-${boardUri}-${postId}">&gt;&gt;/${boardUri}/${postId}</a>`;
-};
-
-
-const renderTarget = ({ boardUri, postId }) => {
-  return `<a href="#post-${boardUri}-${postId}">&gt;&gt;/${boardUri}/${postId}</a>`;
-};
-
-
-const readableResponseReport = (response) => {
-  let report = 'Done.';
-  if (response.error) {
-    report = response.error.type;
-  }
-  report += '<br>';
-  if (response.success && response.success.length) {
-    const allSuccessReflinks = response.success
-      .map((itm) => renderReflink(itm.ref))
-      .join(', ');
-    report += `Successfully changed: ${allSuccessReflinks}<br>`;
-  }
-  if (response.fail && response.fail.length) {
-    const allFailReflinks = response.fail
-      .map((itm) => {
-        let ref = '';
-        if (itm.ref) {
-          ref = renderReflink(itm.ref);
-        } else {
-          ref = renderTarget(itm.target);
-        }
-        let hint = '';
-        if (itm.status === 204) {
-          hint = '(Nothing to change)';
-        } else if (itm.error) {
-          hint = `(${itm.error.msg})`;
-        }
-        return `${ref} ${hint}`;
-      })
-      .join(', ');
-    report += `Not changed: ${allFailReflinks}<br>`;
-  }
-  return report;
-};
-
 
 const sendSetFlagRequest = (url, data) => {
   modal.wait();
@@ -104,7 +61,7 @@ const sendSetFlagRequest = (url, data) => {
       response = response.responseJSON;
     }
     modal
-      .alert(status, readableResponseReport(response))
+      .alert(status, actionResultReportTemplate(response))
       .finally(() => window.location.reload());
   };
   sendJSON(url, 'patch', data)
@@ -271,19 +228,9 @@ const initAdminPanel = () => {
       }
       return u;
     });
-    const renderItem = (item) => {
-      const reflink = renderReflink(item.target);
-      const updateList = Object
-        .entries(item.update)
-        .map(([k, v]) => `<li><strong>${k}</strong> = <strong>${v}</strong></li>`)
-        .join('');
-      return `<li>${reflink}<ul class="list_unmarked">${updateList}</ul></li>`;
-    };
-    const modalBody = groupedItems.map(renderItem).join('');
-    const modalPrompt = `Following items will be changed:`;
-    const modalForm = `<label><input type="checkbox" checked="" name="regenerate:boolean">Regenerate HTML</label>`;
+
     modal
-      .confirmPrompt('Confirm action', `${modalPrompt}<ul class="list_unmarked">${modalBody}</ul>${modalForm}`)
+      .confirmPrompt('Confirm action', modlogModalBodyTemplate({ items: groupedItems }))
       .then(({returnValue, formData}) => {
         console.log(groupedItems, returnValue, formData);
         const regenerate = formData.regenerate;

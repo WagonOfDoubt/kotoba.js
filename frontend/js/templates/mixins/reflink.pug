@@ -1,0 +1,5 @@
+mixin reflink(ref)
+  if (ref.threadId)
+    a(href=`/${ref.boardUri}/res/${ref.threadId}.html#post-${ref.boardUri}-${ref.postId}`) &gt;&gt;/#{ref.boardUri}/#{ref.postId}
+  else
+    a(href=`#post-${ref.boardUri}-${ref.postId}`) &gt;&gt;/#{ref.boardUri}/#{ref.postId}

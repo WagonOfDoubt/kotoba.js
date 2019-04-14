@@ -8,6 +8,8 @@ import * as modal from './modal';
 import { serializeForm, alertErrorHandler, successErrorHandler, sendJSON,
   sendFormData, createTable, fetchChanges, fetchPreivew } from '../utils/api-utils';
 import { assignDeep } from '../utils/object-utils';
+import assetUploadPreviewTemplate from '../templates-compiled/asset-upload-preview';
+
 
 const initPreviewBtns = () => {
   $('button[data-action="preview-markdown"]')
@@ -243,45 +245,6 @@ const managePage_assets = () => {
   const $fileInput = $('#form-upload-assets__file');
   const $previewContainer = $('#upload-assets-items');
 
-  const previewTemplate = (n, name) => {
-    return `
-    <li class="asset-upload__item">
-      <div class="asset-upload__preview">
-        <img class="asset-upload__thumb">
-      </div>
-      <div class="asset-upload__inputs">
-        <div class="form-group">
-          <label for="assets[${n}][name]">File name:</label>
-          <input type="text" value="${name}" name="assets[${n}][name]" id="assets[${n}][name]">
-        </div>
-        <div class="form-group asset-upload__width">
-          <label for="assets[${n}][thumbWidth]">Width:</label>
-          <input type="number" name="assets[${n}][thumbWidth]" id="assets[${n}][thumbWidth]">
-          <small>Resize image. Original file will be preserved.</small>
-        </div>
-        <div class="form-group asset-upload__height">
-          <label for="assets[${n}][thumbHeight]">Height:</label>
-          <input type="number" name="assets[${n}][thumbHeight]" id="assets[${n}][thumbHeight]">
-          <small>Resize image. Original file will be preserved.</small>
-        </div>
-        <div class="form-group">
-          <label for="assets[${n}][category]">Category:</label>
-          <select name="assets[${n}][category]" id="assets[${n}][category]">
-            <option value="misc">Miscellaneous</option>
-            <option value="banner">Banners</option>
-            <option value="bg">Background</option>
-            <option value="favicon">Favicons</option>
-            <option value="logo">Logo</option>
-            <option value="news">News assets</option>
-            <option value="placeholder">Attachment placeholders</option>
-            <option value="style">Style assets</option>
-          </select>
-        </div>
-      </div>
-    </li>
-    `;
-  };
-
   const dummyImage = document.createElement('img');
 
   const isImageFile = (file) => file.type.startsWith('image/');
@@ -296,12 +259,12 @@ const managePage_assets = () => {
         continue;
       }
 
-      const $previewItem = $(previewTemplate(i, file.name));
+      const $previewItem = $(assetUploadPreviewTemplate({ n: i, name: file.name }));
       const img = $previewItem.find("img")[0];
       const $wInput = $previewItem.find(`.asset-upload__width input`);
       const $hInput = $previewItem.find(`.asset-upload__height input`);
       img.file = file;
-      $previewContainer.append($previewItem); // Assuming that "preview" is the div output where the content will be displayed.
+      $previewContainer.append($previewItem);
 
       const reader = new FileReader();
       reader.onload = ((aImg) => {

@@ -1,0 +1,21 @@
+include mixins/reflink.pug
+
+
+if (success && success.length)
+  | Successfully changed:
+  ul.list_unmarked
+    for item in success
+      +reflink(item.ref)
+
+if (fail && fail.length)
+  | Not changed:
+  ul.list_unmarked
+    for item in fail
+      if (item.ref)
+        +reflink(item.ref)
+      else if (item.target)
+        +reflink(item.target)
+        if (item.status === 204)
+          |  (Nothing to change)
+        else if (item.error)
+          |  (#{ item.error.message })

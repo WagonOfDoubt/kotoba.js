@@ -1,0 +1,18 @@
+table.table
+  if head && head.length
+    thead
+      for hrow in head
+        tr.table__row.table__row_header
+          for hcol in hrow
+            if filter
+              th= filter(hcol)
+            else
+              th= hcol
+  tbody
+    for row in body
+      tr.table__row
+        for col in row
+          if filter
+            td= filter(col)
+          else
+            td= col

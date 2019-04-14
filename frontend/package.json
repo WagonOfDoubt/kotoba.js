@@ -24,10 +24,12 @@
     "browserify": "^16.2.3",
     "del": "^3.0.0",
     "gulp": "^4.0.0",
-    "gulp-sass": "^4.0.1",
+    "gulp-pug": "^4.0.1",
+    "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
     "gulp-uglifycss": "^1.1.0",
+    "gulp-umd": "^2.0.0",
     "gulp-util": "^3.0.8",
     "mocha": "^5.2.0",
     "node-sass": "^4.11.0",
@@ -45,7 +47,8 @@
     "lodash.escape": "^4.0.1",
     "lodash.isempty": "^4.4.0",
     "lodash.isequal": "^4.5.0",
-    "lodash.truncate": "^4.4.2"
+    "lodash.truncate": "^4.4.2",
+    "pug-runtime": "^2.0.4"
   },
   "jshintConfig": {
     "esversion": 9

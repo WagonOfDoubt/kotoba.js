@@ -1,0 +1,13 @@
+include mixins/reflink.pug
+
+span Following items will be changed:
+ul.list_unmarked
+  for item in items
+    li
+      +reflink(item.target)
+      ul.list_unmarked
+        for value, key in item.update
+          li #[strong=key] = #[strong=value]
+label
+  input(type="checkbox" checked="" name="regenerate:boolean")
+  | Regenerate HTML

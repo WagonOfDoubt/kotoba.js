@@ -1,0 +1,30 @@
+li.asset-upload__item
+  div.asset-upload__preview
+    img.asset-upload__thumb
+
+  div.asset-upload__inputs
+    div.form-group
+      label(for=`assets[${n}][name]`) File name:
+      input(type="text" value=`${name}` name=`assets[${n}][name]` id=`assets[${n}][name]`)
+    
+    div.form-group.asset-upload__width
+      label(for=`assets[${n}][thumbWidth]`) Width:
+      input(type="number" name=`assets[${n}][thumbWidth]` id=`assets[${n}][thumbWidth]`)
+      small Resize image. Original file will be preserved.
+
+    div.form-group.asset-upload__height
+      label(for=`assets[${n}][thumbHeight]`) Height:
+      input(type="number" name=`assets[${n}][thumbHeight]` id=`assets[${n}][thumbHeight]`)
+      small Resize image. Original file will be preserved.
+
+    div.form-group
+      label(for=`assets[${n}][category]`) Category:
+      select(name=`assets[${n}][category]` id=`assets[${n}][category]`)
+        option(value="misc") Miscellaneous
+        option(value="banner") Banners
+        option(value="bg") Background
+        option(value="favicon") Favicons
+        option(value="logo") Logo
+        option(value="news") News assets
+        option(value="placeholder") Attachment placeholders
+        option(value="style") Style assets

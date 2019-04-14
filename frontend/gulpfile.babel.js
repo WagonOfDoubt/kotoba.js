@@ -5,6 +5,8 @@ import del from 'del';
 import gulp from 'gulp';
 import gutil from 'gulp-util';
 import sass from 'gulp-sass';
+import pug from 'gulp-pug';
+import umd from 'gulp-umd';
 import source from 'vinyl-source-stream';
 import sourcemaps from 'gulp-sourcemaps';
 import uglify from 'gulp-uglify';
@@ -22,7 +24,12 @@ const paths = {
     dest: '../html/.static/js',
     entries: './js/kotoba.js',
   },
-  clean: ['../html/.static/js/*', '../html/.static/css/*'],
+  templates: {
+    src: ['./js/templates/*.pug', './js/templates/**/*.pug', '!./js/templates/mixins/*.pug'],
+    dest: './js/templates-compiled',
+    base: './js/templates',
+  },
+  clean: ['../html/.static/js/*', '../html/.static/css/*', './js/templates-compiled/*'],
 };
 
 
@@ -64,16 +71,47 @@ export const styles = () => {
     .pipe(gulp.dest(paths.styles.dest));
 };
 
-export const scripts = bundle.bind(null, b);
+
+const moduleTemplate = `import pug from 'pug-runtime';
+<%= contents %>
+export default <%= exports %>;`;
+
+export const templates = () => {
+  return gulp.src(paths.templates.src)
+    .pipe(pug({
+      client: true,
+      basedir: paths.templates.base,
+      debug: false,
+      compileDebug: false,
+      inlineRuntimeFunctions: false,
+    }))
+    .pipe(umd({
+      exports: () => 'template',
+      templateSource: moduleTemplate,
+    }))
+    .pipe(gulp.dest(paths.templates.dest));
+};
+
+export const scripts = () => bundle(b);
 
 export const clean = () =>  del(paths.clean, { force: true });
 
-export const watch = () => {
+export const watch_bundle = () => {
   gulp.watch(paths.styles.src, styles);
+  gulp.watch(paths.templates.src, templates);
   bundle(w);
   w.on('update', bundle.bind(null, w)); // on any dep update, runs the bundler
   w.on('log', gutil.log); // output build logs to terminal
 };
 
-const build = gulp.series(clean, gulp.parallel(styles, scripts));
+export const watch = gulp.series(clean, templates, styles, watch_bundle);
+
+const build = gulp.series(
+  clean,
+  gulp.parallel(
+    styles,
+    gulp.series(templates, scripts)
+  )
+);
+
 export default build;

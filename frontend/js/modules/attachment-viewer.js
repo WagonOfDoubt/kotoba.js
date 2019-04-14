@@ -4,6 +4,7 @@
  */
 
 import $ from 'jquery';
+import videoPlayerTemplate from '../templates-compiled/video-player';
 
 
 /**
@@ -81,19 +82,14 @@ export const showVideo = (a) => {
   const { fullSrc, fullWidth, fullHeight, thumbSrc } = a.dataset;
   const $container = $(a).parent();
   const $playerContainer = $('<div class="video-container">');
-  const $player = $('<video>', {
-    class: 'video-player',
-    poster: thumbSrc,
-    autoplay: 'autoplay',
-    controls: 'controls',
-    loop: 'loop',
-    preload: 'auto',
-    src: fullSrc
-  });
-  $player
-    .prop('muted', true)
-    .attr('width', fullWidth)
-    .attr('height', fullHeight);
+  const muted = true;
+  const $player = $(videoPlayerTemplate({
+    thumbSrc,
+    fullSrc,
+    muted,
+    fullWidth,
+    fullHeight,
+  }));
 
   $container.addClass('attachment_video_playing');
   $playerContainer.append($player);

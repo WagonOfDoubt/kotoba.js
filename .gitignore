@@ -70,3 +70,4 @@ html/*
 !html/.static/
 app/doc/
 app/tmp/
+frontend/js/templates-compiled

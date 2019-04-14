@@ -6,6 +6,8 @@
 import $ from 'jquery';
 import 'jquery-serializejson';
 import dialogPolyfill from 'dialog-polyfill';
+import modalPromptTemplate from '../templates-compiled/modal-prompt';
+import modalWaitTemplate from '../templates-compiled/modal-wait';
 
 
 /**
@@ -61,23 +63,7 @@ export const confirmPrompt = (title, message, confirmBtnLabel = 'OK') => {
  */
 export const prompt = (title, message, buttons = [], acceptValues = [], ignoreReject = true) => {
   closeAllModals();
-  buttons = buttons.map(btn => `<button class="btn" type="${ btn.type || 'button' }" value="${ btn.value }">${ btn.label }</button>`);
-  const $dialog = $(
-    `<dialog class="modal fade dispose">
-      <div class="modal-dialog">
-        <form class="modal-content" method="dialog">
-          <div class="modal-header">
-            <h5>${ title }</h5>
-          </div>
-          <div class="modal-body">
-            ${ message }
-          </div>
-          <div class="modal-footer">
-            ${ buttons.join('') }
-          </div>
-        </form>
-      </div>
-    </dialog>`);
+  const $dialog = $(modalPromptTemplate({ title, message, buttons }));
   $(document.body).append($dialog);
   const dialog = $dialog[0];
   dialogPolyfill.registerDialog(dialog);
@@ -146,15 +132,7 @@ export const dialogPromise = (dialog, acceptValues = [], ignoreReject = true) =>
  */
 export const wait = () => {
   closeAllModals();
-  const $dialog = $(`<dialog class="modal dispose modal-wait">
-      <div class="modal-dialog">
-        <div class="loader">
-          <svg class="circular-loader"viewBox="25 25 50 50" >
-            <circle class="loader-path" cx="50" cy="50" r="20" fill="none" stroke="#70c542" stroke-width="2" />
-          </svg>
-        </div>
-      </div>
-    </dialog>`);
+  const $dialog = $(modalWaitTemplate());
   $(document.body).append($dialog);
   const dialog = $dialog[0];
   dialogPolyfill.registerDialog(dialog);
