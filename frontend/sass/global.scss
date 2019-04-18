@@ -84,19 +84,11 @@
 @import './components/badge';
 @import './components/message';
 
-.reflink a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.reflink a:hover {
-  color: #800000;
-}
-
-
 body {
   color: var(--text-color);
   background-color: var(--background-color);
+  // needed for correct positioning of popups
+  position: relative;
 }
 
 aside {
@@ -337,3 +329,4 @@ q {
   border-bottom: 1px var(--border-color) solid;
   list-style: none;
 }
+

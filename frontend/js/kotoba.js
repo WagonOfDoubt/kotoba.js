@@ -12,6 +12,8 @@ import { init as initForms } from './modules/postform';
 import { initTabs } from './modules/tabs';
 import { initToggleVisibility } from './modules/toggle-visibility';
 import { initTables } from './modules/table';
+import { initReflinks } from './modules/reflink-popup';
+
 
 $(() => {
   initSelectAttachment();
@@ -26,4 +28,5 @@ $(() => {
   initTabs();
   initToggleVisibility();
   initTables();
+  initReflinks();
 });

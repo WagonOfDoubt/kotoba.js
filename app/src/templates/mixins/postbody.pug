@@ -11,6 +11,7 @@ mixin reflink(ref, type, match)
         'reflink-op': ref.isOp,
         'reflink-reply': type === 'reply',
         'reflink-reference': type === 'reference',
+        'js-reflink-popup': true,
       }
       data-post= ref.postId
       data-board= ref.boardUri

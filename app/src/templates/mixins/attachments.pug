@@ -12,7 +12,7 @@ mixin attachments(post)
 mixin attachment(attachment, post, n)
   -var id = `post-${ post.boardUri }-${ post.postId }-${ n }`;
   figure(
-    id=id
+    id=(isPreview ? undefined : id)
     class=attributes.class
     class=['attachment', 'attachment_' + attachment.type]
     data-attachment-number=n
@@ -36,7 +36,8 @@ mixin attachment(attachment, post, n)
       data-thumb-width=attachment.thumbWidth
       data-thumb-height=attachment.thumbHeight
     )
-      input.checkbox-hidden.js-select-attachment(type='checkbox', name='attachments[]', value=id)
+      if !isPreview
+        input.checkbox-hidden.js-select-attachment(type='checkbox', name='attachments[]', value=id)
       div.thumb-container
         +thumbnail(attachment)
         if attachment.duration

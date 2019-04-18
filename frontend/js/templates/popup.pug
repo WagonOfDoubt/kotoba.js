@@ -1,0 +1,8 @@
+if body
+  div.reply.post!= body
+else if error
+  div.reply.post
+    div.badge.badge_danger #{error.status}: #{error.statusText}
+else
+  div.popup
+    div.reply.post Loading...
