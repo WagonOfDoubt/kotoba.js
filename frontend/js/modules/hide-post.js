@@ -29,15 +29,15 @@ const hideAllHidden = () =>
     .map(keyToBoardPost)
     .forEach(([boardUri, postId]) =>
       $(`.post[data-post-id=${postId}][data-board-uri=${boardUri}]`)
-        .addClass('post-hidden')
+        .addClass('post_hidden')
       );
 
 
 const toggleHidden = (post) => {
   const { boardUri, postId } = post.data();
   const postKey = boardPostToKey(boardUri, postId);
-  post.toggleClass('post-hidden');
-  if (post.hasClass('post-hidden')) {
+  post.toggleClass('post_hidden');
+  if (post.hasClass('post_hidden')) {
     addToHidden(postKey);
   } else {
     removeFromHidden(postKey);
@@ -50,7 +50,7 @@ const toggleHidden = (post) => {
  */
 export const initHidePost = () => {
   hideAllHidden();
-  $('body').on('click', '.post-btn-hide', e => {
+  $('body').on('click', '.post__button_hide', e => {
     const btn = e.currentTarget;
     const post = $(btn).closest('.post');
     toggleHidden(post);

@@ -14,22 +14,12 @@ block header
 
 block main
   form.admin-form.catalog(method='post', action='/api/attachment', data-method='patch')
-    div.catalog-list
+    div.catalog__threads
       for post in posts
         if post.attachments && post.attachments.length
           for attachment, n in post.attachments
-            div.catalog-thread.attachments-container
-              +attachment(attachment, post, n)(class='attachment_selectable')
-              div.badges
-                if attachment.isDeleted
-                  span.badge.badge_danger DELETED
-                  | 
-                if attachment.isNSFW
-                  span.badge.badge_warning NSFW
-                  | 
-                if attachment.isSpoiler
-                  span.badge.badge_dark SPOILER
-                  | 
+            div.catalog__thread.attachments-container
+              +attachment(attachment, post, n, true)(class=['attachment_selectable'])
               +reflink(post)
 
     include ../includes/adminpanel.pug

@@ -1,0 +1,50 @@
+/**
+ * Navigation sidebar
+ */
+
+// use of calsses is avoided because content is generated from markdown
+
+aside {
+  border-color: var(--border-color);
+  background-color: var(--background-color);
+
+  ul {
+    margin: 0 0 1rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    a {
+      padding: .5rem 1.25rem;
+      display: block;
+      color: var(--board-link-color);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--board-link-color);
+        background-color: var(--board-link-background);
+      }
+    }
+  }
+
+  h3 {
+    text-align: center;
+    margin: 0;
+    padding: 2px .5rem;
+    background-color: var(--postblock-background-color);
+    color: var(--postblock-color);
+  }
+
+  h4 {
+    margin: 0;
+    padding: 2px .5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--postblock-background-color);
+    color: var(--postblock-color);
+  }
+
+  p {
+    margin: .5rem;
+  }
+}

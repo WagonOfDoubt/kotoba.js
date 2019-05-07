@@ -1,5 +1,5 @@
 if !isPage
-  .replymode Reply to thread
+  .page-title Reply to thread
 div#postbox.postarea
   form#postform.postform(
     action=`/form/post/`
@@ -161,11 +161,11 @@ div#postbox.postarea
         td
           div.form-input-group
             if board.features.sage && !isPage
-              span.link-button-wrapper
+              span.button.button_link
                 input#sage(name='sage', type='checkbox')
                 label(for='sage') säge
               | 
-            span.link-button-wrapper
+            span.button.button_link
               input#noko(name='postredir', value='1', type='checkbox')
               label(for='noko') nöko
       tr

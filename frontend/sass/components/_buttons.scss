@@ -1,0 +1,41 @@
+.button-group {
+  &:before {
+    content: '[';
+  }
+
+  &:after {
+    content: ']';
+  }
+
+  list-style: none;
+
+  .button {
+    &::before {
+      content: '';
+    }
+
+    &::after {
+      content: '/';
+    }
+
+    &:last-child::after {
+      content: '';
+    }    
+  }
+
+  a {
+    margin: 0 .5em;
+  }
+}
+
+.button_link {
+  &:before {
+    content: '[';
+  }
+
+  &:after {
+    content: ']';
+  }
+
+  display: inline-block;
+}

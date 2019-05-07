@@ -28,7 +28,7 @@ block main
 
   if news
     h2 Add news post
-    span.link-button-wrapper
+    span.button.button_link
       a(href=`/manage/news/`) Add news post
 
   if newsList.length
@@ -48,7 +48,7 @@ block main
             td
               span= n.number
               | 
-              span.link-button-wrapper
+              span.button.button_link
                 a(href=`/manage/news/${n.number}`) Edit
             td
               if n.postedDate

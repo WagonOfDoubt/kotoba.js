@@ -1,67 +1,34 @@
-.reply {
-  background-color: var(--primary-color);
-  border-color: var(--secondary-color);
-}
+////////////////////////////////////////////////////////////////////////////////
+// Post header
+////////////////////////////////////////////////////////////////////////////////
 
-.postername {
+
+.post__header__name {
   color: var(--name-color);
 }
 
-.thread-container, .postarea {
-  border-color: var(--border-color);
-}
-
-.filetitle {
+.post__header__subject {
   color: var(--subject-color);
 }
 
-.postblock {
-  color: var(--postblock-color);
-  background-color: var(--postblock-background-color);
-}
-
-.omittedposts {
-  color: var(--omitted-posts-color);
-}
-
-.postbody {
-  word-wrap: break-word;
-}
-
-.reply .extrabtns::after {
-  content: var(--post-counter-prefix)counter(thr-cnt);
-  counter-increment: thr-cnt 1;
-  color: #707070;
-  margin-left: 10px;
-  font-size: 13px;
-}
-
-.reply-container {
-  margin-top: 4px;
-  display: flex;
-  flex-direction: row;
-
-  .reply {
-    min-width: 380px;
+.post__header__number {
+  a {
+    color: inherit;
+    text-decoration: none;
   }
 
-  &::before {
-    content: var(--post-block-prefix);
-    margin-right: 4px;
+  a:hover {
+    color: #800000;
   }
 }
 
-.reply:target {
-  box-shadow: 0 0 3px 1px var(--semantic-color-primary-background);
-}
-
-.reply, .board-page, .thread-page {
-  .post-board-link {
+.post_reply, .board-page, .thread-page {
+  .post__header__board {
     display: none;
   }
 }
 
-.post-board-link {
+.post__header__board {
   &::before {
     content: '/';
   }
@@ -73,49 +40,129 @@
   margin: 0 3px 0 3px;
 }
 
-.post-delete-checkbox {
+.post__header__checkbox {
   margin: 0 3px 0 3px;
 }
 
+.post__badge {
+  cursor: help;
+}
+
+.post__button {
+  cursor: pointer;
+}
+
+.post__badge_sage::after {
+  content: 'SAGE!';
+  color: red;
+  padding-left: .5rem;
+}
+
+.post__badge_autosage::after {
+  content: 'BUMP LIMIT';
+  color: red;
+  padding-left: .5rem;
+}
+
+.post__badge_closed::after {
+  content: 'CLOSED';
+  color: red;
+  padding-left: .5rem;
+}
+
+.post__badge_sticky {
+  @include icon-sticky;
+  @extend %icon;
+}
+
+.post__button_hide {
+  @include icon-hide;
+  @extend %icon;
+}
+
+.post_hidden .post__button_hide {
+  @include icon-unhide;
+  @extend %icon;
+}
+
+.post__button_favourite {
+  @include icon-fav;
+  @extend %icon;
+}
+
+.post__button_expand {
+  @include icon-expthr;
+  @extend %icon;
+}
+
+.post__button_reply {
+  @include icon-rep;
+  @extend %icon;
+}
+
+.post_reply .post__header::after {
+  content: var(--post-counter-prefix)counter(thr-cnt);
+  counter-increment: thr-cnt 1;
+  color: #707070;
+  margin-left: 10px;
+  font-size: 13px;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Post/thread body
+////////////////////////////////////////////////////////////////////////////////
+
+
+.omittedposts {
+  color: var(--omitted-posts-color);
+}
+
+.post__body {
+  word-wrap: break-word;
+}
+
+.post_reply {
+  border-style: solid;
+  border-width: 1px;
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
+  padding: 3px;
+}
+
+.thread-container, .postarea {
+  border-color: var(--border-color);
+}
+
+.post_reply:target {
+  box-shadow: 0 0 3px 1px var(--semantic-color-primary-background);
+}
+
+.reply-container {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: row;
+
+  .post_reply {
+    min-width: 380px;
+  }
+
+  &::before {
+    content: var(--post-block-prefix);
+    margin-right: 4px;
+  }
+}
 
 .reflink-op::after {
   content: ' (OP)';
 }
 
-/* post footer */
-.post-footer {
-  margin: 10px 4px 4px 4px;
-  font-size: 75%;
-  font-style: italic;
-}
-
-.post-replies::before {
-  content: 'Replies: ';
-}
-
-.post-references::before {
-  content: 'References: ';
-}
-
-.inline-list {
-  margin: 0;
-  padding: 0;
-}
-
-.inline-list-item {
-  display: inline;
-
-  &:not(:first-child)::before {
-    content: ', ';
-  }
-}
-
 /* hidden posts */
-.post-hidden {
-  .post-body,
-  .post-footer,
+.post_hidden {
+  .post__body,
+  .post__footer,
   .attachment,
-  .post-btn:not(.post-btn-hide) {
+  .post__button:not(.post__button_hide) {
     display: none;
   }
 
@@ -125,16 +172,29 @@
 }
 
 
-.post__number {
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+////////////////////////////////////////////////////////////////////////////////
+// Post footer
+////////////////////////////////////////////////////////////////////////////////
 
-  a:hover {
-    color: #800000;
-  }
+
+.post__footer {
+  margin: 10px 4px 4px 4px;
+  font-size: 75%;
+  font-style: italic;
 }
+
+.post__footer__replies::before {
+  content: 'Replies: ';
+}
+
+.post__footer__references::before {
+  content: 'References: ';
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Post popup
+////////////////////////////////////////////////////////////////////////////////
 
 
 .popups-container {
@@ -155,6 +215,10 @@
 
 .popup .post {
   display: inline-block;
+  border-style: solid;
+  border-width: 1px;
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
   box-shadow: 1px 0px 4px 2px rgba(0,0,0,.5);
 }
 

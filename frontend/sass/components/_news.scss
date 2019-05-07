@@ -1,0 +1,24 @@
+/**
+ * News on front page
+ */
+
+.news-entry {
+  margin: 1rem 3rem;
+}
+
+.news-entry:target {
+  outline: 2px solid red;
+}
+
+.news__header {
+  background: var(--border-color);
+  padding: 0 1rem;
+}
+
+.news__subject, .news__author {
+  font-weight: bold;
+}
+
+.news__link {
+  float: right;
+}

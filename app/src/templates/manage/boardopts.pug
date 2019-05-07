@@ -14,14 +14,14 @@ block main
   - var defaults = boardDefaults
   if board
     h2 /#{ board.uri }/ - #{ board.name }
-    div.link-button-wrapper
+    div.button.button_link
       a(href='/manage/boardopts') Select another board
-    div.link-button-wrapper
+    div.button.button_link
       a(href='/' + board.uri) Browse board
-    div.link-button-wrapper
+    div.button.button_link
       a(href='/manage/staff?board=' + board.uri) Board staff
   else
-    div.link-button-wrapper
+    div.button.button_link
       a(href='/manage/boardopts') Edit boards
 
   - var action = board ? `/api/board/${board.uri}` : '/api/board/';
@@ -74,7 +74,7 @@ block main
 
   if board
     h2 Danger zone
-    div.link-button-wrapper
+    div.button.button_link
       a(href='/manage/delboard/' + board.uri) Delete board
 
 block modals

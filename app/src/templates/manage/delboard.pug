@@ -6,7 +6,7 @@ block header
 
 block main
   h2 /#{ board.uri }/ - #{ board.name }
-  div.link-button-wrapper
+  div.button.button_link
     a(href='/manage/boardopts') Select another board
   h2 Danger zone
   form#form-delete-board(method='post', data-method='delete', action='/api/board/')

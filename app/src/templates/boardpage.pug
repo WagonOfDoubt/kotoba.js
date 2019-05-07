@@ -12,7 +12,7 @@ block main
 
   form#delform.admin-form(action='/form/delpost', method='post')
     if !threads.length
-      div.nothreads Nobody Here but Us Chickens
+      div.no-content-placeholder Nobody Here but Us Chickens
     for thread in threads
       != thread
     include includes/delpostform.pug

@@ -2,21 +2,21 @@
   margin: 0;
 }
 
-input.checkbox-hidden {
+input.checkbox_hidden {
   display: none;
 }
 
-input.checkbox-hidden:checked + .thumb-container::after {
+input.checkbox_hidden:checked + .thumbnail__image-container::after {
   content: '✔';
   background: rgba(255, 255, 255, 0.8);
   position: absolute;
-  top: 2px;
-  bottom: 6px;
-  left: 20px;
+  top: 0;
+  bottom: 4px;
+  left: 0;
   vertical-align: middle;
   color: deepskyblue;
   font-size: 50px;
-  right: 20px;
+  right: 0;
   font-weight: bold;
   display: flex;
   justify-content: center;
@@ -28,8 +28,8 @@ input.checkbox-hidden:checked + .thumb-container::after {
   flex-wrap: wrap;
   padding-left: 20px;
 
-  .thumb-container {
-    padding-left: 0;
+  .thumbnail__image-container {
+    margin-left: 0;
   }
 
   .video-container {
@@ -37,43 +37,119 @@ input.checkbox-hidden:checked + .thumb-container::after {
   }
 
   .attachment_video_playing {
-    .thumb-link::before {
+    .thumbnail::before {
       margin-left: 0;
     }
   }
 
-  input.checkbox-hidden:checked + .thumb-container::after {
+  input.checkbox_hidden:checked + .thumbnail__image-container::after {
     left: 0;
   }
 
-  .filesize {
+  .attachment__header {
     width: 100%;
     display: flex;
     flex-direction: column;
     margin-left: 0;
   }
 
-  .file-info {
+  .file__info {
     display: inline-block;
   }
 }
 
-.post .thumb-container{
+.post .thumbnail__image-container {
   float: left;
 }
 
-.thumb-container {
-  padding: 2px 20px;
+.thumbnail__image-container {
+  margin: 2px 20px;
   position: relative;
+  overflow: hidden;
 }
 
+.attachment_deleted {
+  .thumbnail {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .thumbnail__image-container {
+    height: 5vw;
+    width: 5vw;
+    min-width: 100px;
+    min-height: 100px;
+  }
+
+  .thumbnail__placeholder {
+    border: 3px dashed;
+    text-align: center;
+    user-select: none;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  input.checkbox_hidden:checked + .thumbnail__image-container::after {
+    bottom: -4px;
+  }
+}
+
+.attachment_spoiler .thumbnail__image {
+  filter: blur(8px);
+  opacity: .5;
+  transition: filter .5s, opacity .5s;
+
+  &:hover {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+$pixelationFilter: url("data:image/svg+xml,\
+  <svg xmlns='http://www.w3.org/2000/svg'>\
+    <filter id='b' x='0' y='0'>\
+      <feFlood x='4' y='4' height='2' width='2'/>\
+      <feComposite width='10' height='10'/>\
+      <feTile result='a'/>\
+      <feComposite in='SourceGraphic' in2='a' operator='in'/>\
+      <feMorphology operator='dilate' radius='5'/>\
+    </filter>\
+  </svg>\
+  #b");
+
+
+$pixelationFilterBig: url("data:image/svg+xml,\
+  <svg xmlns='http://www.w3.org/2000/svg'>\
+    <filter id='b' x='0' y='0'>\
+      <feFlood x='4' y='4' height='2' width='2'/>\
+      <feComposite width='16' height='16'/>\
+      <feTile result='a'/>\
+      <feComposite in='SourceGraphic' in2='a' operator='in'/>\
+      <feMorphology operator='dilate' radius='8'/>\
+    </filter>\
+  </svg>\
+  #b");
+
+
+.attachment_nsfw .thumbnail__image {
+  filter: $pixelationFilterBig;
+  transition: filter 1s;
+
+  &:hover {
+    filter: none;
+  }
+}
 
 .attachment_video_playing {
-  .thumb-container {
+  .thumbnail__image-container {
     display: none;
   }
 
-  .thumb-link::before {
+  .thumbnail::before {
     content: '[close]';
     margin-left: 20px;
     display: block;
@@ -84,17 +160,17 @@ input.checkbox-hidden:checked + .thumb-container::after {
   padding: 2px 20px;
 }
 
-.thumb, .video-player {
+.thumbnail__image, .video-player {
   max-width: 100%;
   height: auto;
 }
 
-.thumb[src*="/src/"] {
+.thumbnail__image[src*="/src/"] {
   height: auto;
 }
 
 
-.filesize {
+.attachment__header {
   display: inline;
   font-size: 10px;
   font-family: sans-serif;
@@ -108,19 +184,25 @@ input.checkbox-hidden:checked + .thumb-container::after {
 }
 
 
-.file-info-duration {
+.attachment__badges {
   position: absolute;
-  right: 25px;
+  right: 5px;
+  left: 5px;
   bottom: 10px;
+  text-align: right;
+
+  div {
+    margin-left: .2rem;
+  }
+}
+
+
+.file__info__duration {
   color: #fff;
   background: rgba(0,0,0,0.8);
   font-family: sans-serif;
   font-size: 12px;
   padding: 2px;
   border-radius: 2px;
-}
-
-
-.catalog-thread-image.deleted {
-  border: 2px solid red;
+  display: inline-block;
 }

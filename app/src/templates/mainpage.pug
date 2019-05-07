@@ -7,12 +7,12 @@ block header
 
 block main
   nav.tab-menu.flex-center
-    span.section-wrapper
-      span.link-wrapper
+    span.button-group
+      span.button.button_link
         a.js-select-tab.active(href='#news') News
-      span.link-wrapper
+      span.button.button_link
         a.js-select-tab(href='#faq') FAQ
-      span.link-wrapper
+      span.button.button_link
         a.js-select-tab(href='#rules') Rules
   div#rules.tabs__content!= filters.markdown(site.rules)
   div#faq.tabs__content!= filters.markdown(site.faq)

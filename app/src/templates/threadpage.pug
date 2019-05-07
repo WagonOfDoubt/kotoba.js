@@ -7,7 +7,7 @@ block header
   include includes/boardheader.pug
 
 block main
-  .return-link.return-link-top.link-button-wrapper
+  .return-link.return-link-top.button.button_link
     a(href='/' + board.uri) Return
 
   include includes/postform.pug
@@ -17,7 +17,7 @@ block main
     include includes/delpostform.pug
     include includes/adminpanel.pug
 
-  .return-link.return-link-bottom.link-button-wrapper
+  .return-link.return-link-bottom.button.button_link
     a(href='/' + board.uri) Return
 
 block footer

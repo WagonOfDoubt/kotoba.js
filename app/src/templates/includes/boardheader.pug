@@ -1,21 +1,21 @@
-div.adminbar.adminbar-top
-  nav.menu.menu-site.menu-top!= filters.markdown(site.menu)
-  nav.menu.menu-board.menu-top
-    ul
+div.adminbar.adminbar_top
+  nav.menu.menu_site.menu_top!= filters.markdown(site.menu)
+  nav.menu.menu_board.menu_top
+    ul.button-group
       for s in site.styles
-        li
-          a(href='#', data-action='set-style', data-style=s)= s[0].toUpperCase() + s.substring(1)
-    span.menu-link
+        li.button.button_link
+          a.js-set-style(href='#', data-style=s)= s[0].toUpperCase() + s.substring(1)
+    span.button.button_link
       a(href='/') Home
-    span.menu-link
+    span.button.button_link
       a(href='/manage') Manage
     if board.features.catalog
-      span.menu-link
+      span.button.button_link
         a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
     if board.features.archive
-      span.menu-link
+      span.button.button_link
         a(href='/' + board.uri + '/arch/res') Archive
 h1.logo= board.name
 if board.header
   div.board-header
-    div.board-header-content!= filters.markdown(board.header)
+    div.board-header__content!= filters.markdown(board.header)

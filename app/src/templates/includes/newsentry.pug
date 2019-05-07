@@ -1,21 +1,20 @@
 include ../mixins/timestamp.pug
 
 div.news-entry(id='news-' + n.number)
-  div.news-header
-    span.news-subject
-      span.news-subject= n.subject
+  div.news__header
+    span.news__subject= n.subject
+    | 
+    | by
+    | 
+    if n.postedemail
+      a.news__author(href='mailto:' + n.postedemail)= n.postedby
+    else
+      span.news__author= n.postedby
+    if n.postedDate
       | 
-      | by
+      | -
       | 
-      if n.postedemail
-        a.news-author(href='mailto:' + n.postedemail)= n.postedby
-      else
-        span.news-author= n.postedby
-      if n.postedDate
-        | 
-        | -
-        | 
-        +datetime(n.postedDate)
-    span.news-hash
-      a(href='#news-' + n.number, title='premalink') #
-  div.news-content!= filters.markdown(n.message)
+      +datetime(n.postedDate)
+    span.news__link
+      a(href='#news-' + n.number, title='premalink') ##{n.number}
+  div.news__content!= filters.markdown(n.message)

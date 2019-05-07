@@ -12,11 +12,14 @@ import videoPlayerTemplate from '../templates-compiled/video-player';
  * @param  {HTMLElement} a Attachment container
  */
 export const minimizeImage = (a) => {
-  const thumb = a.querySelector('.thumb');
+  const img = a.querySelector('.thumbnail__image');
+  if (!img) {
+    return;
+  }
   const { thumbSrc, thumbWidth, thumbHeight } = a.dataset;
-  thumb.setAttribute('width', thumbWidth);
-  thumb.setAttribute('height', thumbHeight);
-  thumb.setAttribute('src', thumbSrc);
+  img.setAttribute('width', thumbWidth);
+  img.setAttribute('height', thumbHeight);
+  img.setAttribute('src', thumbSrc);
   a.dataset.maximized = 'false';
   return a;
 };
@@ -27,11 +30,14 @@ export const minimizeImage = (a) => {
  * @param  {HTMLElement} a Attachment container
  */
 export const maximizeImage = (a) => {
-  const thumb = a.querySelector('.thumb');
+  const img = a.querySelector('.thumbnail__image');
+  if (!img) {
+    return;
+  }
   const { fullSrc, fullWidth, fullHeight } = a.dataset;
-  thumb.setAttribute('width', fullWidth);
-  thumb.setAttribute('height', fullHeight);
-  thumb.setAttribute('src', fullSrc);
+  img.setAttribute('width', fullWidth);
+  img.setAttribute('height', fullHeight);
+  img.setAttribute('src', fullSrc);
   a.dataset.maximized = 'true';
   return a;
 };
@@ -57,7 +63,7 @@ export const toggleImage = (a) => {
  */
 export const minimizeAllImages = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment_image a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_image .thumbnail'))
     .map(minimizeImage);
 };
 
@@ -69,7 +75,7 @@ export const minimizeAllImages = (parentElement = document.body) => {
  */
 export const maximizeAllImages = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment_image a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_image .thumbnail'))
     .map(maximizeImage);
 };
 
@@ -81,6 +87,9 @@ export const maximizeAllImages = (parentElement = document.body) => {
 export const showVideo = (a) => {
   const { fullSrc, fullWidth, fullHeight, thumbSrc } = a.dataset;
   const $container = $(a).parent();
+  if (!fullSrc || $container.hasClass('attachment_deleted')) {
+    return;
+  }
   const $playerContainer = $('<div class="video-container">');
   const muted = true;
   const $player = $(videoPlayerTemplate({
@@ -104,6 +113,9 @@ export const showVideo = (a) => {
  */
 export const closeVideo = (a) => {
   const $container = $(a).parent();
+  if ($container.hasClass('attachment_deleted')) {
+    return;
+  }
   $container.removeClass('attachment_video_playing');
   $container.find('.video-player').remove();
   a.dataset.maximized = 'false';
@@ -117,7 +129,7 @@ export const closeVideo = (a) => {
  */
 export const closeAllVideos = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment_video a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_video .thumbnail'))
     .map(closeVideo);
 };
 
@@ -129,7 +141,7 @@ export const closeAllVideos = (parentElement = document.body) => {
  */
 export const showAllVideos = (parentElement = document.body) => {
   return Array
-    .from(parentElement.querySelectorAll('.attachment_video a.thumb-link'))
+    .from(parentElement.querySelectorAll('.attachment_video .thumbnail'))
     .map(closeVideo);
 };
 
@@ -152,11 +164,18 @@ export const toggleVideo = (a) => {
  */
 export const initSelectAttachment = () => {
   $('body')
-    .on('click', '.attachment_selectable a.thumb-link', (e) => {
+    .on('click', '.attachment .thumbnail', (e) => {
       const a = e.currentTarget;
-      const cb = a.querySelector('.js-select-attachment');
-      cb.checked = !cb.checked;
-      $(cb).change();
+      const parentPost = a.closest('.post');
+      const attachment = a.closest('.attachment');
+      if (parentPost.classList.contains('selected') ||
+          attachment.classList.contains('attachment_selectable')) {
+        const checkbox = a.querySelector('.js-select-attachment');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          $(checkbox).change();          
+        }
+      }
       e.preventDefault();
     });
 };
@@ -167,16 +186,13 @@ export const initSelectAttachment = () => {
  */
 export const initExpandImage = () => {
   $('body')
-    .on('click', '.attachment_image.attachment_expandable a.thumb-link', (e) => {
+    .on('click', '.attachment_image.attachment_expandable .thumbnail', (e) => {
       const a = e.currentTarget;
-      const $parentPost = $(a).closest('.post');
-      if (!$parentPost.hasClass('selected')) {
-        toggleImage(a);
-      } else {
-        const cb = a.querySelector('.js-select-attachment');
-        cb.checked = !cb.checked;
-        $(cb).change();
+      const parentPost = a.closest('.post');
+      if (!parentPost || parentPost.classList.contains('selected')) {
+        return;
       }
+      toggleImage(a);
       e.preventDefault();
     });
 };
@@ -187,16 +203,13 @@ export const initExpandImage = () => {
  */
 export const initExpandVideo = () => {
   $('body')
-    .on('click', '.attachment_video.attachment_expandable a.thumb-link', (e) => {
+    .on('click', '.attachment_video.attachment_expandable .thumbnail', (e) => {
       const a = e.currentTarget;
-      const $parentPost = $(a).closest('.post');
-      if (!$parentPost.hasClass('selected')) {
-        toggleVideo(a);
-      } else {
-        const cb = a.querySelector('.js-select-attachment');
-        cb.checked = !cb.checked;
-        $(cb).change();
+      const parentPost = a.closest('.post');
+      if (!parentPost || parentPost.classList.contains('selected')) {
+        return;
       }
+      toggleVideo(a);
       e.preventDefault();
     });
 };

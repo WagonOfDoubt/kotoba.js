@@ -9,42 +9,66 @@ mixin attachments(post)
         for attachment, n in post.attachments
           +attachment(attachment, post, n)(class='attachment_expandable')
 
-mixin attachment(attachment, post, n)
+mixin attachment(attachment, post, n, isMod)
   -var id = `post-${ post.boardUri }-${ post.postId }-${ n }`;
+  -var notDel = !attachment.isDeleted || isMod
   figure(
     id=(isPreview ? undefined : id)
     class=attributes.class
     class=['attachment', 'attachment_' + attachment.type]
+    class={
+      attachment_deleted: !notDel,
+      attachment_nsfw: !isMod && attachment.isNSFW,
+      attachment_spoiler: !isMod && attachment.isSpoiler,
+    }
     data-attachment-number=n
     data-board-uri=post.boardUri
     data-post-id=post.postId
-    data-file=attachment.file
-    data-duration=attachment.duration
+    data-file=notDel && attachment.file
+    data-duration=notDel && attachment.duration
     data-type=attachment.type
   )
-    figcaption.filesize
-      +filelink(attachment)
-      |
-      |
-      +fileinfo(attachment)
-    a.thumb-link(
-      href!= filters.encodeUri(attachment.file)
-      data-full-src=attachment.file
-      data-full-width=attachment.width
-      data-full-height=attachment.height
-      data-thumb-src=attachment.thumb
-      data-thumb-width=attachment.thumbWidth
-      data-thumb-height=attachment.thumbHeight
-    )
-      if !isPreview
-        input.checkbox-hidden.js-select-attachment(type='checkbox', name='attachments[]', value=id)
-      div.thumb-container
-        +thumbnail(attachment)
-        if attachment.duration
-          div.file-info-duration!= filters.readableDuration(attachment.duration)
+    if attachment.isDeleted && !isMod
+      figcaption.attachment__header= attachment.type
+      div.thumbnail
+        if !isPreview
+          input.checkbox_hidden.js-select-attachment(type='checkbox', name='attachments[]', value=id)
+        div.thumbnail__image-container
+          div.thumbnail__placeholder No thumbnail
+          div.attachment__badges
+            div.badge.badge_danger DELETED
+    else
+      figcaption.attachment__header
+        +filelink(attachment)
+        |
+        |
+        +fileinfo(attachment)
+      a.thumbnail(
+        href!= filters.encodeUri(attachment.file)
+        data-full-src=notDel && attachment.file
+        data-full-width=notDel && attachment.width
+        data-full-height=notDel && attachment.height
+        data-thumb-src=notDel && attachment.thumb
+        data-thumb-width=notDel && attachment.thumbWidth
+        data-thumb-height=notDel && attachment.thumbHeight
+      )
+        if !isPreview
+          input.checkbox_hidden.js-select-attachment(type='checkbox', name='attachments[]', value=id)
+        div.thumbnail__image-container
+          +thumbnail(attachment)
+          if attachment.duration || attachment.isSpoiler || attachment.isNSFW || attachment.isDeleted
+            div.attachment__badges
+              if attachment.isDeleted
+                div.badge.badge_danger DELETED
+              if attachment.isNSFW
+                div.badge.badge_warning NSFW
+              if attachment.isSpoiler
+                div.badge.badge_info SPOILER
+              if attachment.duration
+                div.file__info__duration!= filters.readableDuration(attachment.duration)
 
 mixin thumbnail(attachment)
-  img.thumb(
+  img.thumbnail__image(
     src=attachment.thumb
     alt=attachment.name
     width=attachment.thumbWidth
@@ -53,18 +77,18 @@ mixin thumbnail(attachment)
 
 mixin fileinfo(attachment)
   if attachment.size || (attachment.width && attachment.height)
-    span.file-info
+    span.file__info
       | (
       if attachment.size
-        span.file-info-size
+        span.file__info__size
           != filters.readableSize(attachment.size)
       if attachment.width && attachment.height
         | ,
-        span.file-info-resolution #{ attachment.width }x#{ attachment.height }
+        span.file__info__resolution #{ attachment.width }x#{ attachment.height }
       | )
 
 mixin filelink(attachment)
-  a.file-link(
+  a.file__link(
     href!= filters.encodeUri(attachment.file)
     target='_blank'
     title=attachment.name)!= filters.shortFileName(attachment.name, {length: 25, placeholder: '[...]'})

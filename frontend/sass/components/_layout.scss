@@ -40,7 +40,7 @@ aside {
   height: 100vh;
   overflow: auto;
   box-sizing: border-box;
-  padding: 0.5rem;
+  padding: 0;
   // box-shadow: 0 0 5px 2px rgba(0,0,0,0.5)
   border-right: 1px solid transparent;
   overflow-x: hidden;
@@ -62,3 +62,52 @@ footer {
 main, footer, header {
   padding: 1vh 1vw;
 }
+
+.userdelete {
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Layout for page /manage/assets/
+////////////////////////////////////////////////////////////////////////////////
+
+.asset-upload__item {
+  display: grid;
+  grid-template-columns: 200px auto;
+  grid-template-rows: auto auto;
+  grid-template-areas: 'preview inputs'
+    'preview info';
+  grid-column-gap: 2rem;
+  padding: 1rem 0;
+
+  border-bottom: 1px var(--border-color) solid;
+  list-style: none;
+
+  .asset-upload__preview {
+    grid-area: preview;
+    align-self: center;
+  }
+
+  .asset-upload__inputs {
+    grid-area: inputs;
+  }
+
+  .asset-upload__info {
+    grid-area: info;
+  }
+
+}
+
+.asset-upload__thumb {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.asset-upload__item_deleted {
+  padding: 1rem 0;
+  border-bottom: 1px var(--border-color) solid;
+  list-style: none;
+}
+

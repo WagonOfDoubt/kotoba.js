@@ -36,8 +36,8 @@ div.admin-panel
   //- attachment tab
   div#admin-panel__tab_attachments.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.js-select-attachment') Select all
-      button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect all attachments
+      button.js-select-all-items(type='button', data-target='.js-select-attachment') Select all attachments
+      button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect all
     div.column
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='true') Delete
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='false') Restore
@@ -50,7 +50,7 @@ div.admin-panel
   //- attachment tab
   div#admin-panel__tab_modlog.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Select all
+      button.js-select-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Select all records
       button.js-deselect-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Deselect all
     div.column
       button.js-send-form(type='button', data-target='#modlog-form') Undo selected actions

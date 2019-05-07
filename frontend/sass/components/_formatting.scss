@@ -1,3 +1,9 @@
+q {
+  &::before, &::after {
+    content: '';
+  }
+}
+
 /* No idea why it's called unkfunc, this is greentext */
 .unkfunc {
   color: var(--quote-color);

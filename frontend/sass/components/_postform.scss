@@ -19,7 +19,6 @@
 
 .postarea {
   text-align: center;
-  border-top:1px solid var(--border-color);
   border-bottom:1px solid var(--border-color);
   padding-top: 4px;
   padding-bottom: 4px;
@@ -40,4 +39,9 @@
   li {
     margin-left: 1em;
   }
+}
+
+.postblock {
+  color: var(--postblock-color);
+  background-color: var(--postblock-background-color);
 }

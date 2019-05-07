@@ -1,11 +1,7 @@
 @media print {
-  .extrabtns, input, .postarea, .section-wrapper, .link-button-wrapper,
-  .filesize, .userdelete, .pagelist, .clickreplytoview {
-    display: none;
-  }
-
-  .thread-container {
-    column-count: 2;
+  .post__buttons, input, .postarea, .button, .page-title, nav,
+  .file-info, .userdelete, .pagelist, .clickreplytoview {
+    display: none !important;
   }
 
   .reply-container {
@@ -16,16 +12,20 @@
     display: none;
   }
 
-  .postbody {
+  .post__body {
     margin: 0.3rem;
   }
 
-  .reply {
+  .post {
     width: 100%;
     border: none !important;
   }
 
   .post-header {
     font-size: 0.7rem;
+  }
+
+  .admin-form {
+    column-count: 2;
   }
 }

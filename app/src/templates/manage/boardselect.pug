@@ -6,7 +6,7 @@ block header
 
 block main
   h2 Add board
-  span.link-button-wrapper
+  span.button.button_link
     a(href='/manage/addboard') Add board
 
   //- uri name desc createdDate isLocked isHidden isForcedAnon postcount
@@ -42,5 +42,5 @@ block main
               | 
               abbr(title='Anonymous board') 🕵️
           td
-            span.link-button-wrapper
+            span.button.button_link
               a(href=`/manage/staff?board=${b.uri}`) staff
