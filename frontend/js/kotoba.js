@@ -13,6 +13,7 @@ import { initTabs } from './modules/tabs';
 import { initToggleVisibility } from './modules/toggle-visibility';
 import { initTables } from './modules/table';
 import { initReflinks } from './modules/reflink-popup';
+import { initChangeStyle } from './modules/change-style';
 
 
 $(() => {
@@ -29,4 +30,5 @@ $(() => {
   initToggleVisibility();
   initTables();
   initReflinks();
+  initChangeStyle();
 });

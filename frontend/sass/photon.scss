@@ -1,0 +1,38 @@
+:root {
+  --background-color: #eeeeee;
+  --border-color: #bbbbbb;
+  --primary-color: #dddddd;
+  --secondary-color: #cccccc;
+  --text-color: #333333;
+  --header-color: #FF6600;
+  --name-color: #004A99;
+  --subject-color: #002244;
+  --quote-color: #789922;
+  --omitted-posts-color: #666666;
+  --postblock-color: #002244;
+  --postblock-background-color: transparent;
+  --link-color: #FF6600;
+  --link-color-hover: #0066FF;
+  --spoiler-color: #000;
+  --spoiler-bg: #000;
+  --spoiler-open-color: #fff;
+  --spoiler-open-bg: #000;
+  --board-link-color: #002244;
+  --board-link-background: #dddddd;
+  --page-title-color: #2266AA;
+  --page-title-background-color: #DDDDDD;  
+  --input-border-color: #aaaaaa;
+  --input-text-color: inherit;
+  --input-background: inherit;
+
+  --post-border-radius: 5px;
+}
+
+
+.post__header__name {
+  font-weight: bold;
+}
+
+.form-label {
+  font-weight: bold;
+}

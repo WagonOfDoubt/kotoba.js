@@ -12,14 +12,18 @@ head
   else
     title= baseTitle
 
+  mixin styleLink(style, preferred)
+    -var styleName = style[0].toUpperCase() + style.substring(1);
+    link(rel="alternate stylesheet", href=`/.static/css/${ style }.css`, data-style=style, data-preferred=preferred, title=styleName)
+
   - var desc = board && board.desc ? board.desc : site && site.desc ? site.desc : pkg.description;
   meta(name="description", content=desc)
   link(rel="stylesheet", href="/.static/css/global.css")
   - var defaultStyle = board && board.defaultStyle ? board.defaultStyle : site && site.defaultStyle ? site.defaultStyle : 'umnochan';
-  link(rel="stylesheet", href=`/.static/css/${ defaultStyle }.css`)
+  +styleLink(defaultStyle, true)
   for style in site.styles
     if style != defaultStyle
-      link(rel="alternate stylesheet", href=`/.static/css/${ style }.css`)
+      +styleLink(style, false)
   link(rel="shortcut icon", href="/.static/img/favicon.png")
 
   block head

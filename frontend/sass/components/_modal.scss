@@ -5,8 +5,8 @@
 // .modal-content   - actual modal w/ bg and corners and stuff
 
 .modal-content, .modal-header, .modal-footer {
-  background-color: var(--background-color);
-  border-color: var(--border-color);
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
 }
 
 // Kill the scroll on the body
@@ -76,16 +76,12 @@
   width: 100%; // Ensure `.modal-content` extends the full width of the parent `.modal-dialog`
   // counteract the pointer-events: none; in the .modal-dialog
   pointer-events: auto;
-  // background-color: $modal-content-bg;
   background-clip: padding-box;
-  border: var(--modal-content-border-width) solid var(--modal-content-border-color);
-  // @include border-radius($border-radius-lg);
+  border: var(--modal-border-width) solid var(--secondary-color);
   border-radius: var(--modal-border-radius);
-  // @include box-shadow($modal-content-box-shadow-xs);
   box-shadow: 6px 6px 15px 1px rgba(0,0,0,0.75);
   // Remove focus outline from opened modal
   outline: 0;
-  background-color: white;
   max-height: 100vh;
 }
 
@@ -96,7 +92,7 @@
   align-items: flex-start; // so the close btn always stays on the upper right corner
   justify-content: space-between; // Put modal header elements (title and dismiss) on opposite ends
   padding: var(--modal-header-padding);
-  border-bottom: var(--modal-header-border-width) solid var(--modal-header-border-color);
+  border-bottom: var(--modal-border-width) solid var(--secondary-color);
   border-top-left-radius: var(--modal-border-radius);
   border-top-right-radius: var(--modal-border-radius);
 
@@ -128,7 +124,7 @@
   align-items: center; // vertically center
   justify-content: flex-end; // Right align buttons with flex property because text-align doesn't work on flex items
   padding: var(--modal-inner-padding);
-  border-top: var(--modal-footer-border-width) solid var(--modal-footer-border-color);
+  border-top: var(--modal-border-width) solid var(--secondary-color);
   border-bottom-left-radius: var(--modal-border-radius);
   border-bottom-right-radius: var(--modal-border-radius);
 
