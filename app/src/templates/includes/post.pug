@@ -1,6 +1,7 @@
 include ../mixins/attachments.pug
 include ../mixins/timestamp.pug
 include ../mixins/postbody.pug
+include ../mixins/icons.pug
 
 div(
   id=(isPreview ? undefined : `post-${ post.boardUri }-${ post.postId }`)
@@ -49,30 +50,42 @@ div(
       a(href='#postbox')= post.postId
     span.post__badges
       if post.isDeleted
-        span.badge.badge_danger(title='Deleted') DELETED
+        span.post__badge.post__badge_deleted(title='Deleted')
+          +icon('trash', 'small') DELETED
       if post.isSage && !post.isOp
         span.post__badge.post__badge_sage(title='Sage')
+          +icon('arrow-circle-down', 'small')
       if post.isOp
         if post.isSticky
           span.post__badge.post__badge_sticky(title='Sticky')
+            +icon('thumbtack', 'small')
         if post.isClosed
           span.post__badge.post__badge_closed(title='Closed')
+            +icon('lock', 'small')
         if post.isAutosage
           span.post__badge.post__badge_autosage(title='Autosage')
+            +icon('arrow-circle-down', 'small')
     if !isPreview
       span.post__buttons
         if post.isOp
           if site.features.hideThread
             a.post__button.post__button_hide(href='#', title='Hide thread')
+              +icon('plus', 'small')
+              +icon('minus', 'small')
           if site.features.favorites
             a.post__button.post__button_favourite(href='#', title='Watch thread')
+              +icon('star', 'small')
           if site.features.expandThread && isPage
             a.post__button.post__button_expand(href='#', title='Expand thread')
+              +icon('stream', 'small')
         else
           if site.features.hidePost
             a.post__button.post__button_hide(href='#', title='Hide post')
+              +icon('plus', 'small')
+              +icon('minus', 'small')
         if site.features.quickreply
           a.post__button.post__button_reply(href='#', title='Quick reply')
+            +icon('comment', 'small')
     //- [Reply] button
     if isPage && post.isOp
       span.thread__reply.button.button_link

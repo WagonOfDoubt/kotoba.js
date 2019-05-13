@@ -1,5 +1,6 @@
 extends managepage.pug
 include ../mixins/timestamp.pug
+include ../mixins/icons.pug
 
 block header
   h1 Board administration
@@ -34,13 +35,16 @@ block main
           td
             if b.isHidden
               | 
-              abbr(title='Hidden board') 🕶️
+              abbr.badge.badge_light(title='Hidden board')
+                +icon('eye-slash', 'small')
             if b.isLocked
               | 
-              abbr(title='Locked board') 🔒
+              abbr.badge.badge_danger(title='Locked board')
+                +icon('lock', 'small')
             if b.isForcedAnon
               | 
-              abbr(title='Anonymous board') 🕵️
+              abbr.badge.badge_dark(title='Anonymous board')
+                +icon('user-secret', 'small')
           td
             span.button.button_link
               a(href=`/manage/staff?board=${b.uri}`) staff

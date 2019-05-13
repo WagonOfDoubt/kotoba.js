@@ -1,47 +1,49 @@
+include ../mixins/icons.pug
+
 // a.logo(href='/')
   img(src='/.static/img/kotoba_logo_sm.png', alt='Home', title='Home')
 nav
   ul
     li
-      a(href='/') Home
+      a(href='/') #[+icon('home', 'small')] Home
     li
-      a(href='/manage/') Dashboard
+      a(href='/manage/') #[+icon('chart-line', 'small')] Dashboard
   h4 Profile
   ul
     li
-      a(href='/manage/profile') My Profile
+      a(href='/manage/profile') #[+icon('id-card', 'small')] My Profile
     li
-      a(href='/manage/logout') Log out
+      a(href='/manage/logout') #[+icon('sign-out-alt', 'small')] Log out
   h4 Moderation
   ul
     li
-      a(href='/manage/modlog') ModLog
+      a(href='/manage/modlog') #[+icon('scroll', 'small')] ModLog
     li
-      a(href='/manage/uploads') Recent uploads
+      a(href='/manage/uploads') #[+icon('paperclip', 'small')] Recent uploads
   h4 Site management
   ul
     li
-      a(href='/manage/spaceused') Disk space used
+      a(href='/manage/spaceused') #[+icon('hdd', 'small')] Disk space used
     li
-      a(href='/manage/sitesettings') Site settings
+      a(href='/manage/sitesettings') #[+icon('cog', 'small')] Site settings
     li
-      a(href='/manage/maintenance') Site maintenance
+      a(href='/manage/maintenance') #[+icon('toolbox', 'small')] Site maintenance
     li
-      a(href=pkg.homepage, target='_blank') Check for new version
+      a(href=pkg.homepage, target='_blank') #[+icon('external-link-square-alt', 'small')] Check for new version
   h4 Administration
   ul
     li
-      a(href='/manage/staff') Staff
+      a(href='/manage/staff') #[+icon('users', 'small')] Staff
     li
-      a(href='/manage/roles') Roles
+      a(href='/manage/roles') #[+icon('user-tag', 'small')] Roles
     li
-      a(href='/manage/boardopts') Manage boards
+      a(href='/manage/boardopts') #[+icon('layer-group', 'small')] Manage boards
     li
-      a(href='/manage/news') News
+      a(href='/manage/news') #[+icon('newspaper', 'small')] News
     li
-      a(href='/manage/assets') Assets
+      a(href='/manage/assets') #[+icon('images', 'small')] Assets
     li
-      a(href='/manage/trash') Recycle Bin
+      a(href='/manage/trash')  #[+icon('trash', 'small')] Recycle Bin
   h4 TODO
   ul
     li Bans

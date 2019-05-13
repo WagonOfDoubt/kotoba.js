@@ -1,0 +1,5 @@
+mixin icon(name, cls='')
+  -var iconname = 'icon_' + name;
+  -var sizename = 'icon_' + cls;
+  svg.icon(class={ [iconname]: true, [sizename]: !!cls })
+    use(xlink:href=`/.static/img/icons.svg#${name}`)

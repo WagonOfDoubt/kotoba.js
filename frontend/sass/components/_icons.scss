@@ -1,52 +1,15 @@
-.post__buttons {
-  vertical-align: middle;
-  margin: 0 0.3rem;
-
-  :not(:first-child) {
-    margin-left: 0.2rem;
-  }
-
-  display: inline-flex;
-}
-
-@mixin icon-hide {
-  background: transparent url('/.static/img/icons.png') -32px -16px no-repeat;
-}
-
-@mixin icon-unhide {
-  background: transparent url('/.static/img/icons.png') -48px 0px no-repeat;
-}
-
-@mixin icon-fav {
-  background: transparent url('/.static/img/icons.png') -32px 0px no-repeat;
-}
-
-@mixin icon-expthr {
-  background: transparent url('/.static/img/icons.png') 0px -16px no-repeat;
-}
-
-@mixin icon-rep {
-  background: transparent url('/.static/img/icons.png') 0px 0px no-repeat;
-}
-
-@mixin icon-btn-close {
-  background: transparent url('/.static/img/icons.png') -48px -16px no-repeat;
-}
-
-@mixin icon-btn-refresh {
-  background: transparent url('/.static/img/icons.png') -16px -16px no-repeat;
-}
-
-@mixin icon-btn-restore {
-  background: transparent url('/.static/img/icons.png') -16px 0px no-repeat;
-}
-
-@mixin icon-sticky {
-  background: transparent url('/.static/img/sticky.gif') 0 0 no-repeat;
-}
-
-%icon {
+.icon {
   display: inline-block;
+  fill: currentColor;
+  vertical-align: top;
+}
+
+.icon_small {
   width: 16px;
   height: 16px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 }

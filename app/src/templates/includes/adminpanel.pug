@@ -1,3 +1,5 @@
+include ../mixins/icons.pug
+
 div.admin-panel
   ul.tab-menu
     li.tab-menu__item.admin-panel__item_posts
@@ -17,8 +19,8 @@ div.admin-panel
       button.js-set-post-flag(type='submit', name='isSage', value='true') Set sage
       button.js-set-post-flag(type='submit', name='isSage', value='false') Unset sage
     div.column
-      button.js-set-post-flag(type='submit', name='isDeleted', value='true') Delete
-      button.js-set-post-flag(type='submit', name='isDeleted', value='false') Restore
+      button.js-set-post-flag(type='submit', name='isDeleted', value='true') #[+icon('trash', 'small')] Delete
+      button.js-set-post-flag(type='submit', name='isDeleted', value='false') #[+icon('trash-restore', 'small')] Restore
     div.column
       button.js-set-post-flag(type='submit', name='isApproved', value='true') Set Approved
       button.js-set-post-flag(type='submit', name='isApproved', value='false') Unset Approved
@@ -31,16 +33,16 @@ div.admin-panel
       button.js-set-post-flag(type='submit', name='isSticky', value='true') Set Sticky
       button.js-set-post-flag(type='submit', name='isSticky', value='false') Unset Sticky
     div.column
-      button.js-set-post-flag(type='submit', name='isClosed', value='true') Close Thread
-      button.js-set-post-flag(type='submit', name='isClosed', value='false') Unclose Thread
+      button.js-set-post-flag(type='submit', name='isClosed', value='true') #[+icon('lock', 'small')] Close Thread
+      button.js-set-post-flag(type='submit', name='isClosed', value='false') #[+icon('unlock', 'small')] Unclose Thread
   //- attachment tab
   div#admin-panel__tab_attachments.tabs__content
     div.column
       button.js-select-all-items(type='button', data-target='.js-select-attachment') Select all attachments
       button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect all
     div.column
-      button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='true') Delete
-      button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='false') Restore
+      button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='true') #[+icon('trash', 'small')] Delete
+      button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='false') #[+icon('trash-restore', 'small')] Restore
     div.column
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isSpoiler', value='true') Set Spoiler
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isSpoiler', value='false') Unset Spoiler
@@ -54,12 +56,3 @@ div.admin-panel
       button.js-deselect-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Deselect all
     div.column
       button.js-send-form(type='button', data-target='#modlog-form') Undo selected actions
-
-    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='true') Delete
-    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='false') Restore
-    //- div.column
-    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isSpoiler', value='true') Set Spoiler
-    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isSpoiler', value='false') Unset Spoiler
-    //- div.column
-    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='true') Set NSFW
-    //-   button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='false') Unset NSFW

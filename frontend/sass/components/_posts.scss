@@ -18,7 +18,7 @@
   }
 
   a:hover {
-    color: #800000;
+    color: var(--header-color);
   }
 }
 
@@ -44,60 +44,83 @@
   margin: 0 3px 0 3px;
 }
 
+.post__badges,
+.post__buttons {
+  vertical-align: middle;
+  margin: 0 0.3rem;
+
+  & > :not(:first-child) {
+    margin-left: 0.2rem;
+  }
+
+  &:empty {
+    display: none;
+  }
+
+  display: inline-flex;
+}
+
 .post__badge {
   cursor: help;
+  border-radius: 3px;
+  padding: 2px;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.post__badge_closed,
+.post__badge_deleted,
+.post__badge_autosage {
+  background: var(--semantic-color-danger-background);
+  svg {
+    fill: var(--semantic-color-danger-text);
+  }
+}
+
+.post__badge_sticky {
+  background: var(--semantic-color-primary-background);
+  svg {
+    fill: var(--semantic-color-primary-text);
+  }
+}
+
+.post__badge_sage {
+  background: var(--semantic-color-dark-background);
+  svg {
+    fill: var(--semantic-color-dark-text);
+  }
 }
 
 .post__button {
   cursor: pointer;
-}
+  border-radius: 3px;
+  padding: 2px;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
 
-.post__badge_sage::after {
-  content: 'SAGE!';
-  color: red;
-  padding-left: .5rem;
-}
+  fill: var(--link-color);
 
-.post__badge_autosage::after {
-  content: 'BUMP LIMIT';
-  color: red;
-  padding-left: .5rem;
-}
-
-.post__badge_closed::after {
-  content: 'CLOSED';
-  color: red;
-  padding-left: .5rem;
-}
-
-.post__badge_sticky {
-  @include icon-sticky;
-  @extend %icon;
+  &:hover svg {
+    fill: var(--link-color-hover);
+  }
 }
 
 .post__button_hide {
-  @include icon-hide;
-  @extend %icon;
+  .icon_plus {
+    display: none;
+  }
 }
 
 .post_hidden .post__button_hide {
-  @include icon-unhide;
-  @extend %icon;
-}
+  .icon_minus {
+    display: none;
+  }
 
-.post__button_favourite {
-  @include icon-fav;
-  @extend %icon;
-}
-
-.post__button_expand {
-  @include icon-expthr;
-  @extend %icon;
-}
-
-.post__button_reply {
-  @include icon-rep;
-  @extend %icon;
+  .icon_plus {
+    display: block;
+  }
 }
 
 .post_reply .post__header::after {
