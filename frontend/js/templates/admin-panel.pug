@@ -1,4 +1,4 @@
-include ../mixins/icons.pug
+include mixins/icons.pug
 
 div.admin-panel
   ul.tab-menu
@@ -16,21 +16,21 @@ div.admin-panel
       button.js-select-all-items(type='button', data-target='.js-select-post') Select all posts
       button.js-deselect-all-items(type='button', data-target='.js-select-post, .js-select-attachment') Deselect all
     div.column
-      button.js-set-post-flag(type='submit', name='isSage', value='true') Set sage
+      button.js-set-post-flag(type='submit', name='isSage', value='true') #[+icon('arrow-circle-down', 'small')] Set sage
       button.js-set-post-flag(type='submit', name='isSage', value='false') Unset sage
     div.column
       button.js-set-post-flag(type='submit', name='isDeleted', value='true') #[+icon('trash', 'small')] Delete
       button.js-set-post-flag(type='submit', name='isDeleted', value='false') #[+icon('trash-restore', 'small')] Restore
     div.column
-      button.js-set-post-flag(type='submit', name='isApproved', value='true') Set Approved
-      button.js-set-post-flag(type='submit', name='isApproved', value='false') Unset Approved
+      button.js-set-post-flag(type='submit', name='isApproved', value='true') #[+icon('thumbs-up', 'small')] Set Approved
+      button.js-set-post-flag(type='submit', name='isApproved', value='false') #[+icon('thumbs-down', 'small')] Unset Approved
   //- thread tab
   div#admin-panel__tab_threads.tabs__content
     div.column
       button.js-select-all-items(type='button', data-target='.oppost .js-select-post') Select all threads
       button.js-deselect-all-items(type='button', data-target='.oppost .js-select-post, .js-select-attachment') Deselect all threads
     div.column
-      button.js-set-post-flag(type='submit', name='isSticky', value='true') Set Sticky
+      button.js-set-post-flag(type='submit', name='isSticky', value='true') #[+icon('thumbtack', 'small')] Set Sticky
       button.js-set-post-flag(type='submit', name='isSticky', value='false') Unset Sticky
     div.column
       button.js-set-post-flag(type='submit', name='isClosed', value='true') #[+icon('lock', 'small')] Close Thread

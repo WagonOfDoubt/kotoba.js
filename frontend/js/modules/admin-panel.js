@@ -12,12 +12,15 @@ import { closeAllVideos, minimizeAllImages } from './attachment-viewer';
 import { selectTab } from './tabs';
 import modlogModalBodyTemplate from '../templates-compiled/modlog-modal-body';
 import actionResultReportTemplate from '../templates-compiled/action-result-report';
+import adminPanelTemplate from '../templates-compiled/admin-panel';
 
 
 const checkAdminForm = ($form) => {
-  const adminPanel = document.querySelector('.admin-panel');
+  let adminPanel = document.querySelector('.admin-panel');
   if (!adminPanel) {
-    return;
+    const $adminPanel = $(adminPanelTemplate({}));
+    $('.admin-form:first').append($adminPanel);
+    adminPanel = $adminPanel[0];
   }
   
   const toggleTabVisibility = (tabId, formConditionSelector) => {
@@ -33,7 +36,7 @@ const checkAdminForm = ($form) => {
         }
       }
       // if no tabs on panel shown, select this tab
-      if (!adminPanel.querySelector('.tabs__content.show')) {
+      if (hasSelectedItems && !adminPanel.querySelector('.tabs__content.show')) {
         selectTab(`#admin-panel__tab_${tabId}`);
       }
       tab.classList.toggle('hidden', !hasSelectedItems);
@@ -41,11 +44,16 @@ const checkAdminForm = ($form) => {
     return tab && hasSelectedItems;
   };
 
+  const tabs = [
+    ['modlog', 'input[name="items[]"]:checked'],
+    ['posts', 'input[name="posts[]"]:checked'],
+    ['threads', '.post_op input[name="posts[]"]:checked'],
+    ['attachments', 'input[name="attachments[]"]:checked'],
+  ];
   let hasSelected = false;
-  hasSelected = toggleTabVisibility('modlog', 'input[name="items[]"]:checked') || hasSelected;
-  hasSelected = toggleTabVisibility('posts', 'input[name="posts[]"]:checked') || hasSelected;
-  hasSelected = toggleTabVisibility('threads', '.oppost input[name="posts[]"]:checked') || hasSelected;
-  hasSelected = toggleTabVisibility('attachments', 'input[name="attachments[]"]:checked') || hasSelected;
+  for (const [ tab, selector ] of tabs) {
+    hasSelected = toggleTabVisibility(tab, selector) || hasSelected;
+  }
 
   adminPanel.classList.toggle('show', hasSelected);
 };

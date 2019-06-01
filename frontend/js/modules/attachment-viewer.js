@@ -168,8 +168,10 @@ export const initSelectAttachment = () => {
       const a = e.currentTarget;
       const parentPost = a.closest('.post');
       const attachment = a.closest('.attachment');
-      if (parentPost.classList.contains('selected') ||
-          attachment.classList.contains('attachment_selectable')) {
+      const isSelectable = 
+        (parentPost && parentPost.classList.contains('selected')) ||
+        (attachment && attachment.classList.contains('attachment_selectable'));
+      if (isSelectable) {
         const checkbox = a.querySelector('.js-select-attachment');
         if (checkbox) {
           checkbox.checked = !checkbox.checked;

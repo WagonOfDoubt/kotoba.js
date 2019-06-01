@@ -12,10 +12,9 @@ block main
 
   include includes/postform.pug
 
-  form#delform(action='/form/delpost', method='post')
+  form#delform.admin-form(action='/form/delpost', method='post')
     include includes/thread.pug
     include includes/delpostform.pug
-    include includes/adminpanel.pug
 
   .return-link.return-link-bottom.button.button_link
     a(href='/' + board.uri) Return
