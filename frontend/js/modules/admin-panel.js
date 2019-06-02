@@ -6,123 +6,15 @@
 import $ from 'jquery';
 import 'jquery-serializejson';
 import * as modal from './modal';
-import { serializeForm, alertErrorHandler, sendJSON, createTable, fetchChanges,
-  fetchPreivew } from '../utils/api-utils';
+import { sendSetFlagRequest } from '../utils/api-utils';
 import { closeAllVideos, minimizeAllImages } from './attachment-viewer';
 import { selectTab } from './tabs';
-import modlogModalBodyTemplate from '../templates-compiled/modlog-modal-body';
-import actionResultReportTemplate from '../templates-compiled/action-result-report';
 import adminPanelTemplate from '../templates-compiled/admin-panel';
 
 
-const checkAdminForm = ($form) => {
-  let adminPanel = document.querySelector('.admin-panel');
-  if (!adminPanel) {
-    const $adminPanel = $(adminPanelTemplate({}));
-    $('.admin-form:first').append($adminPanel);
-    adminPanel = $adminPanel[0];
-  }
-  
-  const toggleTabVisibility = (tabId, formConditionSelector) => {
-    const hasSelectedItems = !!$form.has(formConditionSelector).length;
-    const tab = adminPanel.querySelector(`.admin-panel__item_${tabId}`);
-    if (tab) {
-      // if current tab was selected, but now hidden
-      if (!hasSelectedItems && tab.querySelector(`.active`)) {
-        // try to select some other tab
-        const tabLink = adminPanel.querySelector(`.tab-menu__item:not(.hidden) a.js-select-tab`);
-        if (tabLink) {
-          selectTab(tabLink.getAttribute('href'));
-        }
-      }
-      // if no tabs on panel shown, select this tab
-      if (hasSelectedItems && !adminPanel.querySelector('.tabs__content.show')) {
-        selectTab(`#admin-panel__tab_${tabId}`);
-      }
-      tab.classList.toggle('hidden', !hasSelectedItems);
-    }
-    return tab && hasSelectedItems;
-  };
-
-  const tabs = [
-    ['modlog', 'input[name="items[]"]:checked'],
-    ['posts', 'input[name="posts[]"]:checked'],
-    ['threads', '.post_op input[name="posts[]"]:checked'],
-    ['attachments', 'input[name="attachments[]"]:checked'],
-  ];
-  let hasSelected = false;
-  for (const [ tab, selector ] of tabs) {
-    hasSelected = toggleTabVisibility(tab, selector) || hasSelected;
-  }
-
-  adminPanel.classList.toggle('show', hasSelected);
-};
-
-
-const sendSetFlagRequest = (url, data) => {
-  modal.wait();
-  const onDone = (response) => {
-    console.log(response);
-    let status = 'Success';
-    if (response.responseJSON) {
-      status = `${response.status} ${response.statusText}`;
-      response = response.responseJSON;
-    }
-    modal
-      .alert(status, actionResultReportTemplate(response))
-      .finally(() => window.location.reload());
-  };
-  sendJSON(url, 'patch', data)
-    .then(onDone)
-    .catch(onDone);
-};
-
-
-const initCheckboxes = () => {
-  const $form = $('.admin-form, #delform');
-  const updateMasterState = ($master) => {
-    const $slaves = $($master.data('target'));
-    const checkboxesTotal = $slaves.length;
-    const $checked = $slaves.filter(':checked');
-    const checkboxesChecked = $checked.length;
-    if (checkboxesChecked === 0) {
-      $master.prop('checked', false);
-      $master.prop('indeterminate', false);
-    } else if (checkboxesTotal === checkboxesChecked) {
-      $master.prop('checked', true);
-      $master.prop('indeterminate', false);
-    } else {
-      $master.prop('checked', false);
-      $master.prop('indeterminate', true);
-    }
-  };
-  // checkboxes that control group of checkboxes
-  $('.js-checkbox-master').on('change', (e) => {
-    const checked = e.target.checked;
-    const $slaves = $(e.target.dataset.target);
-    $slaves.prop('checked', checked);
-    checkAdminForm($form);
-  });
-  // checkboxes that are controlled by checkbox
-  $('.js-checkbox-slave').on('change', (e) => {
-    const $master = $(e.target.dataset.target);
-    updateMasterState($master);
-    checkAdminForm($form);
-  });
-  // init checkboxes
-  $('.js-checkbox-master').each((i, el) => {
-    const $master = $(el);
-    updateMasterState($master);
-    checkAdminForm($form);
-  });
-};
-
-
-/**
- * Initialize module
- */
-const initAdminPanel = () => {
-  const $form = $('.admin-form, #delform');
+const addAdminPanel = ($form) => {
+  const $adminPanel = $(adminPanelTemplate({}));
+  $form.append($adminPanel);
 
   const onSetFlagBtn = (url, e) => {
     e.preventDefault();
@@ -160,23 +52,64 @@ const initAdminPanel = () => {
   $('.js-set-post-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
   $('.js-set-thread-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
 
-  $('.js-select-all-items').on('click', (e) => {
-    e.preventDefault();
-    const { target } = e.target.dataset;
-    $form
-      .find(target)
-      .prop('checked', true)
-      .trigger('change');
-  });
+  return $adminPanel[0];
+};
 
-  $('.js-deselect-all-items').on('click', (e) => {
-    e.preventDefault();
-    const { target } = e.target.dataset;
-    $form
-      .find(target)
-      .prop('checked', false)
-      .trigger('change');
-  });
+
+const checkAdminForm = ($form) => {
+  let adminPanel = document.querySelector('.admin-panel');
+  
+  const toggleTabVisibility = (tabId, hasSelectedItems) => {
+    const tab = adminPanel.querySelector(`.admin-panel__item_${tabId}`);
+    if (tab) {
+      // if current tab was selected, but now hidden
+      if (!hasSelectedItems && tab.querySelector(`.active`)) {
+        // try to select some other tab
+        const tabLink = adminPanel.querySelector(`.tab-menu__item:not(.hidden) a.js-select-tab`);
+        if (tabLink) {
+          selectTab(tabLink.getAttribute('href'));
+        }
+      }
+      // if no tabs on panel shown, select this tab
+      if (hasSelectedItems && !adminPanel.querySelector('.tabs__content.show')) {
+        selectTab(`#admin-panel__tab_${tabId}`);
+      }
+      tab.classList.toggle('hidden', !hasSelectedItems);
+    }
+    return tab && hasSelectedItems;
+  };
+
+  const tabs = {
+    'modlog': 'input[name="items[]"]:checked',
+    'posts': 'input[name="posts[]"]:checked',
+    'threads': '.post_op input[name="posts[]"]:checked',
+    'attachments': 'input[name="attachments[]"]:checked',
+  };
+  let hasSelected = false;
+  const tabsVisible = {};
+  for (const [ tab, selector ] of Object.entries(tabs)) {
+    const thisTabHasSelected = !!$form.has(selector).length;
+    tabsVisible[tab] = thisTabHasSelected;
+    hasSelected = thisTabHasSelected || hasSelected;
+  }
+  if (!adminPanel && hasSelected) {
+    adminPanel = addAdminPanel($form);
+  }
+
+  if (adminPanel) {
+    for (const [tab, visible] of Object.entries(tabsVisible)) {
+      toggleTabVisibility(tab, visible);
+    }
+    adminPanel.classList.toggle('show', hasSelected);
+  }
+};
+
+
+/**
+ * Initialize module
+ */
+const initAdminPanel = () => {
+  const $form = $('.admin-form:first');
 
   $('.js-select-post').on('change', (e) => {
     const input = e.target;
@@ -191,64 +124,8 @@ const initAdminPanel = () => {
     checkAdminForm($form);
   });
 
-  $('.js-select-attachment').on('change', (e) => {
-    const checkbox = e.target;
-    const attachment = checkbox.closest('.attachment');
-    if (attachment) {
-      attachment.classList.toggle('selected', checkbox.checked);
-    }
+  $('.js-select-attachment, .js-select-modlog-item').on('change', (e) => {
     checkAdminForm($form);
-  });
-
-  $('.js-send-form').click((e) => {
-    const $targetForm = $(e.target.dataset.target);
-    $targetForm.trigger('send');
-  });
-
-  $('#modlog-form').on('send', (e) => {
-    const $targetForm = $(e.target);
-    const formData = $targetForm.serializeJSON();
-    const items = formData.items.map(JSON.parse);
-    const updates = items.reduce((acc, val) => {
-      const { postId, boardUri } = val.target;
-      const timestamp = val.target.timestamp;
-      const targetKey = `${boardUri}-${postId}`;
-      if (!acc[targetKey]) {
-        acc[targetKey] = {
-          target: val.target,
-          update: {},
-        };
-      }
-      for (let [key, value] of Object.entries(val.update)) {
-        if (!(key in acc[targetKey].update)) {
-          acc[targetKey].update[key] = value;
-        } else {
-          const currentValue = acc[targetKey].update[key];
-          const newValue = currentValue.ts > value.ts ? currentValue : value;
-          acc[targetKey].update[key] = newValue;
-        }
-      }
-      return acc;
-    }, {});
-    const groupedItems = Object.values(updates).map((u) => {
-      for (let [key, value] of Object.entries(u.update)) {
-        u.update[key] = value.value;
-      }
-      return u;
-    });
-
-    modal
-      .confirmPrompt('Confirm action', modlogModalBodyTemplate({ items: groupedItems }))
-      .then(({returnValue, formData}) => {
-        console.log(groupedItems, returnValue, formData);
-        const regenerate = formData.regenerate;
-        const requestData = {
-          items: groupedItems,
-          regenerate: regenerate,
-        };
-        sendSetFlagRequest('/api/post', requestData);
-      });
-    e.preventDefault();
   });
 
   // initial set on page load
@@ -262,8 +139,6 @@ const initAdminPanel = () => {
   addClassToClosestParent('input[name="posts[]"]:checked', '.post', 'selected');
   addClassToClosestParent('input[name="attachments[]"]:checked', '.attachment', 'selected');
   checkAdminForm($form);
-
-  initCheckboxes();
 };
 
 export { initAdminPanel };

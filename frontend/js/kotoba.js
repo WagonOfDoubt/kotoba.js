@@ -14,6 +14,7 @@ import { initToggleVisibility } from './modules/toggle-visibility';
 import { initTables } from './modules/table';
 import { initReflinks } from './modules/reflink-popup';
 import { initChangeStyle } from './modules/change-style';
+import { initHandlers } from './modules/misc-handlers';
 
 
 $(() => {
@@ -31,4 +32,5 @@ $(() => {
   initTables();
   initReflinks();
   initChangeStyle();
+  initHandlers();
 });

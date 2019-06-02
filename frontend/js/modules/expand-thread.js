@@ -11,7 +11,7 @@ import { localizeTime } from './time';
  * Initialize module
  */
 export const initExpandThread = () => {
-  $('body').on('click', '.post-btn-expthr', e => {
+  $('body').on('click', '.post__button_expand', e => {
     const thread = $(e.currentTarget).closest('.thread-container');
     const { threadId, boardUri } = thread.data();
     const omitted = thread.find('.omittedposts');

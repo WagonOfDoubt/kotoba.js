@@ -2,6 +2,7 @@
  * Tabbed components
  * @module modules/tabs
  */
+import $ from 'jquery';
 
 export const selectTab = (tabHref) => {
   let allTabsInControlGroup = Array
@@ -30,11 +31,9 @@ export const selectTab = (tabHref) => {
  * Initialize module
  */
 export const initTabs = () => {
-  Array
-    .from(document.querySelectorAll('.js-select-tab'))
-    .forEach((el) => el.addEventListener('click', (e) => {
-      e.preventDefault();
-      const tabHref = e.target.getAttribute('href');
-      selectTab(tabHref);
-    }));
+  $('body').on('click', '.js-select-tab', (e) => {
+    e.preventDefault();
+    const tabHref = e.target.getAttribute('href');
+    selectTab(tabHref);    
+  });
 };

@@ -41,7 +41,7 @@ mixin post-change(change, entryId, timestamp)
             target: { postId: change.target.postId, boardUri: change.target.boardUri, threadId: change.target.threadId },
             update: { [change.property]: { value: change.oldValue, ts: timestamp } },
           }
-        input.modlog-entry__change-entry__checkbox.js-checkbox-slave(
+        input.modlog-entry__change-entry__checkbox.js-checkbox-slave.js-select-modlog-item(
           type='checkbox',
           data-target=`#${entryId} .modlog-entry__checkbox`
           name='items[]',

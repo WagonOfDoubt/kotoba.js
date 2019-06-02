@@ -10,6 +10,7 @@ import truncate from 'lodash.truncate';
 import { objectDiff } from './object-utils';
 import * as modal from '../modules/modal';
 import tableTemplate from '../templates-compiled/table';
+import actionResultReportTemplate from '../templates-compiled/action-result-report';
 
 
 export const serializeForm = ($form) =>
@@ -100,15 +101,6 @@ export const sendFormData = (url, method, data) => {
 };
 
 
-export const createTable = (rows = [], head = []) => {
-  return $(tableTemplate({
-    head: [head],
-    body: rows,
-    filter: str => truncate(str, { length: 100 })
-  }));
-};
-
-
 export const fetchChanges = ($form, $populateContainer) => {
   const formData = serializeForm($form);
   $populateContainer.text('Loading...');
@@ -116,12 +108,15 @@ export const fetchChanges = ($form, $populateContainer) => {
   $.getJSON(getRoute)
     .done((data) => {
       const diff = objectDiff(formData, data);
-      const table = createTable(
-        Object.entries(diff)
-          .map(([key, value]) => [key, value.old, value.new ]),
-        ['Property', 'Current value', 'New value']
-      );
-      $populateContainer.text('').append(table);
+      const $table = $(tableTemplate({
+        head: [
+          Object.entries(diff)
+            .map(([key, value]) => [key, value.old, value.new ])
+        ],
+        body: ['Property', 'Current value', 'New value'],
+        filter: str => truncate(str, { length: 100 }),
+      }));
+      $populateContainer.text('').append($table);
     })
     .fail((data) => {
       if (data.responseJSON) {
@@ -160,4 +155,23 @@ export const fetchPreivew = (url, data, $populateContainer) => {
         $populateContainer.text('Error ' + data.status);
       }
     });
+};
+
+
+export const sendSetFlagRequest = (url, data) => {
+  modal.wait();
+  const onDone = (response) => {
+    console.log(response);
+    let status = 'Success';
+    if (response.responseJSON) {
+      status = `${response.status} ${response.statusText}`;
+      response = response.responseJSON;
+    }
+    modal
+      .alert(status, actionResultReportTemplate(response))
+      .finally(() => window.location.reload());
+  };
+  sendJSON(url, 'patch', data)
+    .then(onDone)
+    .catch(onDone);
 };

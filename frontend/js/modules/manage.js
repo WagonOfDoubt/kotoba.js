@@ -6,9 +6,12 @@
 import $ from 'jquery';
 import * as modal from './modal';
 import { serializeForm, alertErrorHandler, successErrorHandler, sendJSON,
-  sendFormData, createTable, fetchChanges, fetchPreivew } from '../utils/api-utils';
+  sendFormData, fetchChanges, fetchPreivew, sendSetFlagRequest }
+    from '../utils/api-utils';
+
 import { assignDeep } from '../utils/object-utils';
 import assetUploadPreviewTemplate from '../templates-compiled/asset-upload-preview';
+import modlogModalBodyTemplate from '../templates-compiled/modlog-modal-body';
 
 
 const initPreviewBtns = () => {
@@ -351,6 +354,55 @@ const managePage_trash = () => {
 };
 
 
+const managePage_modlog = () => {
+    $('#modlog-form').on('send', (e) => {
+    const $targetForm = $(e.target);
+    const formData = $targetForm.serializeJSON();
+    const items = formData.items.map(JSON.parse);
+    const updates = items.reduce((acc, val) => {
+      const { postId, boardUri } = val.target;
+      const timestamp = val.target.timestamp;
+      const targetKey = `${boardUri}-${postId}`;
+      if (!acc[targetKey]) {
+        acc[targetKey] = {
+          target: val.target,
+          update: {},
+        };
+      }
+      for (let [key, value] of Object.entries(val.update)) {
+        if (!(key in acc[targetKey].update)) {
+          acc[targetKey].update[key] = value;
+        } else {
+          const currentValue = acc[targetKey].update[key];
+          const newValue = currentValue.ts > value.ts ? currentValue : value;
+          acc[targetKey].update[key] = newValue;
+        }
+      }
+      return acc;
+    }, {});
+    const groupedItems = Object.values(updates).map((u) => {
+      for (let [key, value] of Object.entries(u.update)) {
+        u.update[key] = value.value;
+      }
+      return u;
+    });
+
+    modal
+      .confirmPrompt('Confirm action', modlogModalBodyTemplate({ items: groupedItems }))
+      .then(({returnValue, formData}) => {
+        console.log(groupedItems, returnValue, formData);
+        const regenerate = formData.regenerate;
+        const requestData = {
+          items: groupedItems,
+          regenerate: regenerate,
+        };
+        sendSetFlagRequest('/api/post', requestData);
+      });
+    e.preventDefault();
+  });
+};
+
+
 /**
  * Initialize module
  */
@@ -375,6 +427,7 @@ export const init = () => {
     'manage-page-profile': managePage_profile,
     'manage-page-assets': managePage_assets,
     'manage-page-trash': managePage_trash,
+    'manage-page-modlog': managePage_modlog,
   };
   const currentActivity = Object
     .keys(activities)

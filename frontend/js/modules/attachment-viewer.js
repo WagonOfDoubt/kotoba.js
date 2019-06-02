@@ -175,7 +175,10 @@ export const initSelectAttachment = () => {
         const checkbox = a.querySelector('.js-select-attachment');
         if (checkbox) {
           checkbox.checked = !checkbox.checked;
-          $(checkbox).change();          
+          $(checkbox).change();
+          if (attachment) {
+            attachment.classList.toggle('selected', checkbox.checked);
+          }
         }
       }
       e.preventDefault();
