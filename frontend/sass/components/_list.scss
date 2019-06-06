@@ -37,12 +37,18 @@
   .list__item {
     display: inline;
 
-    &:not(:first-child)::before {
+    & + .list__item::before {
       content: ', ';
     }
   }
 
+  .list__separator {
+    display: inline;
+    border: none;
+    margin: 0;
+  }
+
   .list__separator::before {
-    display: ' | ';
+    content: ' | ';
   }
 }

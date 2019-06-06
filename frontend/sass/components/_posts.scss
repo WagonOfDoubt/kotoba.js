@@ -22,7 +22,7 @@
   }
 }
 
-.post_reply, .board-page, .thread-page {
+.board-page, .thread-page {
   .post__header__board {
     display: none;
   }
@@ -169,6 +169,10 @@
 
   .post_reply {
     min-width: 380px;
+  }
+
+  .post_op {
+    flex-grow: 1;
   }
 
   &::before {

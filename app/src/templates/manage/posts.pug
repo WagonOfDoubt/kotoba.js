@@ -1,0 +1,23 @@
+extends managepage.pug
+include ../mixins/timestamp.pug
+include ../mixins/postbody.pug
+
+block header
+  h1 Recent posts
+  //- pre= JSON.stringify(selectedBoards, null, 2)
+  form(method='GET', action='/manage/posts')
+    ul.list.list_inline
+      for board in boards
+        - var isSelected = selectedBoards.includes(board)
+        li.list__item
+          label
+            input.js-set-uri-param(type='checkbox', value=board.uri, name='filter[]', checked=isSelected)
+            span /#{board.uri}/
+    input(type='submit', value='Filter')
+
+
+block main
+  form.admin-form.replies-container
+    for post in posts
+      div.reply-container(id=`reply${ post.postId }`)
+        include ../includes/post.pug
