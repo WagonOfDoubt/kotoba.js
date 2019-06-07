@@ -9,6 +9,17 @@ include ../mixins/timestamp.pug
 
 block header
   h1 Recent uploads
+
+  form(method='GET', action='/manage/uploads')
+    ul.list.list_inline
+      for board in boards
+        - var isSelected = selectedBoards.includes(board)
+        li.list__item
+          label
+            input.js-set-uri-param(type='checkbox', value=board.uri, name='filter[]', checked=isSelected)
+            span /#{board.uri}/
+    input(type='submit', value='Filter')
+
   -var numEntries = posts.reduce((acc, val) => acc + val.attachments.length, 0);
   p Showing #[strong= numEntries] latest uploads.
 
