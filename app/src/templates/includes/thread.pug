@@ -11,11 +11,15 @@ div.thread-container(
   include post.pug
   if omittedPosts > 0
     span.omittedposts
-      | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
+      if omittedAttachments
+        | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
+      else
+        | #{ omittedPosts } posts omitted.
       | 
       span.clickreplytoview
         | Click Reply to view.
   div.replies-container
     for post in replies
-      div.reply-container(id=`reply${ post.postId }`)
-        include post.pug
+      if !post.isDeleted
+        div.reply-container(id=`reply${ post.postId }`)
+          include post.pug
