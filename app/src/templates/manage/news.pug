@@ -12,7 +12,7 @@ block header
 
 block main
   - var action = news ? '/api/news/' + news.number : '/api/news/';
-  - var method = news ? 'PATCH' : 'PUT';
+  - var method = news ? 'PATCH' : 'POST';
   form#form-edit-news(action=action, data-method=method)
     - var values = news ? news : { postedby: user.login };
     +textEdit('subject', 'Subject', '', true)

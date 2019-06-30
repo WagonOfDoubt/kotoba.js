@@ -1,12 +1,23 @@
+/**
+ * Model for news entries.
+ * @module models/news
+ */
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const newsSchema = Schema({
+  /** @type {Number} Sequential number of entry that can be used as unique id */
   number:       { type: Number, required: true, unique: true, index: true },
+  /** @type {String} Entry subject */
   subject:      { type: String, default: '' },
+  /** @type {String} Entry message */
   message:      { type: String, default: '' },
+  /** @type {Date} When entry was created */
   postedDate:   { type: Date, default: Date.now },
+  /** @type {String} Who posted this entry */
   postedby:     { type: String, default: '' },
+  /** @type {String} E-mail of poster */
   postedemail:  { type: String, default: '' }
 }, { collection: 'news' });
 

@@ -116,6 +116,7 @@ router.get(
  * "bg", "favicon", "logo", "misc", "news", "placeholder", "style"
  * 
  * @apiUse RequestValidationError
+ * @apiUse AuthRequiredError
  * @apiUse PermissionDeniedError
  * @apiUse FileAlreadyExistsError
  * @apiUse FileFormatNotSupportedError
@@ -304,8 +305,9 @@ router.post(
  * @apiName UpdateAssets
  * @apiGroup Assets
  * @apiPermission admin
- * @apiUse RequestValidationError Request did not pass validation
- * @apiUse PermissionDeniedError  User has no permission for this action
+ * @apiUse RequestValidationError
+ * @apiUse AuthRequiredError
+ * @apiUse PermissionDeniedError
  */
 router.patch(
   '/api/assets/',
