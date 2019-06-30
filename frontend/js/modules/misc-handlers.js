@@ -55,7 +55,7 @@ const initSelectDeselect = () => {
 };
 
 const initSendForm = () => {
-  $('.js-send-form').on('click', (e) => {
+  $('body').on('click', '.js-send-form', (e) => {
     const $targetForm = $(e.target.dataset.target);
     $targetForm.trigger('send');
   });
