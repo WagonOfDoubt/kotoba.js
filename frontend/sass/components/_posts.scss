@@ -186,7 +186,9 @@
 }
 
 /* hidden posts */
-.board-page .post_hidden {
+.board-page .post_op.post_hidden,
+.board-page .post_reply.post_hidden,
+.thread-page .post_reply.post_hidden {
   .post__body,
   .post__footer,
   .attachment,
