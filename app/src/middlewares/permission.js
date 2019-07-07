@@ -43,7 +43,7 @@ const checkPostPermission = async (target, password, updateObj, roles, user) => 
     roleName = '__poster';
   }
   const getRelevantPriority = (field, value) => {
-    if (user.authority === 'admin') {
+    if (user && user.authority === 'admin') {
       return 10000;
     }
     if (boardRole && passwordMatches) {
