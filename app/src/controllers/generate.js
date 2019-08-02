@@ -4,7 +4,8 @@
  * @module controllers/generate
  */
 
-const fs = require('fs');
+const fs = require('fs-extra');
+const path = require('path');
 const pug = require('pug');
 const _ = require('lodash');
 
@@ -49,14 +50,11 @@ const getTemplateGlobals = async () => {
  */
 const renderToFile = async (dir, filename, template, data) => {
   const path = `${ dir }/${ filename }`;
-  const dirExists = fs.existsSync(dir);
-  if (!dirExists) {
-    fs.mkdirSync(dir);
-  }
   const globals = await getTemplateGlobals();
   const templateData = Object.assign(globals, data);
   try {
-    fs.writeFileSync(path, pug.renderFile(template, templateData));
+    await fs.ensureDir(dir);
+    await fs.writeFile(path, pug.renderFile(template, templateData));
   } catch (err) {
     /**
      * @todo create TemplateRenderingError class
@@ -351,6 +349,19 @@ const generateMainPage = async () => {
 
 
 /**
+ * Generate main page (/index.html) if it does not exist.
+ * @async
+ */
+const ensureMainPage = async () => {
+  const indexPath = path.join(config.html_path, 'index.html');
+  const indexExists = await fs.pathExists(indexPath);
+  if (!indexExists) {
+    await generateMainPage();
+  }
+};
+
+
+/**
  * Regenerate all static html.
  * @returns {Promise}
  */
@@ -375,4 +386,5 @@ module.exports.generateBoardPagesAndCatalog = generateBoardPagesAndCatalog;
 module.exports.generateBoard = generateBoard;
 module.exports.generateBoards = generateBoards;
 module.exports.generateMainPage = generateMainPage;
+module.exports.ensureMainPage = ensureMainPage;
 module.exports.regenerateAll = regenerateAll;

@@ -330,7 +330,7 @@ router.patch(
         in: 'body',
         optional: true,
         isBoolean: true,
-        toBooean: true,
+        toBoolean: true,
       },
       'assets.*.name': {
         in: 'body',

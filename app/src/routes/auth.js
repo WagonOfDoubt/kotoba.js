@@ -8,7 +8,7 @@ const config = require('../json/config.json');
 
 
 /*
- * Sets cookie kot.user with user login, id and authority if user is looged in
+ * Sets cookie kot.user with user login, id and authority if user is logged in
  * and clears cookie if not.
  */
 const setUserCookie = (req, res) => {
