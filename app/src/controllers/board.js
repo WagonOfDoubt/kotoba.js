@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const config = require('../json/config.json');
-const { generateBoard, generateCatalog } = require('./generate');
+const { generateBoard } = require('./generate');
 const Board = require('../models/board');
 const Post = require('../models/post');
 

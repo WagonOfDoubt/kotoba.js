@@ -4,6 +4,7 @@
  * @module controllers/generate
  */
 
+const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
 const pug = require('pug');
@@ -52,6 +53,8 @@ const renderToFile = async (dir, filename, template, data) => {
   const path = `${ dir }/${ filename }`;
   const globals = await getTemplateGlobals();
   const templateData = Object.assign(globals, data);
+  // If set to false, everything will be like ~30 times slower
+  templateData.cache = true;
   try {
     await fs.ensureDir(dir);
     await fs.writeFile(path, pug.renderFile(template, templateData));
@@ -62,7 +65,7 @@ const renderToFile = async (dir, filename, template, data) => {
     const error = new Error('fail to generate ' + filename);
     error.data = data;
     error.error = err;
-    console.log('fail to generate', filename, 'data:', data, err);
+    console.error('fail to generate', filename, 'data:', data, err);
     throw error;
   }
 };
@@ -75,16 +78,20 @@ const renderToFile = async (dir, filename, template, data) => {
  * @param {Post} thread - The op-post mongoose document.
  */
 const generateThreadPage = async (thread) => {
-  const board = await Board.findBoards(thread.boardUri).exec();
+  const board = thread.board;
+  assert(board instanceof Board, 'post.board must be populated with document');
+
+  const timeLabel = `generateThreadPage /${board.uri}/res/${thread.postId}.html`;
+  console.time(timeLabel);
 
   const data = {
     board: board,
     thread: thread,
-    replies: thread.children,
+    replies: thread.children || [],
     isPage: false,
     stats: {},
   };
-  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
+  data.stats.uniqueUserPosts = board.uniquePosts;
   if (board.locale) {
     data.lang = board.locale;
   }
@@ -93,7 +100,7 @@ const generateThreadPage = async (thread) => {
   const filename = `${ thread.postId }.html`;
   const template = './templates/threadpage.pug';
   await renderToFile(dir, filename, template, data);
-  console.log('generateThreadPage', board.uri, thread.postId);
+  console.timeEnd(timeLabel);
   return thread;
 };
 
@@ -109,10 +116,15 @@ const generateThreadPage = async (thread) => {
  * @param {Post} thread - The op-post mongoose document.
  */
 const generateThreadPreview = async (thread) => {
-  const board = await Board.findBoards(thread.boardUri).exec();
+  const board = thread.board;
+  assert(board instanceof Board, 'post.board must be populated with document');
+
+  const timeLabel = `generateThreadPreview /${board.uri}/res/${thread.postId}-preview.html`;
+  console.time(timeLabel);
+
   const showReplies =
     thread.isSticky ? board.showRepliesSticky : board.showReplies;
-  const children = thread.children.filter((c) => !c.isDeleted);
+  const children = (thread.children || []).filter((c) => !c.isDeleted);
   const omitted = children.slice(0, children.length - showReplies);
   const omittedPosts = omitted.length;
   let omittedAttachments = 0;
@@ -134,12 +146,12 @@ const generateThreadPreview = async (thread) => {
     isPage: true,
     stats: {},
   };
-  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
+  data.stats.uniqueUserPosts = board.uniquePosts;
   const dir = `${ config.html_path }/${ board.uri }/res`;
   const filename = `${ thread.postId }-preview.html`;
   const template = './templates/includes/thread.pug';
   await renderToFile(dir, filename, template, data);
-  console.log('generateThreadPreview', board.uri, thread.postId);
+  console.timeEnd(timeLabel);
 };
 
 
@@ -149,11 +161,14 @@ const generateThreadPreview = async (thread) => {
  * @param {Post} thread - The op-post mongoose document.
  * @returns {Promise}
  */
-const generateThread = thread =>
-  Promise.all([
+const generateThread = async (thread) => {
+  const board = thread.board;
+  assert(board instanceof Board, 'post.board must be populated with document');
+  return Promise.all([
     generateThreadPage(thread),
     generateThreadPreview(thread)
   ]);
+};
 
 
 /**
@@ -176,13 +191,17 @@ const generateThreads = threads =>
  * @param {Number} totalPages - Number of pages for pages selector.
  */
 const generateBoardPage = async (board, threads, pNum, totalPages) => {
+  const timeLabel = `generateBoardPage /${board.uri}/${pNum}.html`;
+  console.time(timeLabel);
   const files = threads.map((thread) =>
     `${ config.html_path }/${ board.uri }/res/${ thread.postId }-preview.html`);
   const promises = files.map(filepath => {
     return new Promise((resolve, reject) => {
       fs.readFile(filepath, (err, fileData) => {
         if (err) {
-          reject(err);
+          console.error(err);
+          const filename = path.basename(filepath);
+          resolve(`<div class='error'>ERROR: unable to read file ${filename}</div>`);
         } else {
           resolve(fileData);
         }
@@ -221,7 +240,7 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
     },
     stats: {},
   };
-  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
+  data.stats.uniqueUserPosts = board.uniquePosts;
   if (board.locale) {
     data.lang = board.locale;
   }
@@ -230,7 +249,7 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
   const filename = getPageUrl(pNum);
   const template = './templates/boardpage.pug';
   await renderToFile(dir, filename, template, data);
-  console.log('generateBoardPage', board.uri, pNum);
+  console.timeEnd(timeLabel);
 };
 
 
@@ -243,6 +262,8 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
  * @returns {Board} - same board that was passed as the first argument
  */
 const generateBoardPages = async (board, threads) => {
+  const timeLabel = `generateBoardPages /${board.uri}/`;
+  console.time(timeLabel);
   if (!threads) {
     threads = await Post.getSortedThreads(board);
   }
@@ -260,7 +281,7 @@ const generateBoardPages = async (board, threads) => {
       await generateBoardPage(board, e, i, arr.length);
       return e;
     }));
-  console.log('generateBoardPages', board.uri);
+  console.timeEnd(timeLabel);
   return board;
 };
 
@@ -277,8 +298,10 @@ const generateCatalog = async (board, threads = null) => {
   if (!board.features.catalog) {
     return board;
   }
+  const timeLabel = `generateCatalog /${board.uri}/${config.catalog_filename}`;
+  console.time(timeLabel);
   if (!threads) {
-    threads = await Post.getSortedThreads(board).populate('children');
+    threads = await Post.getSortedThreads(board);
   }
   const data = {
     lang: board.locale || globals.lang,
@@ -286,12 +309,12 @@ const generateCatalog = async (board, threads = null) => {
     threads: threads,
     stats: {},
   };
-  data.stats.uniqueUserPosts = await board.getUniqueUserPosts();
+  data.stats.uniqueUserPosts = board.uniquePosts;
   const filename = config.catalog_filename;
   const dir = `${ config.html_path }/${ board.uri }`;
   const template = './templates/catalogpage.pug';
   await renderToFile(dir, filename, template, data);
-  console.log('generateCatalog', board.uri);
+  console.timeEnd(timeLabel);
   return board;
 };
 
@@ -301,12 +324,13 @@ const generateCatalog = async (board, threads = null) => {
  * @param {Board} board - Board to regenerate.
  * @returns {Promise}
  */
-const generateBoardPagesAndCatalog = board =>
-  Post.getSortedThreads(board).populate('children')
-    .then(threads => Promise.all([
-      generateBoardPages(board, threads),
-      generateCatalog(board, threads)
-    ]));
+const generateBoardPagesAndCatalog = async board => {
+  const threads = await Post.getSortedThreads(board);
+  await Promise.all([
+    generateBoardPages(board, threads),
+    generateCatalog(board, threads)
+  ]);
+};
 
 
 /**
@@ -314,13 +338,14 @@ const generateBoardPagesAndCatalog = board =>
  * @param {Board} board - Board to regenerate.
  * @returns {Promise}
  */
-const generateBoard = board =>
-  Post.getSortedThreads(board).populate('children')
-    .then(threads => Promise.all([
-      generateThreads(threads)
-        .then(generateBoardPages(board, threads)),
-      generateCatalog(board, threads)
-    ]));
+const generateBoard = async board => {
+  const threads = await Post.getSortedThreads(board);
+  await Promise.all([
+    generateThreads(threads)
+      .then(generateBoardPages(board, threads)),
+    generateCatalog(board, threads)
+  ]);
+};
 
 
 /**
@@ -337,6 +362,8 @@ const generateBoards = boards =>
  * @async
  */
 const generateMainPage = async () => {
+  const timeLabel = `generateMainPage`;
+  console.time(timeLabel);
   const news = await News.find().sort({ postedDate: -1 }).exec();
   const data = {
     news: news
@@ -344,7 +371,7 @@ const generateMainPage = async () => {
   const dir = config.html_path;
   const template = './templates/mainpage.pug';
   await renderToFile(dir, 'index.html', template, data);
-  console.log('generateMainPage');
+  console.timeEnd(timeLabel);
 };
 
 
@@ -375,13 +402,8 @@ const regenerateAll = () =>
     ]);
 
 
-module.exports.generateThreadPage = generateThreadPage;
-module.exports.generateThreadPreview = generateThreadPreview;
 module.exports.generateThread = generateThread;
 module.exports.generateThreads = generateThreads;
-module.exports.generateBoardPage = generateBoardPage;
-module.exports.generateBoardPages = generateBoardPages;
-module.exports.generateCatalog = generateCatalog;
 module.exports.generateBoardPagesAndCatalog = generateBoardPagesAndCatalog;
 module.exports.generateBoard = generateBoard;
 module.exports.generateBoards = generateBoards;

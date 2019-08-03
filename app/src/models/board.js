@@ -64,16 +64,36 @@ const boardSchema = Schema({
     sage:          { type: Boolean, default: true },
     permanentSage: { type: Boolean, default: false },
   },
+  /**
+   * @todo
+   * @type {Array}
+   */
   filetypes: [{
     type: Schema.Types.ObjectId,
   }],
+  /**
+   * Post counter
+   * @type {Number}
+   */
   postcount: {
     type: Number,
     default: 0,
     get: v => Math.round(v),
     set: v => Math.round(v),
     min: 0
-  }
+  },
+  /**
+   * Number of unique posts for a board.
+   * This is stored in DB for performance reasons to avoid unnecessary queries.
+   * @type {Number}
+   */
+  uniquePosts: {
+    type: Number,
+    default: 0,
+    get: v => Math.round(v),
+    set: v => Math.round(v),
+    min: 0
+  },
 });
 
 boardSchema.statics.defaults = () => {
@@ -102,11 +122,6 @@ boardSchema.statics.findBoards = (boardUri, inclHidden = true) => {
 
 boardSchema.statics.findBoard = (boardUri) => {
   return Board.findOne({ uri: boardUri });
-};
-
-boardSchema.methods.getUniqueUserPosts = async function () {
-  const posts = await Post.getNumberOfUniqueUserPosts(this.uri);
-  return posts;
 };
 
 

@@ -38,8 +38,6 @@ mixin element(el)
     = el.match
 
 mixin postbody(post)
-  if post.rawHtml
-    != post.rawHtml
-  else if post.parsed
+  if post.parsed
     for el in post.parsed
       +element(el)

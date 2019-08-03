@@ -47,14 +47,6 @@ const postSchema = Schema({
     ref: 'Post'
   },
   /**
-   * READ ONLY. OP ONLY. Ref to replies to thread.
-   * @type {Array[ObjectId]}
-   */
-  children: [{
-    type: ObjectId,
-    ref: 'Post'
-  }],
-  /**
    * READ ONLY. Date of post creation.
    * @type {Date}
    */
@@ -95,11 +87,6 @@ const postSchema = Schema({
    * @type {String}
    */
   body:                { type: String, default: '' },
-  /**
-   * READ ONLY. Parsed post body for using in resulting template.
-   * @type {String}
-   */
-  rawHtml:             { type: String, default: '' },
   /**
    * READ ONLY. Intermediate parsing result with HTML strirngs and token
    * objects. Post can be re-parsed to update references to moved posts.
@@ -302,22 +289,17 @@ postSchema.statics.isEditablePostField = regExpTester(createRegExpFromArray(allE
 postSchema.statics.toKey = ({boardUri, postId}) => `post-${boardUri}-${postId}`;
 
 
-const cachedUniqueUserPosts = {};
-
 /**
  * Get number of unique IP addresses of posters on a board.
  * @param {String} boardUri
  * @returns {Number} Number of unique IP addresses of posters on given board.
  */
 postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
-  if (cachedUniqueUserPosts.hasOwnProperty(boardUri)) {
-    return cachedUniqueUserPosts[boardUri];
-  }
-
   const queryResult = await Post.aggregate([
     {
       $match: {
-        boardUri: boardUri
+        boardUri: boardUri,
+        isDeleted: false,
       }
     },
     {
@@ -337,14 +319,8 @@ postSchema.statics.getNumberOfUniqueUserPosts = async (boardUri) => {
   if (!queryResult.length || !queryResult[0].unique) {
     return 0;
   }
-  cachedUniqueUserPosts[boardUri] = queryResult[0].unique;
-  return cachedUniqueUserPosts[boardUri];
+  return queryResult[0].unique;
 };
-
-postSchema.pre('save', function(next) {
-  delete cachedUniqueUserPosts[this.boardUri];
-  next();
-});
 
 
 /**
@@ -432,21 +408,27 @@ postSchema.statics.findPost = (boardUri, postId) => {
 
 
 /**
- * Find one post by it's boardUri and postId.
- * @param {String} boardUri
- * @param {Object} board - board mongoose document. It must have uri, maxPages
- * and maxThreadsOnPage fields.
- * @returns {Array<Object>} Array of mongoose documents.
+ * Find all threads on board sorted by bump order.
+ * @param {Document} board - board mongoose document.
+ * @returns {Array<Document>} Array of mongoose documents.
+ * @async
  */
-postSchema.statics.getSortedThreads = (board) =>
-  Post
+postSchema.statics.getSortedThreads = async (board) => {
+  const posts = await Post
     .find({
       boardUri: board.uri,
       parent: { $exists: false },
       isDeleted: false
     })
     .sort({ isSticky: -1, bumped: -1})
-    .limit(board.maxPages * board.maxThreadsOnPage);
+    .limit(board.maxPages * board.maxThreadsOnPage)
+    .populate('children');
+  // populate each post with same board document, because mongoose populate
+  // will create one instance of per post, and there will be unnecessary
+  // queries to database
+  posts.forEach(p => p.board = board);
+  return posts;
+};
 
 
 postSchema.virtual('numberOfAttachmentsInThread').get(function () {
@@ -456,6 +438,15 @@ postSchema.virtual('numberOfAttachmentsInThread').get(function () {
   return this.children.reduce((acc, child) => {
     return acc + (child.attachments ? child.attachments.length : 0);
   }, 0);
+});
+
+
+postSchema.virtual('children', {
+  ref: 'Post',
+  localField: '_id',
+  foreignField: 'parent',
+  justOne: false,
+  options: { sort: { timestamp: 1 } }
 });
 
 

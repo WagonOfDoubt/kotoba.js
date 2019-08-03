@@ -5,7 +5,7 @@
  */
 
 const ObjectId = require('mongoose').Types.ObjectId;
-const { generateThread, generateThreads, generateBoards, generateBoardPagesAndCatalog } = require('./generate');
+const { generateThread, generateThreads, generateBoardPagesAndCatalog } = require('./generate');
 const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
@@ -41,7 +41,7 @@ const InputError = (msg, reason) => {
  * @returns {number} postId - sequential number of new thread
  */
 module.exports.createThread = async (boardUri, postData, files = []) => {
-  const board = await Board.findOne({ uri: boardUri }).exec();
+  const board = await Board.findBoard(boardUri);
   if (!board) {
     throw InputError('no such board: ' + boardUri, 'invalid_value');
   }
@@ -74,13 +74,15 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
 
   const post = new Post(postData);
   await Parser.parsePost(post);
-  await post
-    .save()
-    .then(generateThread);
-  await Board
-      .findByIdAndUpdate(board._id, { $inc: { postcount: 1 } }, { new: true })
-      .then(generateBoardPagesAndCatalog);
-
+  board.postcount = board.postcount + 1;
+  board.uniquePosts = await Post.getNumberOfUniqueUserPosts(this.uri);
+  await Promise.all([
+    post.save(),
+    board.save(),
+  ]);
+  post.board = board;
+  await generateThread(post);
+  await generateBoardPagesAndCatalog(board);
   return post.postId;
 };
 
@@ -99,7 +101,7 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
 module.exports.createReply = async (boardUri, threadId, postData, files = []) => {
   const [thread, board] = await Promise.all([
       Post.findThread(boardUri, threadId).exec(),
-      Board.findOne({ uri: boardUri }).exec()
+      Board.findBoard(boardUri).exec()
     ]);
 
   if (!board) {
@@ -130,21 +132,22 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
 
   const post = new Post(postData);
   const boardUpdateParams = { $inc: { postcount: 1 } };
-  const threadUpdateParams = { $push: { children: ObjectId(post._id) } };
-  if (!postData.isSage) {
-    threadUpdateParams.bumped = post.timestamp;
-  }
   await Parser.parsePost(post);
-  await post.save();
-  await Post
-    .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams, { new: true });
-  await Post
+  board.postcount = board.postcount + 1;
+  board.uniquePosts = await Post.getNumberOfUniqueUserPosts(this.uri);
+  await Promise.all([post.save(), board.save()]);
+  if (!postData.isSage) {
+    const threadUpdateParams = {};
+    threadUpdateParams.bumped = post.timestamp;
+    await Post
+      .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams);
+  }
+  const updatedThread = await Post
     .findThread(boardUri, threadId)
-    .populate('children')
-    .then(generateThread);
-  await Board
-    .findByIdAndUpdate(ObjectId(board._id), boardUpdateParams, { new: true })
-    .then(generateBoardPagesAndCatalog);
+    .populate('children');
+  updatedThread.board = board;
+  await generateThread(updatedThread);
+  await generateBoardPagesAndCatalog(board);
 
   return post.postId;
 };
@@ -236,18 +239,27 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
       })
       .exec();
   }
-  // regenerate threads
-  if (regenerate && threadsToRegenerate.length) {
-    await Post.findThreads(threadsToRegenerate)
-      .populate('children')
-      .then(threads =>
-          Promise.all(threads.map(generateThread)));
-  }
-  // regenerate boards
   if (regenerate && boardsToRegenerate.length) {
-    await Board.find({ $or: boardsToRegenerate })
-      .then(boards =>
-        Promise.all(boards.map(generateBoardPagesAndCatalog)));
+    const boards = await Board.find({ $or: boardsToRegenerate });
+    const boardsDict = _.groupBy(boards, 'boardUri');
+
+    // regenerate threads
+    if (threadsToRegenerate.length) {
+      const populteThreadBoard = (t) => {
+        t.board = boardsDict[t.boardUri];
+        return t;
+      };
+      await Post.findThreads(threadsToRegenerate)
+        .populate('children')
+        .then(threads =>
+            Promise.all(
+              threads
+                .map(populteThreadBoard)
+                .map(generateThread)
+              ));
+    }
+    // regenerate boards
+    await Promise.all(boards.map(generateBoardPagesAndCatalog));
   }
   // delete files
   if (filesToDelete.length) {
@@ -335,7 +347,7 @@ module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=fal
 
     const originalPost = post.toObject();
     post.set(updateValues);
-    const validationError = post.validateSync();
+    const validationError = await post.validate();
 
     if (validationError) {
       const errorPaths = _.filter(_.map(_.values(validationError.errors), 'path'));

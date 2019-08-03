@@ -91,7 +91,6 @@ router.get('/preview/post/:board/:post',
       const query = { boardUri: board, postId: post };
       const isAdmin = req.user.authority === 'admin';
       const hasBoardRole = req.user.boardRoles.hasOwnProperty(board);
-      console.log(isAdmin, hasBoardRole);
       if (!(isAdmin || hasBoardRole)) {
         query.isDeleted = false;
       }
