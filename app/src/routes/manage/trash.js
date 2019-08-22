@@ -2,6 +2,7 @@ const express = require('express');
 const Asset = require('../../models/asset');
 const Post = require('../../models/post');
 const Board = require('../../models/board');
+const Report = require('../../models/report');
 
 const router = express.Router();
 
@@ -27,11 +28,13 @@ router.get('/trash',
 
       const deletedAssets = await Asset.find({ isDeleted: true }).exec();
       const deletedPosts = await Post.find(postsQuery).sort({'timestamp': -1});
+      const deletedReports = await Report.find({ isDeleted: true }).exec();
 
       res.render('manage/trash', {
         activity: 'manage-page-trash',
         numberOfDeletedAssets: deletedAssets.length,
         numberOfDeletedPosts: deletedPosts.length,
+        numberOfDeletedReports: deletedReports.length,
         title: 'Recycle Bin'
       });
     } catch (err) {
@@ -95,11 +98,30 @@ router.get('/trash/assets',
     try {
       
       const deletedAssets = await Asset.find({ isDeleted: true }).exec();
-      const deletedPosts = await Post.find({ isDeleted: true }).exec();
 
       res.render('manage/trash', {
         activity: 'manage-page-trash',
         deletedAssets: deletedAssets,
+        title: 'Recycle Bin'
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+router.get('/trash/reports',
+  async (req, res, next) => {
+    try {
+      
+      const deletedReports = await Report
+        .find({ isDeleted: true })
+        .sort({'timestamp': -1}).exec();
+
+      res.render('manage/trash', {
+        activity: 'manage-page-trash',
+        deletedReports: deletedReports,
         title: 'Recycle Bin'
       });
     } catch (err) {

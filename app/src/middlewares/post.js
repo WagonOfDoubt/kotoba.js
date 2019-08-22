@@ -11,6 +11,60 @@ const Post = require('../models/post');
 const Role = require('../models/role');
 const { RequestValidationError, DocumentNotFoundError } = require('../errors');
 
+
+/**
+ * Express middleware that filters invalid req.body.items by item.target
+ * Valid req.body.items match schema:
+ *   [
+ *     {
+ *       target: {
+ *         boardUri: String,
+ *         postId: Number (int)
+ *       }
+ *     },
+ *     ...
+ *   ]
+ */
+const filterPostTargetItems = (req, res, next) => {
+  try {
+    const items = req.body.items || [];
+    res.locals.fail = res.locals.fail || [];
+
+    if (!items.length) {
+      const noItemsError = new RequestValidationError('No items specified', 'items', null, 'body');
+      return noItemsError.respond(res);
+    }
+
+    // filter input and find unique posts
+    const isValidTarget = (t) => _.has(t, 'boardUri') && _.has(t, 'postId');
+    const [validTargets, invalidTargets] = _.partition(
+      items,
+      (i) => isValidTarget(i.target)
+    );
+
+    if (invalidTargets.length) {
+      const invalidTargetError = new RequestValidationError('item.target is invalid', 'items', null, 'body');
+
+      res.locals.fail = [
+        ...res.locals.fail,
+        ...invalidTargetError.assignToArray(invalidTargets, 'target')
+      ];
+      if (!validTargets.length) {
+        return res
+          .status(400)
+          .json({
+            fail: res.locals.fail,
+          });
+      }
+    }
+    req.body.items = validTargets;
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 /**
  * Express middleware to filter and merge items in post.body.items, can return
  *    response with status 400 (BAD REQUEST) if no valid entires are present
@@ -103,7 +157,7 @@ const filterPostUpdateItems = (req, res, next) => {
       isUpdatesNonEmpty);
 
     if (emptyUpdates.length) {
-      const invalidUpdateError = new RequestValidationError('item.target is invalid', 'items', null, 'body');
+      const invalidUpdateError = new RequestValidationError('item.update is invalid', 'items', null, 'body');
 
       res.locals.fail = [
         ...res.locals.fail,
@@ -317,6 +371,7 @@ const findUserRoles = async (req, res, next) => {
 };
 
 
+module.exports.filterPostTargetItems = filterPostTargetItems;
 module.exports.filterPostUpdateItems = filterPostUpdateItems;
 module.exports.populatePostUpdateItems = populatePostUpdateItems;
 module.exports.filterOutOfBoundItems = filterOutOfBoundItems;

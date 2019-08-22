@@ -3,7 +3,7 @@
  * @module errors/document-error
  */
 
-const { ConflictError, NotFoundError } = require('./base-error');
+const { ConflictError, NotFoundError, NoContentError } = require('./base-error');
 
 /**
  * @apiDefine DocumentAlreadyExistsError
@@ -62,5 +62,17 @@ class DocumentNotFoundError extends NotFoundError {
 }
 
 
+/**
+ * Document was not modified because it's already in that state
+ */
+class DocumentNotModifiedError extends NoContentError {
+  constructor(documentName, param, value, location) {
+    super(`${documentName} was not modified`,
+      'DocumentNotModified', param, value, location);
+  }
+}
+
+
 module.exports.DocumentAlreadyExistsError = DocumentAlreadyExistsError;
 module.exports.DocumentNotFoundError = DocumentNotFoundError;
+module.exports.DocumentNotModifiedError = DocumentNotModifiedError;

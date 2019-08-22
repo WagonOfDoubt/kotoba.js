@@ -41,6 +41,18 @@ class RequestValidationError extends BadRequestError {
   static fromExpressValidator({ msg, param, value, location }) {
     return new RequestValidationError(msg, param, value, location);
   }
+
+  /**
+   * Convert Mongoose ValidationError to RequestValidationError
+   * @static
+   * @param  {ValidationError} error Mongoose ValidationError object
+   * @param  {String}          location Location of parameter in request
+   *    (body, params, query, cookies)
+   * @return {RequestValidationError}
+   */
+  static fromMongooseValidator({ message, path, stringValue }, location) {
+    return new RequestValidationError(message, path, stringValue, location);
+  }
 }
 
 

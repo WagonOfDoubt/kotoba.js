@@ -22,7 +22,7 @@ const ModlogEntry = require('../../models/modlog');
 const { validateRequest } = require('../../middlewares/validation');
 const reqparser = require('../../middlewares/reqparser');
 const { postEditPermission } = require('../../middlewares/permission');
-const { filterPostUpdateItems,
+const { filterPostTargetItems,
   populatePostUpdateItems,
   filterOutOfBoundItems,
   findUserRoles } = require('../../middlewares/post');
@@ -99,7 +99,7 @@ module.exports.modifyPostHandler = [
   validateRequest,
   // filters req.body.items so only posts that can be changed by current user
   // are present
-  filterPostUpdateItems,
+  filterPostTargetItems,
   populatePostUpdateItems,
   filterOutOfBoundItems,
   findUserRoles,

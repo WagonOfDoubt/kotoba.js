@@ -428,7 +428,9 @@ module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=fal
 
     const [threadDocuments, boardDocuments] = await Promise
       .all([
-        Post.findThreadsByIds(threadsAffected).populate('children'),
+        Post.findThreadsByIds(threadsAffected)
+          .populate('children')
+          .populate('board'),
         Board.findBoardsByIds(boardsAffected)
       ]);
     await generateThreads(threadDocuments);

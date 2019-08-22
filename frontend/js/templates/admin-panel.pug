@@ -10,25 +10,32 @@ div.admin-panel
       a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_attachments') Attachments
     li.tab-menu__item.admin-panel__item_modlog
       a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_modlog') ModLog
+    li.tab-menu__item.admin-panel__item_reports
+      a.tab-menu__item-link.js-select-tab(href='#admin-panel__tab_reports') Reports
   //- post tab
   div#admin-panel__tab_posts.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.js-select-post') Select all posts
-      button.js-deselect-all-items(type='button', data-target='.js-select-post, .js-select-attachment') Deselect all
+      button.js-select-all-items(type='button', data-target='.js-select-post') #[+icon('check-square', 'small')] Select all posts
+      button.js-deselect-all-items(type='button', data-target='.js-select-post, .js-select-attachment') #[+icon('square', 'small')] Deselect all posts
+    div.column
+      button.js-report-posts(type='button') #[+icon('flag', 'small')] Report
     div.column
       button.js-set-post-flag(type='submit', name='isSage', value='true') #[+icon('arrow-circle-down', 'small')] Set sage
       button.js-set-post-flag(type='submit', name='isSage', value='false') Unset sage
     div.column
       button.js-set-post-flag(type='submit', name='isDeleted', value='true') #[+icon('trash', 'small')] Delete
       button.js-set-post-flag(type='submit', name='isDeleted', value='false') #[+icon('trash-restore', 'small')] Restore
-    div.column
-      button.js-set-post-flag(type='submit', name='isApproved', value='true') #[+icon('thumbs-up', 'small')] Set Approved
-      button.js-set-post-flag(type='submit', name='isApproved', value='false') #[+icon('thumbs-down', 'small')] Unset Approved
+    div.column.hidden
+      button.js-set-post-flag(type='submit', name='isApproved', value='true') #[+icon('thumbs-up', 'small')] Approve
+      button.js-set-post-flag(type='submit', name='isApproved', value='false') #[+icon('thumbs-down', 'small')] Unapprove
+    div.column.hidden
+      button(type='button') #[+icon('gavel', 'small')] Ban posters
+      button(type='button') #[+icon('hands-helping', 'small')] Pardon posters
   //- thread tab
   div#admin-panel__tab_threads.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.post_op .js-select-post') Select all threads
-      button.js-deselect-all-items(type='button', data-target='.post_op .js-select-post, .js-select-attachment') Deselect all threads
+      button.js-select-all-items(type='button', data-target='.post_op .js-select-post') #[+icon('check-square', 'small')] Select all threads
+      button.js-deselect-all-items(type='button', data-target='.post_op .js-select-post, .js-select-attachment') #[+icon('square', 'small')] Deselect all threads
     div.column
       button.js-set-post-flag(type='submit', name='isSticky', value='true') #[+icon('thumbtack', 'small')] Set Sticky
       button.js-set-post-flag(type='submit', name='isSticky', value='false') Unset Sticky
@@ -38,8 +45,8 @@ div.admin-panel
   //- attachment tab
   div#admin-panel__tab_attachments.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.js-select-attachment') Select all attachments
-      button.js-deselect-all-items(type='button', data-target='.js-select-attachment') Deselect all
+      button.js-select-all-items(type='button', data-target='.js-select-attachment') #[+icon('check-square', 'small')] Select all attachments
+      button.js-deselect-all-items(type='button', data-target='.js-select-attachment') #[+icon('square', 'small')] Deselect all attachments
     div.column
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='true') #[+icon('trash', 'small')] Delete
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isDeleted', value='false') #[+icon('trash-restore', 'small')] Restore
@@ -49,10 +56,20 @@ div.admin-panel
     div.column
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='true') Set NSFW
       button.js-set-attachment-flag(type='submit', name='attachments.$[n].isNSFW', value='false') Unset NSFW
-  //- attachment tab
+  //- modlog tab
   div#admin-panel__tab_modlog.tabs__content
     div.column
-      button.js-select-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Select all records
-      button.js-deselect-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') Deselect all
+      button.js-select-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') #[+icon('check-square', 'small')] Select all records
+      button.js-deselect-all-items(type='button', data-target='.modlog-entry__change-entry__checkbox') #[+icon('square', 'small')] Deselect all records
     div.column
       button.js-send-form(type='button', data-target='#modlog-form') Undo selected actions
+  //- report tab
+  div#admin-panel__tab_reports.tabs__content
+    div.column
+      button.js-select-all-items(type='button', data-target='.report-entry__checkbox') #[+icon('check-square', 'small')] Select all reports
+      button.js-deselect-all-items(type='button', data-target='.report-entry__checkbox') #[+icon('square', 'small')] Deselect all reports
+    div.column
+      button.js-set-report-flag(type='submit', name='isDeleted', value='true') #[+icon('trash', 'small')] Delete reports
+    div.column.hidden
+      button(type='button') #[+icon('gavel', 'small')] Ban reporting for users
+      button(type='button') #[+icon('hands-helping', 'small')] Pardon reporting for users

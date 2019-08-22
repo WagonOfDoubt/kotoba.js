@@ -1,0 +1,56 @@
+extends managepage.pug
+include ../mixins/timestamp.pug
+include ../mixins/postbody.pug
+
+block header
+  h1 Reports
+  //- form(method='GET', action='/manage/reports')
+  //-   ul.list.list_inline
+  //-     for board in boards
+  //-       - var isSelected = selectedBoards.includes(board)
+  //-       li.list__item
+  //-         label
+  //-           input.js-set-uri-param(type='checkbox', value=board.uri, name='filter[]', checked=isSelected)
+  //-           span /#{board.uri}/
+  //-   input(type='submit', value='Filter')
+
+
+block main
+  if reports.length
+    form.admin-form.replies-container
+      ul.list.list_unmarked
+        for report in reports
+          if report.isDeleted
+            li.report-entry(id=entryId)
+              div.report-entry__header
+                input(type='checkbox', disabled)
+                label
+                  a(href='/manage/trash/reports') Deleted report
+                  | 
+                  +datetime(report.timestamp)
+              
+          else
+            -var entryId = report._id;
+            li.report-entry(id=entryId)
+              div.report-entry__header
+                label
+                  input.report-entry__checkbox.js-checkbox-master(
+                    type='checkbox',
+                    name='reports[]',
+                    value=entryId,
+                    data-target=`#${entryId} .post__header__checkbox`)
+                  span Report
+                  | 
+                  +datetime(report.timestamp)
+                | 
+                span.posterip IP hash: #[= report.iphash]
+              blockquote.report-entry__reason= report.reason
+              div.report-entry__posts
+                for post in report.posts
+                  div.reply-container(id=`reply${ post.postId }`)
+                    include ../includes/post.pug
+  else
+    | No more entries
+  if (reports.length)
+    - var lastEntry = reports[reports.length - 1]
+    a(href=`/manage/reports/${lastEntry.timestamp.getTime()}`) More entries

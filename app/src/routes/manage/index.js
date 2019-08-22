@@ -10,6 +10,7 @@
  * @see module:routes/manage/news
  * @see module:routes/manage/posts
  * @see module:routes/manage/profile
+ * @see module:routes/manage/reports
  * @see module:routes/manage/sitesettings
  * @see module:routes/manage/spaceused
  * @see module:routes/manage/staff
@@ -39,6 +40,7 @@ router.use('/manage/', require('./modlog'));
 router.use('/manage/', require('./news'));
 router.use('/manage/', require('./posts'));
 router.use('/manage/', require('./profile'));
+router.use('/manage/', require('./reports'));
 router.use('/manage/', require('./roles'));
 router.use('/manage/', require('./sitesettings'));
 router.use('/manage/', require('./spaceused'));

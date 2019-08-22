@@ -6,23 +6,24 @@
 import $ from 'jquery';
 import 'jquery-serializejson';
 import * as modal from './modal';
-import { sendSetFlagRequest } from '../utils/api-utils';
+import { sendSetFlagRequest, sendJSON } from '../utils/api-utils';
 import { closeAllVideos, minimizeAllImages } from './attachment-viewer';
 import { selectTab } from './tabs';
 import adminPanelTemplate from '../templates-compiled/admin-panel';
+import reflinkTemplate from '../templates-compiled/reflink';
+import actionResultReportTemplate from '../templates-compiled/action-result-report';
 
 
 const addAdminPanel = ($form) => {
   const $adminPanel = $(adminPanelTemplate({}));
   $form.append($adminPanel);
 
-  const onSetFlagBtn = (url, e) => {
+  const onSetFlagBtn = (url, col, e) => {
     e.preventDefault();
     const { name, value } = e.target;
     const setFlags = {};
     const formData = $form.serializeJSON();
-    const isAttachment = name.startsWith('attachments.$[n].');
-    const collection = isAttachment ? formData.attachments : formData.posts;
+    const collection = formData[col];
     /**
      * [
      *   {
@@ -47,10 +48,72 @@ const addAdminPanel = ($form) => {
     sendSetFlagRequest(url, data);
   };
 
+  const onReportPosts = (url, e) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    const formData = $form.serializeJSON();
+    const collection = formData.posts;
+
+    const posts = collection.map(tragetStr => {
+      const [ post, boardUri, sPostId, attachmentIndex ] = tragetStr.split('-');
+      const postId = parseInt(sPostId);
+      return { boardUri, postId };
+    });
+    const postList = posts.map(reflinkTemplate).join(', ');
+    const onDone = (response) => {
+      console.log(response);
+      let status = 'Success';
+      if (response.statusText) {
+        status = `${response.status} ${response.statusText}`;
+      }
+      if (response.responseJSON) {
+        response = response.responseJSON;
+      }
+      modal
+        .alert(status, actionResultReportTemplate(response));
+    };
+    modal
+      .confirmPrompt('Report posts', `
+        <div>Report following posts: ${postList}</div>
+        <div>Reason:</div>
+        <div>
+          <textarea name="text" class="from-input" cols="38" rows="4"></textarea>
+        </div>`)
+      .then(({returnValue, formData}) => {
+        const data = {
+          items: posts.map(p => ({ target: p })),
+          reason: formData.text,
+        };
+        const url = '/api/report';
+        modal.wait();
+        sendJSON(url, 'post', data)
+          .then(onDone)
+          .catch(onDone);
+      });
+  };
+
+  const onSetReportFlagBtn = (url, col, e) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    const setFlags = {};
+    const formData = $form.serializeJSON();
+    const collection = formData[col];
+
+    const reports = collection.map(reportId => {
+      const update = { _id: reportId };
+      update[name] = value === 'true';
+      return update;
+    });
+    const data = { reports };
+    sendSetFlagRequest(url, data);
+  };
+
   // add events
-  $('.js-set-attachment-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
-  $('.js-set-post-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
-  $('.js-set-thread-flag').on('click', (e) => onSetFlagBtn('/api/post', e));
+  $('.js-set-attachment-flag').on('click', (e) => onSetFlagBtn('/api/post', 'attachments', e));
+  $('.js-set-post-flag').on('click', (e) => onSetFlagBtn('/api/post', 'posts', e));
+  $('.js-set-thread-flag').on('click', (e) => onSetFlagBtn('/api/post', 'posts', e));
+  $('.js-set-report-flag').on('click', (e) => onSetReportFlagBtn('/api/report', 'reports', e));
+  $('.js-report-posts').on('click', (e) => onReportPosts('/api/report', e));
 
   return $adminPanel[0];
 };
@@ -84,6 +147,7 @@ const checkAdminForm = ($form) => {
     'posts': 'input[name="posts[]"]:checked',
     'threads': '.post_op input[name="posts[]"]:checked',
     'attachments': 'input[name="attachments[]"]:checked',
+    'reports': 'input[name="reports[]"]:checked',
   };
   let hasSelected = false;
   const tabsVisible = {};

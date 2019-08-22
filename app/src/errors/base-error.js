@@ -2,7 +2,7 @@
  * Module contains abstract error class
  * @module errors/base-error
  */
-
+const _ = require('lodash');
 
 /**
  * Base error class
@@ -170,7 +170,7 @@ class BaseError extends Error {
     return array.map((item) => {
       const resp = this.toResponse();
       if (valueField) {
-        resp.error.value = item[valueField];
+        resp.error.value = _.get(item, valueField);
       }
       return Object.assign(item, resp);
     });
@@ -261,6 +261,16 @@ class TooManyRequestsError extends BaseError {
 }
 
 
+/**
+ * Generic "204 No Content" Error
+ */
+class NoContentError extends BaseError {
+  constructor(message, code, param, value, location) {
+    super(message, code || 'NoContent', 204, param, value, location);
+  }
+}
+
+
 module.exports.BaseError = BaseError;
 module.exports.BadRequestError = BadRequestError;
 module.exports.UnauthorizedError = UnauthorizedError;
@@ -269,3 +279,4 @@ module.exports.NotFoundError = NotFoundError;
 module.exports.ConflictError = ConflictError;
 module.exports.UnsupportedMediaTypeError = UnsupportedMediaTypeError;
 module.exports.TooManyRequestsError = TooManyRequestsError;
+module.exports.NoContentError = NoContentError;

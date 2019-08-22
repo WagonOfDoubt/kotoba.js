@@ -129,7 +129,6 @@ module.exports.toArray = (path) => {
           req.body = arr;
         }
       }
-      console.log(req.body);
       next();
     } catch (err) {
       next(err);

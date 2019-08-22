@@ -3,9 +3,13 @@ include mixins/reflink.pug
 
 if (success && success.length)
   | Successfully changed:
-  ul.list_unmarked
-    for item in success
-      +reflink(item.ref)
+  if success[0].ref
+    ul.list_unmarked
+      for item in success
+        if (item.ref)
+          +reflink(item.ref)
+  else
+    |  #[strong= success.length] item(s)
 
 if (fail && fail.length)
   | Not changed:

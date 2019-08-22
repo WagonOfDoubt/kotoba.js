@@ -6,6 +6,7 @@
  * @see module:routes/api/maintenance
  * @see module:routes/api/news
  * @see module:routes/api/post
+ * @see module:routes/api/report
  * @see module:routes/api/settings
  * @see module:routes/api/user
  */
@@ -18,6 +19,7 @@ router.use(require('./board'));
 router.use(require('./maintenance'));
 router.use(require('./news'));
 router.use(require('./post'));
+router.use(require('./report'));
 router.use(require('./role'));
 router.use(require('./settings'));
 router.use(require('./user'));
