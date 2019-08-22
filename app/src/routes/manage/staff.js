@@ -38,8 +38,8 @@ router.get('/staff/:userLogin?',
       const query = _.pick(req.query, ['role', 'login', 'authority', 'board']);
 
       const staffOmitted = staffWithRoles.filter((sm) => {
-        const smBoards = Array.from(Object.keys(sm.boardRoles));
-        const smRoles = Array.from(Object.values(sm.boardRoles)).map(r => r.roleName);
+        const smBoards = Array.from(Object.keys(sm.boardRoles || {}));
+        const smRoles = Array.from(Object.values(sm.boardRoles || {})).map(r => r.roleName);
         return ((query.login && (query.login !== sm.login)) ||
           (query.authority && (query.authority !== sm.authority)) ||
           (query.role && !smRoles.includes(query.role)) ||

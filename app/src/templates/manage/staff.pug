@@ -23,7 +23,7 @@ mixin userRow(u)
     span.user__authority(class=userClass, class={'highlight': u.authority === query.authority})= u.authority
   td
     -var omitFilter = ([b, r]) => (query.role && query.role !== r.roleName) || (query.board && query.board !== b);
-    -var rolesArr = Array.from(Object.entries(u.boardRoles));
+    -var rolesArr = Array.from(Object.entries(u.boardRoles || {}));
     -var omittedRoles = rolesArr.filter(omitFilter);
     -var notOmittedRoles = rolesArr.filter(o => !omittedRoles.includes(o));
     span.user__roles(class=userClass)
@@ -143,7 +143,7 @@ block main
         div.info This user has no permissions on any board.
 
       if staffMember.boardRoles
-        -var currentUserRoles = Object.entries(staffMember.boardRoles)
+        -var currentUserRoles = Object.entries(staffMember.boardRoles || {})
         for userRole in currentUserRoles
           if userRole
             -var board = userRole[0]
