@@ -1,12 +1,14 @@
+include ./icons.pug
+
 mixin shortAccess(role, permissions, prop)
   -var access = role && role[permissions] && role[permissions][prop] && role[permissions][prop].access
   if (access)
     if (access === 'no-access')
-      abbr(title='no access') 🚫 n
+      abbr.badge.badge_danger(title='no access') #[+icon('ban', 'small')] n
     else if (access === 'read-only')
-      abbr(title='read only') 👁️ r
+      abbr.badge.badge_info(title='read only') #[+icon('eye', 'small')] r
     else
-      abbr(title='write') ✔️ r/w
+      abbr.badge.badge_success(title='write') #[+icon('edit', 'small')] w
   else
-    abbr.error(title='undefined') ❓ n/a
+    abbr.error(title='undefined') #[+icon('question', 'small')] n/a
 

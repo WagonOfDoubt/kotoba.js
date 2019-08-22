@@ -5,6 +5,7 @@ include ../mixins/modals.pug
 include ../mixins/timestamp.pug
 include ../mixins/text.pug
 include ../mixins/controls.pug
+include ../mixins/icons.pug
 
 mixin userRole(b, r)
   span(class=`user__role`)
@@ -168,7 +169,7 @@ block main
             -var fname= q[0]
             -var fvalue= q[1]
             -var delquery = queryArr.filter(([qn, qv]) => qn !== fname && qv !== fvalue).map((qarr) => qarr.join('=')).join('&')
-            span.query-filter
+            span.query-filter.badge.badge_primary
               if i !== 0
                 | ,
                 |
@@ -176,8 +177,8 @@ block main
               | :
               span.query-filter__value= fvalue
               | 
-              span.button.button_link
-                a(href=`?${delquery}`) ✕
+              span.button
+                a(href=`?${delquery}`) #[+icon('times', 'small')]
     thead
       tr.table__row.table__row_header
         th.table__header.table__header_sortable(data-sort-field='login' data-sort-type='string') Login

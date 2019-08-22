@@ -9,7 +9,7 @@ const postHandlers = require('../handlers/post');
  *
  * @apiGroup Post
  *
- * @apiPermission
+ * @apiPermission anyone
  *
  * @apiDescription Create thread or reply to thread
  * 
