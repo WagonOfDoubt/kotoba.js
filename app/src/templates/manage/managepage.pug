@@ -50,9 +50,15 @@ block main
 
   section#manage-info-sharp
     h3 Sharp libraries versions
-    ul
+    ul(style='column-width: 10rem;')
       for value, key in kot_sharp_versions
         li #[strong= key]: #{value}
+
+  section#manage-info-dependencies
+    h3 Dependencies
+    ul(style='column-width: 15rem;')
+      for value, key in pkg.dependencies
+        li #[a(href=`https://www.npmjs.com/package/${key}`)=key]: #[=value]
 
   section#manage-info-routes
     h3 Routes
