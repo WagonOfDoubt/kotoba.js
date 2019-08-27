@@ -46,8 +46,9 @@ div(
       |
     span.post__header__number
       - var threadUrl = `/${ post.boardUri }/res/${ post.threadId || post.postId }.html`;
-      a(href=`${ threadUrl }#post-${ post.boardUri }-${ post.postId }`) No.&nbsp;
-      a(href='#postbox')= post.postId
+      - var postNo = `post-${ post.boardUri }-${ post.postId }`;
+      a.post__header__number__highlight(href=`${ threadUrl }#${postNo}`) No.&nbsp;
+      a.post__header__number__reply(href=`${ threadUrl }#postbox?r=${postNo}`)= post.postId
     span.post__badges
       if post.isDeleted
         span.post__badge.post__badge_deleted(title='Deleted')

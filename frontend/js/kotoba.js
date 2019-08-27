@@ -33,4 +33,7 @@ $(() => {
   initReflinks();
   initChangeStyle();
   initHandlers();
+
+  // init login form
+  $('[name=redirectHash]').val(window.location.hash);
 });
