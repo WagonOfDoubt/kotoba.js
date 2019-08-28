@@ -6,10 +6,34 @@ block header
   h1 Site maintenance
 
 block main
+  h2 Clear compiled templates cache
+  form#form-clear-cache(method='POST', action='/api/regenerate', data-method='POST')
+    input(type='hidden', name='nocache:boolean', value='true')
+    input(type='submit', class='btn',value='Clear templates cache')
+
   h2 Rebuild all html files
   form#form-regenerate-all(method='POST', action='/api/regenerate', data-method='POST')
     p This action may take some time
-    input(type='submit', class='btn',value='Rebuild all html files')
-
-  h2 Cleanup
-  p TO DO
+    div
+      h3 Options:
+      label
+        input(type='checkbox', name='nocache:boolean', value='true')
+        | Clear templates cache before rebuilding
+    div
+      h3 Rebuild main page:
+      label
+        input(type='checkbox', name='mainpage:boolean', value='true')
+        | Rebuild main (news) page
+    div
+      h3 Rebuild boards:
+      label
+        input.js-checkbox-master.js-rebuild-all-boards(type='checkbox', data-target='.js-rebuild-board')
+        | Rebuild all boards
+      ul.list(style='column-width: 5rem;')
+        for board in boards
+          li.list__item.list_unmarked
+            label
+              input.js-checkbox-slave.js-rebuild-board(type='checkbox', name='boards[]:auto', value=board.uri, data-target='.js-rebuild-all-boards', data-skip-falsy="true")
+              | #{board.uri}
+    div
+      input(type='submit', class='btn',value='Rebuild all html files')

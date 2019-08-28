@@ -390,16 +390,45 @@ const ensureMainPage = async () => {
 
 /**
  * Regenerate all static html.
+ * @param {Object} options Options
+ * @param {Boolean} [options.mainpage=true] Whether or not to regenerate main
+ *    page
+ * @param {String[]} [?options.boards=[]] List of boards (by board.uri) to
+ *    regenerate. If empty, all boards will be regenerated (default).
  * @returns {Promise}
  */
-const regenerateAll = () =>
-  Promise.all([
-    generateMainPage,
-    Board
-      .findBoards()
-      .exec()
-      .then(generateBoards)
-    ]);
+const regenerateAll = (options) => {
+  options = options || {};
+  if (!_.has(options, 'mainpage')) {
+    options.mainpage = true;
+  }
+  const promises = [];
+  if (options.mainpage) {
+    promises.push(generateMainPage());
+  }
+  if (options.boards) {
+    const q = {};
+    if (options.boards.length) {
+      q.uri = { $in: options.boards };
+    }
+    promises.push(
+      Board
+        .find(q)
+        .exec()
+        .then(generateBoards));
+  }
+  return Promise.all(promises);
+};
+
+
+/**
+ * Clear compiled pug templates
+ */
+const clearTemplateCache = () => {
+  for (const prop of Object.keys(pug.cache)) {
+    delete pug.cache[prop];
+  }
+};
 
 
 module.exports.generateThread = generateThread;
@@ -410,3 +439,4 @@ module.exports.generateBoards = generateBoards;
 module.exports.generateMainPage = generateMainPage;
 module.exports.ensureMainPage = ensureMainPage;
 module.exports.regenerateAll = regenerateAll;
+module.exports.clearTemplateCache = clearTemplateCache;

@@ -193,12 +193,17 @@ const addSubmitListener = ($form, callback) => {
 
 
 const managePage_maintenance = () => {
-  const onDone = (data) => {
+  const onRebuildDone = (data) => {
     const took = data.took;
     const message = `Rebuild complete. Took <strong>${ took }</strong> seconds.`;
     modal.alert('Success', message);
   };
-  addSubmitListener($('#form-regenerate-all'), onDone);
+  const onClearDone = (data) => {
+    const message = `Template cache cleared.`;
+    modal.alert('Success', message);
+  };
+  addSubmitListener($('#form-regenerate-all'), onRebuildDone);
+  addSubmitListener($('#form-clear-cache'), onClearDone);
 };
 
 
