@@ -8,7 +8,10 @@ block header
   include includes/boardheader.pug
 
 block main
-  include includes/postform.pug
+  div#postbox.postarea.postarea_top
+    span.button.button_link
+      a.js-toggle-postform(href='#') Create thread
+    include includes/postform.pug
 
   form#delform.admin-form(action='/form/delpost', method='post')
     if !threads.length
@@ -16,6 +19,10 @@ block main
     for thread in threads
       != thread
     include includes/delpostform.pug
+
+  div#postbox_bottom.postarea.postarea_bottom
+    span.button.button_link
+      a.js-toggle-postform(href='#') Create thread
 
 block footer
   +pagination(pagination.current, pagination.pages)

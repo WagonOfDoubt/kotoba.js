@@ -1,173 +1,159 @@
-if !isPage
-  .page-title Reply to thread
-div#postbox.postarea
-  form#postform.postform(
-    action=`/form/post/`
-    method='post'
-    enctype='multipart/form-data'
+form#postform.postform.hidden(
+  action=`/form/post/`
+  method='post'
+  enctype='multipart/form-data'
+)
+  input(
+    name='board'
+    value=board ? board.uri : ''
+    type='hidden'
   )
-    input(
-      name='board'
-      value=board.uri
-      type='hidden'
-    )
-    input(
-      name='replythread'
-      value=thread ? thread.postId : 0
-      type='hidden'
-    )
-    input(
-      name='MAX_FILE_SIZE'
-      value=board.maxFileSize
-      type='hidden'
-    )
-    input(
-      name='email'
-      style={ display: 'none' }
-      type='text'
-    )
-    table.postform
-      if !board.isForcedAnon
-        //- div.form-row
-        tr
-          //- div.form-col
-          td.postblock
-            label(for='name-input').form-label Name
-          //- div.form-col
-          td
-            input#name-input.from-input(
-              name='name'
-              size='28'
-              maxlength='75'
-              accesskey='n'
-              type='text'
-              placeholder=board.defaultPosterName
-            )
-        //- div.form-row
-        tr(class='hidden')
-          //- div.form-col
-          td.postblock
-            label(for='link-input').form-label Email
-          //- div.form-col
-          td
-            input#link-input.from-input(
-              name='em'
-              size='28'
-              maxlength='75'
-              accesskey='n'
-              type='text'
-            )
-      if board.enableCaptcha
-        //- div.form-row
-        tr
-          //- div.form-col
-          td.postblock
-            label(for='captcha-input').form-label Capthca
-          //- div.form-col
-          td
-            input#captcha-input.from-input(
-              name='captcha'
-              size='28'
-              maxlength='64'
-              accesskey='c'
-              type='text'
-            )
-      if isPage || board.allowRepliesSubject
-        //- div.form-row
-        tr
+  input(
+    name='replythread'
+    value=thread ? thread.postId : 0
+    type='hidden'
+  )
+  input.hidden(
+    name='email'
+    type='text'
+  )
+  table.postform
+    if board && !board.isForcedAnon
+      //- div.form-row
+      tr
         //- div.form-col
         td.postblock
-          label(for='subject-input').form-label Subject
+          label(for='name-input').form-label Name
         //- div.form-col
         td
-          input#subject-input.from-input(
-            name='subject'
-            size='35'
+          input#name-input.from-input(
+            name='name'
+            size='28'
             maxlength='75'
-            accesskey='s'
+            accesskey='n'
             type='text'
-            required=isPage && board.newThreadsRequired.subject
+            placeholder=board && board.defaultPosterName
           )
-          input(
-            type='submit'
-            value='Submit'
-            accesskey='z'
+      //- div.form-row
+      tr(class='hidden')
+        //- div.form-col
+        td.postblock
+          label(for='link-input').form-label Email
+        //- div.form-col
+        td
+          input#link-input.from-input(
+            name='em'
+            size='28'
+            maxlength='75'
+            accesskey='n'
+            type='text'
           )
-          //- small.posttypeindicator
-            span#posttypeindicator
-              if thread
-                |(reply to #{ thread.postId })
-              else
-                |(new thread)
+    if !board || board.enableCaptcha
       //- div.form-row
       tr
         //- div.form-col
         td.postblock
-          label(for='message-input').form-label Message
+          label(for='captcha-input').form-label Capthca
         //- div.form-col
         td
-          textarea#message-input.from-input(
-            name='message'
-            cols='38'
-            rows='4'
-            accesskey='m'
-            required=isPage && board.newThreadsRequired.message
+          input#captcha-input.from-input(
+            name='captcha'
+            size='28'
+            maxlength='64'
+            accesskey='c'
+            type='text'
           )
-          if !(isPage || board.allowRepliesSubject)
-            div
-              input(
-                type='submit'
-                value='Submit'
-                accesskey='z'
-                )
+    if isPage || !board || board.allowRepliesSubject
       //- div.form-row
-      if board.maxFilesPerPost !== 0
-        tr
-          //- div.form-col
-          td.postblock
-            label.form-label File
-          //- div.form-col
-          td
-            input.from-input(
-              name=`files`
-              size='35'
-              accesskey='f'
-              type='file'
-              multiple= board.maxFilesPerPost > 1
-              required= n == 0 && isPage && board.newThreadsRequired.files
-            )
-      //- div.form-row
+      tr
+      //- div.form-col
+      td.postblock
+        label(for='subject-input').form-label Subject
+      //- div.form-col
+      td
+        input#subject-input.from-input(
+          name='subject'
+          size='35'
+          maxlength='75'
+          accesskey='s'
+          type='text'
+          required=isPage && board && board.newThreadsRequired.subject
+        )
+        input(
+          type='submit'
+          value='Submit'
+          accesskey='z'
+        )
+    //- div.form-row
+    tr
+      //- div.form-col
+      td.postblock
+        label(for='message-input').form-label Message
+      //- div.form-col
+      td
+        textarea#message-input.from-input(
+          name='message'
+          cols='38'
+          rows='4'
+          accesskey='m'
+          required=isPage && board.newThreadsRequired.message
+        )
+        if !(isPage || (board && board.allowRepliesSubject))
+          div
+            input(
+              type='submit'
+              value='Submit'
+              accesskey='z'
+              )
+    //- div.form-row
+    if !board || board.maxFilesPerPost > 0
       tr
         //- div.form-col
         td.postblock
-          label(for='postpassword-input').form-label Password
+          label.form-label File
         //- div.form-col
         td
-          input#postpassword-input.from-input(
-            name='postpassword'
-            size='8'
-            accesskey='p'
-            type='password'
+          input.from-input(
+            name=`files`
+            size='35'
+            accesskey='f'
+            type='file'
+            multiple= !board || board.maxFilesPerPost > 1
+            required= n == 0 && isPage && board.newThreadsRequired.files
           )
-          |
-          |
-          small.desc (For post and file deletion)
-      //- div.form-row
-      tr
-        //- div.form-col
-        td.postblock
-          label.form-label Options
-        //- div.form-col
-        td
-          div.form-input-group
-            if board.features.sage && !isPage
-              span.button.button_link
-                input#sage(name='sage', type='checkbox')
-                label(for='sage') säge
-              | 
+    //- div.form-row
+    tr
+      //- div.form-col
+      td.postblock
+        label(for='postpassword-input').form-label Password
+      //- div.form-col
+      td
+        input#postpassword-input.from-input(
+          name='postpassword'
+          size='8'
+          accesskey='p'
+          type='password'
+        )
+        |
+        |
+        small.desc (For post and file deletion)
+    //- div.form-row
+    tr
+      //- div.form-col
+      td.postblock
+        label.form-label Options
+      //- div.form-col
+      td
+        div.form-input-group
+          if !board || (board.features.sage && !isPage)
             span.button.button_link
-              input#noko(name='postredir', value='1', type='checkbox')
-              label(for='noko') nöko
+              input#sage(name='sage', type='checkbox')
+              label(for='sage') säge
+            | 
+          span.button.button_link
+            input#noko(name='postredir', value='1', type='checkbox')
+            label(for='noko') nöko
+    if board
       tr
         td.rules(colspan='2')
           ui

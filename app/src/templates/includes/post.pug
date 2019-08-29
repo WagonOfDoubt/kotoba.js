@@ -5,6 +5,7 @@ include ../mixins/icons.pug
 
 div(
   id=(isPreview ? undefined : `post-${ post.boardUri }-${ post.postId }`)
+  data-thread-id=post.threadId
   data-post-id=post.postId
   data-board-uri=post.boardUri
   class={

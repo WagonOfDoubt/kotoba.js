@@ -45,3 +45,33 @@
   color: var(--postblock-color);
   background-color: var(--postblock-background-color);
 }
+
+
+.postarea_quick-reply {
+  .rules {
+    display: none;
+  }
+
+  border-style: solid;
+  border-width: var(--border-width);
+  border-radius: var(--post-border-radius);
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
+  padding: 3px;
+}
+
+.postarea__header {
+  background: var(--page-title-background-color);
+  color: var(--page-title-color);
+  text-align: center;
+  padding: 2px;
+  font-weight: bold;
+}
+
+.postarea__header__buttons {
+  float: right;
+
+  a, a:hover {
+    color: var(--page-title-color);
+  }
+}

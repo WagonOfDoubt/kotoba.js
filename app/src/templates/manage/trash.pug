@@ -82,6 +82,7 @@ block main
         for post in deletedPosts
           div.reply-container(id=`reply${ post.postId }`)
             include ../includes/post.pug
+  include ../includes/postform.pug
 
 block modals
   +confirmPrompt('modal-confirm-delete', 'Delete items', 'Delete')

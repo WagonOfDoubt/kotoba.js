@@ -10,7 +10,12 @@ block main
   .return-link.return-link-top.button.button_link
     a(href='/' + board.uri) Return
 
-  include includes/postform.pug
+  noscript
+    .page-title Reply to thread
+  div#postbox.postarea.postarea_top
+    span.button.button_link
+      a.js-toggle-postform(href='#') Reply
+    include includes/postform.pug
 
   form#delform.admin-form(action='/form/delpost', method='post')
     include includes/thread.pug
@@ -18,6 +23,10 @@ block main
 
   .return-link.return-link-bottom.button.button_link
     a(href='/' + board.uri) Return
+
+  div.postarea.postarea_bottom
+    span.button.button_link
+      a.js-toggle-postform(href='#') Reply
 
 block footer
   include includes/boardfooter.pug
