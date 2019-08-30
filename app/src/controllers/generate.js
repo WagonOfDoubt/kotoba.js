@@ -340,9 +340,9 @@ const generateBoardPagesAndCatalog = async board => {
  */
 const generateBoard = async board => {
   const threads = await Post.getSortedThreads(board);
+  await generateThreads(threads);
   await Promise.all([
-    generateThreads(threads)
-      .then(generateBoardPages(board, threads)),
+    generateBoardPages(board, threads),
     generateCatalog(board, threads)
   ]);
 };
