@@ -49,6 +49,8 @@ const settingsSchema = Schema({
   ] },
   /** Default style for site */
   defaultStyle:   { type: String, default: 'umnochan' },
+  /** Type of style selector at the top of page */
+  styleSelectorType: { type: String, default: 'list', enum: ['none', 'list', 'combobox'] },
   /** Minimum time in seconds a user must wait before posting a new thread again */
   newThreadDelay: { type: Number, default: 30 },
   /** Minimum time in seconds a user must wait before posting a reply again */

@@ -13,8 +13,17 @@ import tableTemplate from '../templates-compiled/table';
 import actionResultReportTemplate from '../templates-compiled/action-result-report';
 
 
-export const serializeForm = ($form) =>
-  $form.serializeJSON({checkboxUncheckedValue: 'false'});
+export const serializeForm = ($form) => {
+  const formOptions = {
+    customTypes: {
+      list: (str) => str.split('\n').map(s => s.trim())
+    },
+    checkboxUncheckedValue: 'false',
+  };
+
+  return $form.serializeJSON(formOptions);
+};
+
 
 const errorToHTML = (error) => {
   if (error.stack) {
@@ -28,6 +37,7 @@ const errorToHTML = (error) => {
     return `<div class="error">${ error.msg || error.message }</div>`;
   }
 };
+
 
 export const alertErrorHandler = (data) => {
   console.error(data);
@@ -65,6 +75,7 @@ export const successErrorHandler = (successMessage) => {
     return modal.alert('Success', alertMessage);
   };
 };
+
 
 export const sendJSON = (url, method, data) => {
   return new Promise((resolve, reject) => {
@@ -109,11 +120,9 @@ export const fetchChanges = ($form, $populateContainer) => {
     .done((data) => {
       const diff = objectDiff(formData, data);
       const $table = $(tableTemplate({
-        head: [
-          Object.entries(diff)
-            .map(([key, value]) => [key, value.old, value.new ])
-        ],
-        body: ['Property', 'Current value', 'New value'],
+        body: Object.entries(diff)
+          .map(([key, value]) => [key, value.old, value.new ]),
+        head: [['Property', 'Current value', 'New value']],
         filter: str => truncate(str, { length: 100 }),
       }));
       $populateContainer.text('').append($table);

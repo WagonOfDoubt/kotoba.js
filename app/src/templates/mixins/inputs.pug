@@ -33,6 +33,20 @@ mixin textEdit(param, label, hint, required)
     else if hint
       +hintText(hint, def)
 
+mixin arrayEdit(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  - var rows = (val || []).join('\n')
+  div.form-group
+    if label
+      label(for=param) #{ label }:
+    textarea(data-default=def, name=`${param}:list`, id=param, rows='10', required=required)= rows
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
 mixin passwordEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);

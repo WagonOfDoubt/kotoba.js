@@ -22,6 +22,13 @@ block main
     +textEdit('dateformat', 'Date format', 'Default date format.')
     +textEdit('imageUri', 'Header image', 'URL. Default header image. Can be overriden on each board.')
     +checkboxEdit('startWithOne', 'Number pages starting with one', 'Traditionally pages are zero-based, like in most programming languages.')
+    //- styles
+    h2 Site styles
+    +arrayEdit('styles', 'List of styles')
+      | One per row, lowercase, put .css files by same name in /.static/css/ directory.
+    +textEdit('defaultStyle', 'Default style', 'Default style for site. Can be overridden for each board.')
+    -var selectorTypeOptions = [{value: 'none', label: 'None'}, {value: 'list', label: 'List'}, {value: 'combobox', label: 'Combo box'}]
+    +comboboxEdit('styleSelectorType', 'Style selector type', selectorTypeOptions, 'Type of style selector at the top of page')
     //- features
     h2 Engine features
     +checkboxEdit('features[expandThread]', 'Expand thread button', 'Whether or not to add expand thread buttons.')

@@ -1,10 +1,15 @@
 div.adminbar.adminbar_top
   nav.menu.menu_site.menu_top!= filters.markdown(site.menu)
   nav.menu.menu_board.menu_top
-    ul.button-group
-      for s in site.styles
-        li.button.button_link
-          a.js-set-style(href='#', data-style=s)= s[0].toUpperCase() + s.substring(1)
+    if (site.styleSelectorType === 'list')
+      ul.button-group
+        for s in site.styles
+          li.button.button_link
+            a.js-set-style(href='#', data-style=s)= s[0].toUpperCase() + s.substring(1)
+    if (site.styleSelectorType === 'combobox')
+      select.style-select.js-set-style
+        for s in site.styles
+          option(value=s)= s[0].toUpperCase() + s.substring(1)
     span.button.button_link
       a(href='/') Home
     span.button.button_link
