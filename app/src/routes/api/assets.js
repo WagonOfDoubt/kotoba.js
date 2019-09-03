@@ -1,21 +1,43 @@
+/**
+ * Assets api endpoint
+ * @module routes/api/assets
+ */
+
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const _ = require('lodash');
-const fs = require('fs-extra');
-const crypto = require('crypto');
+const fp = require('lodash/fp');
 const { checkSchema } = require('express-validator/check');
 
-const upload = require('../../controllers/upload');
-const config = require('../../json/config.json');
 const Asset = require('../../models/asset');
+
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
+const { populateDocumentsByIds,
+  removeDuplicates,
+  compareRequestWithDocuments,
+  applyAndValidateDocuments } = require('../../middlewares/restapi');
 const sanitizer = require('../../middlewares/sanitizer');
-const { BaseError, RequestValidationError, DocumentNotFoundError, AuthRequiredError, PermissionDeniedError, FileFormatNotSupportedError } = require('../../errors');
 
+const { BaseError, UnknownError, DocumentNotFoundError } = require('../../errors');
+const { uploadAssetFiles,
+  removeAssetFiles,
+  resizeAsset,
+  renameAsset } = require('../../controllers/asset');
+
+
+/**
+ * Valid values for Asset.category
+ * @type {Array}
+ */
 const validCategories = ['banner', 'bg', 'favicon', 'logo', 'misc', 'news', 'placeholder', 'style'];
+
+/**
+ * Regular expression to test if file name is safe to use
+ * @type {RegExp}
+ */
 const validFileNameRegExp = /^(?!\\.)(?!com[0-9]$)(?!con$)(?!lpt[0-9]$)(?!nul$)(?!prn$)[^\\|\\*\?\\:<>\/$"]*[^\\.\\|\\*\\?\\\:<>\/$"]+$/i;
 
 
@@ -224,74 +246,43 @@ router.post(
   ],
   async (req, res, next) => {
     try {
-      const processAsset = async ([file, assetDesc]) => {
-        const fileExt = upload.getExtensionByMime(file.mimetype);
-        
-        if (!upload.isImage(fileExt)) {
-          const usupportedMedia = new FileFormatNotSupportedError('files[]', fileExt, 'body');
-          return usupportedMedia.respond(res);
-        }
-
-        const hash = crypto.createHash('md5').update(file.buffer).digest('hex');
-        const duplicate = await Asset.findOne({ hash });
-
-        if (duplicate) {
-          return new FileAlreadyExistsError('files[]', hash, 'body');
-        }
-
-        const name = assetDesc.name || file.originalname;
-        const filename = path.basename(name, path.extname(name));
-        const folder = upload.getRandomName();
-        const { thumbWidth, thumbHeight } = assetDesc;
-        const thumbExt = upload.getOptimalThumbnailExtenstion(fileExt);
-        const fileUri   = path.join('.assets', folder, 'full', filename + fileExt);
-        const thumbUri  = path.join('.assets', folder, filename + thumbExt);
-        const filePath  = path.join(config.html_path, fileUri);
-        const thumbPath = path.join(config.html_path, thumbUri);
-        try {
-          const [origFile, thumbFile] = await Promise.all([
-            upload.saveImage(filePath, file),
-            upload.createThumbnail(thumbPath, file, thumbWidth, thumbHeight),
-          ]);
-          const assetDoc = {
-            hash: hash,
-            name: filename,
-            file: '/' + fileUri,
-            width: origFile.width,
-            height: origFile.height,
-            thumb: '/' + thumbUri,
-            thumbWidth: thumbFile.width,
-            thumbHeight: thumbFile.height,
-            type: 'image',
-            mimetype: file.mimetype,
-            size: origFile.size,
-            user: req.user._id,
-            category: assetDesc.category,
-          };
-          return assetDoc;          
-        } catch (err) {
-          return {
-            status: 500,
-            error: err
-          };
-        }
-      };
-
       const assets = _.zip(req.files, req.body.assets);
-      const assetsDocs = await Promise.all(assets.map(processAsset));
-      const [validAssets, invalidAssets] = _.partition(assetsDocs, doc => !(doc instanceof BaseError));
+
+      const tryToUpload = ([file, assetDesc]) =>
+        uploadAssetFiles(file, assetDesc)
+          .catch(err => {
+            if (!(err instanceof BaseError)) {
+              err = new UnknownError();
+            }
+            _.assign(assetDesc, err.toResponse());
+            return assetDesc;
+          });
+
+      const assetsDocs = await Promise.all(
+        assets.map(tryToUpload));
+      const [validAssets, invalidAssets] = _.partition(assetsDocs, doc => !_.has(doc, 'error'));
+
+      if (invalidAssets.length) {
+        res.locals.fail = [
+          ...(res.locals.fail || []),
+          ...invalidAssets,
+        ];
+      }
 
       if (validAssets.length) {
+        validAssets.forEach((ad) => {
+          ad.user = req.user._id;
+        });
         await Asset.insertMany(validAssets);
         return res
           .status(201).json({
             success: validAssets,
-            fail: invalidAssets.map(BaseError.convertToResponse),
+            fail: res.locals.fail,
           });
       }
       return res
         .status(200).json({
-          fail: invalidAssets.map(BaseError.convertToResponse),
+          fail: res.locals.fail,
         });
     } catch (err) {
       return next(err);
@@ -305,9 +296,24 @@ router.post(
  * @apiName UpdateAssets
  * @apiGroup Assets
  * @apiPermission admin
+ * @apiParam {Object[]} assets Array with infos for related files
+ * @apiParam {String} assets.name File name
+ * @apiParam {Number} assets.thumbWidth Width of resized image
+ * @apiParam {Number} assets.thumbHeight Height of resized image
+ * @apiParam {String} assets.category Asset category, can be one of: "banner",
+ *    "bg", "favicon", "logo", "misc", "news", "placeholder", "style"
+ * @apiSuccess {Object[]} success List of successful updates
+ * @apiSuccess {Object}  success._id MongoDB ObjectId
+ * @apiSuccess {Object[]} fail List of updates that were rejected
+ * @apiSuccess {Object}  fail.target Original target object that was in
+ *    request
+ * @apiSuccess {Number}   fail.status HTTP status for this action
+ * @apiSuccess {Object}   fail.error  Error object (if only one error)
+ * @apiSuccess {Object[]} fail.errors Errors objects (if multiple errors)
  * @apiUse RequestValidationError
  * @apiUse AuthRequiredError
  * @apiUse PermissionDeniedError
+ * @apiUse DocumentNotFoundError
  */
 router.patch(
   '/api/assets/',
@@ -372,101 +378,38 @@ router.patch(
       },
     }),
     validateRequest,
+    populateDocumentsByIds(Asset, 'assets'),
+    removeDuplicates('assets',
+      ['isDeleted', 'name', 'thumbWidth', 'thumbHeight', 'category']),
+    compareRequestWithDocuments('assets'),
+    applyAndValidateDocuments('assets'),
   ],
   async (req, res, next) => {
     try {
       const assets = req.body.assets;
-      if (!assets.length) {
-        const validationError = new RequestValidationError('Array is empty', 'assets', assets, 'body');
-        return validationError.respond(res);
-      }
+      const documents = res.locals.documents;
+      const assetsGrouped = _.mapValues(
+        _.groupBy(assets, '_id'),
+        _.head);
 
-      const assetIds = _.map(assets, '_id');
-      const foundAssets = await Asset.find({ _id: { $in: assetIds } });
-      const foundAssetsById = _.mapValues(_.groupBy(foundAssets, '_id'), (arr) => arr[0].toObject());
-      const notFoundAssets = assetIds
-        .filter(id => !_.has(foundAssetsById, id))
-        .map(id => ({ id: id }));
-      const notFoundAssetError = new DocumentNotFoundError('Asset', 'assets', null, 'body');
-      const notFoundAssetsErrors = notFoundAssetError.assignToArray(notFoundAssets);
-
-      if (!foundAssets.length) {
-        return res.status(404).json({ fail: notFoundAssetsErrors });
-      }
-
-      const assetTasks = assets.filter((asset) => _.has(foundAssetsById, asset._id));
-      const resizeTasks = assetTasks
+      const resizeTasks = assets
         .filter((cmd) => cmd.thumbWidth || cmd.thumbHeight)
-        .map((cmd) => {
-          const asset = foundAssetsById[cmd._id];
-          asset.thumbWidth = cmd.thumbWidth || asset.thumbWidth;
-          asset.thumbHeight = cmd.thumbHeight || asset.thumbHeight;
-          return asset;
-        });
-
-      const resizeAsset = async (assetDoc) => {
-        console.log(config.html_path, assetDoc);
-        const originalFilePath = path.join(config.html_path, assetDoc.file);
-        const originaFileBuffer = await fs.readFile(originalFilePath);
-        const originalFile = {
-          buffer: originaFileBuffer,
-          mimetype: upload.getMimeByExtension(path.extname(originalFilePath)),
-        };
-        const thumbPath = path.join(config.html_path, assetDoc.thumb);
-        const thumbFile = await upload.createThumbnail(thumbPath, originalFile, assetDoc.thumbWidth, assetDoc.thumbHeight);
-        const thumbWidth = thumbFile.width;
-        const thumbHeight = thumbFile.height;
-        const _id = assetDoc._id;
-        return { thumbWidth, thumbHeight, _id };
-      };
-
-      assetTasks.forEach((asset) =>
-        _.assign(foundAssetsById[asset._id],
-          _.pick(asset, ['isDeleted', 'category'])));
+        .map(cmd => documents[cmd._id]);
+      const renameTasks = assets
+        .filter((cmd) => cmd.name)
+        .map(cmd => documents[cmd._id]);
 
       if (resizeTasks.length) {
         const resized = await Promise.all(resizeTasks.map(resizeAsset));
-        resized.forEach((asset) => _.assign(foundAssetsById[asset._id], asset));
+        resized.forEach((asset) => _.assign(assetsGrouped[asset._id], asset));
       }
-
-      const renameAsset = async (assetDoc) => {
-        const { name, file, thumb, _id } = assetDoc;
-        const newFileName = name + path.extname(file);
-        const newFileUri = path.join(path.dirname(file), newFileName);
-        const newFilePath  = path.join(config.html_path, newFileUri);
-        const oldFilePath = path.join(config.html_path, file);
-
-        const newThumbName = name + path.extname(thumb);
-        const newThumbUri  = path.join(path.dirname(thumb), newThumbName);
-        const newThumbPath = path.join(config.html_path, newThumbUri);
-        const oldThumbPath = path.join(config.html_path, thumb);
-
-        console.log(`rename ${oldThumbPath} => ${newThumbPath}`);
-        console.log(`rename ${oldFilePath} => ${newFilePath}`);
-
-        await Promise.all([
-            fs.move(oldThumbPath, newThumbPath),
-            fs.move(oldFilePath, newFilePath),
-          ]);
-
-        return {
-          name: name,
-          file: newFileUri,
-          thumb: newThumbUri,
-          _id: _id
-        };
-      };
-
-      const renameTasks = assetTasks
-        .filter((asset) => asset.name && foundAssetsById[asset._id].name !== asset.name)
-        .map((cmd) => _.assign(foundAssetsById[cmd._id], _.pick(cmd, ['name'])));
 
       if (renameTasks.length) {
         const renamed = await Promise.all(renameTasks.map(renameAsset));
-        renamed.forEach((asset) => _.assign(foundAssetsById[asset._id], asset));
+        renamed.forEach((asset) => _.assign(assetsGrouped[asset._id], asset));
       }
 
-      const query = Array.from(Object.values(foundAssetsById)).map((asset) => {
+      const query = Array.from(Object.values(assetsGrouped)).map((asset) => {
           return {
             updateOne: {
               filter: { _id: asset._id },
@@ -474,17 +417,11 @@ router.patch(
             }
           };
         });
-
-      console.log(query);
       
-      const result = await Asset.bulkWrite(query);
-      console.log(result);
-      return res.status(200).json({
-        success: Object.values(foundAssetsById),
-        fail: [
-          ...notFoundAssetsErrors,
-        ],
-      });
+      await Asset.bulkWrite(query);
+      res.locals.success = Object.values(assetsGrouped);
+      const { success, fail } = res.locals;
+      return res.status(200).json({ success, fail });
     } catch (err) {
       return next(err);
     }
@@ -541,42 +478,19 @@ router.delete(
       },
     }),
     validateRequest,
+    populateDocumentsByIds(Asset, 'assets', ''),
   ],
   async (req, res, next) => {
     try {
-      const ids = req.body.assets.map(asset => asset._id);
-      const assets = await Asset.find({ _id: { $in: ids } });
-      const foundIds = assets.map(asset => asset._id.toString());
-      const notFoundAssets = ids
-        .filter(id => !foundIds.includes(id))
-        .map(id => ({ id: id }));
-      const notFoundAssetError = new DocumentNotFoundError('Asset', 'assets', null, 'body');
-      const notFoundAssetsErrors = notFoundAssetError.assignToArray(notFoundAssets);
-
-      let fail = [];
-      if (notFoundAssets.length) {
-        fail = [
-          ...fail,
-          ...notFoundAssetsErrors
-        ];
-      }
-      if (!foundIds.length) {
-        return res
-          .status(404)
-          .json(fail);
-      }
-      const removeFiles = async (assetDoc) => {
-        const { thumb } = assetDoc;
-        const thumbPath = path.join(config.html_path, thumb);
-        await fs.remove(path.dirname(thumbPath));
-      };
-      await Promise.all(assets.map(removeFiles));
-      await Asset.deleteMany({ _id: { $in: foundIds }});
+      const documents = res.locals.documents;
+      await Promise.all(_.map(documents, removeAssetFiles));
+      const ids = _.map(documents, '_id');
+      await Asset.deleteMany({ _id: { $in: ids }});
       return res
         .status(200)
         .json({
-          success: foundIds.map(_id => ({_id})),
-          fail: fail,
+          success: _.map(documents, fp.pick(['_id'])),
+          fail: res.locals.fail,
         });
     } catch (err) {
       return next(err);

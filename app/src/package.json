@@ -51,6 +51,10 @@
   },
   "devDependencies": {},
   "jshintConfig": {
-    "esversion": 9
+    "esversion": 9,
+    "unused": "vars",
+    "varstmt": true,
+    "undef": true,
+    "node": true
   }
 }

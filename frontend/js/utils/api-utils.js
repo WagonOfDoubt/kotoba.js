@@ -59,13 +59,16 @@ export const alertErrorHandler = (data) => {
 };
 
 
-export const successErrorHandler = (successMessage) => {
+export const successErrorHandler = (successMessage, ignoreErrors = []) => {
   return (data) => {
     console.log(data);
-    const { success, fail } = data;
+    let { success, fail } = data;
     let alertMessage = `No changes were made<br>`;
     if (success && success.length) {
       alertMessage = `${successMessage} (${success.length})<br>`;
+    }
+    if (fail && fail.length && ignoreErrors.length) {
+      fail = fail.filter(failobj => failobj.error && !ignoreErrors.includes(failobj.error.code));
     }
     if (fail && fail.length) {
       alertMessage += '<br>';

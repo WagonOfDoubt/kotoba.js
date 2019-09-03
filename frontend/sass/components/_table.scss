@@ -29,6 +29,8 @@ table.table {
     .table__header_sortable::after {
       content: '\00a0\00a0▾▴';
       opacity: .25;
+      width: 25px;
+      display: inline-block;
     }
 
     .table__header_sort-ascending::after {

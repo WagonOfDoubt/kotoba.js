@@ -109,7 +109,7 @@ const removeDuplicates = (arrayName, editableFields) => {
 
       if (emptyUpdates.length) {
         const invalidUpdateError = new RequestValidationError(
-          'Update is invalid', 'reports', null, 'body');
+          'Update is invalid', arrayName, null, 'body');
         res.locals.fail = [
           ...(res.locals.fail || []),
           ...invalidUpdateError.assignToArray(emptyUpdates)
@@ -177,7 +177,7 @@ const removeDuplicates = (arrayName, editableFields) => {
 
       if (updatesWithDuplicates.length) {
         const duplicateError = new RequestValidationError(
-          'Conflicting updates', 'reports', null, 'body');
+          'Conflicting updates', arrayName, null, 'body');
         res.locals.fail = [
           ...(res.locals.fail || []),
           ...duplicateError.assignToArray(updatesWithDuplicates)
@@ -237,7 +237,7 @@ const compareRequestWithDocuments = (arrayName) => {
 
       if (noChanges.length) {
         const noChangesError = new DocumentNotModifiedError(
-          'Report', 'reports', null, 'body');
+          'Document', arrayName, null, 'body');
         res.locals.fail = [
           ...(res.locals.fail || []),
           ...noChangesError.assignToArray(noChanges)
@@ -274,7 +274,7 @@ const applyAndValidateDocuments = (arrayName) => {
   return async (req, res, next) => {
     try {
       const items = _.mapValues(
-        _.groupBy(req.body.reports, '_id'),
+        _.groupBy(req.body[arrayName], '_id'),
         _.head);
       const affectedDocuments = _.pickBy(res.locals.documents,
         (value, key) => _.has(items, key));

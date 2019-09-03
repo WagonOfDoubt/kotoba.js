@@ -15,7 +15,7 @@ mixin assetEdit(asset)
       +numberEdit(`assets[${n}][thumbHeight]`, 'Height', 'Resize image. Original file will be preserved.')
       +comboboxEdit(`assets[${n}][category]`, 'Category', categoryOptions)
       +checkboxEdit(`assets[${n}][isDeleted]`, 'Delete')
-        | Mark for deletion. Deleted items can be cleared in #[a(href='/manage/trash') Recycle Bin]
+        | Mark for deletion. Deleted items can be cleared in #[a(href='/manage/trash/assets') Recycle Bin]
     .asset-upload__info
       div #[span.badge.badge_primary #{asset.width}x#{asset.height}] #[a.link_long(href=asset.file)= asset.file]
       div #[span.badge.badge_primary #{asset.thumbWidth}x#{asset.thumbHeight}] #[a.link_long(href=asset.thumb)= asset.thumb]
@@ -30,7 +30,7 @@ mixin assetList(assets)
           +assetEdit(asset)
         else
           li.asset-upload__item_deleted
-            div #[span.badge.badge_danger DELETED] Look in #[a(href='/manage/trash') Recycle Bin] to restore/purge asset.
+            div #[span.badge.badge_danger DELETED] Look in #[a(href='/manage/trash/assets') Recycle Bin] to restore/purge asset.
       - n++;
 
 block header

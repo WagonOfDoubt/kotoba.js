@@ -322,7 +322,7 @@ const managePage_assets = () => {
       .confirmPrompt('Confirm update', 'Save changes?', 'Save')
       .then(() => {
         sendJSON(action, method, data)
-          .then(successErrorHandler(`Changes saved`))
+          .then(successErrorHandler(`Changes saved`, ['DocumentNotModified']))
           .then(() => window.location.reload())
           .catch(alertErrorHandler);
       });

@@ -271,6 +271,16 @@ class NoContentError extends BaseError {
 }
 
 
+/**
+ * Generic "500 Internal Server Error"
+ */
+class UnknownError extends BaseError {
+  constructor(message, code, param, value, location) {
+    super(message, code || 'UnknownError', 500, param, value, location);
+  }
+}
+
+
 module.exports.BaseError = BaseError;
 module.exports.BadRequestError = BadRequestError;
 module.exports.UnauthorizedError = UnauthorizedError;
@@ -280,3 +290,4 @@ module.exports.ConflictError = ConflictError;
 module.exports.UnsupportedMediaTypeError = UnsupportedMediaTypeError;
 module.exports.TooManyRequestsError = TooManyRequestsError;
 module.exports.NoContentError = NoContentError;
+module.exports.UnknownError = UnknownError;
