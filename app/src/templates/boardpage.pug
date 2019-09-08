@@ -3,6 +3,7 @@ include mixins/pagination.pug
 
 block bodyClass
   - var bodyClass = 'board-page'
+  - var headAttributes = { 'data-board': board && board.uri }
 
 block header
   include includes/boardheader.pug

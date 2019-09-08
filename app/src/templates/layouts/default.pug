@@ -1,9 +1,11 @@
+block bodyClass
+  -
+    var bodyClass = '';
+    var headAttributes = {};
 doctype html
-html(lang= lang)
+html(lang=lang)&attributes(headAttributes)
   include ../includes/head.pug
-  block bodyClass
-    - var bodyClass = ''
-  body(class=bodyClass + ' layout-default')
+  body.layout-default(class=bodyClass)
     header
       block header
     main

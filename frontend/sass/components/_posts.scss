@@ -9,6 +9,8 @@
 
 .post__header__subject {
   color: var(--subject-color);
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .post__header__number {
@@ -100,10 +102,12 @@
   height: 16px;
   display: inline-block;
 
-  fill: var(--link-color);
+  fill: var(--post-buttons-color);
+  color: var(--post-buttons-color);
 
   &:hover svg {
-    fill: var(--link-color-hover);
+    fill: var(--post-buttons-color-hover);
+    color: var(--post-buttons-color-hover);
   }
 }
 
@@ -126,7 +130,7 @@
 .post_reply .post__header::after {
   content: var(--post-counter-prefix)counter(thr-cnt);
   counter-increment: thr-cnt 1;
-  color: var(--post-conter-color);
+  color: var(--post-counter-color);
   margin-left: 10px;
   font-size: 13px;
 }
@@ -270,4 +274,26 @@
 @keyframes popup-appear {
   from { transform: scale(.4); }
   to   { transform: scale(1);  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Dummy posts
+////////////////////////////////////////////////////////////////////////////////
+
+.example {
+  .post__header a {
+    cursor: not-allowed;
+  }
+
+  .post__header__board {
+    display: none;
+  }
+
+  position: sticky;
+  bottom: 0;
+  max-height: 40vh;
+  overflow-x: auto;
+  background: var(--background-color);
+  border-top: 1px solid var(--border-color);
 }

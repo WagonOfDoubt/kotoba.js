@@ -12,18 +12,29 @@ head
   else
     title= baseTitle
 
-  mixin styleLink(style, preferred)
-    -var styleName = style[0].toUpperCase() + style.substring(1);
-    link(rel="alternate stylesheet", href=`/.static/css/${ style }.css`, data-style=style, data-preferred=preferred, title=styleName)
-
-  - var desc = board && board.desc ? board.desc : site && site.desc ? site.desc : pkg.description;
+  -
+    var desc =
+      board && board.desc ?
+        board.desc :
+      site && site.desc ?
+        site.desc :
+        pkg.description;
   meta(name="description", content=desc)
   link(rel="stylesheet", href="/.static/css/global.css")
-  - var defaultStyle = board && board.defaultStyle ? board.defaultStyle : site && site.defaultStyle ? site.defaultStyle : 'umnochan';
-  +styleLink(defaultStyle, true)
-  for style in site.styles
-    if style != defaultStyle
-      +styleLink(style, false)
+  -
+    var defaultStyleName =
+      board && board.defaultStyle ?
+        board.defaultStyle :
+      site && site.defaultStyle ?
+        site.defaultStyle :
+        'umnochan';
+    var defaultStyle = styles.find(s => s.name === defaultStyleName);
+  if defaultStyle
+    style#user-style(data-style=defaultStyle.name)!= defaultStyle.rawCSS
+  else
+    style#user-style
+  script
+    include ../../html/.static/js/quickinit.js
   link(rel="shortcut icon", href="/.static/img/favicon.png")
 
   block head

@@ -1,0 +1,189 @@
+extends managepage.pug
+
+include ../mixins/inputs.pug
+include ../mixins/timestamp.pug
+include ../mixins/modals.pug
+
+mixin styleEdit(style)
+  if style.colors
+    for color, param in style.colors
+      -var paramname = param.split('-').join(' ')
+      +colorEdit(`colors[${param}]`, paramname)
+
+  if style.strings
+    for value, param in style.strings
+      -var paramname = param.split('-').join(' ')
+      +textEdit(`strings[${param}]`, paramname, 'Any text without quotes.')
+
+  if style.variables
+    for value, param in style.variables
+      -var paramname = param.split('-').join(' ')
+      +textEdit(`variables[${param}]`, paramname)
+        | This is CSS variable. Must contain appropriate
+        | #[a(href='https://www.w3schools.com/css/css_units.asp') CSS unit].
+
+  div.alert.alert_info
+    | Avoid embedding large image files in CSS here. Use #[a(href='/manage/assets') assets] to store them as separate files instead.
+
+  +textArea('css', 'Additional CSS')
+    | Warning: CSS rules are not safe and may have exploits, including the ones that can freeze whole OS for hours! Don't copy & paste here CSS from untrusted sources and don't allow editing of CSS rules by anyone you don't trust. Always make sure that you know that you're doing.
+
+
+mixin swatch(color)
+  div(style={
+    'background-color': color,
+    'width': '25px',
+    'height': '25px',
+    'display': 'inline-block',
+  })
+
+block header
+  if style
+    h1 Edit style #{style.name}
+  else
+    h1 Add style
+
+block main
+  -
+    var values = initialValues;
+    var action = '/api/style/';
+    var method = style ? 'PATCH' : 'POST';
+  div
+    div.alert.alert_info
+      | Styles only appear in style selector after page is rebuilt.
+      | For board pages, it will be rebuilt as soon as someone post a new message.
+      | Consider #[a(href='/manage/maintenance#form-regenerate-all') rebuilding main page] manually.
+    form#form-edit-styles(action=action, data-method=method)
+      if (!style)
+        +textEdit('name', 'Style name', 'Must contain only lowercase letters and numbers without spaces. Can not be changed later.', true)(pattern='^[a-z0-9_]*$')
+        +styleEdit(values)
+        input.js-send-form#btn-add-style(type='submit', value='Add style')
+      else
+        - values = style.toJSON();
+        input(type='hidden', name='name', value=style.name)
+        +nothingEdit('name', 'Style name', 'Can not be changed')
+        +styleEdit(values)
+        input#btn-edit-style(type='submit', value='Change style')
+
+    div.example
+      -
+        var thread = {
+          "postId" : 265,
+          "name" : "Anonymous",
+          "subject" : "Thread subject",
+          "parsed" : [ 
+              "The ", 
+              "<strong>serval</strong> (", 
+              "<em>Leptailurus serval</em>) ", 
+              "<code>/ˈsɜːrvəl/</code> is a wild cat native to Africa. It is rare in North Africa and the Sahel, but widespread in sub-Saharan countries except rainforest regions. On the IUCN Red List it is listed as Least Concern.[1]<br>",
+              `* Image by Bob [<a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>], <a href="https://commons.wikimedia.org/wiki/File:Leptailurus_serval_-Serengeti_National_Park,_Tanzania-8.jpg">via Wikimedia Commons</a>`
+          ],
+          "isOp" : true,
+          "boardUri" : "b",
+          "attachments" : [ 
+            {
+              "file" : "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Leptailurus_serval_-Serengeti_National_Park%2C_Tanzania-8.jpg/1024px-Leptailurus_serval_-Serengeti_National_Park%2C_Tanzania-8.jpg",
+              "name" : "Leptailurus_serval_-Serengeti_National_Park,_Tanzania-8.jpg",
+              "type" : "image",
+              "thumbWidth" : 200,
+              "thumbHeight" : 140,
+              "width" : 1024,
+              "height" : 717,
+              "size" : 296614,
+              "thumb" : "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Leptailurus_serval_-Serengeti_National_Park%2C_Tanzania-8.jpg/256px-Leptailurus_serval_-Serengeti_National_Park%2C_Tanzania-8.jpg"
+            }
+          ],
+          "timestamp" : new Date("2019-09-03T19:03:57.534Z"),
+          "bumped" : new Date("2019-09-03T19:06:40.900Z"),
+        }
+        var replies = [
+          {
+            "postId" : 327,
+            "name" : "Anonymous",
+            "body" : "It was first described by von Schreber in 1776.[2] It is the sole member of the genus *Leptailurus*. Three subspecies are recognised. The serval is a slender, medium-sized cat that stands 54–62 cm (21–24 in) at the shoulder and weighs 9–18 kg (20–40 lb). It is characterised by a small head, large ears, a golden-yellow to buff coat spotted and striped with black, and a short, black-tipped tail. The serval has the longest legs of any cat relative to its body size.",
+            "parsed" : [ 
+                "It was first described by von Schreber in 1776.[2] It is the sole member of the genus ", 
+                "<em>Leptailurus</em>. Three subspecies are recognised. The serval is a slender, medium-sized cat that stands 54–62 cm (21–24 in) at the shoulder and weighs 9–18 kg (20–40 lb). It is characterised by a small head, large ears, a golden-yellow to buff coat spotted and striped with black, and a short, black-tipped tail. The serval has the longest legs of any cat relative to its body size.<br>"
+            ],
+            "isOp" : false,
+            "boardUri" : "b",
+            "timestamp" : new Date("2019-09-03T19:05:47.967Z"),
+          },
+          {
+            "postId" : 328,
+            "name" : "Anonymous",
+            "body" : "Active in the day as well as at night, servals tend to be solitary with minimal social interaction. Both sexes establish highly overlapping home ranges of 10 to 32 km<sup>2</sup> (4 to 12 sq mi), and mark them with feces and saliva. Servals are carnivores – they prey on rodents (particularly vlei rats), small birds, frogs, insects, and reptiles. The serval uses its sense of hearing to locate the prey; to kill small prey, it leaps over 2 m (6 ft 7 in) above the ground to land on the prey on its forefeet, and finally kills it with a bite on the neck or the head. Mating takes place at different times of the year in different parts of their range, but typically once or twice a year in an area. After a gestational period of two to three months, a litter of one to four is born. Weaning occurs at one month, and kittens begin hunting on their own at six months. The juveniles leave their mother at 12 months.",
+            "parsed" : [ 
+                "Active in the day as well as at night, servals tend to be solitary with minimal social interaction. Both sexes establish highly overlapping home ranges of 10 to 32 km<sup>2</sup> (4 to 12 sq mi), and mark them with feces and saliva. Servals are carnivores – they prey on rodents (particularly vlei rats), small birds, frogs, insects, and reptiles. The serval uses its sense of hearing to locate the prey; to kill small prey, it leaps over 2 m (6 ft 7 in) above the ground to land on the prey on its forefeet, and finally kills it with a bite on the neck or the head. Mating takes place at different times of the year in different parts of their range, but typically once or twice a year in an area. After a gestational period of two to three months, a litter of one to four is born. Weaning occurs at one month, and kittens begin hunting on their own at six months. The juveniles leave their mother at 12 months.<br>"
+            ],
+            "isOp" : false,
+            "boardUri" : "b",
+            "timestamp" : new Date("2019-09-03T19:06:40.900Z"),
+          }
+        ];
+      h2 Preview
+      include ../includes/thread.pug
+      //- if omittedPosts > 0
+      //-   span.omittedposts
+      //-     if omittedAttachments
+      //-       | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
+      //-     else
+      //-       | #{ omittedPosts } posts omitted.
+      //-     | 
+      //-     span.clickreplytoview
+      //-       | Click Reply to view.
+      //- div.replies-container
+      //-   for post in replies
+      //-     if !post.isDeleted
+      //-       div.reply-container(id=`reply${ post.postId }`)
+      //-         include post.pug
+
+  if (styles.length)
+    h2 Edit styles
+    if style
+      span.button.button_link
+        a(href='/manage/styles') Add new style
+    table.table
+      thead
+        tr.table__row.table__row_header
+          th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='name', data-sort-type='string', data-sort-order='descending') Name
+          th.table__header.table__header_sortable(data-sort-field='added', data-sort-type='date') Date Added
+          th.table__header.table__header_sortable(data-sort-field='edited', data-sort-type='date') Last change
+          th.table__header.table__header_sortable(data-sort-field='addedby', data-sort-type='string') Added by
+          th.table__header Color scheme
+          th.table__header Del
+      tbody
+        for s in styles
+          tr.table__row(data-name=s.name, data-added=s.createdDate, data-edited=s.updatedDate, data-postedby=s.addedBy && s.addedBy.login)
+            td
+              a(href=`/manage/styles/${s.name}`, title='Edit style')= s.name
+            td
+              if s.createdDate
+                +datetime(s.createdDate)
+            td
+              if s.updatedDate
+                +datetime(s.updatedDate)
+            td
+              if s.addedBy
+                a(href=`/manage/staff/${s.addedBy.login}`)= s.addedBy.login
+            td
+              if s.colors
+                -
+                  var representativeColors = [
+                    'background-color',
+                    'border-color',
+                    'primary-color',
+                    'secondary-color',
+                    'text-color',
+                    'postblock-color',
+                    'postblock-background-color',
+                    'link-color',
+                    'link-color-hover',
+                  ];
+                for colorname in representativeColors
+                  - var color = s.colors.get(colorname)
+                  +swatch(color)
+            td
+              form(method='post', action='/api/style', data-method='delete')
+                input(type='hidden', name='name', value=s.name)
+                button(type='button', class='btn', data-style=s.name, data-action='delete') Delete

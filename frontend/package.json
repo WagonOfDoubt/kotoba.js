@@ -31,6 +31,7 @@
     "gulp-uglifycss": "^1.1.0",
     "gulp-umd": "^2.0.0",
     "gulp-util": "^3.0.8",
+    "merge-stream": "^2.0.0",
     "mocha": "^5.2.0",
     "node-sass": "^4.11.0",
     "uglify-es": "^3.3.9",
@@ -51,6 +52,13 @@
     "pug-runtime": "^2.0.4"
   },
   "jshintConfig": {
-    "esversion": 9
+    "esversion": 9,
+    "unused": "vars",
+    "varstmt": true,
+    "undef": true,
+    "jquery": true,
+    "browserify": true,
+    "devel": true,
+    "mocha": true
   }
 }

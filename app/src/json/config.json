@@ -1,6 +1,7 @@
 {
   "secure_cookies": false,
   "html_path": "/home/node/app/html",
+  "templates_path": "/home/node/app/templates",
   "salt_rounds": 10,
   "catalog_filename": "kotolog.html",
   "session_age": 2592000000,

@@ -1,0 +1,26 @@
+include ../mixins/inputs.pug
+
+block adminbar-before
+div.adminbar.adminbar_top
+  nav.menu.menu_site.menu_top!= filters.markdown(site.menu)
+  nav.menu.menu_board.menu_top
+    if (site.styleSelectorType === 'list')
+      ul.button-group
+        for s in styles
+          li.button.button_link
+            a.js-set-style(href='#', data-style=s.name)= s.capitalizedName
+    if (site.styleSelectorType === 'combobox')
+      -
+        var defaultStyleName =
+          board && board.defaultStyle ?
+            board.defaultStyle :
+          site && site.defaultStyle ?
+            site.defaultStyle :
+            'umnochan';
+      +styleSelector(styles, defaultStyleName)
+    block adminbar-links
+      span.button.button_link
+        a(href='/') Home
+      span.button.button_link
+        a(href='/manage') Manage
+block adminbar-after

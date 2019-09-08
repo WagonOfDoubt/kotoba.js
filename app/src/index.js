@@ -72,6 +72,7 @@ const _ = require('lodash');
 
 const routes = require('./routes');
 const User = require('./models/user');
+const Style = require('./models/style');
 const { globalTemplateVariables } = require('./middlewares/params');
 const { ensureMainPage } = require('./controllers/generate');
 
@@ -207,7 +208,10 @@ const initApp = () => {
   app.use(routes);
 
   connectToDatabase(app)
-    .then(() => ensureMainPage())
+    .then(() => Promise.all([
+      ensureMainPage(),
+      Style.ensureDefaults(),
+    ]))
     .catch(console.error);
 
   // error handler

@@ -1,25 +1,91 @@
 import $ from 'jquery';
 
 
-export const setStyle = (stylename) => {
-  stylename = stylename || '';
-  localStorage.setItem('kot_style', stylename);
-  $('link[data-style]').each(function() {
-      const { preffered, style } = this.dataset;
-      this.disabled = true;
-      this.disabled = !(stylename === style || (!style && preffered));
-  });
+export const applyStyle = (styleData) => {
+  const el = document.getElementById('user-style');
+  el.innerHTML = styleData.rawCSS;
+  el.dataset.style = styleData.name;
 };
 
 
-export const getCurrentStyle = () => {
-  return localStorage.getItem('kot_style');
+const fetchStyle = (stylename) => {
+  return fetch(`/api/style?name=${stylename}`)
+    .then(res => {
+      return res
+        .json()
+        .then((data) => {
+          if (res.ok) {
+            return data;
+          } else {
+            throw data;
+          }
+        });
+    });
+};
+
+
+const setStyle = (stylename = '') => {
+  const stylecfg = getStoredStyles();
+  const board = document.documentElement.dataset.board;
+  if (board) {
+    stylecfg.boards = stylecfg.boards || {};
+    stylecfg.boards[board] = stylename;
+  } else {
+    stylecfg.global = stylename;
+  }
+  stylecfg.styles = stylecfg.styles || {};
+  if (!stylecfg.styles[stylename]) {
+    fetchStyle(stylename)
+      .then(data => {
+        stylecfg.styles[stylename] = data;
+        applyStyle(stylecfg.styles[stylename]);
+        setStoredStyles(stylecfg);
+      })
+      .catch(error => {
+        console.warn(`Error while loading style "${stylename}":`, error);
+      });
+  } else {
+    applyStyle(stylecfg.styles[stylename]);
+    setStoredStyles(stylecfg);
+  }
+};
+
+
+const getCurrentStyleName = () => {
+  const stylecfg = getStoredStyles();
+  const board = document.documentElement.dataset.board;
+  if (board && stylecfg.boards) {
+    return stylecfg.boards[board];
+  }
+  if (stylecfg.global) {
+    return stylecfg.global;
+  }
+  return '';
+};
+
+
+const getStoredStyles = () => {
+  try {
+    const stored = localStorage.getItem('kot_style');
+    const parsed = JSON.parse(stored);
+    if (typeof parsed === 'object') {
+      return parsed;
+    }
+  } catch (err) {
+    return {};
+  }
+  return {};
+};
+
+
+const setStoredStyles = (stylecfg) => {
+  localStorage.setItem('kot_style', JSON.stringify(stylecfg));
 };
 
 
 export const initChangeStyle = () => {
   // on page load, update page style
-  const currentStyle = localStorage.getItem('kot_style');
+  const currentStyle = getCurrentStyleName();
   if (currentStyle) {
     setStyle(currentStyle);
     $(`.style-select option[value=${currentStyle}]`).prop('selected', true);

@@ -38,7 +38,9 @@ block main
       | HTML under board title in page header.
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
-    +textEdit('defaultStyle', 'Default style', 'The style which will be set when the user first visits the board.')
+    if (styles)
+      - var defaultStyleOptions = styles.map(stl => ({ value: stl.name, label: stl.capitalizedName }))
+      +comboboxEdit('defaultStyle', 'Default style', defaultStyleOptions, 'The style which will be set when the user first visits the board.')
     +textEdit('imageUri', 'Header image', 'URL. Overrides the header set in site settings. Leave blank to use configured global header image.')
     +textEdit('faviconUri', 'Favicon image', 'URL. Overrides default favicon. Leave blank to use default favicon.')
     +numberEdit('maxFileSize', 'Maximum file size', 'Maxmimum size of uploaded images, in bytes.')

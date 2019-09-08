@@ -14,6 +14,7 @@
  * @see module:routes/manage/sitesettings
  * @see module:routes/manage/spaceused
  * @see module:routes/manage/staff
+ * @see module:routes/manage/styles
  * @see module:routes/manage/trash
  * @see module:routes/manage/uploads
  */
@@ -45,6 +46,7 @@ router.use('/manage/', require('./roles'));
 router.use('/manage/', require('./sitesettings'));
 router.use('/manage/', require('./spaceused'));
 router.use('/manage/', require('./staff'));
+router.use('/manage/', require('./styles'));
 router.use('/manage/', require('./trash'));
 router.use('/manage/', require('./uploads'));
 

@@ -14,6 +14,7 @@ const Settings = require('../models/settings');
 const filters = require('../utils/filters');
 const config = require('../json/config.json');
 const Board = require('../models/board');
+const Style = require('../models/style');
 const Post = require('../models/post');
 const News = require('../models/news');
 const pkg = require('../package.json');
@@ -27,11 +28,13 @@ const pkg = require('../package.json');
  */
 const getTemplateGlobals = async () => {
   const s = await Settings.get();
+  const styles = await Style.findAll();
   const data = {
     site: s,
     lang: s.locale,
     pkg: pkg,
     config: config,
+    styles: styles,
     filters: filters,
     basedir: config.html_path
   };

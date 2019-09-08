@@ -1,26 +1,14 @@
-div.adminbar.adminbar_top
-  nav.menu.menu_site.menu_top!= filters.markdown(site.menu)
-  nav.menu.menu_board.menu_top
-    if (site.styleSelectorType === 'list')
-      ul.button-group
-        for s in site.styles
-          li.button.button_link
-            a.js-set-style(href='#', data-style=s)= s[0].toUpperCase() + s.substring(1)
-    if (site.styleSelectorType === 'combobox')
-      select.style-select.js-set-style
-        for s in site.styles
-          option(value=s)= s[0].toUpperCase() + s.substring(1)
+extends adminbar.pug
+
+block prepend adminbar-links
+  if board.features.catalog
     span.button.button_link
-      a(href='/') Home
+      a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
+  if board.features.archive
     span.button.button_link
-      a(href='/manage') Manage
-    if board.features.catalog
-      span.button.button_link
-        a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
-    if board.features.archive
-      span.button.button_link
-        a(href='/' + board.uri + '/arch/res') Archive
-h1.logo= board.name
-if board.header
-  div.board-header
-    div.board-header__content!= filters.markdown(board.header)
+      a(href='/' + board.uri + '/arch/res') Archive
+block adminbar-after
+  h1.logo= board.name
+  if board.header
+    div.board-header
+      div.board-header__content!= filters.markdown(board.header)

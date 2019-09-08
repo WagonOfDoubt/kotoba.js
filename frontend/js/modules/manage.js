@@ -12,6 +12,7 @@ import { serializeForm, alertErrorHandler, successErrorHandler, sendJSON,
 import { assignDeep } from '../utils/object-utils';
 import assetUploadPreviewTemplate from '../templates-compiled/asset-upload-preview';
 import modlogModalBodyTemplate from '../templates-compiled/modlog-modal-body';
+import userstyleTemplate from '../templates-compiled/userstyle';
 
 
 const initPreviewBtns = () => {
@@ -125,12 +126,6 @@ const managePage_siteSettings = () => {
 
 
 const managePage_news = () => {
-  $('button[data-action="edit"]').click(e => {
-    const btn = e.currentTarget;
-    const newsId = parseInt(btn.dataset.news);
-    window.location = `/manage/news/${ newsId }`;
-  });
-
   $('button[data-action="delete"]').click(e => {
     const btn = e.currentTarget;
     const newsId = btn.dataset.news;
@@ -366,7 +361,6 @@ const managePage_modlog = () => {
     const items = formData.items.map(JSON.parse);
     const updates = items.reduce((acc, val) => {
       const { postId, boardUri } = val.target;
-      const timestamp = val.target.timestamp;
       const targetKey = `${boardUri}-${postId}`;
       if (!acc[targetKey]) {
         acc[targetKey] = {
@@ -408,6 +402,52 @@ const managePage_modlog = () => {
 };
 
 
+const managePage_styles = () => {
+    $('button[data-action="delete"]').click(e => {
+      const btn = e.currentTarget;
+      const styleName = btn.dataset.style;
+      const data = { name: styleName };
+      modal
+        .confirmPrompt('Delete style', `Delete style ${styleName}?`, 'Delete')
+        .then(() => {
+          sendJSON('/api/style/', 'DELETE', data)
+            .then(() => {
+              modal
+                .alert('Success', 'Style was deleted')
+                .finally(() => window.location = '/manage/styles');
+            })
+            .catch(alertErrorHandler);
+        });
+  });
+
+  const $form = $('#form-edit-styles');
+
+  const updateStyle = () => {
+    const data = serializeForm($form);
+    const s = userstyleTemplate(data);
+    const el = document.getElementById('user-style');
+    el.innerHTML = s;
+  };
+
+  $form.on('change input', 'input, textarea', (e) => {
+    updateStyle();
+  });
+
+  updateStyle();
+
+  $form.submit((e) => {
+    const data = serializeForm($form);
+    const action = $form.attr('action');
+    const method = $form.data('method');
+    const successMessage = method === 'POST' ? 'Style added' : 'Style updated';
+    sendJSON(action, method, data)
+      .then(successErrorHandler(successMessage))
+      .catch(alertErrorHandler);
+    e.preventDefault();
+  });
+};
+
+
 /**
  * Initialize module
  */
@@ -433,6 +473,7 @@ export const init = () => {
     'manage-page-assets': managePage_assets,
     'manage-page-trash': managePage_trash,
     'manage-page-modlog': managePage_modlog,
+    'manage-page-styles': managePage_styles,
   };
   const currentActivity = Object
     .keys(activities)

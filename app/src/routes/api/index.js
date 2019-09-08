@@ -8,6 +8,7 @@
  * @see module:routes/api/post
  * @see module:routes/api/report
  * @see module:routes/api/settings
+ * @see module:routes/api/style
  * @see module:routes/api/user
  */
 
@@ -22,6 +23,7 @@ router.use(require('./post'));
 router.use(require('./report'));
 router.use(require('./role'));
 router.use(require('./settings'));
+router.use(require('./style'));
 router.use(require('./user'));
 
 /**

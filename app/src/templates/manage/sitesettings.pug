@@ -24,9 +24,13 @@ block main
     +checkboxEdit('startWithOne', 'Number pages starting with one', 'Traditionally pages are zero-based, like in most programming languages.')
     //- styles
     h2 Site styles
-    +arrayEdit('styles', 'List of styles')
-      | One per row, lowercase, put .css files by same name in /.static/css/ directory.
-    +textEdit('defaultStyle', 'Default style', 'Default style for site. Can be overridden for each board.')
+    span.button.button_link
+      a(href='/manage/styles') Add/edit styles
+    if (styles)
+      - var defaultStyleOptions = styles.map(stl => ({ value: stl.name, label: stl.capitalizedName }))
+      +comboboxEdit('defaultStyle', 'Default style', defaultStyleOptions, 'Default style for site. Can be overridden for each board.')
+    else
+      div.error No styles defined. Click #[a(href='/manage/styles') here] to add styles.
     -var selectorTypeOptions = [{value: 'none', label: 'None'}, {value: 'list', label: 'List'}, {value: 'combobox', label: 'Combo box'}]
     +comboboxEdit('styleSelectorType', 'Style selector type', selectorTypeOptions, 'Type of style selector at the top of page')
     //- features

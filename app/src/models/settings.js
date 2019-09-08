@@ -38,15 +38,6 @@ const settingsSchema = Schema({
     /** thumbnail height in pixels */
     height: { type: Number, default: 200 }
   },
-  /** List of default style options for site */
-  styles:   { type: Array, default: [
-    'umnochan',
-    'burichan',
-    'futaba',
-    'photon',
-    'kusaba',
-    'bluemoon'
-  ] },
   /** Default style for site */
   defaultStyle:   { type: String, default: 'umnochan' },
   /** Type of style selector at the top of page */
@@ -84,7 +75,7 @@ const settingsSchema = Schema({
   minimize: false
 });
 
-var cachedSettings = null;
+let cachedSettings = null;
 
 
 /**

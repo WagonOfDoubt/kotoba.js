@@ -1,0 +1,14 @@
+| :root {
+if colors
+  for color, varname in colors
+    | --#{varname}: #{color};
+if variables
+  for value, varname in variables
+    | --#{varname}: #{value};
+if strings
+  for value, varname in strings
+    | --#{varname}: "!{value}";
+| }
+
+if css
+  | !{css}

@@ -26,7 +26,7 @@ mixin textEdit(param, label, hint, required)
   div.form-group
     if label
       label(for=param) #{ label }:
-    input(data-default=def, name=param, id=param, type='text', value=val, required=required)
+    input(data-default=def, name=param, id=param, type='text', value=val, required=required)&attributes(attributes)
     if block
       small.desc
         block
@@ -104,3 +104,41 @@ mixin comboboxEdit(param, label, options, hint, required)
     else if hint
       +hintText(hint, def)
 
+mixin colorEdit(param, label, hint, required)
+  - var val = filters.getParam(param, values);
+  - var def = filters.getParam(param, defaults);
+  div.form-group
+    if label
+      label(for=param) #{ label }:
+    input(data-default=def, name=param, id=param, type='color', value=val, required=required)
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
+
+mixin nothingEdit(param, label, hint)
+  - var val = filters.getParam(param, values);
+  div.form-group
+    if label
+      label #{ label }:
+    input(disabled, value=val)
+    if block
+      small.desc
+        block
+    else if hint
+      +hintText(hint, def)
+
+
+mixin styleSelector(styles, selectedStyle)
+  if styles && styles.length
+    select.style-select.js-set-style
+      for s in styles
+        -var isSelected = s.name === selectedStyle
+        option(
+          value=s.name,
+          selected=isSelected,
+          class={
+            'option_default': isSelected,
+          })= s.capitalizedName
