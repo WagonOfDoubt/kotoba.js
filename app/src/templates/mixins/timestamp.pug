@@ -15,3 +15,15 @@ mixin time(timestamp)
     time.time(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()
   else
     span.error Error: no timestamp
+
+mixin fromSeconds(secs)
+  -
+    var seconds = Math.floor(secs) % 60;
+    var minutes = Math.floor(secs / 60) % 60;
+    var hours = Math.floor(secs / 3600);
+    var timeArr = [];
+    if (hours) timeArr.push(hours.toString().padStart(2, '0'));
+    timeArr.push(minutes.toString().padStart(2, '0'));
+    timeArr.push(seconds.toString().padStart(2, '0'));
+    var timeStr = timeArr.join(':');
+  time.duration(datetime=timeStr)= timeStr

@@ -1,5 +1,6 @@
 extends ../layouts/sidebar.pug
 include ../mixins/controls.pug
+include ../mixins/timestamp.pug
 
 block bodyClass
   - var bodyClass = 'manage-page ' + activity
@@ -15,10 +16,31 @@ block main
   p #[a(href='/manage/spaceused') Disk space used] is #[strong= filters.readableSize(spaceused)]
 
   h2 Technical Info
+  section#manage-info-status
+    p Uptime: #[+fromSeconds(process.uptime())]
+    - var cpuUsage = process.cpuUsage()
+    p CPU usage (microseconds): user - #{cpuUsage.user}, system - #{cpuUsage.system}
+    - var memoryUsage = process.memoryUsage()
+    p Memory usage:
+      ul.list.list_unmarked
+        li Heap - #{filters.readableSize(memoryUsage.heapUsed)}/#{filters.readableSize(memoryUsage.heapTotal)} 
+        li External - #{filters.readableSize(memoryUsage.external)}
+        li #[abbr(title='Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the process, which includes the heap, code segment and stack.') RSS] - #{filters.readableSize(memoryUsage.rss)}
+    p Debug port: #{process.debugPort}
+  section#manage-info-node
+    h3 Node.js
+    -var nodeVersion = process.version
+    p #[a(href='https://nodejs.org/') Node] version: #{nodeVersion}
+    -var nodeRelatedStuff = process.versions
+    p Node details: 
+      +showOmittedBtn(Object.keys(nodeRelatedStuff).length, `#manage-info-node-versions`)
+    div#manage-info-node-versions.hidden
+      for v, k in nodeRelatedStuff
+        div #{k}: #{v}
   section#manage-info-mongo
     h3 Mongo version
-    p MongoDB version: #{kot_mongo_version}
-    p Mongoose version: #{kot_mongoose_version}
+    p #[a(href='https://www.mongodb.com/') MongoDB] version: #{kot_mongo_version}
+    p #[a(href='https://mongoosejs.com/') Mongoose] version: #{kot_mongoose_version}
 
   section#manage-info-ffmpeg
     h3 ffmpeg
