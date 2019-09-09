@@ -9,7 +9,7 @@ const router = express.Router();
 const multer = require('multer');
 const _ = require('lodash');
 const fp = require('lodash/fp');
-const { checkSchema } = require('express-validator/check');
+const { checkSchema } = require('express-validator');
 
 const Asset = require('../../models/asset');
 

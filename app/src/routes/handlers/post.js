@@ -1,13 +1,7 @@
-const { body, validationResult } = require('express-validator/check');
+const { body } = require('express-validator');
 const multer = require('multer');
 const upload = multer();
 const _ = require('lodash');
-const express = require('express');
-const ObjectId = require('mongoose').Types.ObjectId;
-const router = express.Router();
-const fp = require('lodash/fp');
-const flattenObject = require('flat');
-
 
 const { createThread,
   createReply,
@@ -15,12 +9,7 @@ const { createThread,
 
 const { updatePosts } = require('../../controllers/posting');
 
-const Post = require('../../models/post');
-const Role = require('../../models/role');
-const ModlogEntry = require('../../models/modlog');
-
 const { validateRequest } = require('../../middlewares/validation');
-const reqparser = require('../../middlewares/reqparser');
 const { postEditPermission } = require('../../middlewares/permission');
 const { filterPostTargetItems,
   populatePostUpdateItems,

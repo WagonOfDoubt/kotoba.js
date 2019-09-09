@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { check, body, checkSchema, validationResult } = require('express-validator/check');
-const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
+const { check, body, checkSchema } = require('express-validator');
 
 const News = require('../../models/news');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
 const { generateMainPage } = require('../../controllers/generate');
-const { RequestValidationError, DocumentNotFoundError } = require('../../errors');
+const { DocumentNotFoundError } = require('../../errors');
 const sanitizer = require('../../middlewares/sanitizer');
 
 

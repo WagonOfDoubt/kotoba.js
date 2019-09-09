@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mongo:
-    image: mongo:4.0
+    image: mongo:4.2
     volumes:
       - ./db:/data/db
     ports:

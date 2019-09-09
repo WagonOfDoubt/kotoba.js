@@ -108,7 +108,10 @@ const connectToDatabase = async (app) => {
 
   // make connection
   try {
-    await mongoose.connect(dbConn, { useNewUrlParser: true });
+    await mongoose.connect(dbConn, {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+    });
     console.log(`kotoba.js connected to database ${ dbConn }`);
   } catch (err) {
     console.error(err);

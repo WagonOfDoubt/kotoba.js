@@ -1,6 +1,6 @@
 const express = require('express');
 const { validateRedirect } = require('../../middlewares/validation');
-const { body, param, validationResult } = require('express-validator/check');
+const { param } = require('express-validator');
 const News = require('../../models/news');
 
 const router = express.Router();

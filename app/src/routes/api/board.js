@@ -1,18 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { oneOf, body, param, check, validationResult } = require('express-validator/check');
-const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
+const { body, param, check } = require('express-validator');
 const _ = require('lodash');
 
 const boardController = require('../../controllers/board');
 const Board = require('../../models/board');
 const ModlogEntry = require('../../models/modlog');
-const reqparser = require('../../middlewares/reqparser');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
 const sanitizer = require('../../middlewares/sanitizer');
 const boardparams = require('../../json/boardparams');
-const { DocumentNotFoundError, AuthRequiredError, PermissionDeniedError, RequestValidationError, DocumentAlreadyExistsError } = require('../../errors');
+const { DocumentNotFoundError, DocumentAlreadyExistsError } = require('../../errors');
 
 
 /**

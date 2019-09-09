@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { param } = require('express-validator/check');
+const { param, checkSchema } = require('express-validator');
 
 const Post = require('../models/post');
 const { authRequired } = require('../middlewares/permission');
 const { validateRequest } = require('../middlewares/validation');
-const { checkSchema } = require('express-validator/check');
 
 
 router.post('/preview/news',

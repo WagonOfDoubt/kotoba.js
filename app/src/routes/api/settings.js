@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { oneOf, body, param, validationResult } = require('express-validator/check');
-const { matchedData, sanitize, sanitizeBody } = require('express-validator/filter');
+const { body } = require('express-validator');
 
 const Settings = require('../../models/settings');
 const ModlogEntry = require('../../models/modlog');

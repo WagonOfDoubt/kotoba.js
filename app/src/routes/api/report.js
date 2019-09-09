@@ -1,17 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { checkSchema } = require('express-validator/check');
+const { checkSchema } = require('express-validator');
 const _ = require('lodash');
 const fp = require('lodash/fp');
 
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');
 const { filterPostTargetItems,
-  populatePostUpdateItems,
-  findUserRoles } = require('../../middlewares/post');
+  populatePostUpdateItems } = require('../../middlewares/post');
 const Report = require('../../models/report');
 const sanitizer = require('../../middlewares/sanitizer');
-const { RequestValidationError, DocumentNotFoundError } = require('../../errors');
 const { populateDocumentsByIds,
   removeDuplicates,
   compareRequestWithDocuments,

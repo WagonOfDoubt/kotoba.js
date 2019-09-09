@@ -1,7 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
-const { body, validationResult } = require('express-validator/check');
+const { body, validationResult } = require('express-validator');
 
 const User = require('../models/user');
 const config = require('../json/config.json');
