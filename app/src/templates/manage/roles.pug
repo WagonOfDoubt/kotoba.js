@@ -6,7 +6,7 @@ include ../mixins/text.pug
 
 block main
   - var action = '/api/role/';
-  - var method = role ? 'PATCH' : 'PUT';
+  - var method = role ? 'PATCH' : 'POST';
   - var isNewRole = !role
   form#form-edit-role.js-api-form.js-reload-on-success(action=action, data-method=method)
     -var values = role ? filters.flatObj(role) : {}

@@ -232,6 +232,24 @@ class NotFoundError extends BaseError {
 
 
 /**
+ * @apiDefine ConflictError
+ * @apiError ConflictError Request could not be processed because of conflict
+ *
+ * @apiErrorExample DocumentNotFound
+ *     HTTP/1.1 409 Conflict
+ *     {
+ *       "status": 409,
+ *       "error": {
+ *         "code": "Conflict",
+ *         "message": "This role is currently assigned 10 times. Revoke role from all users before deleting it.",
+ *         "param": "roleName",
+ *         "value": "moderator",
+ *         "location": "body",
+ *       }
+ *     }
+ */
+
+/**
  * Generic "409 Conflict" Error
  */
 class ConflictError extends BaseError {

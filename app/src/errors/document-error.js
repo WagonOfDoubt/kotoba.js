@@ -8,7 +8,7 @@ const { ConflictError, NotFoundError, NoContentError } = require('./base-error')
 /**
  * @apiDefine DocumentAlreadyExistsError
  * @apiError DocumentAlreadyExists Attempt to create document that already exists
- * @apiErrorExample BoardAlreadyExists
+ * @apiErrorExample DocumentAlreadyExists
  *     HTTP/1.1 409 Conflict
  *     {
  *       "status": 409,
