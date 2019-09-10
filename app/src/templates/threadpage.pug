@@ -1,8 +1,12 @@
 extends layouts/default.pug
 
 block bodyClass
-  - var bodyClass = 'thread-page'
-  - var headAttributes = { 'data-board': board && board.uri }
+  -
+    var bodyClass = 'thread-page';
+    var headAttributes = {
+      'data-board': board && board.uri,
+      'data-thread': thread && thread.postId,
+    };
 
 block header
   include includes/boardheader.pug

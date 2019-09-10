@@ -118,9 +118,9 @@ export class PostForm {
 
   set isVisible(value) {
     if (value) {
-      show();
+      this.show();
     } else {
-      hide();
+      this.hide();
     }
   }
 
@@ -148,7 +148,7 @@ export class PostForm {
 
 
 const isThreadPage = () => document.body.classList.contains('thread-page');
-const isBoardPage = () => document.body.classList.contains('board-page');
+
 
 const getToggleBtnLabel = (isVisible) => {
   if (isVisible) {
@@ -162,21 +162,8 @@ const getToggleBtnLabel = (isVisible) => {
 
 
 const getPageReplyThread = () => {
-  let boardUri = '';
-  let threadId = '0';
-  if (isThreadPage()) {
-    const thread = document.body.querySelector('.thread-container');
-    if (thread) {
-      boardUri = thread.dataset.boardUri;
-      threadId = thread.dataset.threadId;
-    }
-  }
-  if (isBoardPage()) {
-    const thread = document.body.querySelector('.thread-container');
-    if (thread) {
-      boardUri = thread.dataset.boardUri;
-    }
-  }
+  const threadId = document.documentElement.dataset.thread || '0';
+  const boardUri = document.documentElement.dataset.board || '';
   return { boardUri, threadId };
 };
 
