@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { param, checkSchema } = require('express-validator');
+const { checkSchema } = require('express-validator');
 
 const Post = require('../models/post');
 const { authRequired } = require('../middlewares/permission');
@@ -8,10 +8,11 @@ const { validateRequest } = require('../middlewares/validation');
 
 
 router.post('/preview/news',
-  [
-    validateRequest,
-    authRequired
-  ],
+  authRequired,
+  checkSchema({
+    
+  }),
+  validateRequest,
   async (req, res, next) => {
     try {
       res.render('includes/newsentry', { n: req.body.data });
@@ -22,11 +23,19 @@ router.post('/preview/news',
   }
 );
 
+
 router.post('/preview/markdown',
-  [
-    validateRequest,
-    authRequired
-  ],
+  authRequired,
+  checkSchema({
+    data: {
+      in: 'body',
+      isLength: {
+        options: { min: 1 },
+        errorMessage: 'Markdown code is empty',
+      }
+    }
+  }),
+  validateRequest,
   async (req, res, next) => {
     try {
       res.send(res.locals.filters.markdown(req.body.data));
@@ -36,24 +45,44 @@ router.post('/preview/markdown',
   }
 );
 
+
 router.get('/preview/replies/:board/:thread',
-  [
-    param('board').isAlphanumeric(),
-    param('thread').isNumeric(),
-    validateRequest
-  ],
+  checkSchema({
+    board: {
+      in: 'params',
+      matches: {
+        options: [/^[a-zA-Z0-9_]*$/],
+        errorMessage: 'Board uri can contain only letters and numbers or underscore',
+      },
+    },
+    thread: {
+      in: 'params',
+      isNumeric: {
+        options: {
+          no_symbols: true,
+        },
+      },
+      errorMessage: 'Invalid thread Id',
+    },
+  }),
+  validateRequest,
   async (req, res, next) => {
     try {
-      const thread = await Post
-        .findThread(req.params.board, req.params.thread)
+      const { board, thread } = req.params;
+      const query = { boardUri: board, postId: thread, isOp: true };
+      const isAdmin = req.user.authority === 'admin';
+      const hasBoardRole = req.user.boardRoles && req.user.boardRoles.hasOwnProperty(board);
+      if (!(isAdmin || hasBoardRole)) {
+        query.isDeleted = false;
+      }
+      const t = await Post
+        .findOne(query)
         .select('children')
         .populate('children');
-      if (!thread) {
-        const err = new Error('Thread not found');
-        err.status = 404;
-        throw err;
+      if (!t) {
+        return res.sendStatus(404);
       }
-      const data = { replies: thread.children };
+      const data = { replies: t.children };
       res.render('includes/replieslist', data);
     } catch (err) {
       next(err);
@@ -63,27 +92,25 @@ router.get('/preview/replies/:board/:thread',
 
 
 router.get('/preview/post/:board/:post',
-  [
-    checkSchema({
-      board: {
-        in: 'params',
-        matches: {
-          options: [/[a-zA-Z0-9_]*$/],
-          errorMessage: 'Board uri can contain only letters and numbers or underscore',
+  checkSchema({
+    board: {
+      in: 'params',
+      matches: {
+        options: [/^[a-zA-Z0-9_]*$/],
+        errorMessage: 'Board uri can contain only letters and numbers or underscore',
+      },
+    },
+    post: {
+      in: 'params',
+      isNumeric: {
+        options: {
+          no_symbols: true,
         },
       },
-      post: {
-        in: 'params',
-        isNumeric: {
-          options: {
-            no_symbols: true,
-          },
-        },
-        errorMessage: 'Invalid post Id',
-      }
-    }),
-    validateRequest,
-  ],
+      errorMessage: 'Invalid post Id',
+    }
+  }),
+  validateRequest,
   async (req, res, next) => {
     try {
       const { board, post } = req.params;
