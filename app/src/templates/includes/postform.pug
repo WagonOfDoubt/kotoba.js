@@ -66,24 +66,24 @@ form#postform.postform.hidden(
     if isPage || !board || board.allowRepliesSubject
       //- div.form-row
       tr
-      //- div.form-col
-      td.postblock
-        label(for='subject-input').form-label Subject
-      //- div.form-col
-      td
-        input#subject-input.from-input(
-          name='subject'
-          size='35'
-          maxlength='75'
-          accesskey='s'
-          type='text'
-          required=isPage && board && board.newThreadsRequired.subject
-        )
-        input(
-          type='submit'
-          value='Submit'
-          accesskey='z'
-        )
+        //- div.form-col
+        td.postblock
+          label(for='subject-input').form-label Subject
+        //- div.form-col
+        td
+          input#subject-input.from-input(
+            name='subject'
+            size='35'
+            maxlength='75'
+            accesskey='s'
+            type='text'
+            required=isPage && board && board.newThreadsRequired.subject
+          )
+          input(
+            type='submit'
+            value='Submit'
+            accesskey='z'
+          )
     //- div.form-row
     tr
       //- div.form-col
@@ -156,7 +156,7 @@ form#postform.postform.hidden(
     if board
       tr
         td.rules(colspan='2')
-          ui
+          ul
             li Supported file types are: <strong>GIF, PNG, JPG, SVG, WEBP, WEBM, MP4, OGV</strong>
             li Maximum file size allowed is <strong>#{filters.readableSize(board.maxFileSize)}</strong>.
             li Maximum number of files per upload is <strong>#{board.maxFilesPerPost}</strong>.
