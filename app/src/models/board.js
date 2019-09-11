@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const schemaUtils = require('../utils/schema');
 const boardparams = require('../json/boardparams');
-const Post = require('./post');
+const locales = require('../json/locales.json');
+const localeCodes = locales.map(([t, c]) => c);
+
 
 const uriValidators = [
   {
@@ -19,6 +21,15 @@ const uriValidators = [
   },
 ];
 
+const localeValidators = [
+  {
+    validator: function(v) {
+      return localeCodes.includes(v);
+    },
+    message: 'Invalid locale',
+  }
+];
+
 const boardSchema = Schema({
   uri: {
     type: String,
@@ -31,6 +42,7 @@ const boardSchema = Schema({
   name:                { type: String, default: '' },
   desc:                { type: String, default: '' },
   header:              { type: String, default: '' },
+  navbar:              { type: String, default: '' },
   imageUri:            { type: String, default: '' },
   faviconUri:          { type: String, default: '' },
   maxFileSize:         { type: Number, default: 10485760 },
@@ -47,7 +59,11 @@ const boardSchema = Schema({
   isHidden:            { type: Boolean, default: false },
   isForcedAnon:        { type: Boolean, default: false },
   defaultStyle:        { type: String, default: '' },
-  locale:              { type: String, default: 'en' },
+  locale:              {
+    type: String,
+    default: 'en',
+    validate: localeValidators,
+  },
   newThreadsRequired:  {
     files:      { type: Boolean, default: false },
     message:    { type: Boolean, default: false },

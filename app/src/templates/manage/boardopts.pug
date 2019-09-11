@@ -24,20 +24,31 @@ block main
     div.button.button_link
       a(href='/manage/boardopts') Edit boards
 
-  - var action = board ? `/api/board/${board.uri}` : '/api/board/';
+  - var action = '/api/board/';
   - var getUrl = board ? `/api/board/${board.uri}?select=!all` : null;
   - var method = board ? 'PATCH' : 'POST';
   form#form-update-board(method='POST', action=action, data-method=method, data-get-url=getUrl)
     if !board
       +textEdit('uri', 'Directory', 'The directory of the board.', true)
+    else
+      +nothingEdit('uri', 'Directory')
+      input(type='hidden', name='uri', value=board.uri)
     +textEdit('name', 'Name', 'The name of the board.')
     +textEdit('desc', 'Description', 'Short description of board for meta.')
     -var localeOptions = locales.map(([lang, code]) => ({value: code, label: `${ lang } (${ code })`}));
     +comboboxEdit('locale', 'Locale', localeOptions, 'Locale to use on this board. Leave blank to use the locale defined in site settings.')
-    +textArea('header', 'Include header')
+    +textArea('header', 'Additional header')
       | HTML under board title in page header.
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    div.text-right
+      button(type='button', class='btn', data-action='preview-markdown', data-field='header') Preivew
+    +textArea('navbar', 'Additional menu')
+      | HTML of additional navigation menu under #[a(href='/manage/sitesettings#menu') top links].
+      | Be careful and close all tags.
+      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+    div.text-right
+      button(type='button', class='btn', data-action='preview-markdown', data-field='navbar') Preivew
     if (styles)
       - var defaultStyleOptions = styles.map(stl => ({ value: stl.name, label: stl.capitalizedName }))
       +comboboxEdit('defaultStyle', 'Default style', defaultStyleOptions, 'The style which will be set when the user first visits the board.')

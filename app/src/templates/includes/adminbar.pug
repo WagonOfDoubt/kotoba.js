@@ -1,7 +1,8 @@
 include ../mixins/inputs.pug
 
-block adminbar-before
+block adminbar-beforebegin
 div.adminbar.adminbar_top
+  block adminbar-afterbegin
   nav.menu.menu_site.menu_top!= filters.markdown(site.menu)
   nav.menu.menu_board.menu_top
     if (site.styleSelectorType === 'list')
@@ -23,4 +24,5 @@ div.adminbar.adminbar_top
         a(href='/') Home
       span.button.button_link
         a(href='/manage') Manage
-block adminbar-after
+  block adminbar-beforeend
+block adminbar-afterend

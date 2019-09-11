@@ -63,6 +63,12 @@ class DocumentNotFoundError extends NotFoundError {
 
 
 /**
+ * @apiDefine DocumentNotModifiedError
+ * @apiSuccessExample DocumentNotModified
+ *     HTTP/1.1 204 No Content
+ */
+
+/**
  * Document was not modified because it's already in that state
  */
 class DocumentNotModifiedError extends NoContentError {
