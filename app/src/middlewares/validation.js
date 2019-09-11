@@ -1,5 +1,14 @@
-const { validationResult } = require('express-validator');
+const { validationResult, matchedData } = require('express-validator');
 const { RequestValidationError } = require('../errors');
+
+
+/**
+ * Replaces req.body with matchedData() form express-validator
+ */
+module.exports.filterMatched = (req, res, next) => {
+  req.body = matchedData(req, { locations: ['body'] });
+  next();
+};
 
 
 /**

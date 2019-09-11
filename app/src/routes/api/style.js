@@ -11,13 +11,49 @@ const { checkSchema } = require('express-validator');
 const Style = require('../../models/style');
 
 const { adminOnly } = require('../../middlewares/permission');
-const { validateRequest } = require('../../middlewares/validation');
-const sanitizer = require('../../middlewares/sanitizer');
+const { validateRequest, filterMatched } = require('../../middlewares/validation');
 
 const { DocumentNotFoundError, DocumentAlreadyExistsError } = require('../../errors');
 
-const validStyleNameRegexp = /^[a-z0-9_]*$/;
 
+/**
+ * @apiDefine StyleParams
+ * @apiParam {String} name Name of style also serving as unique id of style
+ * @apiParam {Object} colors CSS color variables
+ * @apiParam {Object} strings CSS text variables
+ * @apiParam {String} css Additional plain CSS
+ */
+
+const validStyleNameRegexp = /^[a-z0-9_]+$/;
+const styleParamsValidator = {
+  'name': {
+    in: 'body',
+    matches: {
+      options: [validStyleNameRegexp],
+      errorMessage: 'Style name can contain only lowercase letters and numbers'
+    },
+    trim: true,
+  },
+  'colors.*': {
+    in: 'body',
+    isHexColor: true,
+    trim: true,
+  },
+  'variables.*': {
+    in: 'body',
+    isAscii: true,
+    trim: true,
+  },
+  'strings.*': {
+    in: 'body',
+    optional: true,
+  },
+  'css': {
+    in: 'body',
+    optional: true,
+    trim: true,
+  },
+};
 
 /**
  * @api {get} /api/style/ Get styles
@@ -35,19 +71,17 @@ const validStyleNameRegexp = /^[a-z0-9_]*$/;
  */
 router.get(
   '/api/style/',
-  [
-    checkSchema({
-      name: {
-        in: 'query',
-        matches: {
-          options: [validStyleNameRegexp],
-          errorMessage: 'Style name can contain only lowercase letters and numbers'
-        },
-        trim: true,
-      }
-    }),
-    validateRequest,
-  ],
+  checkSchema({
+    name: {
+      in: 'query',
+      matches: {
+        options: [validStyleNameRegexp],
+        errorMessage: 'Style name can contain only lowercase letters and numbers'
+      },
+      trim: true,
+    }
+  }),
+  validateRequest,
   async (req, res, next) => {
     try {
       const styleName = req.query.name;
@@ -75,15 +109,7 @@ router.get(
 
 
 /**
- * @apiDefine StyleParams
- * @apiParam {String} name Name of style also serving as unique id of style
- * @apiParam {Object} colors CSS color variables
- * @apiParam {Object} strings CSS text variables
- * @apiParam {String} css Additional plain CSS
- */
-
-/**
- * @api {post} /api/style/ Upload new style
+ * @api {post} /api/style/ Create style
  * @apiName CreateStyle
  * @apiGroup Style
  * @apiPermission admin
@@ -98,35 +124,12 @@ router.get(
  */
 router.post(
   '/api/style/',
-  [
-    adminOnly,
-    sanitizer
-      .filterBody(['name', 'colors', 'variables', 'strings', 'css']),
-    checkSchema({
-      'name': {
-        matches: {
-          options: [validStyleNameRegexp],
-          errorMessage: 'Style name can contain only lowercase letters and numbers'
-        },
-        trim: true,
-      },
-      'colors.*': {
-        isHexColor: true,
-        trim: true,
-      },
-      'variables.*': {
-        isAscii: true,
-        trim: true,
-      },
-      'strings.*': {
-
-      },
-      'css': {
-
-      },
-    }),
-    validateRequest,
-  ],
+  adminOnly,
+  checkSchema({
+    ...styleParamsValidator,
+  }),
+  validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
       const styleWithSameName = await Style.findByName(req.body.name);
@@ -162,7 +165,7 @@ router.post(
 
 
 /**
- * @api {patch} /api/style/ Change style
+ * @api {patch} /api/style/ Modify style
  * @apiName UpdateStyle
  * @apiGroup Style
  * @apiPermission admin
@@ -177,35 +180,12 @@ router.post(
  */
 router.patch(
   '/api/style/',
-  [
-    adminOnly,
-    sanitizer
-      .filterBody(['name', 'colors', 'variables', 'strings', 'css']),
-    checkSchema({
-      'name': {
-        matches: {
-          options: [validStyleNameRegexp],
-          errorMessage: 'Style name can contain only letters and numbers'
-        },
-        trim: true,
-      },
-      'colors.*': {
-        isHexColor: true,
-        trim: true,
-      },
-      'variables.*': {
-        isAscii: true,
-        trim: true,
-      },
-      'strings.*': {
-
-      },
-      'css': {
-
-      },
-    }),
-    validateRequest,
-  ],
+  adminOnly,
+  checkSchema({
+    ...styleParamsValidator,
+  }),
+  validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
       const styleName = req.body.name;
@@ -250,19 +230,19 @@ router.patch(
  */
 router.delete(
   '/api/style/',
-  [
-    adminOnly,
-    checkSchema({
-      'name': {
-        matches: {
-          options: [validStyleNameRegexp],
-          errorMessage: 'Style name can contain only letters and numbers'
-        },
-        trim: true,
+  adminOnly,
+  checkSchema({
+    'name': {
+      in: 'body',
+      matches: {
+        options: [validStyleNameRegexp],
+        errorMessage: 'Style name can contain only letters and numbers'
       },
-    }),
-    validateRequest,
-  ],
+      trim: true,
+    },
+  }),
+  validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
       const styleName = req.body.name;

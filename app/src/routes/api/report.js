@@ -5,11 +5,10 @@ const _ = require('lodash');
 const fp = require('lodash/fp');
 
 const { adminOnly } = require('../../middlewares/permission');
-const { validateRequest } = require('../../middlewares/validation');
+const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const { filterPostTargetItems,
   populatePostUpdateItems } = require('../../middlewares/post');
 const Report = require('../../models/report');
-const sanitizer = require('../../middlewares/sanitizer');
 const { populateDocumentsByIds,
   removeDuplicates,
   compareRequestWithDocuments,
@@ -21,7 +20,7 @@ const { populateDocumentsByIds,
  * @apiName GetReport
  * @apiGroup Report
  * @apiPermission admin
- * @apiDescription Not implemented yet
+ * @apiDescription Not implemented
  */
 router.get('/api/report',
   adminOnly,
@@ -79,7 +78,7 @@ router.post('/api/report',
         options: { min: 1 },
       },
       matches: {
-        options: [/^[a-zA-Z0-9_]*$/],
+        options: [/^[a-z0-9_]+$/],
       }
     },
     'items.*.target.postId': {
@@ -167,9 +166,6 @@ router.post('/api/report',
  */
 router.patch('/api/report',
   adminOnly,
-  sanitizer.filterBody(['reports']),
-  sanitizer.toArray('reports'),
-  sanitizer.filterArray(['isDeleted', '_id', 'reason'], 'reports'),
   checkSchema({
     reports: {
       isArray: true,
@@ -187,12 +183,19 @@ router.patch('/api/report',
     },
     'reports.*.isDeleted': {
       isBoolean: true,
+      toBoolean: true,
       optional: true,
       in: 'body',
       errorMessage: 'report.isDeleted must be a boolean',
     },
+    'reports.*.reason': {
+      optional: true,
+      trim: true,
+      in: 'body',
+    }
   }),
   validateRequest,
+  filterMatched,
   populateDocumentsByIds(Report, 'reports'),
   removeDuplicates('reports', ['isDeleted', 'reason']),
   compareRequestWithDocuments('reports'),
@@ -207,7 +210,7 @@ router.patch('/api/report',
             update: _.omit(item, '_id'),
           },
         }));
-      const response = await Report.bulkWrite(updateReportQuery);
+      await Report.bulkWrite(updateReportQuery);
 
       res.locals.success = items;
       const { success, fail } = res.locals;
@@ -259,13 +262,14 @@ router.delete('/api/report',
     }
   }),
   validateRequest,
+  filterMatched,
   populateDocumentsByIds(Report, 'reports', ''),
   async (req, res, next) => {
     try {
       const reports = req.body.reports;
 
       const ids = _.map(reports, '_id');
-      const result = await Report.deleteMany({ _id: { $in: ids }});
+      await Report.deleteMany({ _id: { $in: ids }});
       res.locals.success = _.map(reports, fp.pick(['_id']));
       return res
         .status(200)
