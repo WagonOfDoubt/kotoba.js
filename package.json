@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node test.js",
-    "docs": "jsdoc -p index.js lib/answer-generator.js lib/image-generator.js test.js README.md"
+    "docs": "jsdoc -p -d docs index.js lib/answer-generator.js lib/image-generator.js test.js README.md"
   },
   "repository": {
     "type": "git",
