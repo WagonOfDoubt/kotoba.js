@@ -56,7 +56,7 @@ wakabtcha.generateImage(str, options)
 |name|type|default|descrition|
 |----|----|-------|----------|
 |str|String| |Captcha answer|
-|options|Object|Override defaults|
+|options|Object|{}|Override defaults|
 |options.captchaHeight|Number|18|Height of image|
 |options.captchaScribble|Number|0.2|Random scatter level|
 |options.captchaScaling|Number|0.15|Amplitude of random scale|
