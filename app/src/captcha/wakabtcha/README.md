@@ -20,7 +20,7 @@
 ![_space](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/_space.gif)
 ![wakaba](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/wakaba.gif)
 ![_space](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/_space.gif)
-![source](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/source.gif) 
+![source](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/source.gif)
 
 Wakabtcha consists of two independend modules: for generating random text (captcha answers) and for generating images from text (captcha questions). It doesn't have any database handling and verification logic, just challenge itself. It is an accurate port of [captcha.pl](https://github.com/some1suspicious/wakaba-original/blob/master/captcha.pl) from original Wakaba written by Dag Ågren (!WAHa.06x36) and produces 100% identical result on binary level. Customisation capabilities include user-defined fonts, grammar, level of randomization and styling.
 
@@ -56,7 +56,7 @@ wakabtcha.generateImage(str, options)
 |name|type|default|descrition|
 |----|----|-------|----------|
 |str|String| |Captcha answer|
-|options|Object|Override defaults|
+|options|Object|{}|Override defaults|
 |options.captchaHeight|Number|18|Height of image|
 |options.captchaScribble|Number|0.2|Random scatter level|
 |options.captchaScaling|Number|0.15|Amplitude of random scale|
@@ -144,7 +144,7 @@ const DEFAULT_FONT = {
 };
 ```
 
-### Example 2: Font with numbers
+#### Example 2: Font with numbers
 
 Font by [@OMOTO-TK](https://github.com/OMOTO-TK/mod-captcha-for-wakaba)
 
