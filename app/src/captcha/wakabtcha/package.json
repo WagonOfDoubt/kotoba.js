@@ -1,0 +1,37 @@
+{
+  "name": "wakabtcha",
+  "version": "1.0.0",
+  "description": "Captcha generator ported from Wakaba",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "node test.js",
+    "docs": "jsdoc -p -d docs index.js lib/answer-generator.js lib/image-generator.js test.js README.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WagonOfDoubt/wakabtcha.js.git"
+  },
+  "keywords": [
+    "wakaba",
+    "imageboard",
+    "captcha",
+    "captcha-generator"
+  ],
+  "author": "WagonOfDoubt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WagonOfDoubt/wakabtcha.js/issues"
+  },
+  "homepage": "https://github.com/WagonOfDoubt/wakabtcha.js#readme",
+  "devDependencies": {},
+  "jshintConfig": {
+    "esversion": 9,
+    "unused": "vars",
+    "varstmt": true,
+    "undef": true,
+    "node": true
+  }
+}
