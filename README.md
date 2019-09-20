@@ -22,7 +22,7 @@
 ![_space](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/_space.gif)
 ![source](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/source.gif) 
 
-Wakabtcha consists of two independend modules: for generating random text (captcha answers) and for generating images from text (captcha questions). It doesn't have any database handling and verification logic, just challenge itself. It is an accurate port of [captcha.pl](https://github.com/some1suspicious/wakaba-original/blob/master/captcha.pl) from original Wakaba and produces 100% identical result on binary level. Customisation capabilities include user-defined fonts, grammar, level of randomization and styling.
+Wakabtcha consists of two independend modules: for generating random text (captcha answers) and for generating images from text (captcha questions). It doesn't have any database handling and verification logic, just challenge itself. It is an accurate port of [captcha.pl](https://github.com/some1suspicious/wakaba-original/blob/master/captcha.pl) from original Wakaba written by Dag Ågren (!WAHa.06x36) and produces 100% identical result on binary level. Customisation capabilities include user-defined fonts, grammar, level of randomization and styling.
 
 ## ![usage](https://raw.githubusercontent.com/WagonOfDoubt/wakabtcha.js/assets/words/usage.gif)
 
@@ -142,4 +142,26 @@ const DEFAULT_FONT = {
   'z': [3, [0, 3, 3, 3, 0, 6, 3, 6], [0.5, 4.5, 2.5, 4.5]],
   ' ': [3],
 };
+```
+
+### Example 2: Font with numbers
+
+Font by [@OMOTO-TK](https://github.com/OMOTO-TK/mod-captcha-for-wakaba)
+
+```js
+const myFont = {
+	'1': [2,[1,1,1,6],[-1,2,1,1]],
+	'0': [3,[0,4,1,2,2,2,3,3,3,5,2,6,1,6,0,5,0,4]],
+	'2': [3,[-1,3,1,1,3,1],[3,1,0,5],[0,5,5,5]],
+	'3': [3,[-1,3,1,1,3,1],[3,1,1,4],[1,4,3,5],[3,5,-1,7]],
+	'4': [3,[0,0,0,3],[0,3,4,3],[4,3,4,0],[4,3,4,8]],
+	'5': [3,[5,0,0,0],[0,0,0,2],[0,2,3,2],[3,2,3,6],[3,6,0,6]],
+	'6': [3,[5,0,4,1,3,2,2,3,1,4],[1,4,0,5,0,6,3,6,3,5,1,4]],
+	'7': [3,[0,0,6,0],[6,0,0,6]],
+	'8': [3,[0,4,1,3,2,3,3,4,3,5,2,6,1,6,0,5,0,4],[1,3,2,3,3,3,3,2,2,0,1,0,0,2,0,3,1,3]],
+	'9': [3,[1,3,2,3,3,3,3,2,2,0,1,0,0,2,0,3,1,3],[3,3,0,7]],
+	' ': [3],
+};
+
+wakabtcha.generateImage('123456', { font: myFont });
 ```
