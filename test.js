@@ -19,8 +19,7 @@ const cb = (err) => {
 
 const tries = 10;
 for (let i = 0; i < tries; i++) {
-  const word = generateAnswer.generate();
-  const buf = generateImage.generate(word, {
-  });
+  const word = generateAnswer();
+  const buf = generateImage(word, {});
   fs.writeFile(`out/${word}.gif`, buf, cb);
 }
