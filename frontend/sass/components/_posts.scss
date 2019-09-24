@@ -127,12 +127,15 @@
   }
 }
 
-.post_reply .post__header::after {
-  content: var(--post-counter-prefix)counter(thr-cnt);
-  counter-increment: thr-cnt 1;
-  color: var(--post-counter-color);
-  margin-left: 10px;
-  font-size: 13px;
+
+.thread-page, .board-page {
+  .post_reply .post__header::after {
+    content: var(--post-counter-prefix)counter(thr-cnt);
+    counter-increment: thr-cnt 1;
+    color: var(--post-counter-color);
+    margin-left: 10px;
+    font-size: 13px;
+  }  
 }
 
 
@@ -245,15 +248,19 @@
 .popup {
   position: absolute;
   pointer-events: auto;
-}
 
-.popup .post {
-  display: inline-block;
-  border-style: solid;
-  border-width: 1px;
-  background-color: var(--primary-color);
-  border-color: var(--secondary-color);
-  box-shadow: 1px 0px 4px 2px rgba(0,0,0,.5);
+  .post {
+    display: inline-block;
+    border-style: solid;
+    border-width: 1px;
+    background-color: var(--primary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 1px 0px 4px 2px rgba(0,0,0,.5);
+  }
+
+  .post_reply .post__header::after {
+    display: none;
+  }
 }
 
 .popup_tail .post {
