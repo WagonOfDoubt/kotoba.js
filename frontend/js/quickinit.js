@@ -21,7 +21,7 @@ const getStoredStyles = () => {
   try {
     const stored = localStorage.getItem('kot_style');
     const parsed = JSON.parse(stored);
-    if (typeof parsed === 'object') {
+    if (!!parsed && typeof parsed === 'object') {
       return parsed;
     }
   } catch (err) {

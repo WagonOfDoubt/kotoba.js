@@ -27,11 +27,13 @@ const fetchStyle = (stylename) => {
 const setStyle = (stylename = '') => {
   const stylecfg = getStoredStyles();
   const board = document.documentElement.dataset.board;
-  if (board) {
-    stylecfg.boards = stylecfg.boards || {};
-    stylecfg.boards[board] = stylename;
-  } else {
-    stylecfg.global = stylename;
+  if (stylecfg) {
+    if (board) {
+      stylecfg.boards = stylecfg.boards || {};
+      stylecfg.boards[board] = stylename;
+    } else {
+      stylecfg.global = stylename;
+    }    
   }
   stylecfg.styles = stylecfg.styles || {};
   if (!stylecfg.styles[stylename]) {
@@ -68,7 +70,7 @@ const getStoredStyles = () => {
   try {
     const stored = localStorage.getItem('kot_style');
     const parsed = JSON.parse(stored);
-    if (typeof parsed === 'object') {
+    if (!!parsed && typeof parsed === 'object') {
       return parsed;
     }
   } catch (err) {
