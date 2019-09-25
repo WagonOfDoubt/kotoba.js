@@ -3,10 +3,12 @@ const Asset = require('../../models/asset');
 const Post = require('../../models/post');
 const Board = require('../../models/board');
 const Report = require('../../models/report');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/trash',
+  authRequired,
   async (req, res, next) => {
     try {
       let availableBoardsQuery = {};
@@ -44,6 +46,7 @@ router.get('/trash',
 );
 
 router.get('/trash/posts',
+  authRequired,
   async (req, res, next) => {
     try {
       let availableBoardsQuery = {};
@@ -94,6 +97,7 @@ router.get('/trash/posts',
 );
 
 router.get('/trash/assets',
+  authRequired,
   async (req, res, next) => {
     try {
       
@@ -112,6 +116,7 @@ router.get('/trash/assets',
 
 
 router.get('/trash/reports',
+  authRequired,
   async (req, res, next) => {
     try {
       

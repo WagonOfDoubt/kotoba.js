@@ -2,14 +2,14 @@ const express = require('express');
 const { validateRedirect } = require('../../middlewares/validation');
 const { param } = require('express-validator');
 const News = require('../../models/news');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/news/:newsId?',
-  [
-    param('newsId').optional().isNumeric(),
-     validateRedirect('/manage/news'),
-  ],
+  authRequired,
+  param('newsId').optional().isNumeric(),
+  validateRedirect('/manage/news'),
   async (req, res, next) => {
     try {
       const newsId = req.params.newsId;

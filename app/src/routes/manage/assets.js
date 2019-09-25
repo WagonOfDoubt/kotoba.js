@@ -1,11 +1,13 @@
 const express = require('express');
 const _ = require('lodash');
+const { authRequired } = require('../../middlewares/permission');
 
 const Asset = require('../../models/asset');
 
 const router = express.Router();
 
 router.get('/assets/',
+  authRequired,
   async (req, res, next) => {
     try {
       const assets = await Asset.find().exec();

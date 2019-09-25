@@ -22,16 +22,13 @@
 const express = require('express');
 const ffmpeg = require('fluent-ffmpeg');
 const router = express.Router();
-const { authRequired } = require('../../middlewares/permission');
-const { globalTemplateVariables } = require('../../middlewares/params');
 const Post = require('../../models/post');
 const Board = require('../../models/board');
 const du = require('du');
 const config = require('../../json/config.json');
+const { authRequired } = require('../../middlewares/permission');
 
 
-router.use(authRequired);
-router.use(globalTemplateVariables);
 router.use('/manage/', require('./addboard'));
 router.use('/manage/', require('./assets'));
 router.use('/manage/', require('./boardopts'));
@@ -51,6 +48,7 @@ router.use('/manage/', require('./trash'));
 router.use('/manage/', require('./uploads'));
 
 router.get('/manage/',
+  authRequired,
   async (req, res, next) => {
     try {
       const promisify = (fn) =>

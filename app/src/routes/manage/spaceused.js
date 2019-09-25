@@ -1,10 +1,12 @@
 const express = require('express');
 const dirSizes = require('../../utils/dirstats');
 const config = require('../../json/config.json');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/spaceused',
+  authRequired,
   async (req, res, next) => {
     try {
       const dirStats = await dirSizes(config.html_path);

@@ -11,7 +11,9 @@
 const express = require('express');
 const router = express.Router();
 const config = require('../json/config.json');
+const { globalTemplateVariables } = require('../middlewares/params');
 
+router.use(globalTemplateVariables);
 router.use(require('./api'));
 router.use(require('./auth'));
 router.use(require('./form'));

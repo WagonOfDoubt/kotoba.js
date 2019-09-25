@@ -1,12 +1,13 @@
 const express = require('express');
 
-
 const Style = require('../../models/style');
 const defaultSyles = require('../../json/defaultstyles.json');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/styles/:stylename?',
+  authRequired,
   async (req, res, next) => {
     try {
       const styles = await Style.findAll();

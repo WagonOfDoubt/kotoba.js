@@ -1,10 +1,12 @@
 const express = require('express');
 const Board = require('../../models/board');
 const locales = require('../../json/locales');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/addboard',
+  authRequired,
   async (req, res, next) => {
     try {
       res.render('manage/boardopts', {

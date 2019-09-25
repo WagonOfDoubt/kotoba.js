@@ -1,10 +1,12 @@
 const express = require('express');
 const Settings = require('../../models/settings');
 const locales = require('../../json/locales');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/sitesettings',
+  authRequired,
   async (req, res, next) => {
     try {
       const settings = await Settings.get();

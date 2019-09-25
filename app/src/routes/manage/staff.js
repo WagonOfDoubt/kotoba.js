@@ -3,6 +3,7 @@ const _ = require('lodash');
 const User = require('../../models/user');
 const Role = require('../../models/role');
 const Board = require('../../models/board');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ const populateRoles = (staffMember, rolesMap) => {
 };
 
 router.get('/staff/:userLogin?',
+  authRequired,
   async (req, res, next) => {
     try {
       let staffMember;

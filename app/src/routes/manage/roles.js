@@ -1,9 +1,11 @@
 const express = require('express');
 const Role = require('../../models/role');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/roles/:roleName?',
+  authRequired,
   async (req, res, next) => {
     try {
       let role;

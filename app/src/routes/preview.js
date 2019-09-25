@@ -70,8 +70,8 @@ router.get('/preview/replies/:board/:thread',
     try {
       const { board, thread } = req.params;
       const query = { boardUri: board, postId: thread, isOp: true };
-      const isAdmin = req.user.authority === 'admin';
-      const hasBoardRole = req.user.boardRoles && req.user.boardRoles.hasOwnProperty(board);
+      const isAdmin = req.user && req.user.authority === 'admin';
+      const hasBoardRole = req.user && req.user.boardRoles && req.user.boardRoles.hasOwnProperty(board);
       if (!(isAdmin || hasBoardRole)) {
         query.isDeleted = false;
       }

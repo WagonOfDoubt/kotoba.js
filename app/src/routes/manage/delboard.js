@@ -1,9 +1,11 @@
 const express = require('express');
 const Board = require('../../models/board');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/delboard/:board',
+  authRequired,
   async (req, res, next) => {
     try {
       const board = await Board.findOne({ uri: req.params.board }).exec();

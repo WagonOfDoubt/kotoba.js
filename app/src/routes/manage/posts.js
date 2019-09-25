@@ -1,10 +1,12 @@
 const express = require('express');
 const Post = require('../../models/post');
 const Board = require('../../models/board');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/posts',
+  authRequired,
   async (req, res, next) => {
     try {
       let availableBoardsQuery = {};

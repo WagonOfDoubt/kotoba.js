@@ -1,9 +1,11 @@
 const express = require('express');
 const ModlogEntry = require('../../models/modlog');
+const { authRequired } = require('../../middlewares/permission');
 
 const router = express.Router();
 
 router.get('/modlog/:before?',
+  authRequired,
   async (req, res, next) => {
     try {
       console.log(req.params);
