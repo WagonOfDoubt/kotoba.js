@@ -2,6 +2,14 @@ form#postform.postform.hidden(
   action=`/form/post/`
   method='post'
   enctype='multipart/form-data'
+  class={
+    'postform_forced-anon': board ? board.isForcedAnon : false,
+    'postform_reply': isPage,
+    'postform_no-subject': !(isPage || !board || board.allowRepliesSubject),
+    'postform_no-upload': board ? board.maxFilesPerPost === 0 : false,
+    'postform_no-captcha': board ? !(board.captcha && board.captcha.enabled) : false,
+    'postform_no-sage': board ? !(board.features && board.features.sage) : false,
+  }
 )
   input(
     name='board'
@@ -13,157 +21,129 @@ form#postform.postform.hidden(
     value=thread ? thread.postId : 0
     type='hidden'
   )
-  input.hidden(
+  //- spam trap
+  input.trap(
     name='email'
     type='text'
   )
-  table.postform
-    if board && !board.isForcedAnon
-      //- div.form-row
-      tr
-        //- div.form-col
-        td.postblock
-          label(for='name-input').form-label Name
-        //- div.form-col
-        td
-          input#name-input.from-input(
-            name='name'
-            size='28'
-            maxlength='75'
-            accesskey='n'
-            type='text'
-            placeholder=board && board.defaultPosterName
+  - var placeholder = board ? board.defaultPosterName : '';
+  div.postform__row.postform__postername
+    div.postform__row__label
+      label(for='name-input').form-label Name
+    div.postform__row__inputs
+      input#name-input.from-input(
+        name='name'
+        size='28'
+        maxlength='75'
+        accesskey='n'
+        type='text'
+        placeholder=placeholder
+      )
+  div.postform__row.postform__email
+    div.postform__row__label
+      label(for='link-input').form-label Email
+    div.postform__row__inputs
+      input#link-input.from-input(
+        name='em'
+        size='28'
+        maxlength='75'
+        accesskey='n'
+        type='text'
+      )
+  div.postform__row.postform__subject
+    div.postform__row__label
+      label(for='subject-input').form-label Subject
+    div.postform__row__inputs
+      input#subject-input.from-input(
+        name='subject'
+        size='35'
+        maxlength='75'
+        accesskey='s'
+        type='text'
+      )
+      input.postform__submit.postform__submit_subject(
+        type='submit'
+        value='Submit'
+        accesskey='z'
+      )
+  div.postform__row.postform__message
+    div.postform__row__label
+      label(for='message-input').form-label Message
+    div.postform__row__inputs
+      textarea#message-input.from-input(
+        name='message'
+        cols='38'
+        rows='4'
+        accesskey='m'
+      )
+      div.postform__submit.postform__submit_bottom
+        input(
+          type='submit'
+          value='Submit'
+          accesskey='z'
           )
-      //- div.form-row
-      tr(class='hidden')
-        //- div.form-col
-        td.postblock
-          label(for='link-input').form-label Email
-        //- div.form-col
-        td
-          input#link-input.from-input(
-            name='em'
-            size='28'
-            maxlength='75'
-            accesskey='n'
-            type='text'
-          )
-    if !board || board.enableCaptcha
-      //- div.form-row
-      tr
-        //- div.form-col
-        td.postblock
-          label(for='captcha-input').form-label Capthca
-        //- div.form-col
-        td
-          input#captcha-input.from-input(
-            name='captcha'
-            size='28'
-            maxlength='64'
-            accesskey='c'
-            type='text'
-          )
-    if isPage || !board || board.allowRepliesSubject
-      //- div.form-row
-      tr
-        //- div.form-col
-        td.postblock
-          label(for='subject-input').form-label Subject
-        //- div.form-col
-        td
-          input#subject-input.from-input(
-            name='subject'
-            size='35'
-            maxlength='75'
-            accesskey='s'
-            type='text'
-            required=isPage && board && board.newThreadsRequired.subject
-          )
-          input(
-            type='submit'
-            value='Submit'
-            accesskey='z'
-          )
-    //- div.form-row
-    tr
-      //- div.form-col
-      td.postblock
-        label(for='message-input').form-label Message
-      //- div.form-col
-      td
-        textarea#message-input.from-input(
-          name='message'
-          cols='38'
-          rows='4'
-          accesskey='m'
-          required=isPage && board.newThreadsRequired.message
-        )
-        if !(isPage || (board && board.allowRepliesSubject))
-          div
-            input(
-              type='submit'
-              value='Submit'
-              accesskey='z'
-              )
-    //- div.form-row
-    if !board || board.maxFilesPerPost > 0
-      tr
-        //- div.form-col
-        td.postblock
-          label.form-label File
-        //- div.form-col
-        td
-          input.from-input(
-            name=`files`
-            size='35'
-            accesskey='f'
-            type='file'
-            multiple= !board || board.maxFilesPerPost > 1
-            required= n == 0 && isPage && board.newThreadsRequired.files
-          )
-    //- div.form-row
-    tr
-      //- div.form-col
-      td.postblock
-        label(for='postpassword-input').form-label Password
-      //- div.form-col
-      td
-        input#postpassword-input.from-input(
-          name='postpassword'
-          size='8'
-          accesskey='p'
-          type='password'
-        )
-        |
-        |
-        small.desc (For post and file deletion)
-    //- div.form-row
-    tr
-      //- div.form-col
-      td.postblock
-        label.form-label Options
-      //- div.form-col
-      td
-        div.form-input-group
-          if !board || (board.features.sage && !isPage)
-            span.button.button_link
-              input#sage(name='sage', type='checkbox')
-              label(for='sage') säge
-            | 
-          span.button.button_link
-            input#noko(name='postredir', value='1', type='checkbox')
-            label(for='noko') nöko
+  div.postform__row.postform__upload
+    div.postform__row__label
+      label.form-label File
+    div.postform__row__inputs
+      - var multiple = board ? board.maxFilesPerPost > 1 : true;
+      input.from-input(
+        name=`files`
+        size='35'
+        accesskey='f'
+        type='file'
+        multiple=multiple
+      )
+  div.postform__row.postform__password
+    div.postform__row__label
+      label(for='postpassword-input').form-label Password
+    div.postform__row__inputs
+      input#postpassword-input.from-input(
+        name='postpassword'
+        size='8'
+        accesskey='p'
+        type='password'
+      )
+      |
+      |
+      small.desc (For post and file deletion)
+  div.postform__row.postform__captcha
+    div.postform__row__label
+      label(for='captcha-input').form-label Capthca
+    div.postform__row__inputs
+      input.captcha-input#captcha-input.from-input(
+        name='captcha'
+        size='28'
+        maxlength='64'
+        accesskey='c'
+        type='text'
+        placeholder='Click here to display captcha'
+      )
+      a.js-update-captcha(href='#', title='Click to refresh captcha')
+        noscript
+          - var catpchaUrl = `/api/captcha?key=${board ? board.uri : ''}&r=${Math.random()}`;
+          img.captcha-image#captcha-image(src=catpchaUrl, alt='Captcha image')
+  div.postform__row.postform__options
+    div.postform__row__label
+      label.form-label Options
+    div.postform__row__inputs
+      div.form-input-group
+        span.postform__sage.button.button_link
+          input#sage(name='sage', type='checkbox')
+          label(for='sage') säge
+        span.postform__noko.button.button_link
+          input#noko(name='postredir', value='1', type='checkbox')
+          label(for='noko') nöko
+  div.postform__row.postform__rules
     if board
-      tr
-        td.rules(colspan='2')
-          ul
-            li Supported file types are: <strong>GIF, PNG, JPG, SVG, WEBP, WEBM, MP4, OGV</strong>
-            li Maximum file size allowed is <strong>#{filters.readableSize(board.maxFileSize)}</strong>.
-            li Maximum number of files per upload is <strong>#{board.maxFilesPerPost}</strong>.
-            li Images greater than <strong>#{site.thumbSize.width}x#{site.thumbSize.width}</strong> will be thumbnailed.
-            li
-              | Currently <strong>#{stats.uniqueUserPosts}</strong> unique user posts.
-              if board.features.catalog
-                |
-                |
-                a(href=`/${board.uri}/${config.catalog_filename}`) View catalog
+      ul
+        li Supported file types are: <strong>GIF, PNG, JPG, SVG, WEBP, WEBM, MP4, OGV</strong>
+        li Maximum file size allowed is <strong>#{filters.readableSize(board.maxFileSize)}</strong>.
+        li Maximum number of files per upload is <strong>#{board.maxFilesPerPost}</strong>.
+        li Images greater than <strong>#{site.thumbSize.width}x#{site.thumbSize.width}</strong> will be thumbnailed.
+        li
+          | Currently <strong>#{stats.uniqueUserPosts}</strong> unique user posts.
+          if board.features.catalog
+            |
+            |
+            a(href=`/${board.uri}/${config.catalog_filename}`) View catalog

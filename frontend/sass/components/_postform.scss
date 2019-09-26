@@ -25,12 +25,7 @@
   margin-bottom: 4px;
 }
 
-.postarea table {
-  margin: 0 auto;
-  text-align: left;
-}
-
-.rules {
+.postform__rules {
   font-size: 0.6rem;
   ul {
     margin: 0;
@@ -48,7 +43,7 @@
 
 
 .postarea_quick-reply {
-  .rules {
+  .postform__row.postform__rules {
     display: none;
   }
 
@@ -58,6 +53,10 @@
   background-color: var(--primary-color);
   border-color: var(--secondary-color);
   padding: 3px;
+
+  .postarea__header {
+    margin-bottom: 3px;
+  }
 }
 
 .postarea__header {
@@ -78,4 +77,92 @@
 
 .captcha-image {
   vertical-align: middle;
+}
+
+
+.postform {
+  &.postform_no-upload {
+    .postform__upload {
+      display: none;
+    }
+  }
+
+  &.postform_no-captcha {
+    .postform__captcha {
+      display: none;
+    }
+  }
+
+  &.postform_no-sage {
+    .postform__sage {
+      display: none;
+    }
+  }
+
+  &.postform_forced-anon {
+    .postform__email,
+    .postform__postername {
+      display: none;
+    }
+  }
+
+  &.postform_no-subject {
+    .postform__row.postform__subject {
+      display: none;
+    }
+
+    .postform__row .postform__submit_bottom {
+      text-align: right;
+      display: block;
+    }
+
+    .postform__row .postform__submit_subject {
+      display: none;
+    }
+  }
+
+  .postform__row .postform__submit_bottom {
+    display: none;
+  }
+}
+
+
+.postarea_top, .postarea_bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// todo: change this to using subgrid when it's implemented in most browsers;
+.postform {
+  display: grid;
+  grid-template-columns: auto;
+  grid-column-gap: 2px;
+  grid-row-gap: 2px;
+
+  .postform__row {
+    display: grid;
+    grid-template-columns: 6rem auto;
+    grid-column-gap: 2px;
+    grid-row-gap: 2px;
+  }
+
+  .postform__rules {
+    grid-template-columns: auto;
+    text-align: left;
+  }
+
+  .postform__row__label {
+    color: var(--postblock-color);
+    background-color: var(--postblock-background-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2px;
+  }
+
+  .postform__row__inputs,
+  .postform__row__label {
+    text-align: left;
+  }
 }
