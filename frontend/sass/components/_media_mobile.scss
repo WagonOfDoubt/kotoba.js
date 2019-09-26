@@ -1,0 +1,104 @@
+
+@media only screen and (max-width: 480px) {
+  .reply-container {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: row;
+    clear: both;
+
+    .post_reply {
+      min-width: 380px;
+    }
+
+    .post_op {
+      flex-grow: 1;
+    }
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .post {
+    .post__header__subject {
+      font-size: 1rem;
+    }
+
+    .post__header__subject::after {
+      content: "\A";
+      white-space: pre;
+    }
+
+    .post_reply .post__header::after {
+      display: none;
+    }
+
+    .thread__reply {
+      font-size: 1rem;
+    }
+
+    .post__body {
+      blockquote {
+        margin: 5px;
+      }
+    }
+
+    .post__buttons {
+      float: right;
+    }
+
+    .post__header {
+      font-size: .8rem;
+    }
+  }
+
+  .post {
+    width: 100%;
+  }
+
+  .attachments-container {
+    padding-left: 5px;
+  }
+
+  .postarea {
+    width: 100%;
+  }
+
+  .postform {
+    .postform__row {
+      grid-template-columns: auto;
+    }
+
+    .postform__row .postform__row__inputs .postform__submit_bottom {
+      display: block;
+      margin: 5px 0;
+
+      input {
+        display: block;
+        font-size: 1.2rem;
+        width: 80%;
+        margin: 0 auto;
+      }
+    }
+
+    .postform__row .postform__submit_subject {
+      display: none;
+    }
+  }
+
+  .postform__row__label {
+    font-size: .8rem;
+  }
+
+  .postform__message textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 10rem;
+    resize: none;
+  }
+
+  .postform__subject input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

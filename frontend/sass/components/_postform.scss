@@ -106,7 +106,7 @@
     }
   }
 
-  &.postform_no-subject {
+  &.postform_reply.postform_no-subject {
     .postform__row.postform__subject {
       display: none;
     }
