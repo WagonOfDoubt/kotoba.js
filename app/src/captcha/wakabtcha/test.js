@@ -1,6 +1,6 @@
 /**
  * Just some rudimentary testing. Creates 10 random images and saves them in
- *    output/ directory.
+ *    out/ directory.
  * @module wakabtcha/test
  */
 

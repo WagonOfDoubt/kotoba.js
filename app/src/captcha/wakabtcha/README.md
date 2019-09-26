@@ -42,7 +42,7 @@ fs.writeFile(`${answer}.gif`, image, console.log);
 ```js
 wakabtcha.generateAnswer(start = '%W%', grammar = DEFAULT_GRAMMAR)
 ```
-|name|type|default|descrition|
+|Name|Type|Default|Description|
 |----|----|-------|----------|
 |start|String|"%W%"|Starting template|
 |grammar|Object.<String,Array.\<String>>|DEFAULT_GRAMMAR|Grammar object (see below)|
@@ -53,7 +53,7 @@ wakabtcha.generateAnswer(start = '%W%', grammar = DEFAULT_GRAMMAR)
 wakabtcha.generateImage(str, options)
 ```
 
-|name|type|default|descrition|
+|Name|Type|Default|Description|
 |----|----|-------|----------|
 |str|String| |Captcha answer|
 |options|Object|{}|Override defaults|
@@ -62,7 +62,7 @@ wakabtcha.generateImage(str, options)
 |options.captchaScaling|Number|0.15|Amplitude of random scale|
 |options.captchaRotation|Number|0.3|Amplitude of random rotation|
 |options.captchaSpacing|Number|2.5|Distance between letters|
-|options.font|Object.<String,Number\|Number[]>|DEFAULT_FONT|Captcha font object, where keys are characters, values are arrays where first value is character width, other values are strokes where each stroke is represented by array of coordinates \[x1,y1, x2,y2, x3,y3, xN,yN\]|
+|options.font|Object.<String,Number\|Number[]>|DEFAULT_FONT|Font object (see below)|
 |options.fontHeight|Number|8|Height of characters in font|
 |options.foregroundColor|Number|0x000000|Color of text|
 |options.backgroundColor|Number|0xFFFFFF|Color of background|
