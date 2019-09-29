@@ -4,7 +4,7 @@ form#postform.postform.hidden(
   enctype='multipart/form-data'
   class={
     'postform_forced-anon': board ? board.isForcedAnon : false,
-    'postform_reply': isPage,
+    'postform_reply': !isPage,
     'postform_no-subject': !(isPage || !board || board.allowRepliesSubject),
     'postform_no-upload': board ? board.maxFilesPerPost === 0 : false,
     'postform_no-captcha': board ? !(board.captcha && board.captcha.enabled) : false,
@@ -72,8 +72,8 @@ form#postform.postform.hidden(
     div.postform__row__inputs
       textarea#message-input.from-input(
         name='message'
-        cols='38'
-        rows='4'
+        cols='60'
+        rows='10'
         accesskey='m'
       )
       div.postform__submit.postform__submit_bottom
@@ -121,7 +121,8 @@ form#postform.postform.hidden(
       )
       a.js-update-captcha(href='#', title='Click to refresh captcha')
         noscript
-          - var catpchaUrl = `/api/captcha?key=${board ? board.uri : ''}&r=${Math.random()}`;
+          - var action = isPage ? 'thread': 'reply';
+          - var catpchaUrl = `/api/captcha/${board ? board.uri : ''}/${action}?raw=true&r=${Math.random()}`;
           img.captcha-image#captcha-image(src=catpchaUrl, alt='Captcha image')
   div.postform__row.postform__options
     div.postform__row__label

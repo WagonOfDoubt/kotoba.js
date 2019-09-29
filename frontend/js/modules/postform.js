@@ -23,6 +23,23 @@ export class PostForm {
     this.formEl.addEventListener('submit', (e) => {
       setStoredPassword(this.formEl.postpassword.value);
     });
+    const captchaLink = this.formEl.querySelector('.js-update-captcha');
+
+    const captchaUpdateHandler = (e) => {
+      this.updateCaptcha();
+      e.preventDefault();
+    };
+    if (captchaLink) {
+      captchaLink.addEventListener('click', captchaUpdateHandler);
+    }
+    const captchaInput = this.formEl.querySelector('.captcha-input');
+    if (this.isVisible && captchaInput) {
+      const captchaInitHandler = (e) => {
+        captchaInput.removeEventListener('click', captchaInitHandler);
+        captchaUpdateHandler(e);
+      };
+      captchaInput.addEventListener('click', captchaInitHandler);
+    }
     this.hide();
   }
 
@@ -85,6 +102,24 @@ export class PostForm {
     this.show();
   }
 
+  updateCaptcha() {
+    let capthcaImage = this.formEl.querySelector('.captcha-image');
+    if (!capthcaImage) {
+      capthcaImage = document.createElement('img');
+      capthcaImage.id = '#captcha-image';
+      capthcaImage.classList.add('captcha-image');
+      capthcaImage.setAttribute('alt', 'Captcha image');
+      const captchaImageContainer = this.formEl.querySelector('.js-update-captcha');
+      captchaImageContainer.appendChild(capthcaImage);
+      const captchaInput = this.formEl.querySelector('.captcha-input');
+      captchaInput.setAttribute('placeholder', '');
+    }
+    const boardUri = this.formEl.board.value;
+    const action = this.isReplyToThread ? 'reply' : 'thread';
+    const captchaUrl = `/api/captcha/${boardUri}/${action}?raw=true&r=${Math.random()}`;
+    capthcaImage.setAttribute('src', captchaUrl);
+  }
+
   hide() {
     this.formEl.classList.add('hidden');
     const btn = this.getCurrentToggleBtn();
@@ -138,11 +173,17 @@ export class PostForm {
   set replyThread({boardUri, threadId}) {
     this.formEl.board.value = boardUri;
     this.formEl.replythread.value = threadId;
+    this.updateCaptcha();
     const replytoHeader = this.quickReplyPostarea
       .querySelector('.postarea__header__title');
     if (replytoHeader) {
       replytoHeader.innerText = `Reply in thread >>/${boardUri}/${threadId}`;
     }
+  }
+
+  get isReplyToThread() {
+    const replyThread = this.replyThread;
+    return parseInt(replyThread.threadId) > 0;
   }
 }
 

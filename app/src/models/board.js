@@ -71,7 +71,15 @@ const boardSchema = Schema({
   },
   allowRepliesSubject: { type: Boolean, default: true },
   captcha: {
-    enabled:           { type: Boolean, default: false },
+    enabled:            { type: Boolean, default: false },
+    unsolvedExpireTime: { type: Number, default: 10 },
+    replyExpireTime:    { type: Number, default: 0 },
+    threadExpireTime:   { type: Number, default: 0 },
+    provider:           {
+      type: String,
+      enum: ['wakabtcha'],
+      default: 'wakabtcha'
+    },
   },
   features: {
     reporting:     { type: Boolean, default: true },

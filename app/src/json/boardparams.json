@@ -27,6 +27,10 @@
     "newThreadsRequired.subject",
     "allowRepliesSubject",
     "captcha.enabled",
+    "captcha.unsolvedExpireTime",
+    "captcha.replyExpireTime",
+    "captcha.threadExpireTime",
+    "captcha.provider",
     "features.reporting",
     "features.archive",
     "features.catalog",
@@ -45,6 +49,7 @@
   ],
   "uriBlacklist": [
     "admin",
+    "auth",
     "api",
     "board",
     "captcha",

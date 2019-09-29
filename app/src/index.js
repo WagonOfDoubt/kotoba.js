@@ -105,6 +105,8 @@ const connectToDatabase = async (app) => {
   mongoose.Promise = global.Promise;
   // debug mode for mongoose is set by NODE_ENV
   mongoose.set('debug', process.env.NODE_ENV === 'development');
+  mongoose.set('useFindAndModify', false);
+  mongoose.set('useUnifiedTopology', true);
 
   // make connection
   try {

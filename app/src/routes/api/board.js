@@ -78,6 +78,16 @@ const localeCodes = locales.map(([t, c]) => c);
  *    threads they saged.
  * @apiParam (Board data) {Boolean} data.allowRepliesSubject=true Display
  *    subject field in form for replying in thread.
+ * @apiParam (Board data) {Object} data.captcha Captcha options
+ * @apiParam (Board data) {Boolean} data.captcha.enabled Enable captcha
+ * @apiParam (Board data) {Boolean} data.captcha.unsolvedExpireTime Number of
+ *    minutes until unsolved captcha is removed and need to be refreshed
+ * @apiParam (Board data) {Boolean} data.captcha.replyExpireTime Number of
+ *    minutes when solved captcha is still valid after reply
+ * @apiParam (Board data) {Boolean} data.captcha.threadExpireTime Number of
+ *    minutes when solved captcha is still valid after creating new thread
+ * @apiParam (Board data) {Boolean} data.captcha.provider Captcha provider.
+ *    Currently supported is: "wakabtcha" - default captcha from Wakaba
  */
 const boardParamsValidator = {
   'data.name': {
@@ -216,6 +226,29 @@ const boardParamsValidator = {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+  },
+  'data.captcha.enabled': {
+    optional: true,
+    isBoolean: true,
+    toBoolean: true,
+  },
+  'data.captcha.unsolvedExpireTime': {
+    optional: true,
+    isInt: true,
+    toInt: true,
+  },
+  'data.captcha.replyExpireTime': {
+    optional: true,
+    isInt: true,
+    toInt: true,
+  },
+  'data.captcha.threadExpireTime': {
+    optional: true,
+    isInt: true,
+    toInt: true,
+  },
+  'data.captcha.provider': {
+    optional: true,
   },
 };
 

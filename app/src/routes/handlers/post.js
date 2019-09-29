@@ -15,6 +15,13 @@ const { filterPostTargetItems,
   populatePostUpdateItems,
   filterOutOfBoundItems,
   findUserRoles } = require('../../middlewares/post');
+const Captcha = require('../../models/captcha');
+const Board = require('../../models/board');
+const {
+  BaseError,
+  DocumentNotFoundError,
+  CaptchaEntryNotFoundError,
+  IncorrectCaptchaError } = require('../../errors');
 
 
 module.exports.createPostHandler = [
@@ -33,12 +40,44 @@ module.exports.createPostHandler = [
   body('noko').toBoolean(),
   validateRequest,
   async (req, res, next) => {
+    const boardUri = req.body.board;
+    const board = await Board.findBoard(boardUri);
+    if (!board) {
+      const notFoundError = new DocumentNotFoundError('Board', 'board', boardUri, 'body');
+      return notFoundError.respond(res);
+    }
+
+    let threadId = req.body.replythread;
+    const isNewThread = threadId == 0;
+    const action = isNewThread ? 'thread' : 'reply';
+
     // TODO check ban
     const ip = req.ip;
-    // TODO check captcha
-    const capthca = req.body.capthca;
+
+    // Check captcha
+    if (board.captcha.enabled) {
+      const captchaAnswer = req.body.captcha;
+      const solvedExpireTime = isNewThread ?
+        board.captcha.threadExpireTime :
+        board.captcha.replyExpireTime;
+      try {
+        const captchaEntry = await Captcha.validate(captchaAnswer, req.session.id,
+          action, boardUri, solvedExpireTime);
+        if (captchaEntry === null) {
+          const captchaErr = new CaptchaEntryNotFoundError('captcha', captchaAnswer, 'body');
+          return captchaErr.respond(res);
+        }
+        if (!captchaEntry.isSolved) {
+          const captchaErr = new IncorrectCaptchaError('captcha', captchaAnswer, 'body');
+          return captchaErr.respond(res);
+        }
+      } catch (err) {
+        next(err);
+        return;
+      }
+    }
+
     const files = req.files;
-    const boardUri = req.body.board;
 
     const postData = {
       ip: ip,
@@ -54,17 +93,14 @@ module.exports.createPostHandler = [
 
     const noko = req.body.postredir || req.body.em == 'noko';
 
-    const replythread = req.body.replythread;
-    const isNewThread = replythread == 0;
-    let threadId = replythread;
     try {
       if (isNewThread) {
         threadId = await createThread(boardUri, postData, files);
       } else {
-        await createReply(boardUri, replythread, postData, files);
+        await createReply(boardUri, threadId, postData, files);
       }
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
       return;
     }
 

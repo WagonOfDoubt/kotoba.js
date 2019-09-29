@@ -49,26 +49,38 @@ block main
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
       button(type='button', class='btn', data-action='preview-markdown', data-field='navbar') Preivew
+    h3 Options
+    +checkboxEdit('isHidden', 'Hidden', 'Do not dispaly this board in navigation menu.')
+    +checkboxEdit('isLocked', 'Locked', 'Only moderators of the board and admins can make new posts/replies.')
+    h3 Appearance
     if (styles)
       - var defaultStyleOptions = styles.map(stl => ({ value: stl.name, label: stl.capitalizedName }))
-      +comboboxEdit('defaultStyle', 'Default style', defaultStyleOptions, 'The style which will be set when the user first visits the board.')
-    +textEdit('imageUri', 'Header image', 'URL. Overrides the header set in site settings. Leave blank to use configured global header image.')
-    +textEdit('faviconUri', 'Favicon image', 'URL. Overrides default favicon. Leave blank to use default favicon.')
-    +numberEdit('maxFileSize', 'Maximum file size', 'Maxmimum size of uploaded images, in bytes.')
-    +numberEdit('maxFilesPerPost', 'Maximum files per post', '0 forbids any uploads making board text only.')
+      +comboboxEdit('defaultStyle', 'Default style', defaultStyleOptions)
+        | The style which will be set when the user first visits the board. #[span.button.button_link #[a(href='/manage/styles') Edit styles]]
+    +textEdit('imageUri', 'Header image')
+      | URL. Overrides the header set in site settings. Leave blank to use configured global header image. Use #[a(href='/manage/assets/') assets] as reliable image storage.
+    +textEdit('faviconUri', 'Favicon image')
+      | URL. Overrides default favicon. Leave blank to use default favicon. Use #[a(href='/manage/assets/') assets] as reliable image storage.
+    h3 Pages
     +numberEdit('maxThreadsOnPage', 'Threads per page', 'How many threads are shown on page by default.')
     +numberEdit('maxPages', 'Maximum board pages.', 'Number of pages that are displayed on board. This option does not mean that threads after last page are deleted, they are still available via api and can be bumped. More pages means more load on server as all pages are rendered after each post on board.')
     +numberEdit('autosage', 'Maximum thread replies', 'The number of replies a thread can have before autosaging to the back of the board.')
     +numberEdit('showReplies', 'Show replies', 'Number of replies to show on a board page.')
     +numberEdit('showRepliesSticky', 'Show replies sticky', 'Number of replies to show on a board page when the thread is sticked.')
-    +numberEdit('maxMessageLength', 'Maximum message length.')
+    h3 Upload rules
+    +numberEdit('maxFileSize', 'Maximum file size', 'Maxmimum size of uploaded images, in bytes.')
+    +numberEdit('maxFilesPerPost', 'Maximum files per post', '0 forbids any uploads making board text only.')
+    h3 Posting rules
+    +numberEdit('maxMessageLength', 'Maximum message length', 'Maximum message length.')
     +textEdit('defaultPosterName', 'Anonymous', 'Name to display when a name is not attached to a post.')
-    +checkboxEdit('isHidden', 'Hidden', 'Do not dispaly this board in navigation menu.')
-    +checkboxEdit('isLocked', 'Locked', 'Only moderators of the board and admins can make new posts/replies.')
     +checkboxEdit('isForcedAnon', 'Forced anonymous', 'If set to yes, users will not be allowed to enter a name, making everyone appear as Anonymous.')
     +checkboxEdit('allowRepliesSubject', 'Enable subject field for replies', 'Who needs it anyway?')
     h3 Captcha
+    small.hint Rebuild all board pages when changing captcha settings, or else posting can become impossible due to lack of captcha field in posting form
     +checkboxEdit('captcha[enabled]', 'Enable captcha', 'Enable/disable captcha system for this board. If captcha is enabled, in order for a user to post, they must first correctly enter the text on an image.')
+    +numberEdit('captcha[unsolvedExpireTime]', 'Expiration time for unsolved captcha', 'Number of minutes until unsolved captcha expires and need to be refreshed. Set it to reasonable value, like 10 minutes.')
+    +numberEdit('captcha[replyExpireTime]', 'Expiration time after reply', 'Number of minutes when solved captcha is still valid after reply.')
+    +numberEdit('captcha[threadExpireTime]', 'Expiration time after new thread', 'Number of minutes when solved captcha is still valid after creation of new thread.')
     h3 New threads require
     +checkboxEdit('newThreadsRequired[files]', 'Attachments', 'If set to yes, new threads will require an image to be posted.')
     +checkboxEdit('newThreadsRequired[message]', 'Message', 'If set to yes, new threads will require message to be posted.')

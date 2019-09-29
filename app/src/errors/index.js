@@ -8,6 +8,7 @@ const { AuthRequiredError, PermissionDeniedError } = require('./permission-error
 const { DocumentAlreadyExistsError, DocumentNotFoundError, DocumentNotModifiedError } = require('./document-error');
 const { RequestValidationError } = require('./validation-error');
 const { FileAlreadyExistsError, FileFormatNotSupportedError } = require('./file-error');
+const { CaptchaEntryNotFoundError, IncorrectCaptchaError } = require('./captcha-error');
 
 module.exports.BaseError = BaseError;
 module.exports.AuthRequiredError = AuthRequiredError;
@@ -18,3 +19,5 @@ module.exports.DocumentNotModifiedError = DocumentNotModifiedError;
 module.exports.RequestValidationError = RequestValidationError;
 module.exports.FileAlreadyExistsError = FileAlreadyExistsError;
 module.exports.FileFormatNotSupportedError = FileFormatNotSupportedError;
+module.exports.CaptchaEntryNotFoundError = CaptchaEntryNotFoundError;
+module.exports.IncorrectCaptchaError = IncorrectCaptchaError;
