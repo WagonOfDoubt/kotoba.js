@@ -48,11 +48,14 @@
     "uri"
   ],
   "uriBlacklist": [
+    "add",
     "admin",
-    "auth",
     "api",
+    "auth",
     "board",
     "captcha",
+    "create",
+    "delete",
     "faptcha",
     "files",
     "form",
@@ -62,15 +65,19 @@
     "login",
     "logout",
     "manage",
+    "modify",
+    "new",
     "password",
     "post",
     "preview",
     "registraion",
+    "remove",
     "set",
     "signin",
     "signup",
     "static",
     "stats",
+    "update",
     "user"
   ]
 }

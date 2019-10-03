@@ -1,10 +1,8 @@
 /**
  * Routes for admin interface
  * @module routes/manage
- * @see module:routes/manage/addboard
  * @see module:routes/manage/assets
- * @see module:routes/manage/boardopts
- * @see module:routes/manage/delboard
+ * @see module:routes/manage/boards
  * @see module:routes/manage/maintenance
  * @see module:routes/manage/modlog
  * @see module:routes/manage/news
@@ -29,10 +27,8 @@ const config = require('../../json/config.json');
 const { authRequired } = require('../../middlewares/permission');
 
 
-router.use('/manage/', require('./addboard'));
 router.use('/manage/', require('./assets'));
-router.use('/manage/', require('./boardopts'));
-router.use('/manage/', require('./delboard'));
+router.use('/manage/', require('./boards'));
 router.use('/manage/', require('./maintenance'));
 router.use('/manage/', require('./modlog'));
 router.use('/manage/', require('./news'));

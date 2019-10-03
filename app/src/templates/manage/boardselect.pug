@@ -8,7 +8,7 @@ block header
 block main
   h2 Add board
   span.button.button_link
-    a(href='/manage/addboard') Add board
+    a(href='/manage/boards/create') Add board
 
   //- uri name desc createdDate isLocked isHidden isForcedAnon postcount
   h2 Select board
@@ -26,7 +26,7 @@ block main
       for b in boards
         tr.table__row(data-board=b.uri, data-name=b.name, data-created=b.createdDate, data-postcount=b.postcount)
           td
-            a(href='/manage/boardopts/' + b.uri) /#{ b.uri }/
+            a(href='/manage/boards/edit/' + b.uri) /#{ b.uri }/
           td= b.name
           td= b.desc
           td

@@ -66,7 +66,7 @@ const managePage_updateBoard = () => {
           .then(() => {
             modal
               .dialogPromise(document.getElementById('dialog-update-board-success'))
-              .finally(() => window.location.href = '/manage/boardopts/');
+              .finally(() => window.location.href = '/manage/boards/');
           })
           .catch(alertErrorHandler);
       });
@@ -93,7 +93,7 @@ const managePage_deleteBoard = () => {
             .then(() => {
               modal
                 .dialogPromise(document.getElementById('dialog-delete-board-success'))
-                .finally(() => window.location.href = '/manage/boardopts');
+                .finally(() => window.location.href = '/manage/boards');
             })
             .catch(alertErrorHandler);
         });

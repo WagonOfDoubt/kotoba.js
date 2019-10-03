@@ -15,14 +15,14 @@ block main
   if board
     h2 /#{ board.uri }/ - #{ board.name }
     div.button.button_link
-      a(href='/manage/boardopts') Select another board
+      a(href='/manage/boards') Select another board
     div.button.button_link
       a(href='/' + board.uri) Browse board
     div.button.button_link
       a(href='/manage/staff?board=' + board.uri) Board staff
   else
     div.button.button_link
-      a(href='/manage/boardopts') Edit boards
+      a(href='/manage/boards') Edit boards
 
   - var action = '/api/board/';
   - var getUrl = board ? `/api/board/${board.uri}?select=!all` : null;
@@ -100,7 +100,7 @@ block main
   if board
     h2 Danger zone
     div.button.button_link
-      a(href='/manage/delboard/' + board.uri) Delete board
+      a(href='/manage/boards/delete/' + board.uri) Delete board
 
 block modals
   +confirmPrompt('dialog-update-board', 'Update board options', 'Save changes')
