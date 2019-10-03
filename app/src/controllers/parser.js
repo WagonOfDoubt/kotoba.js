@@ -1,3 +1,8 @@
+/**
+ * Post markup parser module
+ * @module controllers/parser
+ */
+
 const format = require('util').format;
 const Post = require('../models/post');
 const wakabamark = require('../json/parser.json');
@@ -62,15 +67,32 @@ const reflinks = [
   }
 ];
 
+
 class Parser {
+  /**
+   * Parser constructor
+   * @param  {Object} markup Markup rules
+   */
   constructor(markup) {
     this.markup = markup;
   }
 
+  /**
+   * Parse array of threads
+   * @async
+   * @param  {Array.<module:models/post~Post>} threads Threads to parse
+   * @return {Array.<module:models/post~Post>}         Parsed threads
+   */
   async parseThreads(threads) {
     return await Promise.all(threads.map(this.parseThread));
   }
 
+  /**
+   * Parse all posts in thread
+   * @async
+   * @param  {module:models/post~Post} thread Thread to parse
+   * @return {module:models/post~Post}        Parsed thread
+   */
   async parseThread(thread) {
     const promises = [thread].concat(thread.children)
       .map((post) => this.parseBody(post.body, post.boardUri)
@@ -79,11 +101,23 @@ class Parser {
     return thread;
   }
 
+  /**
+   * Parse one post
+   * @async
+   * @param  {module:models/post~Post} post Post to parse
+   * @return {module:models/post~Post}      Parsed post
+   */
   async parsePost(post) {
     post.parsed = await this.parseBody(post.body, post.boardUri);
     return post;
   }
 
+  /**
+   * Parse post body
+   * @param  {String} text  Post body
+   * @param  {String} board Board uri
+   * @return {Array}        Parsed body
+   */
   async parseBody(text, board) {
     if (!text || !text.length) {
       return '';

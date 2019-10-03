@@ -1,6 +1,6 @@
 /**
  * Model for user-defined styles.
- * @module models/styles
+ * @module models/style
  */
 
 const mongoose = require('mongoose');
@@ -25,8 +25,18 @@ const nameValidators = [
 ];
 
 
+/**
+ * Style model
+ * @class Style
+ * @extends external:Model
+ */
 const styleSchema = Schema({
-  /** @type {String} Name of style also serving as unique id of style */
+  /**
+   * Name of style also serving as unique id of style
+   * @type {String}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   name:         {
     type: String,
     required: true,
@@ -36,19 +46,54 @@ const styleSchema = Schema({
     minlength: 1,
     validate: nameValidators
   },
-  /** @type {ObjectId} Reference to user who created this style */
+  /**
+   * Reference to user who created this style
+   * @type {ObjectId}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   addedBy:      { type: ObjectId, ref: 'User' },
-  /** @type {Date} When style was created */
+  /**
+   * When style was created
+   * @type {Date}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   createdDate:  { type: Date, default: Date.now },
-  /** @type {Date} When style was updated */
+  /**
+   * When style was updated
+   * @type {Date}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   updatedDate:  { type: Date, default: Date.now },
-  /** @type {Map} CSS color variables */
+  /**
+   * CSS color variables
+   * @type {Map}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   colors:       { type: Map, of: String },
-  /** @type {Map} CSS text variables */
+  /**
+   * CSS text variables
+   * @type {Map}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   strings:      { type: Map, of: String },
-  /** @type {Map} Other CSS variables */
+  /**
+   * Other CSS variables
+   * @type {Map}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   variables:    { type: Map, of: String },
-  /** @type {String} Additional plain CSS */
+  /**
+   * Additional plain CSS
+   * @type {String}
+   * @memberOf module:models/style~Style#
+   * @instance
+   */
   css:          { type: String, default: '' },
 });
 
@@ -56,6 +101,13 @@ const styleSchema = Schema({
 const styleCache = new Map();
 
 
+/**
+ * If styles collection is empty, adds default built-in styles to collection
+ * @memberOf module:models/style~Style
+ * @name ensureDefaults
+ * @function
+ * @static
+ */
 styleSchema.static('ensureDefaults', async () => {
   const numberOfStyles = await Style.countDocuments({});
   if (numberOfStyles === 0) {
@@ -70,11 +122,26 @@ styleSchema.static('ensureDefaults', async () => {
 });
 
 
+/**
+ * Clear style cache
+ * @memberOf module:models/style~Style
+ * @name invalidateCache
+ * @function
+ * @static
+ */
 styleSchema.static('invalidateCache', () => {
   styleCache.clear();
 });
 
 
+/**
+ * Get style cache
+ * @memberOf module:models/style~Style
+ * @name getCache
+ * @static
+ * @function
+ * @return {Map} Styles cache
+ */
 styleSchema.static('getCache', () => {
   return styleCache;
 });
@@ -85,6 +152,10 @@ styleSchema.static('getCache', () => {
  * @param  {String} name             Style name
  * @async
  * @return {Style}                   Style document
+ * @memberOf module:models/style~Style
+ * @name findByName
+ * @function
+ * @static
  */
 styleSchema.static('findByName', async (name) => {
   if (!styleCache.has(name)) {
@@ -101,6 +172,10 @@ styleSchema.static('findByName', async (name) => {
  * Retrieve all styles from database or from cache if possible
  * @async
  * @return {Style[]}                 Array of documents
+ * @memberOf module:models/style~Style
+ * @name findAll
+ * @function
+ * @static
  */
 styleSchema.static('findAll', async () => {
   if (styleCache.size === 0) {
@@ -117,6 +192,10 @@ styleSchema.static('findAll', async () => {
  * Retrieve list of all style names
  * @async
  * @return {String[]}           Array of names
+ * @memberOf module:models/style~Style
+ * @name getList
+ * @function
+ * @static
  */
 styleSchema.static('getList', async () => {
   if (styleCache.size === 0) {
@@ -137,11 +216,27 @@ styleSchema.post('remove', (doc) => {
 });
 
 
+/**
+ * Name of style with starting capital letter
+ * @type {String}
+ * @memberOf module:models/style~Style
+ * @name capitalizedName
+ * @instance
+ * @readOnly
+ */
 styleSchema.virtual('capitalizedName').get(function () {
   return this.name[0].toUpperCase() + this.name.substring(1);
 });
 
 
+/**
+ * CSS code of style
+ * @type {String}
+ * @memberOf module:models/style~Style
+ * @name rawCSS
+ * @instance
+ * @readOnly
+ */
 styleSchema.virtual('rawCSS').get(function () {
   const colors = this.colors ? _.fromPairs(Array.from(this.colors.entries())) : {};
   const variables = this.variables ? _.fromPairs(Array.from(this.variables.entries())) : {};

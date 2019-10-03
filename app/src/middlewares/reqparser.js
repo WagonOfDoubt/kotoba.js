@@ -26,6 +26,9 @@ const Board = require('../models/board');
  * // becomes
  * req.body.posts = [{ boardUri: 'b', postId: 123 }]
  * req.body.attachments = [{ boardUri: 'b', postId: 123, attachmentIndex: 4 }]
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.parsePostIds = (req, res, next) => {
   try {
@@ -62,6 +65,9 @@ module.exports.parsePostIds = (req, res, next) => {
  * Middleware that populates req.body.posts which contains { boardUri, postId }
  * with corresponding Post documents from MongoDB.
  * @async
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.findPosts = async (req, res, next) => {
   try {
@@ -79,6 +85,9 @@ module.exports.findPosts = async (req, res, next) => {
  * Middleware that finds board and populates req.body.board based on either
  * req.params.boardUri or req.body.board
  * @async
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.findBoard = async (req, res, next) => {
   try {

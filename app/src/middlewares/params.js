@@ -1,3 +1,8 @@
+/**
+ * Middlewares for variables injection
+ * @module middlewares/params
+ */
+
 const Settings = require('../models/settings');
 const Style = require('../models/style');
 const pkg = require('../package.json');
@@ -6,7 +11,11 @@ const filters = require('../utils/filters');
 
 /**
  * Middleware that populates res.locals with variables which are used in most
- * templates.
+ * templates
+ * @async
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.globalTemplateVariables = async (req, res, next) => {
   const s = await Settings.get();

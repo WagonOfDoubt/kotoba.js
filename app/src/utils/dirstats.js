@@ -1,5 +1,5 @@
 /**
- * Utilities for retrieving directory or file info
+ * Function for retrieving directory or file info
  * @module utils/dirstats
  */
 
@@ -15,21 +15,23 @@ const path = require('path');
  * @return {Object}         Object with directory info
  * @example
  * const stats = dirStats('/home/username/');
- * // stats => {
- * //   total: {
- * //     size: 1234567,
- * //     files: 123
- * //   },
- * //   children: [
- * //     {
- * //       size: 1234567,
- * //       files: 123,
- * //       dirname: 'pictures',
- * //       dir: '/home/username/pictures'
- * //     },
- * //     ...
- * //   ]
- * // }
+ * =>
+ * {
+ *   total: {
+ *     size: 1234567,
+ *     files: 123
+ *   },
+ *   children: [
+ *     {
+ *       size: 1234567,
+ *       files: 123,
+ *       dirname: 'pictures',
+ *       dir: '/home/username/pictures'
+ *     },
+ *     ...
+ *   ]
+ * }
+ * @alias module:utils/dirstats
  */
 const dirStats = async (rootDir) => {
   let stats = await ls(rootDir);

@@ -24,6 +24,8 @@ const { ConflictError, NotFoundError, NoContentError } = require('./base-error')
 
 /**
  * Attempt to create document that already exists
+ * @extends module:errors/base-error.ConflictError
+ * @alias module:errors/document-error.DocumentAlreadyExistsError
  */
 class DocumentAlreadyExistsError extends ConflictError {
   constructor(documentName, param, value, location) {
@@ -53,6 +55,8 @@ class DocumentAlreadyExistsError extends ConflictError {
 
 /**
  * Document was not found
+ * @extends module:errors/base-error.NotFoundError
+ * @alias module:errors/document-error.DocumentNotFoundError
  */
 class DocumentNotFoundError extends NotFoundError {
   constructor(documentName, param, value, location) {
@@ -70,6 +74,8 @@ class DocumentNotFoundError extends NotFoundError {
 
 /**
  * Document was not modified because it's already in that state
+ * @extends module:errors/base-error.NoContentError
+ * @alias module:errors/document-error.DocumentNotModifiedError
  */
 class DocumentNotModifiedError extends NoContentError {
   constructor(documentName, param, value, location) {

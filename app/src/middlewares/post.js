@@ -24,6 +24,10 @@ const { RequestValidationError, DocumentNotFoundError } = require('../errors');
  *     },
  *     ...
  *   ]
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
+ * @static
  */
 const filterPostTargetItems = (req, res, next) => {
   try {
@@ -95,6 +99,10 @@ const filterPostTargetItems = (req, res, next) => {
  *   { target: { boardUri: 'b', postId: 456 }, update: { 'isSticky': true } },
  *   { target: { boardUri: 'a', postId: 789 }, update: { 'isSage': true } },
  * ];
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
+ * @static
  */
 const filterPostUpdateItems = (req, res, next) => {
   try {
@@ -221,6 +229,10 @@ const filterPostUpdateItems = (req, res, next) => {
  *    corresponding Post documents and items with no corresponding posts found
  *    will be added to res.locals.fail if there are any.
  * @async
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
+ * @static
  */
 const populatePostUpdateItems = async (req, res, next) => {
   try {
@@ -273,6 +285,10 @@ const populatePostUpdateItems = async (req, res, next) => {
  *    of bounds for respective array for target post, i.e.
  *    "attachments.5.isDeleted" for Post that has only 4 attachments.
  * @async
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
+ * @static
  */
 const filterOutOfBoundItems = (req, res, next) => {
   try {
@@ -334,6 +350,10 @@ const filterOutOfBoundItems = (req, res, next) => {
  *   ...
  * }
  * @async
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
+ * @static
  */
 const findUserRoles = async (req, res, next) => {
   try {

@@ -28,5 +28,26 @@ const getDefaults = entries =>
     return prev;
   }, {});
 
+
+/**
+ * Return object with default values defined in Mongoose Schema
+ * @param  {Object} object The original object passed to the schema
+ *    constructor (Schema#obj)
+ * @return {Object}        Object with default values for each property
+ * @see {@link https://mongoosejs.com/docs/api.html#schema_Schema-obj}
+ * @alias module:utils/schema.getDefaults
+ * @example
+ * const someSchema = mongoose.Schema({
+ *   foo: { type: Number, default: 123 },
+ *   bar: { type: String, default: 'fgsfds' }
+ * });
+ *
+ * getDefaults(someSchema.obj)
+ * =>
+ * {
+ *   foo: 123,
+ *   bar: 'fgsfds'
+ * }
+ */
 module.exports.getDefaults = (object) =>
   getDefaults(Object.entries(object));

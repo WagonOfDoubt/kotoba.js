@@ -6,16 +6,18 @@ const _ = require('lodash');
 
 /**
  * Base error class
+ * @extends Error
+ * @alias module:errors/base-error.BaseError
  */
 class BaseError extends Error {
   /**
    * Create error
-   * @param  {string} message  Error message
-   * @param  {string} code     Error identifier
-   * @param  {string} status   HTTP status code related to error
-   * @param  {string} param    Name of request parameter that triggered error
+   * @param  {String} message  Error message
+   * @param  {String} code     Error identifier
+   * @param  {String} status   HTTP status code related to error
+   * @param  {String} param    Name of request parameter that triggered error
    * @param  {*}      value    Value of request parameter that triggered error
-   * @param  {string} location Location of parameter in request (body, params,
+   * @param  {String} location Location of parameter in request (body, params,
    *    query, cookies)
    */
   constructor(message, code, status, param, value, location) {
@@ -98,7 +100,7 @@ class BaseError extends Error {
 
   /**
    * Name of parameter that triggered error
-   * @return {?string}
+   * @return {?String}
    */
   get param() {
     return this._param || null;
@@ -136,7 +138,7 @@ class BaseError extends Error {
   /**
    * Assign status and error for each object in array
    * @param  {Object[]} array Source array
-   * @param  {string=}  valueField name of field to assign as value for each
+   * @param  {String=}  valueField name of field to assign as value for each
    *    error
    * @return {Object[]}       Array where each object has additional error and
    *    status fields
@@ -193,6 +195,8 @@ class BaseError extends Error {
 
 /**
  * Generic "400 Bad Request" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.BadRequestError
  */
 class BadRequestError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -203,6 +207,8 @@ class BadRequestError extends BaseError {
 
 /**
  * Generic "401 Unauthorized" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.UnauthorizedError
  */
 class UnauthorizedError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -213,6 +219,8 @@ class UnauthorizedError extends BaseError {
 
 /**
  * Generic "403 Forbidden" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.ForbiddenError
  */
 class ForbiddenError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -223,6 +231,8 @@ class ForbiddenError extends BaseError {
 
 /**
  * Generic "404 Not Found" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.NotFoundError
  */
 class NotFoundError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -251,6 +261,8 @@ class NotFoundError extends BaseError {
 
 /**
  * Generic "409 Conflict" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.ConflictError
  */
 class ConflictError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -261,6 +273,8 @@ class ConflictError extends BaseError {
 
 /**
  * Generic "415 Unsupported Media Type" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.UnsupportedMediaTypeError
  */
 class UnsupportedMediaTypeError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -270,7 +284,21 @@ class UnsupportedMediaTypeError extends BaseError {
 
 
 /**
+ * Generic "422 Unprocessable Entity" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.UnprocessableEntityError
+ */
+class UnprocessableEntityError extends BaseError {
+  constructor(message, code, param, value, location) {
+    super(message, code || 'UnprocessableEntity', 422, param, value, location);
+  }
+}
+
+
+/**
  * Generic "429 Too Many Requests" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.TooManyRequestsError
  */
 class TooManyRequestsError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -281,6 +309,8 @@ class TooManyRequestsError extends BaseError {
 
 /**
  * Generic "204 No Content" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.NoContentError
  */
 class NoContentError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -291,6 +321,8 @@ class NoContentError extends BaseError {
 
 /**
  * Generic "500 Internal Server Error"
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.UnknownError
  */
 class UnknownError extends BaseError {
   constructor(message, code, param, value, location) {
@@ -306,6 +338,7 @@ module.exports.ForbiddenError = ForbiddenError;
 module.exports.NotFoundError = NotFoundError;
 module.exports.ConflictError = ConflictError;
 module.exports.UnsupportedMediaTypeError = UnsupportedMediaTypeError;
+module.exports.UnprocessableEntityError = UnprocessableEntityError;
 module.exports.TooManyRequestsError = TooManyRequestsError;
 module.exports.NoContentError = NoContentError;
 module.exports.UnknownError = UnknownError;

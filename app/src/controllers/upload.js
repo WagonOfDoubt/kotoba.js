@@ -16,7 +16,7 @@ const _ = require('lodash');
 
 /**
  * Whether or not file extension belongs to known supported video format
- * @param {string} ext - file extension, starting with dot (".webm", ".mp4")
+ * @param {String} ext - file extension, starting with dot (".webm", ".mp4")
  * @returns {boolean}
  */
 const isVideo = (ext) => {
@@ -27,7 +27,7 @@ const isVideo = (ext) => {
 
 /**
  * Whether or not file extension belongs to known supported image format
- * @param {string} ext - file extension, starting with dot (".jpg", ".png")
+ * @param {String} ext - file extension, starting with dot (".jpg", ".png")
  * @returns {boolean}
  */
 const isImage = (ext) => {
@@ -39,8 +39,8 @@ const isImage = (ext) => {
 /**
  * Determine kind of file (video, image, audio, unknown) based on extension
  * @todo add support for audio formats
- * @param {string} ext - file extension, starting with dot (".jpg", ".png")
- * @returns {string} "video", "image" or "unknown"
+ * @param {String} ext - file extension, starting with dot (".jpg", ".png")
+ * @returns {String} "video", "image" or "unknown"
  */
 const getAttachmentType = (ext) => {
   if (isImage(ext)) {
@@ -56,8 +56,8 @@ const getAttachmentType = (ext) => {
 /**
  * Determine optimal format for thumbnail. For formats what support
  * transparency returns .png, otherwise .jpg
- * @param {string} ext - file extension, starting with dot (".jpg", ".png")
- * @returns {string} file extension of thumbnail, starting with dot
+ * @param {String} ext - file extension, starting with dot (".jpg", ".png")
+ * @returns {String} file extension of thumbnail, starting with dot
  */
 const getOptimalThumbnailExtenstion = (ext) => {
   if (['.png', '.svg', '.gif'].includes(ext)) {
@@ -109,7 +109,7 @@ const getMimeByExtension = (ext) => {
 /**
  * Generate random name where first part is current Unix time and last 2 digits
  * are random
- * @returns {string}
+ * @returns {String}
  */
 const getRandomName = () =>
   `${ Date.now() }${ Math.floor(Math.random() * 100) }`;
@@ -119,13 +119,14 @@ const getRandomName = () =>
  * Save file to file system and create thumbnail
  * @alias module:controllers/upload.uploadFiles
  * @async
- * @param {string} boardUri - board directory
+ * @param {String} boardUri - board directory
  * @param {Array.<object>} files - array of file objects from multer package
  * {@link https://www.npmjs.com/package/multer}
  * @param {boolean} keepFilename - whether or not to store original file name,
  * if false, random numbers will be used instead
  * @returns { Array.<Promise> } array of promises resolving to attachment
  * object according to attachment schema
+ * @static
  */
 const uploadFiles = (boardUri, files, keepFilename = true) =>
   Promise.all(files.map(file => uploadFile(boardUri, file, keepFilename)));
@@ -135,12 +136,13 @@ const uploadFiles = (boardUri, files, keepFilename = true) =>
  * Save file to file system and create thumbnail
  * @alias module:controllers/upload.uploadFile
  * @async
- * @param {string} boardUri - board directory
- * @param {object} file - file object from multer package
+ * @param {String} boardUri - board directory
+ * @param {Object} file - file object from multer package
  * {@link https://www.npmjs.com/package/multer}
  * @param {boolean} keepFilename - whether or not to store original file name,
  * if false, random numbers will be used instead
  * @returns { object } attachment object to be saved to database
+ * @static
  */
 const uploadFile = async (boardUri, file, keepFilename = true) => {
   const ext = getExtensionByMime(file.mimetype);
@@ -229,10 +231,11 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
 /**
  * Save image file to path and also delete image metadata if possible
  * @async
- * @param {string} imagePath - path to save image to
- * @param {object} file - multer file
- * @returns {object} image info from sharp package
- * {@link https://www.npmjs.com/package/sharp}
+ * @param {String} imagePath - path to save image to
+ * @param {Object} file - multer file
+ * @returns {Object} image info from sharp package
+ * @see  {@link https://www.npmjs.com/package/sharp}
+ * @static
  */
 const saveImage = async (imagePath, file) => {
   const ext = getExtensionByMime(file.mimetype);
@@ -262,10 +265,11 @@ const saveImage = async (imagePath, file) => {
 /**
  * Save file to path
  * @async
- * @param {string} imagePath - path to save to
- * @param {object} file - multer file
- * @returns {object} object with field size equal to file size in bytes, and
+ * @param {String} imagePath - path to save to
+ * @param {Object} file - multer file
+ * @returns {Object} object with field size equal to file size in bytes, and
  * with and height equal to 0
+ * @static
  */
 const saveFile = async (filePath, file) => {
   try {
@@ -285,10 +289,11 @@ const saveFile = async (filePath, file) => {
 /**
  * Generate thumbnail for image and save it to path
  * @async
- * @param {string} thumbPath - path to save to
- * @param {object} file - multer file
- * @returns {object} image info from sharp package
- * {@link https://www.npmjs.com/package/sharp}
+ * @param {String} thumbPath - path to save to
+ * @param {Object} file - multer file
+ * @returns {Object} image info from sharp package
+ * @see  {@link https://www.npmjs.com/package/sharp}
+ * @static
  */
 const createThumbnail = async (thumbPath, file, width, height) => {
   const ext = getExtensionByMime(file.mimetype);
@@ -311,9 +316,10 @@ const createThumbnail = async (thumbPath, file, width, height) => {
 /**
  * Save file to path
  * @async
- * @param {string} imagePath - path to save to
- * @returns {object} object with field size equal to file size in bytes, and
+ * @param {String} imagePath - path to save to
+ * @returns {Object} object with field size equal to file size in bytes, and
  * with and height equal to 0
+ * @static
  */
 const saveVideo = async (filePath, file) => {
   try {
@@ -356,12 +362,13 @@ const getVideoMetadata = (filePath) => {
 /**
  * Generate thumbnail for video and save it to path
  * @async
- * @param {string} thumbPath - path to save to
- * @param {object} filePath - path to video file
+ * @param {String} thumbPath - path to save to
+ * @param {Object} filePath - path to video file
  * @param {Number} width Maximum thumbnail width
  * @param {Number} height Maximum thumbnail height
- * @returns {object} image info from sharp package
- * {@link https://www.npmjs.com/package/sharp}
+ * @returns {Object} image info from sharp package
+ * @see  {@link https://www.npmjs.com/package/sharp}
+ * @static
  */
 const createVideoThumbnail = async (thumbPath, filePath, width, height) => {
   try {

@@ -1,9 +1,21 @@
+/**
+ * Middlewares for checking user's permissions
+ * @module middlewares/permission
+ */
+
 const _ = require('lodash');
-const { createRegExpFromArray, regExpTester } = require('../utils/regexp');
 const Post = require('../models/post');
 const { PermissionDeniedError } = require('../errors');
 
 
+/**
+ * Check if user has permission to change post field. Checks req.body.items
+ *    and filters them, leaving only allowed items, populates res.locals.fail
+ *    with rejected items.
+ * @param  {Request}   req
+ * @param  {Response}  res
+ * @param  {Function}  next
+ */
 module.exports.postEditPermission = async (req, res, next) => {
   try {
     const { items, postpassword } = req.body;
@@ -32,6 +44,17 @@ module.exports.postEditPermission = async (req, res, next) => {
 };
 
 
+/**
+ * Helper function for checking permission of changing values of particular
+ *    post fields
+ * @param  {Object} target    Target post
+ * @param  {String} password  User's post deletion password (not login password)
+ * @param  {Object} updateObj Fields to update
+ * @param  {Object} roles     User's roles
+ * @param  {module:models/user~User} user      Logged in user
+ * @return {Object}           { target, update, denied }
+ * @async
+ */
 const checkPostPermission = async (target, password, updateObj, roles, user) => {
   const passwordMatches = password && await target.checkPassword(password);
 
@@ -100,23 +123,42 @@ const checkPostPermission = async (target, password, updateObj, roles, user) => 
 };
 
 
-/** @type {Number} User has no write access */
+/**
+ * User has no write access
+ * @type {Number}
+ */
 const PRIORITY_NO_ACCESS        = -1;
-/** @type {Number} User has no role assigned for this board */
+/**
+ * User has no role assigned for this board
+ * @type {Number}
+ */
 const PRIORITY_NO_ROLE          = -10;
-/** @type {Number} Invalid field name */
+/**
+ * Invalid field name
+ * @type {Number}
+ */
 const PRIORITY_INVALID_FIELD    = -20;
-/** @type {Number} User permissions for this action is undefined */
+/**
+ * User permissions for this action is undefined
+ * @type {Number}
+ */
 const PRIORITY_EMPTY_PERMISSION = -30;
-/** @type {Number} User has no permission to set field to this value */
+/**
+ * User has no permission to set field to this value
+ * @type {Number}
+ */
 const PRIORITY_INVALID_VALUE = -40;
-/** @type {Number} User is not logged in and post password is incorrect */
+/**
+ * User is not logged in and post password is incorrect
+ * @type {Number}
+ */
 const PRIORITY_NO_PASSWORD  = -50;
 
 
 /**
  * Decode invalid priority code to human-readable message
- * @param  {Number} priority Invalid priority (negative number)
+ * @param  {Number} oldPriority Existing priority of previous change
+ * @param  {Number} newPriority Current priority
  * @return {String}          Human-readable error message
  */
 const getReason = (oldPriority, newPriority) => {
@@ -147,13 +189,13 @@ const getReason = (oldPriority, newPriority) => {
 
 /**
  * Get priority for modifying specific Post field with new value from User
- * role
+ *    role
  * @param  {String} field     Name of Post field that is being modified
  * @param  {Mixed}  value     New value for Post field
  * @param  {Role}   boardRole Mongoose document or plain object implementing
- * RoleSchema
+ *    RoleSchema
  * @return {Number}           Priority for modifying Post field. Negative
- * values indicate various cases of invalid priority.
+ *    values indicate various cases of invalid priority.
  */
 const getPriorityForUpdatingPostField = (field, value, boardRole) => {
   if (!boardRole) {
@@ -206,8 +248,14 @@ const getPriorityForUpdatingPostField = (field, value, boardRole) => {
 };
 
 
+/**
+ * Get priority for anonymous (not logged-in) user when changing post by
+ *    poster password
+ * @param  {String} field Post filed name
+ * @param  {*} value New value for field
+ * @return {Number}       Priority for changing field to new value
+ */
 const getPriorityForUpdatingPostFieldByPassword = (field, value) => {
-  const acceptableAccess = ['write-any', 'write-value'];
   const anonRole = {
     roleName: '__poster',
     hierarchy: 0,
@@ -274,7 +322,10 @@ const getPriorityForUpdatingPostFieldByPassword = (field, value) => {
 
 
 /**
- * Middleware that redirects to login page if user is not authenticated.
+ * Middleware that redirects to login page if user is not authenticated
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.authRequired = (req, res, next) => {
   const isLoginned = req.isAuthenticated();
@@ -288,7 +339,10 @@ module.exports.authRequired = (req, res, next) => {
 
 /**
  * Middleware that returns 401 status and JSON response with error if user is
- * not authenticated.
+ * not authenticated
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.apiAuthRequired = (req, res, next) => {
   try {
@@ -312,6 +366,9 @@ module.exports.apiAuthRequired = (req, res, next) => {
 /**
  * Middleware that returns 401 status if user is not authenticated or has no
  * admin rights
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Function} next
  */
 module.exports.adminOnly = (req, res, next) => {
   try {

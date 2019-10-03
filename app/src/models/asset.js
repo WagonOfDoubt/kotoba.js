@@ -5,30 +5,85 @@
  */
 
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const attachmentSchema = require('./schema/attachment');
 
 
-const Asset = module.exports = mongoose.model('Asset', {
-  /** @type {Boolean} Uploaded file md5 hash (hex string) */
+/**
+ * Asset Mongoose model
+ * @class Asset
+ * @extends external:Model
+ */
+const assetSchema = Schema({
+  /**
+   * Uploaded file md5 hash (hex string)
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   hash:                { type: String, index: true },
-  /** @type {String} Original file name */
+  /**
+   * Original file name
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   name:                { type: String },
-  /** @type {String} Path where uploaded file was saved */
+  /**
+   * Path where uploaded file was saved
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   file:                { type: String },
-  /** @type {Number} Uploaded file width in pixels, if it is image or video */
+  /**
+   * Uploaded file width in pixels
+   * @type {Number}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   width:               { type: Number },
-  /** @type {Number} Uploaded file height in pixels, if it is image or video */
+  /**
+   * Uploaded file height in pixels
+   * @type {Number}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   height:              { type: Number },
-  /** @type {String} Path of generated thumbnail */
+  /**
+   * Path of generated thumbnail
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   thumb:               { type: String },
-  /** @type {Number} Generated thumbnail width in pixels */
+  /**
+   * Generated thumbnail width in pixels
+   * @type {Number}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   thumbWidth:          { type: Number },
-  /** @type {Number} Generated thumbnail height in pixels */
+  /**
+   * Generated thumbnail height in pixels
+   * @type {Number}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   thumbHeight:         { type: Number },
-  /** @type {Number} Duration in seconds for video and audio files */
+  /**
+   * Duration in seconds for video and audio files
+   * @type {Number}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   duration:            { type: Number },
-  /** @type {String} Media type as recognized by engine (image, video, etc) */
+  /**
+   * Media type as recognized by engine (image, video, etc)
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   type: {
     type: String,
     enum: [
@@ -40,23 +95,48 @@ const Asset = module.exports = mongoose.model('Asset', {
       'video',
     ],
   },
-  /** @type {String} MIME type of uploaded file */
+  /**
+   * MIME type of uploaded file
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   mimetype:            { type: String, required: true },
-  /** @type {Number} File size in bytes */
+  /**
+   * File size in bytes
+   * @type {Number}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   size:                { type: Number },
-  /** @type {Boolean} Is attachment set for deletion */
+  /**
+   * Is attachment set for deletion
+   * @type {Boolean}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   * @default false
+   */
   isDeleted:           { type: Boolean, default: false },
   /**
    * READ ONLY. Date of document creation.
    * @type {Date}
+   * @memberOf module:models/asset~Asset
+   * @instance
    */
   timestamp:           { type: Date, default: Date.now },
   /**
    * User who uploaded this asset.
    * @type {ObjectId}
+   * @memberOf module:models/asset~Asset
+   * @instance
    */
   user:                { type: ObjectId, ref: 'User' },
-  /** @type {String} Where asset is supposed to be used on site */
+  /**
+   * Where asset is supposed to be used on site
+   * @type {String}
+   * @memberOf module:models/asset~Asset
+   * @instance
+   */
   category: {
     type: String,
     enum: [
@@ -71,3 +151,8 @@ const Asset = module.exports = mongoose.model('Asset', {
     ],
   },
 });
+
+
+const Asset = mongoose.model('Asset', assetSchema);
+
+module.exports = Asset;

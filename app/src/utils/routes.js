@@ -6,7 +6,6 @@
 /**
  * Returns object with all routes in stack of given express router, where keys
  * are paths and values are arrays of supported methods.
- * @module utils/routes
  * @param {Object} stack router.stack of express router
  * @returns {Object} Object with routes paths as keys and arrays of methods as
  * values
@@ -34,8 +33,9 @@
  *   "/blog": ["get", "post"],
  *   "/gallery/images": ["get", "post", "delete"]
  * }
+ * @alias module:utils/routes
  */
-const findRoutes = module.exports = (stack, routesMap={}, parent=null) => {
+const findRoutes = (stack, routesMap={}, parent=null) => {
   stack.forEach((layer) => {
     if (layer.route && layer.route.path) {
       let path = layer.route.path;
@@ -65,3 +65,5 @@ const findRoutes = module.exports = (stack, routesMap={}, parent=null) => {
   });
   return routesMap;
 };
+
+module.exports = findRoutes;

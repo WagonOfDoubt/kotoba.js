@@ -9,19 +9,23 @@ const Int32 = require('mongoose-int32');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 
+/**
+ * @typedef {Object} Reflink
+ * @param {ObjectId} src Referenced post ObjectId
+ * @param {String} boardUri Referenced post board
+ * @param {Int32} postId Referenced post sequential number
+ * @param {Int32} threadId Referenced post thread sequential number
+ * @param {Boolean} isOp Is referenced post is topic starter
+ * @public
+ */
 module.exports = Schema({
-  /** Referenced post ObjectId */
   src: {
     type: ObjectId,
     ref: 'Post'
   },
-  /** Referenced post board */
   boardUri: { type: String },
-  /** Referenced post sequential number */
   postId: { type: Int32 },
-  /** Referenced post thread sequential number */
   threadId: { type: Int32 },
-  /** Is referenced post is topic starter */
   isOp:     { type: Boolean },
 },
 // options

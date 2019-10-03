@@ -25,6 +25,8 @@ const { ConflictError, UnsupportedMediaTypeError } = require('./base-error');
 
 /**
  * Attempt to upload file that already exists
+ * @extends module:errors/base-error.ConflictError
+ * @alias module:errors/file-error.FileAlreadyExistsError
  */
 class FileAlreadyExistsError extends ConflictError {
   constructor(param, value, location) {
@@ -53,6 +55,8 @@ class FileAlreadyExistsError extends ConflictError {
 
 /**
  * Attempt to upload file that already exists
+ * @extends module:errors/base-error.UnsupportedMediaTypeError
+ * @alias module:errors/file-error.FileFormatNotSupportedError
  */
 class FileFormatNotSupportedError extends UnsupportedMediaTypeError {
   constructor(param, value, location) {

@@ -1,6 +1,6 @@
 /**
  * Module handles rendering templates and saving them as static HTML files.
- * Nothing here can make changes to database or have other side effects.
+ *    Nothing here can make changes to database or have other side effects.
  * @module controllers/generate
  */
 
@@ -21,9 +21,8 @@ const pkg = require('../package.json');
 
 
 /**
- * Helper function.
- * Gets Settings object from database
- * and returns object with parameters necessary for templates.
+ * Helper function. Gets Settings object from database and returns object with
+ *    parameters necessary for templates.
  * @async
  */
 const getTemplateGlobals = async () => {
@@ -43,14 +42,13 @@ const getTemplateGlobals = async () => {
 
 
 /**
- * Helper function.
- * Renders template with given data and saves it to dir as filename
- * Also passes global template variables to template
+ * Helper function. Renders template with given data and saves it to dir as
+ *    filename Also passes global template variables to template
  * @async
- * @param {String} dir - Directory to save to.
- * @param {String} filename - Filename of resulting file.
- * @param {String} template - Name of pug template.
- * @param {Object} data - Data to pass to pug template.
+ * @param {String} dir Directory to save to.
+ * @param {String} filename Filename of resulting file.
+ * @param {String} template Name of pug template.
+ * @param {Object} data Data to pass to pug template.
  */
 const renderToFile = async (dir, filename, template, data) => {
   const path = `${ dir }/${ filename }`;
@@ -75,10 +73,10 @@ const renderToFile = async (dir, filename, template, data) => {
 
 
 /**
- * Generate thread reply page.
- * Saves file board/res/[postId].html
+ * Generate thread reply page. Saves file board/res/[postId].html
  * @async
- * @param {Post} thread - The op-post mongoose document.
+ * @param {module:models/post~Post} thread The op-post mongoose document
+ * @static
  */
 const generateThreadPage = async (thread) => {
   const board = thread.board;
@@ -109,14 +107,15 @@ const generateThreadPage = async (thread) => {
 
 
 /**
- * Generate cached thread fragment which will be displayed on board page.
- * When thread is bumped, threads on board are shuffled, so each page of board
- * must be regenerated. But there is no need to render each thread fragment
- * since none of them was changed. Keeping rendered thread fragments lets avoid
- * unnecessary database queries and increases overall performance.
- * Saves file board/res/[postId]-preview.html
+ * Generate cached thread fragment which will be displayed on board page. When
+ *    thread is bumped, threads on board are shuffled, so each page of board
+ *    must be regenerated. But there is no need to render each thread fragment
+ *    since none of them was changed. Keeping rendered thread fragments lets
+ *    avoid unnecessary database queries and increases overall performance.
+ *    Saves file board/res/[postId]-preview.html
  * @async
- * @param {Post} thread - The op-post mongoose document.
+ * @param {module:models/post~Post} thread The op-post mongoose document
+ * @static
  */
 const generateThreadPreview = async (thread) => {
   const board = thread.board;
@@ -140,7 +139,7 @@ const generateThreadPreview = async (thread) => {
   const notOmitted = children.slice(-showReplies);
 
   const data = {
-    lang: board.locale || globals.lang,
+    lang: board.locale,
     board: board,
     thread: thread,
     replies: notOmitted,
@@ -161,8 +160,9 @@ const generateThreadPreview = async (thread) => {
 /**
  * Generate thread reply page and thread preview.
  * @async
- * @param {Post} thread - The op-post mongoose document.
+ * @param {module:models/post~Post} thread The op-post mongoose document.
  * @returns {Promise}
+ * @static
  */
 const generateThread = async (thread) => {
   const board = thread.board;
@@ -176,22 +176,26 @@ const generateThread = async (thread) => {
 
 /**
  * Generate thread reply page and thread preview for each thread.
- * @param {Array} threads - Array of {Post} threads to display on page.
+ * @param {Array<module:models/post~Post>} threads Array of threads to display
+ *    on page.
  * @returns {Promise}
+ * @static
  */
 const generateThreads = threads =>
   Promise.all(threads.map(generateThread));
 
 
 /**
- * Generate one page of board.
- * Threads on page are not rendered, but included from -preview.html files.
- * Saves file board/index.html or board/[pNum].html
+ * Generate one page of board. Threads on page are not rendered, but included
+ *    from -preview.html files. Saves file board/index.html or
+ *    board/[pNum].html
  * @async
- * @param {Board} board - The board mongoose document.
- * @param {Array} threads - Array of {Post} threads to display on page.
- * @param {Number} pNum - Current page. If 0, file will be named index.html
- * @param {Number} totalPages - Number of pages for pages selector.
+ * @param {module:models/board~Board} board The board mongoose document.
+ * @param {Array<module:models/post~Post>} threads Array of threads to display
+ *    on page.
+ * @param {Number} pNum Current page. If 0, file will be named index.html
+ * @param {Number} totalPages Number of pages for pages selector.
+ * @static
  */
 const generateBoardPage = async (board, threads, pNum, totalPages) => {
   const timeLabel = `generateBoardPage /${board.uri}/${pNum}.html`;
@@ -257,12 +261,15 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
 
 
 /**
- * Generate all pages on given board.
+ * Generate all pages on given board. Saves files board/index.html,
+ *    board/1.html, ..., board/n.html
  * @async
- * Saves files board/index.html, board/1.html, ..., board/n.html
- * @param {Board} board - The board mongoose document.
- * @param {Array} threads - Array of threads sorted by bump order.
- * @returns {Board} - same board that was passed as the first argument
+ * @param {module:models/board~Board} board The board mongoose document.
+ * @param {Array<module:models/post~Post>} threads Array of threads sorted by
+ *    bump order.
+ * @returns {module:models/board~Board} same board that was passed as the
+ *    first argument
+ * @static
  */
 const generateBoardPages = async (board, threads) => {
   const timeLabel = `generateBoardPages /${board.uri}/`;
@@ -290,12 +297,14 @@ const generateBoardPages = async (board, threads) => {
 
 
 /**
- * Generate catalog of board.
- * Saves file board/catalog.html
+ * Generate catalog of board. Saves file board/catalog.html
  * @async
- * @param {Board} board - The board mongoose document.
- * @param {Array} threads - Array of threads sorted by bump order.
- * @returns {Board} - same board that was passed as the first argument
+ * @param {module:models/board~Board} board The board mongoose document.
+ * @param {Array<module:models/post~Post>} threads Array of threads sorted by
+ *    bump order.
+ * @returns {module:models/board~Board} same board that was passed as the
+ *    first argument
+ * @static
  */
 const generateCatalog = async (board, threads = null) => {
   if (!board.features.catalog) {
@@ -307,7 +316,7 @@ const generateCatalog = async (board, threads = null) => {
     threads = await Post.getSortedThreads(board);
   }
   const data = {
-    lang: board.locale || globals.lang,
+    lang: board.locale,
     board: board,
     threads: threads,
     stats: {},
@@ -324,8 +333,9 @@ const generateCatalog = async (board, threads = null) => {
 
 /**
  * Regenerate all board pages and catalog for given board
- * @param {Board} board - Board to regenerate.
+ * @param {module:models/board~Board} board Board to regenerate.
  * @returns {Promise}
+ * @static
  */
 const generateBoardPagesAndCatalog = async board => {
   const threads = await Post.getSortedThreads(board);
@@ -338,8 +348,9 @@ const generateBoardPagesAndCatalog = async board => {
 
 /**
  * Regenerate all board pages, thread reply pages and catalog for given board
- * @param {Board} board - Board to regenerate.
+ * @param {module:models/board~Board} board Board to regenerate.
  * @returns {Promise}
+ * @static
  */
 const generateBoard = async board => {
   const threads = await Post.getSortedThreads(board);
@@ -352,9 +363,12 @@ const generateBoard = async board => {
 
 
 /**
- * Regenerate all board pages, thread reply pages and catalog for all given boards
- * @param {Array} threads - Array of {Board} boards to regenerate.
+ * Regenerate all board pages, thread reply pages and catalog for all given
+ *    boards
+ * @param {Array<module:models/board~Board>} threads Array of boards to
+ *    regenerate.
  * @returns {Promise}
+ * @static
  */
 const generateBoards = boards =>
   Promise.all(boards.map(generateBoard));
@@ -363,6 +377,7 @@ const generateBoards = boards =>
 /**
  * Generate main page (/index.html)
  * @async
+ * @static
  */
 const generateMainPage = async () => {
   const timeLabel = `generateMainPage`;
@@ -381,6 +396,7 @@ const generateMainPage = async () => {
 /**
  * Generate main page (/index.html) if it does not exist.
  * @async
+ * @static
  */
 const ensureMainPage = async () => {
   const indexPath = path.join(config.html_path, 'index.html');
@@ -399,6 +415,7 @@ const ensureMainPage = async () => {
  * @param {String[]} [?options.boards=[]] List of boards (by board.uri) to
  *    regenerate. If empty, all boards will be regenerated (default).
  * @returns {Promise}
+ * @static
  */
 const regenerateAll = (options) => {
   options = options || {};
@@ -426,6 +443,8 @@ const regenerateAll = (options) => {
 
 /**
  * Clear compiled pug templates
+ * @static
+ * @function
  */
 const clearTemplateCache = () => {
   for (const prop of Object.keys(pug.cache)) {

@@ -21,6 +21,7 @@ const {
  * @param  {Model}  model        Mongoose model
  * @param  {String} arrayName    Name of array in body
  * @return {function}            async express middleware
+ * @static
  */
 const populateDocumentsByIds = (model, arrayName) => {
   assert(model.prototype instanceof mongoose.Model);
@@ -97,6 +98,7 @@ const populateDocumentsByIds = (model, arrayName) => {
  * @param  {String}   arrayName      Name of array in body
  * @param  {String[]} editableFields Array with valid keys for objects
  * @return {function}                Express middleware
+ * @static
  */
 const removeDuplicates = (arrayName, editableFields) => {
   assert(_.isString(arrayName));
@@ -208,6 +210,7 @@ const removeDuplicates = (arrayName, editableFields) => {
  *    Populates res.locals.fail with errors.
  * @param  {String} arrayName Name of array in body
  * @return {function}         Express middleware
+ * @static
  */
 const compareRequestWithDocuments = (arrayName) => {
   assert(_.isString(arrayName));
@@ -268,6 +271,7 @@ const compareRequestWithDocuments = (arrayName) => {
  *    is valid.
  * @param  {String} arrayName Name of array in body
  * @return {function}         Express middleware
+ * @static
  */
 const applyAndValidateDocuments = (arrayName) => {
   assert(_.isString(arrayName));

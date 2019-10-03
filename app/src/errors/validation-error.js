@@ -26,6 +26,8 @@ const { BadRequestError } = require('./base-error');
 
 /**
  * Request did not pass validation
+ * @extends module:errors/base-error.BadRequestError
+ * @alias module:errors/validation-error.RequestValidationError
  */
 class RequestValidationError extends BadRequestError {
   constructor(message, param, value, location) {
@@ -37,6 +39,7 @@ class RequestValidationError extends BadRequestError {
    * @static
    * @param  {Object} error express-validator error object
    * @return {RequestValidationError}
+   * @see  {@link https://express-validator.github.io/docs/validation-result-api.html}
    */
   static fromExpressValidator({ msg, param, value, location }) {
     return new RequestValidationError(msg, param, value, location);
@@ -49,6 +52,7 @@ class RequestValidationError extends BadRequestError {
    * @param  {String}          location Location of parameter in request
    *    (body, params, query, cookies)
    * @return {RequestValidationError}
+   * @see  {@link https://github.com/Automattic/mongoose/blob/4.13.1/lib/error/validation.js}
    */
   static fromMongooseValidator({ message, path, stringValue }, location) {
     return new RequestValidationError(message, path, stringValue, location);

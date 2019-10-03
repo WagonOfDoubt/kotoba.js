@@ -23,6 +23,8 @@ const { UnauthorizedError, ForbiddenError } = require('./base-error');
 
 /**
  * Error that thrown if user is not logged in
+ * @extends module:errors/base-error.UnauthorizedError
+ * @alias module:errors/permission-error.AuthRequiredError
  */
 class AuthRequiredError extends UnauthorizedError {
   constructor() {
@@ -47,6 +49,8 @@ class AuthRequiredError extends UnauthorizedError {
 
 /**
  * User don't have necessary permission
+ * @extends module:errors/base-error.ForbiddenError
+ * @alias module:errors/permission-error.PermissionDeniedError
  */
 class PermissionDeniedError extends ForbiddenError {
   constructor() {

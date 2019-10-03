@@ -16,7 +16,7 @@ const { FileFormatNotSupportedError, FileAlreadyExistsError, UnknownError } = re
 /**
  * Upload files listed in asset document
  * @async
- * @param  {File}   file      multer file object
+ * @param  {external:File}   file      multer file object
  * @param  {Object} assetDesc Object with asset data
  * @param {?String} assetDesc.name File name. If empty, file.originalname will
  *    be used.
@@ -24,9 +24,9 @@ const { FileFormatNotSupportedError, FileAlreadyExistsError, UnknownError } = re
  * @param {Number} assetDesc.thumbHeight Thumbnail image height in pixels
  * @return {Object}           Object with asset data with properties related
  *    to file populated
- * @throws {FileFormatNotSupportedError} If file is not image
- * @throws {FileAlreadyExistsError} If file with same hash already exists
- * @throws {UnknownError} If something else went wrong during saving of file
+ * @throws {module:errors.FileFormatNotSupportedError} If file is not image
+ * @throws {module:errors.FileAlreadyExistsError} If file with same hash already exists
+ * @throws {module:errors.UnknownError} If something else went wrong during saving of file
  */
 module.exports.uploadAssetFiles = async (file, assetDesc) => {
   const fileExt = upload.getExtensionByMime(file.mimetype);
@@ -80,7 +80,7 @@ module.exports.uploadAssetFiles = async (file, assetDesc) => {
 
 /**
  * Remove files related to asset
- * @param  {Asset} assetDoc Asset document
+ * @param  {module:models/asset~Asset} assetDoc Asset document
  * @async
  */
 module.exports.removeAssetFiles = async (assetDoc) => {
@@ -93,7 +93,7 @@ module.exports.removeAssetFiles = async (assetDoc) => {
 /**
  * Resize asset thumbnail
  * @async
- * @param  {Asset} assetDoc Asset document
+ * @param  {module:models/asset~Asset} assetDoc Asset document
  * @return {Object}         { thumbWidth, thumbHeight, _id }
  */
 module.exports.resizeAsset = async (assetDoc) => {

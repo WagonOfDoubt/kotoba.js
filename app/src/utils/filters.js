@@ -1,5 +1,5 @@
 /**
- * Functions for pug templates and string formatting
+ * Functions mostly for string formatting for use in templates
  * @module utils/filters
  */
 
@@ -14,21 +14,23 @@ const filters = {};
 /**
  * Render text in markdown
  * @param  {String} text    Text to format
- * @param  {Object} options Filter options (not used)
+ * @param  {Object} [options] Filter options (not used)
  * @return {String}         Formatted HTML
+ * @alias module:utils/filters.markdown
  */
 filters.markdown = (text, options) => {
   return md.render(text);
 };
 
 
-const evalPath = (o, x) =>
-  (typeof o == 'undefined' || o === null) ? o : o[x];
-
-
-filters.getPath = (key, obj) => {
-  return obj && key.split('.').reduce(evalPath, obj);
-};
+/**
+ * Get value of object's property, but if object is null or undefined, don't
+ *    throw error and just return passed argument.
+ * @param  {Object} o Source object
+ * @param  {String} x Property key
+ * @return {?*}     Value of property
+ */
+const evalPath = (o, x) => (typeof o == 'undefined' || o === null) ? o : o[x];
 
 
 /**
@@ -40,6 +42,7 @@ filters.getPath = (key, obj) => {
  * @example
  * getPath('foo.bar.baz', obj);
  * getPath('foo[bar][baz]', obj);
+ * @alias module:utils/filters.getParam
  */
 filters.getParam = (key, obj) => {
   return obj && key
@@ -51,8 +54,9 @@ filters.getParam = (key, obj) => {
 
 /**
  * Flatten nested objects into an object that is one level deep
- * @param  {Object} obj source object
- * @return {Object}     Flatten object
+ * @param  {Object} obj Source object
+ * @return {Object}     Flat object
+ * @alias module:utils/filters.flatObj
  */
 filters.flatObj = (obj) => flatten(obj);
 
@@ -60,11 +64,12 @@ filters.flatObj = (obj) => flatten(obj);
 /**
  * Convert bytes to readable size, depending of value (kilobytes, megabytes,
  *    etc.)
- * @param  {String} text    Size in bytes (must be a number)
- * @param  {Object} options Filter options (not used)
- * @return {String}         Formatted size
+ * @param  {String} text      Size in bytes (must be a number)
+ * @param  {Object} [options] Filter options (not used)
+ * @return {String}           Formatted size
  * @example
  * readableSize("12492")  // => "12.19" MiB
+ * @alias module:utils/filters.readableSize
  */
 filters.readableSize = (text, options) => {
   const bytes = parseInt(text);
@@ -83,12 +88,13 @@ filters.readableSize = (text, options) => {
 
 /**
  * Convert duration in seconds into readable format, depending of value
- *    (hh:mm:ss, mm:ss)
- * @param  {String} text    Time in seconds (must be  a number)
- * @param  {Object} options Filter options (not used)
+ *    to format "hh:mm:ss" or "mm:ss"
+ * @param  {String} text    Time in seconds (must be a number)
+ * @param  {Object} [options] Filter options (not used)
  * @return {String}         Formatted time
  * @example
  * readableDuration('64')  // => "01:04"
+ * @alias module:utils/filters.readableDuration
  */
 filters.readableDuration = (text, options) => {
   let seconds = Math.round(parseFloat(text)) % 60;
@@ -111,9 +117,11 @@ filters.readableDuration = (text, options) => {
 /**
  * Cut long file name to max length, replacing part of string with placeholder
  * @param  {String} text                String to cut
+ * @param  {Object} options             Options
  * @param  {Number} options.length      Max string length
  * @param  {String} options.placeholder Omitted part placeholder
  * @return {String}                     String cut to length
+ * @alias module:utils/filters.shortFileName
  */
 filters.shortFileName = (text, {length, placeholder}) => {
   const ext = path.extname(text);
@@ -127,9 +135,10 @@ filters.shortFileName = (text, {length, placeholder}) => {
 
 /**
  * Escape HTML characters in string
- * @param  {String} text    String to escape
- * @param  {Object} options Filter options (not used)
- * @return {String}         Escaped string
+ * @param  {String} text      String to escape
+ * @param  {Object} [options] Filter options (not used)
+ * @return {String}           Escaped string
+ * @alias module:utils/filters.escape
  */
 filters.escape = (text, options) => {
   const entities = {
@@ -151,10 +160,12 @@ filters.escape = (text, options) => {
 
 /**
  * Encode special characters
- * @param  {String} text Text to encode
- * @return {String}      Encoded string
+ * @param  {String} text      Text to encode
+ * @param  {Object} [options] Filter options (not used)
+ * @return {String}           Encoded string
+ * @alias module:utils/filters.encodeUri
  */
-filters.encodeUri = (text) => encodeURI(decodeURI(text));
+filters.encodeUri = (text, options) => encodeURI(decodeURI(text));
 
 
 module.exports = filters;

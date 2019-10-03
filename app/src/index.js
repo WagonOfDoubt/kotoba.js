@@ -61,8 +61,37 @@
  *    KOT_DATABASE_PASSWORD.
  */
 
+/**
+ * Express application
+ * @external Application
+ * @see {@link https://expressjs.com/en/4x/api.html#app|Application}
+ */
 const express = require('express');
+/**
+ * Mongoose Model
+ * @external Model
+ * @see {@link https://mongoosejs.com/docs/api/model.html|Model}
+ */
+/**
+ * Mongoose Query
+ * @external Query
+ * @see {@link https://mongoosejs.com/docs/api/query.html|Query}
+ */
 const mongoose = require('mongoose');
+/**
+ * Multer File information
+ * @external File
+ * @property {String} fieldname   Field name specified in the form  
+ * @property {String} originalname  Name of the file on the user's computer   
+ * @property {String} encoding  Encoding type of the file   
+ * @property {String} mimetype  Mime type of the file   
+ * @property {Number} size  Size of the file in bytes   
+ * @property {String} destination   The folder to which the file has been saved
+ * @property {String} filename  The name of the file within the destination
+ * @property {String} path  The full path to the uploaded file
+ * @property {Buffer} buffer  A Buffer of the entire file
+ * @see {@link https://github.com/expressjs/multer#file-information|File}
+ */
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -88,6 +117,7 @@ process.env.FFPROBE_PATH = require('ffprobe-static').path;
  * Establish connection with MongoDB database described by env variables
  *    KOT_DATABASE_HOST, KOT_DATABASE_PORT, KOT_DATABASE_NAME,
  *    KOT_DATABASE_USER, KOT_DATABASE_PASSWORD.
+ * @param  {external:Application} app Express application
  * @return {Connection} Mongoose connection
  * @see {@link https://mongoosejs.com/docs/api/connection.html#connection_Connection}
  * @async
@@ -134,7 +164,7 @@ const connectToDatabase = async (app) => {
 
 /**
  * Configure authentication 
- * @param  {Application} app Express application
+ * @param  {external:Application} app Express application
  * @see {@link http://www.passportjs.org/packages/passport-local/}
  */
 const configureAuthentication = (app) => {
@@ -186,7 +216,6 @@ const configureAuthentication = (app) => {
   passport.serializeUser((user, done) => done(null, user._id));
   passport.deserializeUser((id, done) => User.findById(id, done));
 };
-
 
 /**
  * Create express app and initialize required middlewares

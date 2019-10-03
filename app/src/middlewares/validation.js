@@ -1,9 +1,15 @@
+/**
+ * Middlewares for request validation
+ * @module middlewares/validation
+ */
+
 const { validationResult, matchedData } = require('express-validator');
 const { RequestValidationError } = require('../errors');
 
 
 /**
  * Replaces req.body with matchedData() form express-validator
+ * @static
  */
 module.exports.filterMatched = (req, res, next) => {
   req.body = matchedData(req, { locations: ['body'] });
@@ -14,6 +20,7 @@ module.exports.filterMatched = (req, res, next) => {
 /**
  * Middleware that returns 400 status and JSON response with express-validator
  * errors object, if there are any errors.
+ * @static
  */
 module.exports.validateRequest = (req, res, next) => {
   try {
@@ -42,6 +49,7 @@ module.exports.validateRequest = (req, res, next) => {
  * @param {string} redirect - uri to redirect to
  * @returns Middleware function that redirects to said url if validationResult
  * is not empty
+ * @static
  */
 module.exports.validateRedirect = (redirect) =>
   (req, res, next) => {

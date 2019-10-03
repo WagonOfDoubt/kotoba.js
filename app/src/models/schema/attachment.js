@@ -7,34 +7,40 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
+/**
+ * @typedef {Object} Attachment
+ * @property {String} hash Uploaded file md5 hash (hex string)
+ * @property {String} name Original file name
+ * @property {String} file Path where uploaded file was saved
+ * @property {Number} width Uploaded file width in pixels, if it is image or
+ *    video
+ * @property {Number} height Uploaded file height in pixels, if it is image or
+ *    video
+ * @property {String} thumb Path of generated thumbnail
+ * @property {Number} thumbWidth Generated thumbnail width in pixels
+ * @property {Number} thumbHeight Generated thumbnail height in pixels
+ * @property {Number} duration Duration in seconds for video and audio files
+ * @property {String} type Attachment type (image, video, etc)
+ * @property {Number} size Attachment file size in bytes
+ * @property {String} isDeleted Is attachment set for deletion
+ * @property {String} isNSFW Is attachment set as not safe for work
+ * @property {String} isSpoiler Is attachment set as spoiler
+ * @public
+ */
 module.exports = Schema({
-  /** Uploaded file md5 hash (hex string) */
   hash:                { type: String, index: true },
-  /** Original file name */
   name:                { type: String },
-  /** Path where uploaded file was saved */
   file:                { type: String },
-  /** Uploaded file width in pixels, if it is image or video */
   width:               { type: Number },
-  /** Uploaded file height in pixels, if it is image or video */
   height:              { type: Number },
-  /** Path of generated thumbnail */
   thumb:               { type: String },
-  /** Generated thumbnail width in pixels */
   thumbWidth:          { type: Number },
-  /** Generated thumbnail height in pixels */
   thumbHeight:         { type: Number },
-  /** Duration in seconds for video and audio files */
   duration:            { type: Number },
-  /** Attachment type (image, video, etc) */
   type:                { type: String, enum: ['image', 'video', 'audio', 'document', 'archive', 'unknown'] },
-  /** Attachment file size in bytes */
   size:                { type: Number },
-  /** Is attachment set for deletion */
   isDeleted:           { type: Boolean, default: false },
-  /** Is attachment set as not safe for work */
   isNSFW:              { type: Boolean, default: false },
-  /** Is attachment set as spoiler */
   isSpoiler:           { type: Boolean, default: false },
 },
 // options

@@ -15,7 +15,6 @@ const fs = require('fs-extra');
 const config = require('../json/config');
 const path = require('path');
 const _ = require('lodash');
-const fp = require('lodash/fp');
 
 
 /**
@@ -131,7 +130,6 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
   postData.isOp = false;
 
   const post = new Post(postData);
-  const boardUpdateParams = { $inc: { postcount: 1 } };
   await Parser.parsePost(post);
   board.postcount = board.postcount + 1;
   board.uniquePosts = await Post.getNumberOfUniqueUserPosts(this.uri);

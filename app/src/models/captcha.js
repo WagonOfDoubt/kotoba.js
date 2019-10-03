@@ -16,7 +16,7 @@ const captchaSchema = Schema({
   /**
    * User's session id
    * @type {String}
-   * @memberof module:models/captcha~Captcha
+   * @memberOf module:models/captcha~Captcha
    * @instance
    */
   session: { type: String, required: true },
@@ -24,14 +24,14 @@ const captchaSchema = Schema({
    * Captcha key in format "{reply|thread}.{boardUri}" i.e.: "reply.b",
    *    "thread.a". Indexed.
    * @type {String}
-   * @memberof module:models/captcha~Captcha
+   * @memberOf module:models/captcha~Captcha
    * @instance
    */
   key: { type: String, required: true },
   /**
    * Captcha answer. Indexed.
    * @type {String}
-   * @memberof module:models/captcha~Captcha
+   * @memberOf module:models/captcha~Captcha
    * @instance
    */
   answer: { type: String, required: true },
@@ -39,15 +39,16 @@ const captchaSchema = Schema({
    * Date when captcha token will be deleted from database. Expiration is
    *    handled by MongoDB itself.
    * @type {Date}
-   * @memberof module:models/captcha~Captcha
+   * @memberOf module:models/captcha~Captcha
    * @instance
    */
   expireAt: { type: Date, index: { expireAfterSeconds: 0 } },
   /**
    * Whether or not user already solved this challenge
    * @type {Boolean}
-   * @memberof module:models/captcha~Captcha
+   * @memberOf module:models/captcha~Captcha
    * @instance
+   * @default false
    */
   isSolved: { type: Boolean, default: false },
 });
