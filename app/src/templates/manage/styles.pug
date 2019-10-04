@@ -38,17 +38,76 @@ mixin swatch(color)
   })
 
 block header
-  if style
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isUpdate
     h1 Edit style #{style.name}
+  else if isCreate
+    h1 Create new style
   else
-    h1 Add style
+    h1 Site styles
+  nav
+    span.button.button_link
+      a(href='/manage/styles') All styles
+    span.button.button_link
+      a(href='/manage/styles/create') Create new style
+
 
 block main
   -
     var values = initialValues;
     var action = '/api/style/';
     var method = style ? 'PATCH' : 'POST';
-  div
+  if isRead
+    table.table
+      thead
+        tr.table__row.table__row_header
+          th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='name', data-sort-type='string', data-sort-order='descending') Name
+          th.table__header.table__header_sortable(data-sort-field='added', data-sort-type='date') Date Added
+          th.table__header.table__header_sortable(data-sort-field='edited', data-sort-type='date') Last change
+          th.table__header.table__header_sortable(data-sort-field='addedby', data-sort-type='string') Added by
+          th.table__header Color scheme
+          th.table__header Del
+      tbody
+        for s in styles
+          tr.table__row(data-name=s.name, data-added=s.createdDate, data-edited=s.updatedDate, data-postedby=s.addedBy && s.addedBy.login)
+            td
+              a(href=`/manage/styles/edit/${s.name}`, title='Edit style')= s.name
+            td
+              if s.createdDate
+                +datetime(s.createdDate)
+            td
+              if s.updatedDate
+                +datetime(s.updatedDate)
+            td
+              if s.addedBy
+                a(href=`/manage/staff/${s.addedBy.login}`)= s.addedBy.login
+            td
+              if s.colors
+                -
+                  var representativeColors = [
+                    'background-color',
+                    'border-color',
+                    'primary-color',
+                    'secondary-color',
+                    'text-color',
+                    'postblock-color',
+                    'postblock-background-color',
+                    'link-color',
+                    'link-color-hover',
+                  ];
+                for colorname in representativeColors
+                  - var color = s.colors.get(colorname)
+                  +swatch(color)
+            td
+              form(method='post', action='/api/style', data-method='delete')
+                input(type='hidden', name='name', value=s.name)
+                button(type='button', class='btn', data-style=s.name, data-action='delete') Delete
+  else
+    //- create or edit
     div.alert.alert_info
       | Styles only appear in style selector after page is rebuilt.
       | For board pages, it will be rebuilt as soon as someone post a new message.
@@ -57,13 +116,13 @@ block main
       if (!style)
         +textEdit('name', 'Style name', 'Must contain only lowercase letters and numbers without spaces. Can not be changed later.', true)(pattern='^[a-z0-9_]*$')
         +styleEdit(values)
-        input.js-send-form#btn-add-style(type='submit', value='Add style')
+        input.js-send-form#btn-add-style(type='submit', value='Create style')
       else
         - values = style.toJSON();
         input(type='hidden', name='name', value=style.name)
         +nothingEdit('name', 'Style name', 'Can not be changed')
         +styleEdit(values)
-        input#btn-edit-style(type='submit', value='Change style')
+        input#btn-edit-style(type='submit', value='Update style')
 
     div.example
       -
@@ -123,67 +182,17 @@ block main
         ];
       h2 Preview
       include ../includes/thread.pug
-      //- if omittedPosts > 0
-      //-   span.omittedposts
-      //-     if omittedAttachments
-      //-       | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
-      //-     else
-      //-       | #{ omittedPosts } posts omitted.
-      //-     | 
-      //-     span.clickreplytoview
-      //-       | Click Reply to view.
-      //- div.replies-container
-      //-   for post in replies
-      //-     if !post.isDeleted
-      //-       div.reply-container(id=`reply${ post.postId }`)
-      //-         include post.pug
-
-  if (styles.length)
-    h2 Edit styles
-    if style
-      span.button.button_link
-        a(href='/manage/styles') Add new style
-    table.table
-      thead
-        tr.table__row.table__row_header
-          th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='name', data-sort-type='string', data-sort-order='descending') Name
-          th.table__header.table__header_sortable(data-sort-field='added', data-sort-type='date') Date Added
-          th.table__header.table__header_sortable(data-sort-field='edited', data-sort-type='date') Last change
-          th.table__header.table__header_sortable(data-sort-field='addedby', data-sort-type='string') Added by
-          th.table__header Color scheme
-          th.table__header Del
-      tbody
-        for s in styles
-          tr.table__row(data-name=s.name, data-added=s.createdDate, data-edited=s.updatedDate, data-postedby=s.addedBy && s.addedBy.login)
-            td
-              a(href=`/manage/styles/${s.name}`, title='Edit style')= s.name
-            td
-              if s.createdDate
-                +datetime(s.createdDate)
-            td
-              if s.updatedDate
-                +datetime(s.updatedDate)
-            td
-              if s.addedBy
-                a(href=`/manage/staff/${s.addedBy.login}`)= s.addedBy.login
-            td
-              if s.colors
-                -
-                  var representativeColors = [
-                    'background-color',
-                    'border-color',
-                    'primary-color',
-                    'secondary-color',
-                    'text-color',
-                    'postblock-color',
-                    'postblock-background-color',
-                    'link-color',
-                    'link-color-hover',
-                  ];
-                for colorname in representativeColors
-                  - var color = s.colors.get(colorname)
-                  +swatch(color)
-            td
-              form(method='post', action='/api/style', data-method='delete')
-                input(type='hidden', name='name', value=s.name)
-                button(type='button', class='btn', data-style=s.name, data-action='delete') Delete
+    //- if omittedPosts > 0
+    //-   span.omittedposts
+    //-     if omittedAttachments
+    //-       | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
+    //-     else
+    //-       | #{ omittedPosts } posts omitted.
+    //-     | 
+    //-     span.clickreplytoview
+    //-       | Click Reply to view.
+    //- div.replies-container
+    //-   for post in replies
+    //-     if !post.isDeleted
+    //-       div.reply-container(id=`reply${ post.postId }`)
+    //-         include post.pug
