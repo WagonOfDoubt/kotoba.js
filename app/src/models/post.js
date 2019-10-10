@@ -52,12 +52,6 @@ const postSchema = Schema({
     required: true,
     index: true,
   },
-  // todo redundant. delete?
-  board: {
-    type: ObjectId,
-    required: true,
-    ref: 'Board'
-  },
   /**
    * REPLY ONLY. Ref to parent thread.
    * @type {ObjectId}
@@ -626,5 +620,20 @@ postSchema.virtual('children', {
   options: { sort: { timestamp: 1 } }
 });
 
+
+/**
+ * Post's board document
+ * @type {Board}
+ * @readOnly
+ * @alias module:models/post~Post#board
+ * @memberOf module:models/post~Post
+ * @instance
+ */
+postSchema.virtual('board', {
+  ref: 'Board',
+  localField: 'boardUri',
+  foreignField: 'uri',
+  justOne: true,
+});
 
 const Post = module.exports = mongoose.model('Post', postSchema);
