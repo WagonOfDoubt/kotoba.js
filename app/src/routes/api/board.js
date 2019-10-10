@@ -6,6 +6,7 @@ const _ = require('lodash');
 const boardController = require('../../controllers/board');
 const Board = require('../../models/board');
 const ModlogEntry = require('../../models/modlog');
+const captchaProviders = require('../../captcha');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const boardparams = require('../../json/boardparams');
@@ -282,6 +283,9 @@ const boardParamsValidator = {
   },
   'data.captcha.provider': {
     optional: true,
+    isIn: {
+      options: Array.from(Object.keys(captchaProviders)),
+    },
     in: 'body',
   },
 };

@@ -110,7 +110,7 @@ modlogEntrySchema.statics.diff = (model, target, oldValues, newValues, prioritie
   const changes = Object
     .entries(newValues)
     .filter(([key, value]) =>
-      oldValues[key] !== value && (prevChanges[key] === undefined || priorities[key] !== prevChanges[key]))
+      oldValues[key] !== value && value !== undefined && (prevChanges[key] === undefined || priorities[key] !== prevChanges[key]))
     .map(([key, value]) => ({
         target:   target,
         model:    model,
