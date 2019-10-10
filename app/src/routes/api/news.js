@@ -4,10 +4,9 @@ const { check, body, checkSchema } = require('express-validator');
 
 const News = require('../../models/news');
 const { adminOnly } = require('../../middlewares/permission');
-const { validateRequest } = require('../../middlewares/validation');
+const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const { generateMainPage } = require('../../controllers/generate');
 const { DocumentNotFoundError } = require('../../errors');
-const sanitizer = require('../../middlewares/sanitizer');
 
 
 /**
@@ -78,6 +77,7 @@ router.get('/api/news/:newsId?',
     }
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
       const newsId = req.body.newsId || req.params.newsId;
@@ -150,8 +150,7 @@ router.post(
     body('regenerate').toBoolean(),
     adminOnly,
     validateRequest,
-    sanitizer.filterBody(['data', 'regenerate']),
-    sanitizer.filterBody(['subject', 'message', 'postedby', 'postedemail'], 'data'),
+    filterMatched,
   ],
   async (req, res, next) => {
     try {
@@ -206,8 +205,7 @@ router.patch(
     body('regenerate').toBoolean(),
     adminOnly,
     validateRequest,
-    sanitizer.filterBody(['data', 'regenerate']),
-    sanitizer.filterBody(['subject', 'message', 'postedby', 'postedemail'], 'data'),
+    filterMatched,
   ],
   async (req, res, next) => {
     try {
@@ -261,7 +259,8 @@ router.delete('/api/news/:newsId?',
     check('newsId').isNumeric(),
     check('newsId').toInt(),
     body('regenerate').toBoolean(),
-    validateRequest
+    validateRequest,
+    filterMatched,
   ],
   async (req, res, next) => {
     try {

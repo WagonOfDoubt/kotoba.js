@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { checkSchema, matchedData } = require('express-validator');
+const { checkSchema } = require('express-validator');
 const _ = require('lodash');
 
 const boardController = require('../../controllers/board');
 const Board = require('../../models/board');
 const ModlogEntry = require('../../models/modlog');
 const { adminOnly } = require('../../middlewares/permission');
-const { validateRequest } = require('../../middlewares/validation');
+const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const boardparams = require('../../json/boardparams');
 const { DocumentNotFoundError, DocumentAlreadyExistsError, DocumentNotModifiedError } = require('../../errors');
 const locales = require('../../json/locales.json');
@@ -93,162 +93,196 @@ const boardParamsValidator = {
   'data.name': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.desc': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.header': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.navbar': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.imageUri': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.faviconUri': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.maxFileSize': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.maxFilesPerPost': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.maxThreadsOnPage': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.maxPages': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.autosage': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.showReplies': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.showRepliesSticky': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.maxMessageLength': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.defaultPosterName': {
     optional: true,
+    in: 'body',
   },
   'data.isLocked': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.isHidden': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.isForcedAnon': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.defaultStyle': {
     optional: true,
     trim: true,
+    in: 'body',
   },
   'data.locale': {
     optional: true,
     isIn: {
       options: [localeCodes],
-    }
+    },
+    in: 'body',
   },
   'data.newThreadsRequired.files': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.newThreadsRequired.message': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.newThreadsRequired.subject': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.allowRepliesSubject': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.features.reporting': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.features.archive': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.features.catalog': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.features.sage': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.features.permanentSage': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.captcha.enabled': {
     optional: true,
     isBoolean: true,
     toBoolean: true,
+    in: 'body',
   },
   'data.captcha.unsolvedExpireTime': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.captcha.replyExpireTime': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.captcha.threadExpireTime': {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
   },
   'data.captcha.provider': {
     optional: true,
+    in: 'body',
   },
 };
 
@@ -356,6 +390,7 @@ router.get(
     }
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
       let selectQuery = (req.query.select && req.query.select.split(',')) || [];
@@ -470,9 +505,10 @@ router.post(
     ...boardParamsValidator,
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
-      const { data } = matchedData(req);
+      const { data } = req.body;
       const boardUri = data.uri;
       const boardExists = await Board.findOne({ uri: boardUri });
       if (boardExists) {
@@ -567,14 +603,15 @@ router.patch(
     'regenerate': {
       isBoolean: true,
       toBoolean: true,
+      in: 'body',
     },
     ...boardParamsValidator,
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
-      const matched = matchedData(req);
-      const { data, regenerate } = matched;
+      const { data, regenerate } = req.body;
       const boardUri = data.uri;
       const board = await Board.findOne({ uri: boardUri });
       if (!board) {
@@ -635,10 +672,10 @@ router.delete('/api/board/',
     'uri': _boardUriValidator,
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
-      const matched = matchedData(req);
-      const uri = matched.uri;
+      const uri = req.body.uri;
       const board = await Board.findOne({ uri }, 'uri');
       if (!board) {
         const e = new DocumentNotFoundError('Board', 'uri', uri, req.params.uri ? 'params' : 'body');

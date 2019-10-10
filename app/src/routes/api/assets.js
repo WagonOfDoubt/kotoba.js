@@ -14,12 +14,11 @@ const { checkSchema } = require('express-validator');
 const Asset = require('../../models/asset');
 
 const { adminOnly } = require('../../middlewares/permission');
-const { validateRequest } = require('../../middlewares/validation');
+const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const { populateDocumentsByIds,
   removeDuplicates,
   compareRequestWithDocuments,
   applyAndValidateDocuments } = require('../../middlewares/restapi');
-const sanitizer = require('../../middlewares/sanitizer');
 
 const { BaseError, UnknownError, DocumentNotFoundError } = require('../../errors');
 const { uploadAssetFiles,
@@ -197,12 +196,6 @@ router.post(
     adminOnly,
     multer()
       .array('files[]'),
-    sanitizer
-      .filterBody(['assets', 'files[]']),
-    sanitizer
-      .toArray('assets'),
-    sanitizer
-      .filterArray(['isDeleted', 'name', 'thumbWidth', 'thumbHeight', 'category'], 'assets'),
     checkSchema({
       assets: {
         in: 'body',
@@ -242,6 +235,7 @@ router.post(
         },
       },
     }),
+    filterMatched,
     validateRequest,
   ],
   async (req, res, next) => {
@@ -319,9 +313,6 @@ router.patch(
   '/api/assets/',
   [
     adminOnly,
-    sanitizer.filterBody(['assets']),
-    sanitizer.toArray('assets'),
-    sanitizer.filterArray(['isDeleted', 'name', 'thumbWidth', 'thumbHeight', 'category', '_id'], 'assets'),
     checkSchema({
       assets: {
         in: 'body',
@@ -378,6 +369,7 @@ router.patch(
       },
     }),
     validateRequest,
+    filterMatched,
     populateDocumentsByIds(Asset, 'assets'),
     removeDuplicates('assets',
       ['isDeleted', 'name', 'thumbWidth', 'thumbHeight', 'category']),
@@ -478,6 +470,7 @@ router.delete(
       },
     }),
     validateRequest,
+    filterMatched,
     populateDocumentsByIds(Asset, 'assets', ''),
   ],
   async (req, res, next) => {

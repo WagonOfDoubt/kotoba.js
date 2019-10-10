@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { checkSchema, matchedData } = require('express-validator');
+const { checkSchema } = require('express-validator');
 
 const Role = require('../../models/role');
 const { adminOnly } = require('../../middlewares/permission');
-const { validateRequest } = require('../../middlewares/validation');
+const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const { DocumentAlreadyExistsError, DocumentNotFoundError, ConflictError } = require('../../errors');
 
 
@@ -35,6 +35,7 @@ const roleNameValidator = {
  */
 const roleHierarchyValidator = {
   hierarchy: {
+    in: 'body',
     isInt: {
       options: { min: 0, max: 9999 },
       errorMessage: 'Role hierarchy must be in rage [0-9999]',
@@ -45,6 +46,7 @@ const roleHierarchyValidator = {
 
 
 const _accessValidator = {
+  in: 'body',
   isIn: {
     options: [['no-access', 'read-only', 'write-any', 'write-value']],
     errorMessage: 'Access type must be one of: "no-access", "read-only", "write-any", "write-value"',
@@ -54,6 +56,7 @@ const _accessValidator = {
 
 
 const _priorityValidator = {
+  in: 'body',
   isInt: {
     options: { min: 0, max: 9999 },
     errorMessage: 'Priority must be in rage [0-9999]',
@@ -64,6 +67,7 @@ const _priorityValidator = {
 
 
 const _valuesValidator = {
+  in: 'body',
   eq: {
     optional: true,
   },
@@ -232,6 +236,7 @@ router.get(
   '/api/role/',
   adminOnly,
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
       return res.status(501);
@@ -273,16 +278,16 @@ router.post(
     ...rolePermissionsValidator,
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
-      const matched = matchedData(req);
-      const roleName = matched.roleName;
+      const roleName = req.body.roleName;
       const existingRole = await Role.findOne({ roleName });
       if (existingRole) {
         const e = new DocumentAlreadyExistsError('Role', 'roleName', roleName, 'body');
         return e.respond(res);
       }
-      const savedRole = await Role.create(matched);
+      const savedRole = await Role.create(req.body);
       return res
         .status(201)
         .json(savedRole);
@@ -323,16 +328,16 @@ router.patch(
     ...rolePermissionsValidator,
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
-      const matched = matchedData(req);
-      const roleName = matched.roleName;
+      const roleName = req.body.roleName;
       const existingRole = await Role.findOne({ roleName });
       if (!existingRole) {
         const e = new DocumentNotFoundError('Role', 'roleName', roleName, 'body');
         return e.respond(res);
       }
-      existingRole.set(matched);
+      existingRole.set(req.body);
       const mongoResult = await existingRole.save();
       return res
         .status(200)
@@ -371,10 +376,10 @@ router.delete('/api/role/',
     ...roleNameValidator,
   }),
   validateRequest,
+  filterMatched,
   async (req, res, next) => {
     try {
-      const matched = matchedData(req);
-      const roleName = matched.roleName;
+      const roleName = req.body.roleName;
       const allRoles = await Role.findAllAndSort();
       const currentRole = allRoles.find((r) => r.roleName === roleName);
       if (!currentRole) {
