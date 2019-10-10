@@ -6,6 +6,7 @@
 
 const ObjectId = require('mongoose').Types.ObjectId;
 const { generateThread, generateThreads, generateBoardPagesAndCatalog } = require('./generate');
+const { DocumentNotFoundError, PostingError } = require('../errors');
 const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
 const Post = require('../models/post');
@@ -15,18 +16,6 @@ const fs = require('fs-extra');
 const config = require('../json/config');
 const path = require('path');
 const _ = require('lodash');
-
-
-/**
- *
- * @todo create custom error types for each case and move somewhere not here
- */
-const InputError = (msg, reason) => {
-  const error = Error(msg);
-  error.type = 'input_error';
-  error.reason = reason;
-  return error;
-};
 
 
 /**
@@ -42,22 +31,22 @@ const InputError = (msg, reason) => {
 module.exports.createThread = async (boardUri, postData, files = []) => {
   const board = await Board.findBoard(boardUri);
   if (!board) {
-    throw InputError('no such board: ' + boardUri, 'invalid_value');
+    throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
   }
   if (files.length > board.maxFilesPerPost) {
-    throw InputError('Too many files', 'max_array_length');
+    throw new PostingError('Too many files', 'files', files.length, 'body');
   }
   if (!postData.body && !files.length) {
-    throw InputError('No comment entered', 'missing_value');
+    throw new PostingError('No comment entered', 'message', '', 'body');
   }
   if (board.newThreadsRequired.message && !postData.body) {
-    throw InputError('New threads must contain message', 'missing_value');
+    throw new PostingError('New threads must contain message', 'message', '', 'body');
   }
   if (board.newThreadsRequired.subject && !postData.subject) {
-    throw InputError('New threads must contain subject', 'missing_value');
+    throw new PostingError('New threads must contain subject', 'subject', '', 'body');
   }
   if (board.newThreadsRequired.files && !files.length) {
-    throw InputError('New threads must include image', 'missing_value');
+    throw new PostingError('New threads must include image', 'files', 0, 'body');
   }
 
   if (files.length) {
@@ -104,16 +93,16 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
     ]);
 
   if (!board) {
-    throw InputError('no such board: ' + boardUri, 'invalid_value');
+    throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
   }
   if (!thread) {
-    throw InputError(`No thread to reply to: ${ boardUri }/${ threadId }`, 'invalid_value');
+    throw new DocumentNotFoundError(`Thread ${ boardUri }/${ threadId } not found`, 'replythread', threadId, 'body');
   }
   if (files.length > board.maxFilesPerPost) {
-    throw InputError('Too many files', 'max_array_length');
+    throw new PostingError('Too many files', 'files', files.length, 'body');
   }
   if (!postData.body && !files.length) {
-    throw InputError('No comment entered', 'missing_value');
+    throw new PostingError('No comment entered', 'message', '', 'body');
   }
 
   if (files.length) {

@@ -7,8 +7,9 @@ const { BaseError } = require('./base-error');
 const { AuthRequiredError, PermissionDeniedError } = require('./permission-error');
 const { DocumentAlreadyExistsError, DocumentNotFoundError, DocumentNotModifiedError } = require('./document-error');
 const { RequestValidationError } = require('./validation-error');
-const { FileAlreadyExistsError, FileFormatNotSupportedError } = require('./file-error');
+const { FileAlreadyExistsError, FileFormatNotSupportedError, ThumbnailGenerationError } = require('./file-error');
 const { CaptchaEntryNotFoundError, IncorrectCaptchaError } = require('./captcha-error');
+const { PostingError } = require('./posting-error');
 
 /**
  * @see module:errors/base-error.BaseError
@@ -47,6 +48,10 @@ module.exports.FileAlreadyExistsError = FileAlreadyExistsError;
  */
 module.exports.FileFormatNotSupportedError = FileFormatNotSupportedError;
 /**
+ * @see module:errors/file-error.ThumbnailGenerationError
+ */
+module.exports.ThumbnailGenerationError = ThumbnailGenerationError;
+/**
  * @see module:errors/captcha-error.CaptchaEntryNotFoundError
  */
 module.exports.CaptchaEntryNotFoundError = CaptchaEntryNotFoundError;
@@ -54,3 +59,7 @@ module.exports.CaptchaEntryNotFoundError = CaptchaEntryNotFoundError;
  * @see module:errors/captcha-error.IncorrectCaptchaError
  */
 module.exports.IncorrectCaptchaError = IncorrectCaptchaError;
+/**
+ * @see module:errors/posting-error.PostingError
+ */
+module.exports.PostingError = PostingError;

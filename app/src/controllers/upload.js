@@ -12,6 +12,7 @@ const sharp = require('sharp');
 const crypto = require('crypto');
 const ffmpeg = require('fluent-ffmpeg');
 const _ = require('lodash');
+const { FileFormatNotSupportedError, ThumbnailGenerationError } = require('../errors');
 
 
 /**
@@ -148,10 +149,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
   const ext = getExtensionByMime(file.mimetype);
   const type = getAttachmentType(ext);
   if (type === 'unknown') {
-    const error = new Error('Unsupported file format: ' + ext);
-    error.type = 'input_error';
-    error.reason = 'invalid_upload_format';
-    throw error;
+    throw new FileFormatNotSupportedError('', ext);
   }
   const thumbExt = getOptimalThumbnailExtenstion(ext);
 
@@ -188,10 +186,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
         fs.remove(path.dirname(filePath)),
         fs.remove(thumbPath),
       ]);
-      const error = new Error('Cannot create thumbnail');
-      error.type = 'input_error';
-      error.reason = 'thumbnail_generation_fail';
-      throw error;
+      throw new ThumbnailGenerationError();
     }
     fileInfo = await saveImage(filePath, file);
   } else if (type === 'video') {
@@ -206,11 +201,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
         fs.remove(path.dirname(filePath)),
         fs.remove(thumbPath),
       ]);
-      const error = new Error('Cannot create thumbnail');
-      error.type = 'input_error';
-      error.reason = 'thumbnail_generation_fail';
-      console.log(err);
-      throw error;
+      throw new ThumbnailGenerationError();
     }
   } else {
     fileInfo = await saveFile(filePath, file);
@@ -240,9 +231,7 @@ const uploadFile = async (boardUri, file, keepFilename = true) => {
 const saveImage = async (imagePath, file) => {
   const ext = getExtensionByMime(file.mimetype);
   if (!isImage(ext)) {
-    const err = new Error(`Invalid image format: ${ext}`);
-    err.type = 'InvalidImageFormatError';
-    throw err;
+    throw new FileFormatNotSupportedError('', ext);
   }
   try {
     await fs.ensureDir(path.dirname(imagePath));
@@ -298,9 +287,7 @@ const saveFile = async (filePath, file) => {
 const createThumbnail = async (thumbPath, file, width, height) => {
   const ext = getExtensionByMime(file.mimetype);
   if (!isImage(ext)) {
-    const err = new Error(`Invalid image format: ${ext}`);
-    err.type = 'InvalidImageFormatError';
-    throw err;
+    throw new FileFormatNotSupportedError('', ext);
   }
   try {
     await fs.ensureDir(path.dirname(thumbPath));

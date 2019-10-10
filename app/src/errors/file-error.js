@@ -66,5 +66,33 @@ class FileFormatNotSupportedError extends UnsupportedMediaTypeError {
 }
 
 
+/**
+ * @apiDefine ThumbnailGenerationError
+ * @apiError ThumbnailGenerationError Attempt to upload file that already exists
+ * @apiErrorExample ThumbnailGenerationError
+ *     HTTP/1.1 409 Conflict
+ *     {
+ *       "status": 409,
+ *       "error": {
+ *         "code": "ThumbnailGenerationError",
+ *         "message": "Unable to generate thumbnail for media file. File may be corrupt or have unsupported format or codec",
+ *       }
+ *     }
+ */
+
+/**
+ * Error occurred during thumbnail creation
+ * @extends module:errors/base-error.UnsupportedMediaTypeError
+ * @alias module:errors/file-error.ThumbnailGenerationError
+ */
+class ThumbnailGenerationError extends UnsupportedMediaTypeError {
+  constructor(param, value, location) {
+    super(`Unable to generate thumbnail for media file. File may be corrupt or have unsupported format or codec.`,
+      'FileFormatNotSupported', param, value, location);
+  }
+}
+
+
 module.exports.FileAlreadyExistsError = FileAlreadyExistsError;
 module.exports.FileFormatNotSupportedError = FileFormatNotSupportedError;
+module.exports.ThumbnailGenerationError = ThumbnailGenerationError;
