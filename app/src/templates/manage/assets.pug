@@ -4,7 +4,19 @@ include ../mixins/inputs.pug
 include ../mixins/modals.pug
 
 mixin assetEdit(asset)
-  - values = { assets: { [n]: asset } };
+  -
+    values = { assets: { [n]: asset } };
+    const categoryOptions = [
+      { value: "misc", label: 'Miscellaneous' },
+      { value: "banner", label: 'Banners' },
+      { value: "bg", label: 'Background' },
+      { value: "favicon", label: 'Favicons' },
+      { value: "logo", label: 'Logo' },
+      { value: "news", label: 'News assets' },
+      { value: "placeholder", label: 'Attachment placeholders' },
+      { value: "style", label: 'Style assets' },
+    ];
+
   li.asset-upload__item
     input(type='hidden', name=`assets[${n}][_id]`, value=asset._id)
     .asset-upload__preview
@@ -34,53 +46,70 @@ mixin assetList(assets)
       - n++;
 
 block header
-  h1 Assets
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isCreate
+    h1 Upload assets
+  if isUpdate
+    h1 Edit assets
+  nav
+    ul.list.list_buttons
+      if !isCreate
+        li.list__item
+          a(href='/manage/assets/create') Upload assets
+      if !isUpdate
+        li.list__item
+          a(href='/manage/assets') All assets
 
 block main
-  - const categories = Object.keys(groupedAssets);
-  - var values;
-  - var n = 0;
-  if categories.length === 0
-    .badge.badge_info Site has no assets
-  else
-    h2 Edit assets
-    form#form-update-assets(method='POST', data-method='PATCH', action='/api/assets', enctype='multipart/form-data')
-      section
-        h3 Banners
-        +assetList(groupedAssets['banner'])
-      section
-        h3 Attachment placeholders
-        +assetList(groupedAssets['placeholder'])
-      section
-        h3 News assets
-        +assetList(groupedAssets['news'])
-      section
-        h3 Background
-        +assetList(groupedAssets['bg'])
-      section
-        h3 Style assets
-        +assetList(groupedAssets['style'])
-      section
-        h3 Favicons
-        +assetList(groupedAssets['favicon'])
-      section
-        h3 Logo
-        +assetList(groupedAssets['logo'])
-      section
-        h3 Miscellaneous
-        +assetList(groupedAssets['misc'])
+  if isUpdate
+    - const categories = Object.keys(groupedAssets);
+    - var values;
+    - var n = 0;
+    if categories.length === 0
+      .badge.badge_info Site has no assets
+    else
+      form#form-update-assets(method='POST', data-method='PATCH', action='/api/assets', enctype='multipart/form-data')
+        section
+          h3 Banners
+          +assetList(groupedAssets['banner'])
+        section
+          h3 Attachment placeholders
+          +assetList(groupedAssets['placeholder'])
+        section
+          h3 News assets
+          +assetList(groupedAssets['news'])
+        section
+          h3 Background
+          +assetList(groupedAssets['bg'])
+        section
+          h3 Style assets
+          +assetList(groupedAssets['style'])
+        section
+          h3 Favicons
+          +assetList(groupedAssets['favicon'])
+        section
+          h3 Logo
+          +assetList(groupedAssets['logo'])
+        section
+          h3 Miscellaneous
+          +assetList(groupedAssets['misc'])
+        hr
+        input(type='submit', value='Save changes')
+  if isCreate
+    form#form-upload-assets(method='POST', data-method='POST', action='/api/assets', enctype='multipart/form-data')
+      input#form-upload-assets__file.from-input(
+        name=`files[]`
+        size='35'
+        accesskey='f'
+        type='file'
+        multiple,
+        required,
+      )
+      ul#upload-assets-items
       hr
-      input(type='submit', value='Save changes')
-  h2 Upload
-  form#form-upload-assets(method='POST', data-method='POST', action='/api/assets', enctype='multipart/form-data')
-    input#form-upload-assets__file.from-input(
-      name=`files[]`
-      size='35'
-      accesskey='f'
-      type='file'
-      multiple,
-      required,
-    )
-    ul#upload-assets-items
-    hr
-    input(type='submit', value='Upload files', accept='image/*')
+      input(type='submit', value='Upload files', accept='image/*')
+

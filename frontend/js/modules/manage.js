@@ -288,7 +288,7 @@ const managePage_assets = () => {
     handleFiles(fileList);
   });
 
-  if ($fileInput[0].files.length) {
+  if ($fileInput.length && $fileInput[0].files.length) {
     handleFiles($fileInput[0].files);
   }
 
