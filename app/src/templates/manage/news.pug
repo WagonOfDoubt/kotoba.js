@@ -5,34 +5,44 @@ include ../mixins/timestamp.pug
 include ../mixins/modals.pug
 
 block header
-  if news
-    h1 Edit news post
-  else
-    h1 Add news post
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isCreate
+    h1 Add news
+  if isUpdate
+    h1 Edit news
+  if isRead
+    h1 News
+  nav
+    ul.list.list_buttons
+      if !isRead
+        li.list__item
+          a(href='/manage/news') All news
+      if !isCreate
+        li.list__item
+          a(href='/manage/news/create') Create news
 
 block main
-  - var action = news ? '/api/news/' + news.number : '/api/news/';
-  - var method = news ? 'PATCH' : 'POST';
-  form#form-edit-news(action=action, data-method=method)
-    - var values = news ? news : { name: user.login };
-    +textEdit('subject', 'Subject', '', true)
-    +textArea('message', 'Message', '', true)
-      | This message will be displayed as it is written, so make sure you add the proper HTML.
-      | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
-    +textEdit('name', 'Posted by', 'Can be left blank.')
-    +textEdit('email', 'E-mail', 'Can be left blank.')
-    if news
-      input#btn-edit-news(type='submit', value='Edit')
-    else
-      input#btn-add-news(type='submit', value='Add')
+  if !isRead
+    - var action = news ? '/api/news/' + news.number : '/api/news/';
+    - var method = news ? 'PATCH' : 'POST';
+    form#form-edit-news(action=action, data-method=method)
+      - var values = news ? news : { name: user.login };
+      +textEdit('subject', 'Subject', '', true)
+      +textArea('message', 'Message', '', true)
+        | This message will be displayed as it is written, so make sure you add the proper HTML.
+        | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
+      +textEdit('name', 'Posted by', 'Can be left blank.')
+      +textEdit('email', 'E-mail', 'Can be left blank.')
+      if news
+        input#btn-edit-news(type='submit', value='Edit')
+      else
+        input#btn-add-news(type='submit', value='Add')
 
-  if news
-    h2 Add news post
-    span.button.button_link
-      a(href=`/manage/news/`) Add news post
-
-  if newsList.length
-    h2 Edit/Delete News
+  if isRead && newsList.length
     table.table
       thead
         tr.table__row.table__row_header
@@ -49,7 +59,7 @@ block main
               span= n.number
               | 
               span.button.button_link
-                a(href=`/manage/news/${n.number}`) Edit
+                a(href=`/manage/news/edit/${n.number}`) Edit
             td
               if n.createdAt
                 +datetime(n.createdAt)
