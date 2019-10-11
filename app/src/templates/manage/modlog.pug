@@ -27,10 +27,10 @@ mixin change-priority(change)
   if change.roleName
     if change.oldPriority !== change.newPriority
       |
-      small (as #[a(href=`/manage/roles/${change.roleName}`)= change.roleName], priority increased from #[strong= change.oldPriority] to #[strong= change.newPriority])
+      small (as #[a(href=`/manage/roles/edit/${change.roleName}`)= change.roleName], priority increased from #[strong= change.oldPriority] to #[strong= change.newPriority])
     else
       | 
-      small (as #[a(href=`/manage/roles/${change.roleName}`)= change.roleName], priority: #[strong= change.priority])
+      small (as #[a(href=`/manage/roles/edit/${change.roleName}`)= change.roleName], priority: #[strong= change.priority])
 
 mixin post-change(change, entryId, timestamp)
   if change
@@ -62,7 +62,7 @@ mixin post-change(change, entryId, timestamp)
           | in #[+reflink(change.target)]
       if change.roleName
         | 
-        small (as #[a(href=`/manage/roles/${change.roleName}`)= change.roleName], priority: #[strong= change.priority])
+        small (as #[a(href=`/manage/roles/edit/${change.roleName}`)= change.roleName], priority: #[strong= change.priority])
 
 mixin boardref(board)
   if board

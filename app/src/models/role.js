@@ -71,6 +71,7 @@ const roleSchema = Schema({
    * @type {String}
    * @memberOf module:models/role~Role#
    * @instance
+   * @readOnly
    */
   roleName: {
     type: String,
@@ -81,6 +82,7 @@ const roleSchema = Schema({
       validator: (v) => /^[a-z0-9]+$/,
       message: `Role name must contain only latin letters and numbers [a-zA-Z0-9]`,
     },
+    immutable: true,
   },
   /**
    * Position of role in hierarchy. Serves as default priority for all

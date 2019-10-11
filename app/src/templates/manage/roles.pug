@@ -4,59 +4,78 @@ include ../mixins/inputs.pug
 include ../mixins/modals.pug
 include ../mixins/text.pug
 
+
+block header
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isUpdate
+    h1 Edit role #{ role.roleName }
+  if isRead
+    h1 Roles
+  if isCreate
+    h1 Create role
+  nav
+    ul.list.list_buttons
+      if !isRead
+        li.list__item
+          a(href='/manage/roles') All roles
+      if !isCreate
+        li.list__item
+          a(href='/manage/roles/create') Create role
+
+
 block main
-  - var action = '/api/role/';
-  - var method = role ? 'PATCH' : 'POST';
-  - var isNewRole = !role
-  form#form-edit-role.js-api-form.js-reload-on-success(action=action, data-method=method)
-    -var values = role ? role : {}
-    -var accessOpts = [ { value: 'no-access', label: 'No access' }, { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
-    -var publicAccessOpts = [ { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
-    if (isNewRole)
-      h2 Create role
-    else
-      h2 Edit role #{ role.roleName }
-    +textEdit('roleName', 'Role name', 'Must contain only latin letters and numbers, e.g.: janitor, moderator, supermoderator, boardowner, etc.', true)
-    +numberEdit('hierarchy', 'Hierarchy', 'Defines maximum priority for all actions. Avoid creating roles with same value. Assign hierarchy in increments of 100 to leave space for new roles and for adjustments of individual permissions.', true)
-    h3 Threads
-    +comboboxEdit('postPermissions.isSticky.access', 'isSticky', publicAccessOpts, 'Allow staff member to set threads as sticky.', true)
-    +comboboxEdit('postPermissions.isClosed.access', 'isClosed', publicAccessOpts, 'Allow staff member to close discussion.', true)
-    h3 Posts
-    +comboboxEdit('postPermissions.isSage.access', 'isSage', publicAccessOpts, 'Allow staff member to add sage to posts to sink threads.', true)
-    +comboboxEdit('postPermissions.isApproved.access', 'isApproved', accessOpts, 'Approved flag does nothing at this point, will find a purpose or get rid of this in the future.', true)
-    +comboboxEdit('postPermissions.isDeleted.access', 'isDeleted', accessOpts, 'Read-only access gives ability to view deleted posts, write access allows to delete or restore posts.', true)
-    h3 Attachments
-    +comboboxEdit('attachmentPermissions.isDeleted.access', 'isDeleted', accessOpts, 'Read-only access gives ability to view deleted attachments, write access allows to delete or restore attachment.', true)
-    +comboboxEdit('attachmentPermissions.isNSFW.access', 'isNSFW', publicAccessOpts, 'Allow to (un)mark attachments as NSFW.', true)
-    +comboboxEdit('attachmentPermissions.isSpoiler.access', 'isSpoiler', publicAccessOpts, 'Allow to (un)mark attachments as Spoiler.', true)
-    if (isNewRole)
-      input#btn-add-role(type='submit', value='Add role')
-    else
-      input#btn-update-role(type='submit', value='Save changes')
+  if !isRead
+    -
+      var action = '/api/role/';
+      var method = isUpdate ? 'PATCH' : 'POST';
+      var values = role ? role : {}
+      var accessOpts = [ { value: 'no-access', label: 'No access' }, { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
+      var publicAccessOpts = [ { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
+    form#form-edit-role.js-api-form.js-reload-on-success(action=action, data-method=method)
+      if role
+        +nothingEdit('roleName', 'Role name')
+        input(type='hidden', name='roleName', value=values.roleName)
+      else
+        +textEdit('roleName', 'Role name', 'Must contain only Latin letters and numbers, e.g.: janitor, moderator, supermoderator, boardowner, etc.', true)
+      +numberEdit('hierarchy', 'Hierarchy', 'Defines maximum priority for all actions. Avoid creating roles with same value. Assign hierarchy in increments of 100 to leave space for new roles and for adjustments of individual permissions.', true)
+      h3 Threads
+      +comboboxEdit('postPermissions.isSticky.access', 'isSticky', publicAccessOpts, 'Allow staff member to set threads as sticky.', true)
+      +comboboxEdit('postPermissions.isClosed.access', 'isClosed', publicAccessOpts, 'Allow staff member to close discussion.', true)
+      h3 Posts
+      +comboboxEdit('postPermissions.isSage.access', 'isSage', publicAccessOpts, 'Allow staff member to add sage to posts to sink threads.', true)
+      +comboboxEdit('postPermissions.isApproved.access', 'isApproved', accessOpts, 'Approved flag does nothing at this point, will find a purpose or get rid of this in the future.', true)
+      +comboboxEdit('postPermissions.isDeleted.access', 'isDeleted', accessOpts, 'Read-only access gives ability to view deleted posts, write access allows to delete or restore posts.', true)
+      h3 Attachments
+      +comboboxEdit('attachmentPermissions.isDeleted.access', 'isDeleted', accessOpts, 'Read-only access gives ability to view deleted attachments, write access allows to delete or restore attachment.', true)
+      +comboboxEdit('attachmentPermissions.isNSFW.access', 'isNSFW', publicAccessOpts, 'Allow to (un)mark attachments as NSFW.', true)
+      +comboboxEdit('attachmentPermissions.isSpoiler.access', 'isSpoiler', publicAccessOpts, 'Allow to (un)mark attachments as Spoiler.', true)
+      if (isCreate)
+        input#btn-add-role(type='submit', value='Create role')
+      else
+        input#btn-update-role(type='submit', value='Save changes')
 
-  h2 Roles
-
-  if (!isNewRole)
-    span.button.button_link
-      a(href='/manage/roles') Add new role
-  div.info Note: only roles that are not assigned to any user can be deleted.
-
-  table.table
-    thead
-      tr.table__row.table__row_header
-        th.table__header Delete
-        th.table__header.table__header_sortable(data-sort-field='role', data-sort-type='string') Role
-        th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='hierarchy', data-sort-type='number', data-sort-order='descending') Hierarchy
-        th.table__header.table__header_sortable(data-sort-field='used', data-sort-type='number') Used
-        th.table__header.table__header_vertical thread.isSticky
-        th.table__header.table__header_vertical thread.isClosed
-        th.table__header.table__header_vertical post.isSage
-        th.table__header.table__header_vertical post.isApproved
-        th.table__header.table__header_vertical post.isDeleted
-        th.table__header.table__header_vertical attachment.isDeleted
-        th.table__header.table__header_vertical attachment.isNSFW
-        th.table__header.table__header_vertical attachment.isSpoiler
-    tbody
+  if isRead
+    div.info Note: only roles that are not assigned to any user can be deleted.
+    table.table
+      thead
+        tr.table__row.table__row_header
+          th.table__header Delete
+          th.table__header.table__header_sortable(data-sort-field='role', data-sort-type='string') Role
+          th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='hierarchy', data-sort-type='number', data-sort-order='descending') Hierarchy
+          th.table__header.table__header_sortable(data-sort-field='used', data-sort-type='number') Used
+          th.table__header.table__header_vertical thread.isSticky
+          th.table__header.table__header_vertical thread.isClosed
+          th.table__header.table__header_vertical post.isSage
+          th.table__header.table__header_vertical post.isApproved
+          th.table__header.table__header_vertical post.isDeleted
+          th.table__header.table__header_vertical attachment.isDeleted
+          th.table__header.table__header_vertical attachment.isNSFW
+          th.table__header.table__header_vertical attachment.isSpoiler
+      tbody
       for role in roles
         tr.table__row(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes)
           td
@@ -67,7 +86,7 @@ block main
             else
               | -
           td
-            a(href=`/manage/roles/${ role.roleName }/` title='Edit this role')= role.roleName
+            a(href=`/manage/roles/edit/${ role.roleName }/` title='Edit this role')= role.roleName
           td= role.hierarchy
           td
             if (role.usedTimes)
@@ -90,5 +109,3 @@ block main
             +shortAccess(role, 'attachmentPermissions', 'isNSFW')
           td
             +shortAccess(role, 'attachmentPermissions', 'isSpoiler')
-          
-  // pre= JSON.stringify(roles, null, 2)

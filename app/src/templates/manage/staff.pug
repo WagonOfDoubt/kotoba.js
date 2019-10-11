@@ -11,7 +11,7 @@ mixin userRole(b, r)
   span(class=`user__role`)
     a(href=`/${b}/`, title='Go to board', class='user__role__board', class={'highlight': b === query.board}) /#{b}/
     | :
-    a(href=`/manage/roles/${r.roleName}`, title='Edit role', class='user__role__name', class={'highlight': r.roleName === query.role}) #{r.roleName}
+    a(href=`/manage/roles/edit/${r.roleName}`, title='Edit role', class='user__role__name', class={'highlight': r.roleName === query.role}) #{r.roleName}
 
 mixin userRow(u)
   - var userClass = `user_${u.login}`;
@@ -128,7 +128,7 @@ block main
                 td
                   a(href=`/${board}/`) /#{board}/
                 td
-                  a(href=`/manage/roles/${role.roleName}/`)= role.roleName
+                  a(href=`/manage/roles/edit/${role.roleName}/`)= role.roleName
                 td
                   form.form_inline.js-api-form.js-reload-on-success(action='/api/user/role', 'data-method'='PATCH')
                     input(type='hidden', name='user', value=staffMember.login)
