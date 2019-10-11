@@ -50,10 +50,13 @@ block header
   else
     h1 Site styles
   nav
-    span.button.button_link
-      a(href='/manage/styles') All styles
-    span.button.button_link
-      a(href='/manage/styles/create') Create new style
+    ul.list.list_buttons
+      if !isRead
+        li.list__item
+          a(href='/manage/styles') All styles
+      if !isCreate
+        li.list__item
+          a(href='/manage/styles/create') Create new style
 
 
 block main
@@ -84,7 +87,7 @@ block main
                 +datetime(s.updatedAt)
             td
               if s.createdBy
-                a(href=`/manage/staff/${s.createdBy.login}`)= s.createdBy.login
+                a(href=`/manage/staff/edit/${s.createdBy.login}`)= s.createdBy.login
             td
               if s.colors
                 -

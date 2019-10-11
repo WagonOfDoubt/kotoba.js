@@ -121,7 +121,7 @@ block main
               +datetime(item.createdAt)
             if item.user
               | 
-              a.postername(href=`/manage/staff/${ item.user.login }`)= item.user.login
+              a.postername(href=`/manage/staff/edit/${ item.user.login }`)= item.user.login
               //- if item.user.name
               //-   small.unimportant  (aka #[span.nickname #{item.user.name}])
             else

@@ -20,22 +20,18 @@ const populateRoles = (staffMember, rolesMap) => {
   return staffMember;
 };
 
-router.get('/staff/:userLogin?',
+
+router.get('/staff/',
   authRequired,
   async (req, res, next) => {
     try {
-      let staffMember;
       const staff = await User.find();
       const roles = await Role.findAllAndSort();
-      const boards = await Board.findBoards();
       const rolesMap = roles.reduce((acc, role) => {
         const { _id, ...rest } = role;
         return { ...acc, [_id]: rest };
       }, {});
       const staffWithRoles = staff.map((u) => populateRoles(u, rolesMap));
-      if (req.params.userLogin) {
-        staffMember = await staffWithRoles.find((u) => u.login === req.params.userLogin);
-      }
 
       const query = _.pick(req.query, ['role', 'login', 'authority', 'board']);
 
@@ -53,15 +49,43 @@ router.get('/staff/:userLogin?',
         title: 'Staff',
         staff: staffWithRoles,
         staffOmitted: staffOmitted,
-        roles: roles,
         query: query,
-        boards: boards,
-        staffMember: staffMember,
+        crud: 'read',
       });
     } catch (err) {
       next(err);
     }
   }
 );
+
+
+router.get('/staff/edit/:userLogin',
+  authRequired,
+  async (req, res, next) => {
+    try {
+      const staff = await User.find();
+      const roles = await Role.findAllAndSort();
+      const boards = await Board.findBoards();
+      const rolesMap = roles.reduce((acc, role) => {
+        const { _id, ...rest } = role;
+        return { ...acc, [_id]: rest };
+      }, {});
+      const staffWithRoles = staff.map((u) => populateRoles(u, rolesMap));
+      const staffMember = await staffWithRoles.find((u) => u.login === req.params.userLogin);
+
+      res.render('manage/staff', {
+        activity: 'manage-page-staff',
+        title: 'Staff',
+        roles: roles,
+        boards: boards,
+        staffMember: staffMember,
+        crud: 'update',
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 
 module.exports = router;

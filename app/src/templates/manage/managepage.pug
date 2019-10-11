@@ -11,7 +11,7 @@ block aside
 block main
   h2 Welcome!
   p Welcome, #[a(href='/manage/profile') #{user.login}]!
-  p Your authority: #[a(href=`/manage/staff/${user.login}`) #{user.authority}]
+  p Your authority: #[a(href=`/manage/staff/edit/${user.login}`) #{user.authority}]
   p Currently there are #[strong= postcount] posts on #[strong= boardcount] #[a(href='/manage/boardopts') boards]
   p #[a(href='/manage/spaceused') Disk space used] is #[strong= filters.readableSize(spaceused)]
 

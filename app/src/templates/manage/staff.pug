@@ -16,7 +16,7 @@ mixin userRole(b, r)
 mixin userRow(u)
   - var userClass = `user_${u.login}`;
   td
-    a.user__login(href=`/manage/staff/${ u.login }` title='Edit user', class=userClass, class={'highlight': u.login === query.login})= u.login
+    a.user__login(href=`/manage/staff/edit/${ u.login }` title='Edit user', class=userClass, class={'highlight': u.login === query.login})= u.login
     if u.name
       small.unimportant  (aka #[span.user__name #{u.name}])
   td
@@ -54,15 +54,28 @@ mixin userRow(u)
 
 
 block header
-  h1 Staff
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isUpdate
+    h1 Edit staff member #{staffMember.login}
+  else
+    h1 Staff
+  if !isRead
+    nav
+      ul.list.list_buttons
+        if !isRead
+          li.list__item
+            a(href='/manage/staff') All staff members
+
 
 block main
-  //- pre= JSON.stringify(staff, null, 2)
-  //- pre= JSON.stringify(staffMember, null, 2)
-  -var allRoles= roles.map(role => ({ value: role.roleName, label: role.roleName }))
-  -var allBoards= boards.map(board => ({ value: board.uri, label: `/${ board.uri }/` }))
-
-  if staffMember
+  if isUpdate
+    -
+      const allRoles = roles.map(role => ({ value: role.roleName, label: role.roleName }));
+      const allBoards = boards.map(board => ({ value: board.uri, label: `/${ board.uri }/` }));
     h2 #{staffMember.login} profile
     div
       p Login: #[strong= staffMember.login]
@@ -70,8 +83,9 @@ block main
         p Name: #[strong.nickname #{staffMember.name}]
       p Authority: #[strong= staffMember.authority]
       if staffMember.authority === 'admin'
-        -var authorities = [{ value: 'admin', label: 'admin' }, { value: 'staff-member', label: 'staff-member' }, { value: 'guest', label: 'guest' }]
-        -var values = staffMember
+        -
+          const authorities = [{ value: 'admin', label: 'admin' }, { value: 'staff-member', label: 'staff-member' }, { value: 'guest', label: 'guest' }];
+          const values = staffMember;
         form#form-cahnge-authority.js-api-form.js-reload-on-success(action='/api/user', 'data-method'='PATCH')
           input(type='hidden', name='user', value=staffMember.login)
           +comboboxEdit('authority', 'Auhority', authorities, '', true)
@@ -84,7 +98,7 @@ block main
 
     if staffMember.authority === 'admin'
       h3 Roles
-      div.info Site administarator has all permissions by default.
+      div.info Site administrator has all permissions by default.
     else
       if staffMember.boardRoles
         h3 Roles
@@ -142,13 +156,6 @@ block main
         h3 Roles
         div.info This user has no permissions on any board.
 
-      if staffMember.boardRoles
-        -var currentUserRoles = Object.entries(staffMember.boardRoles || {})
-        for userRole in currentUserRoles
-          if userRole
-            -var board = userRole[0]
-            -var role = userRole[1]
-
       h3 Add role
       form#form-add-role.form_inline.js-api-form.js-reload-on-success(action='/api/user/role', 'data-method'='PUT')
         input(type='hidden', name='user', value=staffMember.login)
@@ -156,45 +163,45 @@ block main
         +comboboxEdit('role', 'Role', allRoles, '', true)
         input(type='submit', value='Add role')
 
-  -var queryArr = Array.from(Object.entries(query))
-
-  table.table
-    caption
-      h2 Staff members
-      if (queryArr.length)
-        div.query-filters
-          span.query-filters__title Active filters:
-          | 
-          for q, i in queryArr
-            -var fname= q[0]
-            -var fvalue= q[1]
-            -var delquery = queryArr.filter(([qn, qv]) => qn !== fname && qv !== fvalue).map((qarr) => qarr.join('=')).join('&')
-            span.query-filter.badge.badge_primary
-              if i !== 0
-                | ,
-                |
-              span.query-filter__field= fname
-              | :
-              span.query-filter__value= fvalue
-              | 
-              span.button
-                a(href=`?${delquery}`) #[+icon('times', 'small')]
-    thead
-      tr.table__row.table__row_header
-        th.table__header.table__header_sortable(data-sort-field='login' data-sort-type='string') Login
-        th.table__header.table__header_sortable(data-sort-field='authority' data-sort-type='string') Authority
-        th.table__header Boards
-        th.table__header.table__header_sortable(data-sort-field='created' data-sort-type='date') Joined
-        th.table__header.table__header_sortable(data-sort-field='active' data-sort-type='date') Last active
-    tbody
-      -var staffNotOmitted = staff.filter(sm => !staffOmitted.includes(sm))
-      for u in staffNotOmitted
-        tr.table__row(data-login=u.login, data-authority=u.authority, data-created=u.createdAt, data-active=u.activeAt)
-          +userRow(u)
-      if staffOmitted.length
-        tr.table__row.table__row_separator
-          td(colspan=3)
-            +showOmittedBtn(staffOmitted.length, '.table__row_omitted', 'users')
-      for u in staffOmitted
-        tr.table__row.table__row_omitted.hidden(data-login=u.login, data-authority=u.authority, data-created=u.createdAt, data-active=u.activeAt)
-          +userRow(u)
+  if isRead
+    - var queryArr = Array.from(Object.entries(query))
+    table.table
+      caption
+        h2 Staff members
+        if (queryArr.length)
+          div.query-filters
+            span.query-filters__title Active filters:
+            | 
+            for q, i in queryArr
+              -var fname= q[0]
+              -var fvalue= q[1]
+              -var delquery = queryArr.filter(([qn, qv]) => qn !== fname && qv !== fvalue).map((qarr) => qarr.join('=')).join('&')
+              span.query-filter.badge.badge_primary
+                if i !== 0
+                  | ,
+                  |
+                span.query-filter__field= fname
+                | :
+                span.query-filter__value= fvalue
+                | 
+                span.button
+                  a(href=`?${delquery}`) #[+icon('times', 'small')]
+      thead
+        tr.table__row.table__row_header
+          th.table__header.table__header_sortable(data-sort-field='login' data-sort-type='string') Login
+          th.table__header.table__header_sortable(data-sort-field='authority' data-sort-type='string') Authority
+          th.table__header Boards
+          th.table__header.table__header_sortable(data-sort-field='created' data-sort-type='date') Joined
+          th.table__header.table__header_sortable(data-sort-field='active' data-sort-type='date') Last active
+      tbody
+        -var staffNotOmitted = staff.filter(sm => !staffOmitted.includes(sm))
+        for u in staffNotOmitted
+          tr.table__row(data-login=u.login, data-authority=u.authority, data-created=u.createdAt, data-active=u.activeAt)
+            +userRow(u)
+        if staffOmitted.length
+          tr.table__row.table__row_separator
+            td(colspan=3)
+              +showOmittedBtn(staffOmitted.length, '.table__row_omitted', 'users')
+        for u in staffOmitted
+          tr.table__row.table__row_omitted.hidden(data-login=u.login, data-authority=u.authority, data-created=u.createdAt, data-active=u.activeAt)
+            +userRow(u)

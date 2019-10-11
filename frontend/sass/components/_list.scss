@@ -52,3 +52,33 @@
     content: ' | ';
   }
 }
+
+
+.list_buttons {
+  display: inline-flex;
+  list-style: none;
+  align-items: baseline;
+  padding: 0;
+  white-space: nowrap;
+
+  &::before {
+    content: '[';
+    margin-right: var(--adminbar-spacing);
+  }
+
+  &::after {
+    content: ']';
+    margin-left: var(--adminbar-spacing);
+  }
+
+  li:not(:last-child) {
+    &:after {
+      content: '/';
+      margin: 0 var(--adminbar-spacing);
+    }
+  }
+
+  li {
+    display: inline-flex;
+  }
+}

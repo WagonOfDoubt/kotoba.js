@@ -3,7 +3,7 @@
   [
     {
       "path": ".",
-      "folder_exclude_patterns": ["node_modules", "db", "html", "app/doc", "frontend/js/templates-compiled"],
+      "folder_exclude_patterns": ["node_modules", "db", "html", "app/doc/out", "frontend/js/templates-compiled"],
       "file_exclude_patterns": ["*.map"]
     }
   ],
