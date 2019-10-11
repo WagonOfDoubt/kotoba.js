@@ -7,8 +7,6 @@ block header
   h1 Site settings
 
 block main
-  //- pre= JSON.stringify(sitesettings, null, 2)
-  //- pre= JSON.stringify(defaults, null, 2)
   form#form-update-sitesettings(method='GET', action='/api/settings', data-method='PATCH')
     - var values = sitesettings
     h2 Common settings
@@ -20,7 +18,7 @@ block main
     +comboboxEdit('locale', 'Locale', localeOptions, 'Site locale. Locales can be assigned individually per board.')
 
     +textEdit('dateformat', 'Date format', 'Default date format.')
-    +textEdit('imageUri', 'Header image', 'URL. Default header image. Can be overriden on each board.')
+    +textEdit('imageUri', 'Header image', 'URL. Default header image. Can be overridden on each board.')
     +checkboxEdit('startWithOne', 'Number pages starting with one', 'Traditionally pages are zero-based, like in most programming languages.')
     //- styles
     h2 Site styles
@@ -47,8 +45,8 @@ block main
     +numberEdit('thumbSize[height]', 'Thumbnail height', 'Maximum thumbnail height.')
     //- delays
     h2 Posting limits
-    +numberEdit('newThreadDelay', 'Reply delay', 'Minimum time in seonds a user must wait before posting a new thread again.')
-    +numberEdit('replyDelay', 'Reply delay', 'Minimum time in seonds a user must wait before posting a reply again.')
+    +numberEdit('newThreadDelay', 'Reply delay', 'Minimum time in seconds a user must wait before posting a new thread again.')
+    +numberEdit('replyDelay', 'Reply delay', 'Minimum time in seconds a user must wait before posting a reply again.')
     //- html
     h2 Site pages
     +textArea('faq', 'FAQ')
@@ -57,28 +55,28 @@ block main
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
-      button(type='button', class='btn', data-action='preview-markdown', data-field='faq') Preivew
+      button(type='button', class='btn', data-action='preview-markdown', data-field='faq') Preview
     +textArea('rules', 'Rules')
       | HTML of Rules section displayed on front page of site.
       | Write here rules of posting like no CP, no shitposting, moderator is always right, etc.
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
-      button(type='button', class='btn', data-action='preview-markdown', data-field='rules') Preivew
+      button(type='button', class='btn', data-action='preview-markdown', data-field='rules') Preview
     +textArea('menu', 'Top links')
       | HTML of FAQ section displayed on top of each page.
-      | Write here liks to featured boards, links to sattelite websites, twitter, and manage page.
+      | Write here links to featured boards, links to satellite websites, twitter, and manage page.
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
-      button(type='button', class='btn', data-action='preview-markdown', data-field='menu') Preivew
+      button(type='button', class='btn', data-action='preview-markdown', data-field='menu') Preview
     +textArea('frame', 'Sidebar links')
       | HTML of default tab of sidebar on the left.
       | Traditionally it's list of all boards grouped in categories.
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
-      button(type='button', class='btn', data-action='preview-markdown', data-field='frame') Preivew
+      button(type='button', class='btn', data-action='preview-markdown', data-field='frame') Preview
 
     input#btn-update-sitesettings(type='submit', value='Save changes')
 

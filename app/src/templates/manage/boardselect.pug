@@ -3,15 +3,37 @@ include ../mixins/timestamp.pug
 include ../mixins/icons.pug
 
 block header
-  h1 Board administration
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isUpdate
+    h1 Board options /#{ board.uri }/
+  if isRead
+    h1 Boards
+  if isDelete
+    h1 Delete board /#{ board.uri }/
+  if isCreate
+    h1 Create board
+  nav
+    ul.list.list_buttons
+      if !isRead
+        li.list__item
+          a(href='/manage/boards') All boards
+      if !isCreate
+        li.list__item
+          a(href='/manage/boards/create') Create board
+      if isUpdate
+        li.list__item
+          a(href='/' + board.uri) Browse board
+        li.list__item
+          a(href='/manage/staff?board=' + board.uri) Board staff
+      if isDelete
+        li.list__item
+          a(href='/manage/boards/edit/' + board.uri) Back to board options
 
 block main
-  h2 Add board
-  span.button.button_link
-    a(href='/manage/boards/create') Add board
-
-  //- uri name desc createdAt isLocked isHidden isForcedAnon postcount
-  h2 Select board
   table.table
     thead
       tr.table__row.table__row_header

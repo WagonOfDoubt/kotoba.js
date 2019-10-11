@@ -18,6 +18,7 @@ router.get('/boards/',
         boards: boards,
         title: 'Board options',
         locales: locales,
+        crud: 'read',
       });
     } catch (err) {
       next(err);
@@ -38,6 +39,7 @@ router.get('/boards/edit/:board',
         boardDefaults: Board.defaults(),
         title: 'Board administration',
         locales: locales,
+        crud: 'update',
       });
     } catch (err) {
       next(err);
@@ -55,6 +57,7 @@ router.get('/boards/create',
         boardDefaults: Board.defaults(),
         title: 'Add board',
         locales: locales,
+        crud: 'create',
       });
     } catch (err) {
       next(err);
@@ -77,7 +80,8 @@ router.get('/boards/delete/:board',
       res.render('manage/delboard', {
         activity: 'manage-page-delboard',
         board: board,
-        title: 'Delete board'
+        title: 'Delete board',
+        crud: 'delete',
       });
     } catch (err) {
       next(err);

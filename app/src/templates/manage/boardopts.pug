@@ -4,29 +4,43 @@ include ../mixins/inputs.pug
 include ../mixins/modals.pug
 
 block header
-  if board
-    h1 Board options
-  else
-    h1 Add board
+  -
+    const isCreate = crud === 'create';
+    const isUpdate = crud === 'update';
+    const isDelete = crud === 'delete';
+    const isRead = crud === 'read';
+  if isUpdate
+    h1 Board options /#{ board.uri }/
+  if isRead
+    h1 Boards
+  if isDelete
+    h1 Delete board /#{ board.uri }/
+  if isCreate
+    h1 Create board
+  nav
+    ul.list.list_buttons
+      if !isRead
+        li.list__item
+          a(href='/manage/boards') All boards
+      if !isCreate
+        li.list__item
+          a(href='/manage/boards/create') Create board
+      if isUpdate
+        li.list__item
+          a(href='/' + board.uri) Browse board
+        li.list__item
+          a(href='/manage/staff?board=' + board.uri) Board staff
+      if isDelete
+        li.list__item
+          a(href='/manage/boards/edit/' + board.uri) Back to board options
 
 block main
-  - var values = board || boardDefaults
-  - var defaults = boardDefaults
-  if board
-    h2 /#{ board.uri }/ - #{ board.name }
-    div.button.button_link
-      a(href='/manage/boards') Select another board
-    div.button.button_link
-      a(href='/' + board.uri) Browse board
-    div.button.button_link
-      a(href='/manage/staff?board=' + board.uri) Board staff
-  else
-    div.button.button_link
-      a(href='/manage/boards') Edit boards
-
-  - var action = '/api/board/';
-  - var getUrl = board ? `/api/board/${board.uri}?select=!all` : null;
-  - var method = board ? 'PATCH' : 'POST';
+  -
+    var values = board || boardDefaults
+    var defaults = boardDefaults
+    var action = '/api/board/';
+    var getUrl = board ? `/api/board/${board.uri}?select=!all` : null;
+    var method = board ? 'PATCH' : 'POST';
   form#form-update-board(method='POST', action=action, data-method=method, data-get-url=getUrl)
     if !board
       +textEdit('uri', 'Directory', 'The directory of the board.', true)
@@ -35,22 +49,22 @@ block main
       input(type='hidden', name='uri', value=board.uri)
     +textEdit('name', 'Name', 'The name of the board.')
     +textEdit('desc', 'Description', 'Short description of board for meta.')
-    -var localeOptions = locales.map(([lang, code]) => ({value: code, label: `${ lang } (${ code })`}));
+    - var localeOptions = locales.map(([lang, code]) => ({value: code, label: `${ lang } (${ code })`}));
     +comboboxEdit('locale', 'Locale', localeOptions, 'Locale to use on this board. Leave blank to use the locale defined in site settings.')
     +textArea('header', 'Additional header')
       | HTML under board title in page header.
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
-      button(type='button', class='btn', data-action='preview-markdown', data-field='header') Preivew
+      button(type='button', class='btn', data-action='preview-markdown', data-field='header') Preview
     +textArea('navbar', 'Additional menu')
       | HTML of additional navigation menu under #[a(href='/manage/sitesettings#menu') top links].
       | Be careful and close all tags.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
     div.text-right
-      button(type='button', class='btn', data-action='preview-markdown', data-field='navbar') Preivew
+      button(type='button', class='btn', data-action='preview-markdown', data-field='navbar') Preview
     h3 Options
-    +checkboxEdit('isHidden', 'Hidden', 'Do not dispaly this board in navigation menu.')
+    +checkboxEdit('isHidden', 'Hidden', 'Do not display this board in navigation menu.')
     +checkboxEdit('isLocked', 'Locked', 'Only moderators of the board and admins can make new posts/replies.')
     h3 Appearance
     if (styles)
@@ -68,7 +82,7 @@ block main
     +numberEdit('showReplies', 'Show replies', 'Number of replies to show on a board page.')
     +numberEdit('showRepliesSticky', 'Show replies sticky', 'Number of replies to show on a board page when the thread is sticked.')
     h3 Upload rules
-    +numberEdit('maxFileSize', 'Maximum file size', 'Maxmimum size of uploaded images, in bytes.')
+    +numberEdit('maxFileSize', 'Maximum file size', 'Maximum size of uploaded images, in bytes.')
     +numberEdit('maxFilesPerPost', 'Maximum files per post', '0 forbids any uploads making board text only.')
     h3 Posting rules
     +numberEdit('maxMessageLength', 'Maximum message length', 'Maximum message length.')
