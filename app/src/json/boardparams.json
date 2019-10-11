@@ -15,7 +15,7 @@
     "showReplies",
     "showRepliesSticky",
     "maxMessageLength",
-    "createdDate",
+    "createdAt",
     "defaultPosterName",
     "isLocked",
     "isHidden",

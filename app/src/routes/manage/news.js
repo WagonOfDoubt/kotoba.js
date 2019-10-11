@@ -13,7 +13,7 @@ router.get('/news/:newsId?',
   async (req, res, next) => {
     try {
       const newsId = req.params.newsId;
-      const newsList = await News.find().sort({ postedDate: -1 });
+      const newsList = await News.find().sort({ createdAt: -1 });
       if (newsId) {
         const news = await News.findOne({ number: newsId });
         if (!news) {

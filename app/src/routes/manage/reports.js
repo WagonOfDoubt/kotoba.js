@@ -31,7 +31,7 @@ router.get('/reports',
       const reportsLimit = 100;
       const reports = await Report
         .find()
-        .sort({'timestamp': -1})
+        .sort({'createdAt': -1})
         .populate('posts')
         .limit(reportsLimit);
 

@@ -2,19 +2,19 @@ mixin datetime(timestamp)
   if timestamp
     time.datetime(datetime=timestamp.toJSON())= timestamp.toLocaleString()
   else
-    span.error Error: no timestamp
+    span.text_danger Error: no timestamp
 
 mixin date(timestamp)
   if timestamp
     time.date(datetime=timestamp.toJSON())= timestamp.toLocaleDateString()
   else
-    span.error Error: no timestamp
+    span.text_danger Error: no timestamp
 
 mixin time(timestamp)
   if timestamp
     time.time(datetime=timestamp.toJSON())= timestamp.toLocaleTimeString()
   else
-    span.error Error: no timestamp
+    span.text_danger Error: no timestamp
 
 mixin fromSeconds(secs)
   -

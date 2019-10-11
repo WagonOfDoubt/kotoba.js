@@ -19,11 +19,11 @@ router.get('/api/me', [
   async (req, res, next) => {
     try {
       const userFields = [
-        'displayname',
+        'name',
         'login',
         'authority',
-        'addedon',
-        'lastactive',
+        'createdAt',
+        'activeAt',
         'contacts',
         'boardRoles',
       ];
@@ -150,8 +150,8 @@ router.get('/api/user', [
   ],
   async (req, res, next) => {
     try {
-      const query = _.pick(req.query || {}, ['login', 'authority', 'displayname']);
-      const users = await User.find(query, [], { sort: { lastactive: -1 } });
+      const query = _.pick(req.query || {}, ['login', 'authority', 'name']);
+      const users = await User.find(query, [], { sort: { activeAt: -1 } });
       res.json(users);
     } catch (err) {
       next(err);

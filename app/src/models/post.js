@@ -67,15 +67,16 @@ const postSchema = Schema({
    * @type {Date}
    * @memberOf module:models/post~Post
    * @instance
+   * @readOnly
    */
-  timestamp:           { type: Date, default: Date.now },
+  createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
    * OP ONLY. Date of last non-sage reply to thread for sorting threads.
    * @type {Date}
    * @memberOf module:models/post~Post
    * @instance
    */
-  bumped:              { type: Date, default: Date.now },
+  bumpedAt:            { type: Date, default: Date.now },
   /**
    * INPUT. Poster name. Can be edited by original poster with password or by
    *    user with role with permission to edit other's posts.
@@ -196,23 +197,26 @@ const postSchema = Schema({
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
+   * @readOnly
    */
-  ip:                  { type: String, required: true },
+  ip:                  { type: String, required: true, immutable: true },
   /**
    * Hash of poster posting password (for edition/deletion)
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
+   * @readOnly
    */
-  password:            { type: String, default: '' },
+  password:            { type: String, default: '', immutable: true },
   /**
    * INPUT. Parsed useragent of poster.
    * @see models/schema/useragent
    * @type {module:models/schema/useragent~Useragent}
    * @memberOf module:models/post~Post
    * @instance
+   * @readOnly
    */
-  useragent:           { type: useragentSchema, required: true },
+  useragent:           { type: useragentSchema, required: true, immutable: true },
   /**
    * Reserved for future use. This field can be changed by user with role with
    *    write permission which assigned on board to which this post belongs.
@@ -541,7 +545,7 @@ postSchema.statics.findPost = (boardUri, postId) => {
     .select({
       _id: 0,
       postId: 1,
-      timestamp: 1,
+      createdAt: 1,
       name: 1,
       tripcode: 1,
       email: 1,
@@ -617,7 +621,7 @@ postSchema.virtual('children', {
   localField: '_id',
   foreignField: 'parent',
   justOne: false,
-  options: { sort: { timestamp: 1 } }
+  options: { sort: { createdAt: 1 } }
 });
 
 

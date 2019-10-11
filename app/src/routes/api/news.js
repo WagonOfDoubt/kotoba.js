@@ -30,17 +30,17 @@ const { DocumentNotFoundError } = require('../../errors');
  *       {
  *         "subject": "Breaking news!",
  *         "message": "Something happened!",
- *         "postedby": "Administrator",
- *         "postedemail": "nomad@ag.ru",
- *         "postedDate": "2019-01-08T02:05:56.466Z",
+ *         "name": "Administrator",
+ *         "email": "nomad@ag.ru",
+ *         "createdAt": "2019-01-08T02:05:56.466Z",
  *         "number": 7
  *       },
  *       {
  *         "subject": "Don't you know about the bird?",
  *         "message": "Everybody knows that the bird is the word!",
- *         "postedby": "Administrator",
- *         "postedemail": "nomad@ag.ru",
- *         "postedDate": "2018-09-18T20:51:34.574Z",
+ *         "name": "Administrator",
+ *         "email": "nomad@ag.ru",
+ *         "createdAt": "2018-09-18T20:51:34.574Z",
  *         "number": 6
  *       },
  *       ...
@@ -92,7 +92,7 @@ router.get('/api/news/:newsId?',
         const skip = parseInt(req.query.skip || 0);
         const limit = parseInt(req.query.limit || 0);
         const newsArr = await News.find()
-          .sort({ postedDate: -1 })
+          .sort({ createdAt: -1 })
           .select('-_id -__v')
           .skip(skip)
           .limit(limit)
@@ -111,8 +111,8 @@ router.get('/api/news/:newsId?',
  * @apiParam {Object} data News entry data
  * @apiParam {String} data.subject Entry subject
  * @apiParam {String} data.message Entry message
- * @apiParam {String} data.postedby Who posted this entry
- * @apiParam {String} data.postedemail E-mail of poster
+ * @apiParam {String} data.name Who posted this entry
+ * @apiParam {String} data.email E-mail of poster
  */
 
 
@@ -132,9 +132,9 @@ router.get('/api/news/:newsId?',
  *     {
  *       "subject": "Breaking news!",
  *       "message": "Something happened!",
- *       "postedby": "Administrator",
- *       "postedemail": "nomad@ag.ru",
- *       "postedDate": "2019-01-08T02:05:56.466Z",
+ *       "name": "Administrator",
+ *       "email": "nomad@ag.ru",
+ *       "createdAt": "2019-01-08T02:05:56.466Z",
  *       "number": 7
  *     }
  *
@@ -185,9 +185,9 @@ router.post(
  *     {
  *       "subject": "Breaking news!",
  *       "message": "Something happened!",
- *       "postedby": "Administrator",
- *       "postedemail": "nomad@ag.ru",
- *       "postedDate": "2019-01-08T02:05:56.466Z",
+ *       "name": "Administrator",
+ *       "email": "nomad@ag.ru",
+ *       "createdAt": "2019-01-08T02:05:56.466Z",
  *       "number": 7
  *     }
  *
@@ -242,9 +242,9 @@ router.patch(
  *     {
  *       "subject": "Breaking news!",
  *       "message": "Something happened!",
- *       "postedby": "Administrator",
- *       "postedemail": "nomad@ag.ru",
- *       "postedDate": "2019-01-08T02:05:56.466Z",
+ *       "name": "Administrator",
+ *       "email": "nomad@ag.ru",
+ *       "createdAt": "2019-01-08T02:05:56.466Z",
  *       "number": 7
  *     }
  *

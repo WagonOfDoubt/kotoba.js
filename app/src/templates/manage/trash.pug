@@ -60,7 +60,7 @@ block main
                     data-target=`#${entryId} .post__header__checkbox`)
                   span Report
                   | 
-                  +datetime(report.timestamp)
+                  +datetime(report.createdAt)
                 | 
                 span.posterip IP hash: #[= report.iphash]
               blockquote.report-entry__reason= report.reason

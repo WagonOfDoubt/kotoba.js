@@ -382,7 +382,7 @@ const generateBoards = boards =>
 const generateMainPage = async () => {
   const timeLabel = `generateMainPage`;
   console.time(timeLabel);
-  const news = await News.find().sort({ postedDate: -1 }).exec();
+  const news = await News.find().sort({ createdAt: -1 }).exec();
   const data = {
     news: news
   };

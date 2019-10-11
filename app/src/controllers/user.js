@@ -32,7 +32,7 @@ module.exports.updateUser = (userId, data = {}) => {
   // pick only fields that can be changed by user
   const updateData = _.pick(data, [
       'contacts',
-      'displayname',
+      'name',
     ]);
   const promise = User
     .findOneAndUpdate({ _id: userId }, updateData, { new: true })

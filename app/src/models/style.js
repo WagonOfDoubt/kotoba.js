@@ -36,6 +36,7 @@ const styleSchema = Schema({
    * @type {String}
    * @memberOf module:models/style~Style#
    * @instance
+   * @readOnly
    */
   name:         {
     type: String,
@@ -44,29 +45,32 @@ const styleSchema = Schema({
     index: true,
     lowercase: true,
     minlength: 1,
-    validate: nameValidators
+    validate: nameValidators,
+    immutable: true,
   },
   /**
    * Reference to user who created this style
    * @type {ObjectId}
    * @memberOf module:models/style~Style#
    * @instance
+   * @readOnly
    */
-  addedBy:      { type: ObjectId, ref: 'User' },
+  createdBy:    { type: ObjectId, ref: 'User', immutable: true },
   /**
    * When style was created
    * @type {Date}
    * @memberOf module:models/style~Style#
    * @instance
+   * @readOnly
    */
-  createdDate:  { type: Date, default: Date.now },
+  createdAt:    { type: Date, default: Date.now, immutable: true },
   /**
    * When style was updated
    * @type {Date}
    * @memberOf module:models/style~Style#
    * @instance
    */
-  updatedDate:  { type: Date, default: Date.now },
+  updatedAt:    { type: Date, default: Date.now },
   /**
    * CSS color variables
    * @type {Map}
@@ -179,7 +183,7 @@ styleSchema.static('findByName', async (name) => {
  */
 styleSchema.static('findAll', async () => {
   if (styleCache.size === 0) {
-    const newStyles = await Style.find().populate('addedBy', 'login').exec();
+    const newStyles = await Style.find().populate('createdBy', 'login').exec();
     for (const s of newStyles) {
       styleCache.set(s.name, s);
     }
@@ -206,7 +210,7 @@ styleSchema.static('getList', async () => {
 
 
 styleSchema.post('save', (doc) => {
-  doc.populate('addedBy', 'login');
+  doc.populate('createdBy', 'login');
   styleCache.set(doc.name, doc);
 });
 

@@ -27,7 +27,7 @@ block main
           data-images=images
           data-board-uri=thread.boardUri
           data-thread-id=thread.postId
-          data-created=thread.timestamp
+          data-created=thread.createdAt
           data-subject=thread.subject
           data-message=thread.body
           )
@@ -43,7 +43,7 @@ block main
               span.catalog__thread__attachments(title='Number of images')= images
               |
               span.catalog__thread__created(title='Thread created')
-                +date(thread.timestamp)
+                +date(thread.createdAt)
             if thread.body
               div.catalog__thread__message= thread.body.substring(0, 100)
 

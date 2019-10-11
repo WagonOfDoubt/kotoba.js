@@ -9,10 +9,10 @@ router.get('/modlog/:before?',
   async (req, res, next) => {
     try {
       console.log(req.params);
-      const q = req.params.before ? { timestamp: { $lt: req.params.before } } : {};
+      const q = req.params.before ? { createdAt: { $lt: req.params.before } } : {};
       const modlog = await ModlogEntry
         .find(q)
-        .sort({ timestamp: -1})
+        .sort({ createdAt: -1})
         .limit(10)
         .populate([
           { path: 'changes.target' },

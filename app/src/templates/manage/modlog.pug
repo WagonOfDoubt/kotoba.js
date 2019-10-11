@@ -112,18 +112,18 @@ block main
     form#modlog-form.admin-form.modlog__form
       ul.list.list_unmarked
         for item in modlog
-          -const entryId = `${item.timestamp.getTime()}_${item.changes && item.changes.length || 0}`;
+          -const entryId = `${item.createdAt && item.createdAt.getTime()}_${item.changes && item.changes.length || 0}`;
           li.modlog-entry(id=entryId)
             label
               input.modlog-entry__checkbox.js-checkbox-master(
                 type='checkbox',
                 data-target=`#${entryId} .modlog-entry__change-entry__checkbox`)
-              +datetime(item.timestamp)
+              +datetime(item.createdAt)
             if item.user
               | 
               a.postername(href=`/manage/staff/${ item.user.login }`)= item.user.login
-              //- if item.user.displayname
-              //-   small.unimportant  (aka #[span.nickname #{item.user.displayname}])
+              //- if item.user.name
+              //-   small.unimportant  (aka #[span.nickname #{item.user.name}])
             else
               | 
               span.postername Anonymous
@@ -132,7 +132,7 @@ block main
             ul.list_unmarked
               if item.changes && item.changes.length
                 for change in item.changes
-                  +change(change, entryId, item.timestamp.getTime())
+                  +change(change, entryId, item.createdAt && item.createdAt.getTime())
               else
                 +nothing-change
               if item.regenerate
@@ -141,4 +141,4 @@ block main
     | No more entries
   if (modlog.length)
     - var lastEntry = modlog[modlog.length - 1]
-    a(href=`/manage/modlog/${lastEntry.timestamp.getTime()}`) More entries
+    a(href=`/manage/modlog/${lastEntry.createdAt && lastEntry.createdAt.getTime()}`) More entries

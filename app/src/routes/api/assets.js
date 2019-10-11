@@ -67,9 +67,9 @@ const validFileNameRegExp = /^(?!\\.)(?!com[0-9]$)(?!con$)(?!lpt[0-9]$)(?!nul$)(
  *         "type": "image",
  *         "mimetype": "image/png",
  *         "size": 14481678,
- *         "user": "<ObjectId>",
+ *         "createdBy": "<ObjectId>",
  *         "category": "misc",
- *         "timestamp": "2019-04-02T12:40:45.739Z"
+ *         "createdAt": "2019-04-02T12:40:45.739Z"
  *       },
  *       ...
  *     ]
@@ -170,7 +170,7 @@ router.get(
  *           thumbHeight: 141,
  *           thumbWidth: 200,
  *           type: "image",
- *           user: "<ObjectId>",
+ *           createdBy: "<ObjectId>",
  *           width: 1280
  *         },
  *         ...
@@ -265,7 +265,7 @@ router.post(
 
       if (validAssets.length) {
         validAssets.forEach((ad) => {
-          ad.user = req.user._id;
+          ad.createdBy = req.user._id;
         });
         await Asset.insertMany(validAssets);
         return res

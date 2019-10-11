@@ -1,0 +1,36 @@
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text_primary {
+  color: var(--semantic-color-primary-background);
+}
+.text_secondary {
+  color: var(--semantic-color-secondary-background);
+}
+.text_success {
+  color: var(--semantic-color-success-background);
+}
+.text_danger {
+  color: var(--semantic-color-danger-background);
+}
+.text_warning {
+  color: var(--semantic-color-warning-background);
+}
+.text_info {
+  color: var(--semantic-color-info-background);
+}
+.text_light {
+  color: var(--semantic-color-light-background);
+}
+.text_dark {
+  color: var(--semantic-color-dark-background);
+}

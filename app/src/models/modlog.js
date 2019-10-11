@@ -22,23 +22,26 @@ const modlogEntrySchema = Schema({
    * @type {Date}
    * @memberOf module:models/modlog~ModlogEntry
    * @instance
+   * @readOnly
    */
-  timestamp:           { type: Date, default: Date.now },
+  createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
    * IP of user who initiated action
    * @type {String}
    * @memberOf module:models/modlog~ModlogEntry
    * @instance
+   * @readOnly
    */
-  ip:                  { type: String, required: true },
+  ip:                  { type: String, required: true, immutable: true },
   /**
    * useragent of user who initiated action
    * @type {module:models/schema/useragent~Useragent}
    * @memberOf module:models/modlog~ModlogEntry
    * @instance
+   * @readOnly
    * @see module:models/schema/useragent
    */
-  useragent:           { type: useragentSchema, required: true },
+  useragent:           { type: useragentSchema, required: true, immutable: true },
   /**
    * If user is logged in, profile of this user.
    * Can be empty if user was not logged in.
@@ -46,8 +49,9 @@ const modlogEntrySchema = Schema({
    * @memberOf module:models/modlog~ModlogEntry
    * @see module:models/user~User
    * @instance
+   * @readOnly
    */
-  user:                { type: ObjectId, ref: 'User' },
+  user:                { type: ObjectId, ref: 'User', immutable: true },
   /**
    * Array of changes that were made
    * @type {Array.<module:models/schema/change~Change>}
@@ -62,8 +66,9 @@ const modlogEntrySchema = Schema({
    * @memberOf module:models/modlog~ModlogEntry
    * @instance
    * @default false
+   * @readOnly
    */
-  regenerate:          { type: Boolean, default: false },
+  regenerate:          { type: Boolean, default: false, immutable: true },
 },
 {
   collection: 'modlog',

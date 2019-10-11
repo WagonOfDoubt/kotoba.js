@@ -114,7 +114,6 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
   }
   postData.postId = board.postcount + 1;
   postData.threadId = thread.postId;
-  postData.board = ObjectId(board._id);
   postData.parent = ObjectId(thread._id);
   postData.isOp = false;
 
@@ -125,7 +124,7 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
   await Promise.all([post.save(), board.save()]);
   if (!postData.isSage) {
     const threadUpdateParams = {};
-    threadUpdateParams.bumped = post.timestamp;
+    threadUpdateParams.bumpedAt = post.createdAt;
     await Post
       .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams);
   }

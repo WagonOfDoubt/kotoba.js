@@ -47,6 +47,7 @@ const boardSchema = Schema({
    * @type {String}
    * @memberOf module:models/board~Board
    * @instance
+   * @readOnly
    */
   uri: {
     type: String,
@@ -54,7 +55,8 @@ const boardSchema = Schema({
     unique: true,
     lowercase: true,
     minlength: 1,
-    validate: uriValidators
+    validate: uriValidators,
+    immutable: true,
   },
   /**
    * Board title
@@ -167,8 +169,9 @@ const boardSchema = Schema({
    * @type {Date}
    * @memberOf module:models/board~Board
    * @instance
+   * @readOnly
    */
-  createdDate:         { type: Date, default: Date.now },
+  createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
    * Name to display when a name is not attached to a post
    * @type {String}

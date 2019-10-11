@@ -27,7 +27,7 @@ block main
                 label
                   a(href='/manage/trash/reports') Deleted report
                   | 
-                  +datetime(report.timestamp)
+                  +datetime(report.createdAt)
               
           else
             -var entryId = report._id;
@@ -41,7 +41,7 @@ block main
                     data-target=`#${entryId} .post__header__checkbox`)
                   span Report
                   | 
-                  +datetime(report.timestamp)
+                  +datetime(report.createdAt)
                 | 
                 span.posterip IP hash: #[= report.iphash]
               blockquote.report-entry__reason= report.reason
@@ -53,4 +53,4 @@ block main
     | No more entries
   if (reports.length)
     - var lastEntry = reports[reports.length - 1]
-    a(href=`/manage/reports/${lastEntry.timestamp.getTime()}`) More entries
+    a(href=`/manage/reports/${lastEntry.createdAt && lastEntry.createdAt.getTime()}`) More entries

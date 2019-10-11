@@ -6,15 +6,15 @@ div.news-entry(id='news-' + n.number)
     | 
     | by
     | 
-    if n.postedemail
-      a.news__author(href='mailto:' + n.postedemail)= n.postedby
+    if n.email
+      a.news__author(href='mailto:' + n.email)= n.name
     else
-      span.news__author= n.postedby
-    if n.postedDate
+      span.news__author= n.name
+    if n.createdAt
       | 
       | -
       | 
-      +datetime(n.postedDate)
+      +datetime(n.createdAt)
     span.news__link
       a(href='#news-' + n.number, title='premalink') ##{n.number}
   div.news__content!= filters.markdown(n.message)

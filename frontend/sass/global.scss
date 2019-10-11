@@ -90,6 +90,7 @@
 @import './components/news';
 @import './components/sidebar';
 @import './components/buttons';
+@import './components/text';
 
 body {
   color: var(--text-color);
@@ -171,18 +172,6 @@ hr {
     display: block;
     clear: left;
   }
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
 }
 
 .flex-center {

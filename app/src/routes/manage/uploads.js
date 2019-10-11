@@ -43,10 +43,10 @@ router.get('/uploads',
             boardUri: 1,
             postId: 1,
             threadId: 1,
-            timestamp: 1
+            createdAt: 1
           }
         )
-        .sort({'timestamp': -1})
+        .sort({'createdAt': -1})
         .limit(uploadsLimit);
       res.render('manage/uploads', {
         activity: 'manage-page-upoads',

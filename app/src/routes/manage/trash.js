@@ -29,7 +29,7 @@ router.get('/trash',
       };
 
       const deletedAssets = await Asset.find({ isDeleted: true }).exec();
-      const deletedPosts = await Post.find(postsQuery).sort({'timestamp': -1});
+      const deletedPosts = await Post.find(postsQuery).sort({'createdAt': -1});
       const deletedReports = await Report.find({ isDeleted: true }).exec();
 
       res.render('manage/trash', {
@@ -77,7 +77,7 @@ router.get('/trash/posts',
       const postsLimit = 100;
       const posts = await Post
         .find(postsQuery)
-        .sort({'timestamp': -1})
+        .sort({'createdAt': -1})
         .limit(postsLimit);
 
       const deletedAssets = await Asset.find({ isDeleted: true }).exec();
@@ -122,7 +122,7 @@ router.get('/trash/reports',
       
       const deletedReports = await Report
         .find({ isDeleted: true })
-        .sort({'timestamp': -1}).exec();
+        .sort({'createdAt': -1}).exec();
 
       res.render('manage/trash', {
         activity: 'manage-page-trash',

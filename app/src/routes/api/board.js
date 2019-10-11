@@ -359,11 +359,11 @@ const _boardUriValidator = {
  *       "uri": "b"
  *     }
  *
- * @apiSuccessExample GET /api/board/b?select=createdDate,postcount:
+ * @apiSuccessExample GET /api/board/b?select=createdAt,postcount:
  *     HTTP/1.1 200 OK
  *     {
  *       "postcount": 4815162342,
- *       "createdDate": "2019-01-12T17:37:55.337Z"
+ *       "createdAt": "2019-01-12T17:37:55.337Z"
  *     }
  *
  * @apiUse DocumentNotFoundError
@@ -491,7 +491,7 @@ router.get(
  *       "filetypes": [],
  *       "postcount": 0,
  *       "uri": "b",
- *       "createdDate": "2019-01-12T03:40:59.741Z"
+ *       "createdAt": "2019-01-12T03:40:59.741Z"
  *     }
  *
  * @apiUse AuthRequiredError
@@ -588,7 +588,7 @@ router.post(
  *       "filetypes": [],
  *       "postcount": 0,
  *       "uri": "b",
- *       "createdDate": "2019-01-12T03:40:59.741Z"
+ *       "createdAt": "2019-01-12T03:40:59.741Z"
  *     }
  *
  * @apiUse AuthRequiredError

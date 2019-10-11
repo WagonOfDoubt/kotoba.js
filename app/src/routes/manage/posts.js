@@ -36,7 +36,7 @@ router.get('/posts',
       const postsLimit = 100;
       const posts = await Post
         .find(postsQuery)
-        .sort({'timestamp': -1})
+        .sort({'createdAt': -1})
         .limit(postsLimit);
 
       res.render('manage/posts', {

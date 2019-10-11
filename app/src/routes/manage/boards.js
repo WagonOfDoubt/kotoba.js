@@ -11,7 +11,7 @@ router.get('/boards/',
     try {
       const boards = await Board
         .find()
-        .select('uri name desc createdDate isLocked isHidden isForcedAnon postcount')
+        .select('uri name desc createdAt isLocked isHidden isForcedAnon postcount')
         .exec();
       res.render('manage/boardselect', {
         activity: 'manage-page-boardselect',

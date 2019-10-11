@@ -10,7 +10,7 @@ block main
   span.button.button_link
     a(href='/manage/boards/create') Add board
 
-  //- uri name desc createdDate isLocked isHidden isForcedAnon postcount
+  //- uri name desc createdAt isLocked isHidden isForcedAnon postcount
   h2 Select board
   table.table
     thead
@@ -24,13 +24,13 @@ block main
         th.table__heaeder Staff
     tbody
       for b in boards
-        tr.table__row(data-board=b.uri, data-name=b.name, data-created=b.createdDate, data-postcount=b.postcount)
+        tr.table__row(data-board=b.uri, data-name=b.name, data-created=b.createdAt, data-postcount=b.postcount)
           td
             a(href='/manage/boards/edit/' + b.uri) /#{ b.uri }/
           td= b.name
           td= b.desc
           td
-            +date(b.createdDate)
+            +date(b.createdAt)
           td= b.postcount
           td
             if b.isHidden

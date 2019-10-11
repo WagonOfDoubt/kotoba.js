@@ -18,16 +18,18 @@ const captchaSchema = Schema({
    * @type {String}
    * @memberOf module:models/captcha~Captcha
    * @instance
+   * @readOnly
    */
-  session: { type: String, required: true },
+  session: { type: String, required: true, immutable: true },
   /**
    * Captcha key in format "{reply|thread}.{boardUri}" i.e.: "reply.b",
    *    "thread.a". Indexed.
    * @type {String}
    * @memberOf module:models/captcha~Captcha
    * @instance
+   * @readOnly
    */
-  key: { type: String, required: true },
+  key: { type: String, required: true, immutable: true },
   /**
    * Captcha answer. Indexed.
    * @type {String}

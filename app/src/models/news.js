@@ -39,22 +39,23 @@ const newsSchema = Schema({
    * @type {Date}
    * @memberOf module:models/news~News
    * @instance
+   * @readOnly
    */
-  postedDate:   { type: Date, default: Date.now },
+  createdAt:   { type: Date, default: Date.now, immutable: true },
   /**
    * Who posted this entry
    * @type {String}
    * @memberOf module:models/news~News
    * @instance
    */
-  postedby:     { type: String, default: '' },
+  name:     { type: String, default: '' },
   /**
    * E-mail of poster
    * @type {String}
    * @memberOf module:models/news~News
    * @instance
    */
-  postedemail:  { type: String, default: '' }
+  email:  { type: String, default: '' }
 }, { collection: 'news' });
 
 

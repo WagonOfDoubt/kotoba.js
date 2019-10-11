@@ -3,7 +3,7 @@ div.thread-container(
   style={ 'counter-reset': `thr-cnt ${ omittedPosts }` }
   data-thread-id=thread.postId
   data-board-uri=thread.boardUri
-  data-bumped=thread.bumped.toJSON()
+  data-bumped=thread.bumpedAt && thread.bumpedAt.toJSON()
   data-omitted-posts=omittedPosts
   data-omitted-files=omittedAttachments
 )

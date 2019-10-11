@@ -203,46 +203,28 @@ roleSchema.statics.findAllAndSort = () => {
 
 
 roleSchema.pre('validate', function () {
-  this.postPermissions.isSticky = this.postPermissions.isSticky || {};
-  this.postPermissions.isSticky.priority =
-    _.isNumber(this.postPermissions.isSticky.priority) ?
-    this.postPermissions.isSticky.priority :
-    this.hierarchy;
-  this.postPermissions.isClosed = this.postPermissions.isClosed || {};
-  this.postPermissions.isClosed.priority =
-    _.isNumber(this.postPermissions.isClosed.priority) ?
-    this.postPermissions.isClosed.priority :
-    this.hierarchy;
-  this.postPermissions.isSage = this.postPermissions.isSage || {};
-  this.postPermissions.isSage.priority =
-    _.isNumber(this.postPermissions.isSage.priority) ?
-    this.postPermissions.isSage.priority :
-    this.hierarchy;
-  this.postPermissions.isApproved = this.postPermissions.isApproved || {};
-  this.postPermissions.isApproved.priority =
-    _.isNumber(this.postPermissions.isApproved.priority) ?
-    this.postPermissions.isApproved.priority :
-    this.hierarchy;
-  this.postPermissions.isDeleted = this.postPermissions.isDeleted || {};
-  this.postPermissions.isDeleted.priority =
-    _.isNumber(this.postPermissions.isDeleted.priority) ?
-    this.postPermissions.isDeleted.priority :
-    this.hierarchy;
-  this.attachmentPermissions.isDeleted = this.attachmentPermissions.isDeleted || {};
-  this.attachmentPermissions.isDeleted.priority =
-    _.isNumber(this.attachmentPermissions.isDeleted.priority) ?
-    this.attachmentPermissions.isDeleted.priority :
-    this.hierarchy;
-  this.attachmentPermissions.isNSFW = this.attachmentPermissions.isNSFW || {};
-  this.attachmentPermissions.isNSFW.priority =
-    _.isNumber(this.attachmentPermissions.isNSFW.priority) ?
-    this.attachmentPermissions.isNSFW.priority :
-    this.hierarchy;
-  this.attachmentPermissions.isSpoiler = this.attachmentPermissions.isSpoiler || {};
-  this.attachmentPermissions.isSpoiler.priority =
-    _.isNumber(this.attachmentPermissions.isSpoiler.priority) ?
-    this.attachmentPermissions.isSpoiler.priority :
-    this.hierarchy;
+  const defaultPriority = (currentValue, defaultValue) => {
+    if (_.isFinite(currentValue)) {
+      return currentValue;
+    }
+    return defaultValue;
+  };
+
+  const defaultPermission = (permissions, permissionName) => {
+    this[permissions][permissionName] =
+      this[permissions][permissionName] || {};
+    this[permissions][permissionName].priority =
+      defaultPriority(this[permissions][permissionName].priority, this.hierarchy);
+  };
+
+  defaultPermission('postPermissions',       'isSticky');
+  defaultPermission('postPermissions',       'isClosed');
+  defaultPermission('postPermissions',       'isSage');
+  defaultPermission('postPermissions',       'isApproved');
+  defaultPermission('postPermissions',       'isDeleted');
+  defaultPermission('attachmentPermissions', 'isDeleted');
+  defaultPermission('attachmentPermissions', 'isNSFW');
+  defaultPermission('attachmentPermissions', 'isSpoiler');
 });
 
 

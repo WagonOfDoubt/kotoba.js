@@ -14,13 +14,13 @@ block main
   - var action = news ? '/api/news/' + news.number : '/api/news/';
   - var method = news ? 'PATCH' : 'POST';
   form#form-edit-news(action=action, data-method=method)
-    - var values = news ? news : { postedby: user.login };
+    - var values = news ? news : { name: user.login };
     +textEdit('subject', 'Subject', '', true)
     +textArea('message', 'Message', '', true)
       | This message will be displayed as it is written, so make sure you add the proper HTML.
       | <a href="http://spec.commonmark.org/">Markdown</a> is supported.
-    +textEdit('postedby', 'Posted by', 'Can be left blank.')
-    +textEdit('postedemail', 'E-mail', 'Can be left blank.')
+    +textEdit('name', 'Posted by', 'Can be left blank.')
+    +textEdit('email', 'E-mail', 'Can be left blank.')
     if news
       input#btn-edit-news(type='submit', value='Edit')
     else
@@ -37,28 +37,28 @@ block main
       thead
         tr.table__row.table__row_header
           th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='number', data-sort-type='number', data-sort-order='descending') #
-          th.table__header.table__header_sortable(data-sort-field='added', data-sort-type='date') Date Added
+          th.table__header.table__header_sortable(data-sort-field='created', data-sort-type='date') Date Added
           th.table__header Subject
-          th.table__header.table__header_sortable(data-sort-field='postedby', data-sort-type='string') Posted by
+          th.table__header.table__header_sortable(data-sort-field='name', data-sort-type='string') Posted by
           th.table__header Message
           th.table__header Delete
       tbody
         for n in newsList
-          tr.table__row(data-number=n.number, data-added=n.postedDate, data-postedby=n.postedby)
+          tr.table__row(data-number=n.number, data-created=n.createdAt, data-name=n.name)
             td
               span= n.number
               | 
               span.button.button_link
                 a(href=`/manage/news/${n.number}`) Edit
             td
-              if n.postedDate
-                +datetime(n.postedDate)
+              if n.createdAt
+                +datetime(n.createdAt)
             td= n.subject
             td
-              if n.postedemail
-                a(href='mailto:' + n.postedemail)= n.postedby
+              if n.email
+                a(href='mailto:' + n.email)= n.name
               else
-                =n.postedby
+                =n.name
             td= n.message
             td
               form(method='post', action='/api/news', data-method='delete')

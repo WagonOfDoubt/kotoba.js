@@ -122,15 +122,17 @@ const assetSchema = Schema({
    * @type {Date}
    * @memberOf module:models/asset~Asset
    * @instance
+   * @readOnly
    */
-  timestamp:           { type: Date, default: Date.now },
+  createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
    * User who uploaded this asset.
    * @type {ObjectId}
    * @memberOf module:models/asset~Asset
    * @instance
+   * @readOnly
    */
-  user:                { type: ObjectId, ref: 'User' },
+  createdBy:           { type: ObjectId, ref: 'User', immutable: true },
   /**
    * Where asset is supposed to be used on site
    * @type {String}

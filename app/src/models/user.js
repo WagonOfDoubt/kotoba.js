@@ -21,8 +21,9 @@ const userSchema = Schema({
    * @type {String}
    * @memberOf module:models/user~User#
    * @instance
+   * @readOnly
    */
-  login:               { type: String, required: true },
+  login:               { type: String, required: true, immutable: true },
   /**
    * Salted md5 hash of password
    * @type {String}
@@ -42,22 +43,23 @@ const userSchema = Schema({
    * @type {Date}
    * @memberOf module:models/user~User#
    * @instance
+   * @readOnly
    */
-  addedon:             { type: Date, default: Date.now},
+  createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
    * Last login date
    * @type {Date}
    * @memberOf module:models/user~User#
    * @instance
    */
-  lastactive:          { type: Date, default: Date.now},
+  activeAt:            { type: Date, default: Date.now },
   /**
    * User's name to show instead of login
    * @type {String}
    * @memberOf module:models/user~User#
    * @instance
    */
-  displayname:         { type: String, default: '' },
+  name:                { type: String, default: '' },
   /**
    * User's authority
    * @type {String}

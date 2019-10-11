@@ -62,7 +62,7 @@ const styleParamsValidator = {
  * @apiParam {String} name Name of style to get. If not present, array of all styles
  *    will be returned.
  * @apiSuccess {String} name Name of style.
- * @apiSuccess {Date} updatedDate When style was last updated.
+ * @apiSuccess {Date} updatedAt When style was last updated.
  * @apiSuccess {rawCSS} CSS to insert on page.
  * @apiUse RequestValidationError
  * @apiUse DocumentNotFoundError
@@ -91,13 +91,13 @@ router.get(
           const err = new DocumentNotFoundError('Style', 'name', styleName, 'query');
           return err.respond(res);
         }
-        const styleObj = _.pick(style, ['name', 'updatedDate', 'rawCSS']);
+        const styleObj = _.pick(style, ['name', 'updatedAt', 'rawCSS']);
         return res
           .status(200)
           .json(styleObj);
       }
       const styles = await Style.findAll();
-      const stylesObj = styles.map(s => _.pick(s, ['name', 'updatedDate']));
+      const stylesObj = styles.map(s => _.pick(s, ['name', 'updatedAt']));
       return res
         .status(200)
         .json(stylesObj);
@@ -116,7 +116,7 @@ router.get(
  * @apiUse StyleParams
  * @apiSuccess {Object[]} success
  * @apiSuccess {String} success.name
- * @apiSuccess {Date} success.createdDate
+ * @apiSuccess {Date} success.createdAt
  * @apiUse RequestValidationError
  * @apiUse DocumentAlreadyExistsError
  * @apiUse AuthRequiredError
@@ -143,7 +143,7 @@ router.post(
         strings: req.body.strings,
         variables: req.body.variables,
         css: req.body.css,
-        addedBy: req.user._id,
+        createdBy: req.user._id,
       });
       await style.save();
       return res
@@ -152,7 +152,7 @@ router.post(
           success: [
             {
               name: style.name,
-              createdDate: style.createdDate,
+              createdAt: style.createdAt,
             }
           ],
           fail: (res.locals.fail || []),
@@ -172,7 +172,7 @@ router.post(
  * @apiUse StyleParams
  * @apiSuccess {Object[]} success
  * @apiSuccess {String} success.name
- * @apiSuccess {Date} success.updatedDate
+ * @apiSuccess {Date} success.updatedAt
  * @apiUse RequestValidationError
  * @apiUse AuthRequiredError
  * @apiUse PermissionDeniedError
@@ -197,14 +197,14 @@ router.patch(
       }
       const updateQuery = _.pick(req.body,
         ['colors', 'variables', 'strings', 'css']);
-      updateQuery.updatedDate = new Date();
+      updateQuery.updatedAt = new Date();
       style.set(updateQuery);
       await style.save();
 
       res.locals.fail = [];
       res.locals.success = [{
         name: style.name,
-        updatedDate: style.updatedDate,
+        updatedAt: style.updatedAt,
       }];
       const { success, fail } = res.locals;
       return res.status(200).json({ success, fail });

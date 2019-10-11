@@ -66,25 +66,25 @@ block main
       thead
         tr.table__row.table__row_header
           th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='name', data-sort-type='string', data-sort-order='descending') Name
-          th.table__header.table__header_sortable(data-sort-field='added', data-sort-type='date') Date Added
-          th.table__header.table__header_sortable(data-sort-field='edited', data-sort-type='date') Last change
-          th.table__header.table__header_sortable(data-sort-field='addedby', data-sort-type='string') Added by
+          th.table__header.table__header_sortable(data-sort-field='created', data-sort-type='date') Date Added
+          th.table__header.table__header_sortable(data-sort-field='updated', data-sort-type='date') Last change
+          th.table__header.table__header_sortable(data-sort-field='createdby', data-sort-type='string') Added by
           th.table__header Color scheme
           th.table__header Del
       tbody
         for s in styles
-          tr.table__row(data-name=s.name, data-added=s.createdDate, data-edited=s.updatedDate, data-postedby=s.addedBy && s.addedBy.login)
+          tr.table__row(data-name=s.name, data-created=s.createdAt, data-updated=s.updatedAt, data-createdby=s.createdBy && s.createdBy.login)
             td
               a(href=`/manage/styles/edit/${s.name}`, title='Edit style')= s.name
             td
-              if s.createdDate
-                +datetime(s.createdDate)
+              if s.createdAt
+                +datetime(s.createdAt)
             td
-              if s.updatedDate
-                +datetime(s.updatedDate)
+              if s.updatedAt
+                +datetime(s.updatedAt)
             td
-              if s.addedBy
-                a(href=`/manage/staff/${s.addedBy.login}`)= s.addedBy.login
+              if s.createdBy
+                a(href=`/manage/staff/${s.createdBy.login}`)= s.createdBy.login
             td
               if s.colors
                 -
@@ -152,7 +152,7 @@ block main
               "thumb" : "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Leptailurus_serval_-Serengeti_National_Park%2C_Tanzania-8.jpg/256px-Leptailurus_serval_-Serengeti_National_Park%2C_Tanzania-8.jpg"
             }
           ],
-          "timestamp" : new Date("2019-09-03T19:03:57.534Z"),
+          "createdAt" : new Date("2019-09-03T19:03:57.534Z"),
           "bumped" : new Date("2019-09-03T19:06:40.900Z"),
         }
         var replies = [
@@ -166,7 +166,7 @@ block main
             ],
             "isOp" : false,
             "boardUri" : "b",
-            "timestamp" : new Date("2019-09-03T19:05:47.967Z"),
+            "createdAt" : new Date("2019-09-03T19:05:47.967Z"),
           },
           {
             "postId" : 328,
@@ -177,7 +177,7 @@ block main
             ],
             "isOp" : false,
             "boardUri" : "b",
-            "timestamp" : new Date("2019-09-03T19:06:40.900Z"),
+            "createdAt" : new Date("2019-09-03T19:06:40.900Z"),
           }
         ];
       h2 Preview

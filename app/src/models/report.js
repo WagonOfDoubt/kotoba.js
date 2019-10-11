@@ -22,32 +22,36 @@ const reportSchema = Schema({
    * @type {Date}
    * @memberOf module:models/report~Report
    * @instance
+   * @readOnly
    */
-  timestamp:           { type: Date, default: Date.now },
+  createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
    * Poster IP. Users are required to have role on post's board with
    *    permission.
    * @type {String}
    * @memberOf module:models/report~Report
    * @instance
+   * @readOnly
    */
-  ip:                  { type: String, required: true },
+  ip:                  { type: String, required: true, immutable: true },
   /**
    * Poster IP md5 hash with salt. Users are required to have role on post's
    *    board with permission.
    * @type {String}
    * @memberOf module:models/report~Report
    * @instance
+   * @readOnly
    */
-  iphash:              { type: String, required: true },
+  iphash:              { type: String, required: true, immutable: true },
   /**
    * Parsed useragent of poster.
    * @see models/schema/useragent
    * @type {Useragent}
    * @memberOf module:models/report~Report
    * @instance
+   * @readOnly
    */
-  useragent:           { type: useragentSchema, required: true },
+  useragent:           { type: useragentSchema, required: true, immutable: true },
   /**
    * INPUT. Refs to posts that are reported.
    * @see models/schema/reflink
@@ -86,7 +90,7 @@ reportSchema.virtual('posts', {
   localField: 'reflinks.src',
   foreignField: '_id',
   justOne: false,
-  options: { sort: { timestamp: 1 } }
+  options: { sort: { createdAt: 1 } }
 });
 
 
