@@ -9,7 +9,7 @@ const { generateThread, generateThreads, generateBoardPagesAndCatalog } = requir
 const { DocumentNotFoundError, PostingError } = require('../errors');
 const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
-const Post = require('../models/post');
+const { Post, Thread, Reply } = require('../models/post');
 const ModlogEntry = require('../models/modlog');
 const Parser = require('./parser');
 const fs = require('fs-extra');
@@ -56,22 +56,23 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
   if (board.isForcedAnon || !postData.name) {
     postData.name = board.defaultPosterName;
   }
-  postData.postId = postData.threadId = board.postcount + 1;
+  postData.postId = board.postcount + 1;
   postData.board = board._id;
-  postData.isOp = true;
 
-  const post = new Post(postData);
-  await Parser.parsePost(post);
+
+  const thread = new Thread(postData);
+  await Parser.parsePost(thread);
   board.postcount = board.postcount + 1;
-  board.uniquePosts = await Post.getNumberOfUniqueUserPosts(this.uri);
+  board.uniquePosts = await Post.getNumberOfUniqueUserPosts(board.uri);
   await Promise.all([
-    post.save(),
+    thread.save(),
     board.save(),
   ]);
-  post.board = board;
-  await generateThread(post);
+  // populate virtual field board to avoid another query to DB
+  thread.board = board;
+  await generateThread(thread);
   await generateBoardPagesAndCatalog(board);
-  return post.postId;
+  return thread.postId;
 };
 
 
@@ -88,7 +89,7 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
  */
 module.exports.createReply = async (boardUri, threadId, postData, files = []) => {
   const [thread, board] = await Promise.all([
-      Post.findThread(boardUri, threadId).exec(),
+      Thread.findThread(boardUri, threadId).exec(),
       Board.findBoard(boardUri).exec()
     ]);
 
@@ -117,18 +118,18 @@ module.exports.createReply = async (boardUri, threadId, postData, files = []) =>
   postData.parent = ObjectId(thread._id);
   postData.isOp = false;
 
-  const post = new Post(postData);
+  const post = new Reply(postData);
   await Parser.parsePost(post);
   board.postcount = board.postcount + 1;
-  board.uniquePosts = await Post.getNumberOfUniqueUserPosts(this.uri);
+  board.uniquePosts = await Post.getNumberOfUniqueUserPosts(board.uri);
   await Promise.all([post.save(), board.save()]);
   if (!postData.isSage) {
     const threadUpdateParams = {};
     threadUpdateParams.bumpedAt = post.createdAt;
-    await Post
+    await Thread
       .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams);
   }
-  const updatedThread = await Post
+  const updatedThread = await Thread
     .findThread(boardUri, threadId)
     .populate('children');
   updatedThread.board = board;
@@ -175,7 +176,7 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
 
   if (threadsRepliesIds.length) {
     // select replies to deleted threads from database
-    const threadsReplies = await Post.find({ _id: { $in: threadsRepliesIds } });
+    const threadsReplies = await Post.findPostsByIds(threadsRepliesIds);
     // add replies to deleted threads to deletion list
     postsToDelete = postsToDelete.concat(threadsReplies);
   }
@@ -235,7 +236,7 @@ module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
         t.board = boardsDict[t.boardUri];
         return t;
       };
-      await Post.findThreads(threadsToRegenerate)
+      await Thread.findThreads(threadsToRegenerate)
         .populate('children')
         .then(threads =>
             Promise.all(
@@ -383,21 +384,27 @@ module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=fal
   const updatePostQuery = validItems.map(item =>
     ({
       updateOne: {
-        filter: { _id: item.target._id },
+        filter: { _id: item.target._id, __t: item.target.__t },
         update: item.update,
       },
     }));
-  const modlog = {
+  const [updateReplies, updateThreads] =
+    _.partition(updatePostQuery, item => item.updateOne.filter.__t === 'Reply');
+  const modlogData = {
     ip: ip,
     useragent: useragent,
     user: user,
     changes: _.flatten(changesList),
     regenerate: regenerate,
   };
-  const response = await Promise.all([
-    Post.bulkWrite(updatePostQuery),
-    ModlogEntry.create(modlog),
-  ]);
+  const promises = [ModlogEntry.create(modlogData)];
+  if (updateThreads.length) {
+    promises.push(Thread.bulkWrite(updateThreads));
+  }
+  if (updateReplies.length) {
+    promises.push(Reply.bulkWrite(updateReplies));
+  }
+  const response = await Promise.all(promises);
 
   if (regenerate) {
     const posts = validItems.map(_.property('target'));
@@ -408,18 +415,18 @@ module.exports.updatePosts = async (items, {ip, useragent, user}, regenerate=fal
       threads.map(_.property('_id')),
       String);
 
+    const threadDocuments = await Thread.findThreadsByIds(threadsAffected)
+      .populate('children')
+      .populate('board');
+
+    await generateThreads(threadDocuments);
+
     const boardsAffected = _.uniqBy(
-      posts.map(_.property('board')),
+      threadDocuments.map(_.property('board')),
       String);
 
-    const [threadDocuments, boardDocuments] = await Promise
-      .all([
-        Post.findThreadsByIds(threadsAffected)
-          .populate('children')
-          .populate('board'),
-        Board.findBoardsByIds(boardsAffected)
-      ]);
-    await generateThreads(threadDocuments);
+    const boardDocuments = await Board.findBoardsByIds(boardsAffected);
+
     await Promise.all(boardDocuments.map(bd => generateBoardPagesAndCatalog(bd)));
   }
 

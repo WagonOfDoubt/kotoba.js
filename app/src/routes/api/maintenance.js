@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { checkSchema } = require('express-validator');
 
 const { regenerateAll, clearTemplateCache } = require('../../controllers/generate');
-const Post = require('../../models/post');
+const {Post} = require('../../models/post');
 const Parser = require('../../controllers/parser');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest } = require('../../middlewares/validation');

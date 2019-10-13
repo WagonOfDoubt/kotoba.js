@@ -1,5 +1,5 @@
 const express = require('express');
-const Post = require('../../models/post');
+const {Post} = require('../../models/post');
 const Board = require('../../models/board');
 const { authRequired } = require('../../middlewares/permission');
 

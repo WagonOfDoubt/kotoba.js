@@ -1,6 +1,6 @@
 const express = require('express');
 const Asset = require('../../models/asset');
-const Post = require('../../models/post');
+const {Post} = require('../../models/post');
 const Board = require('../../models/board');
 const Report = require('../../models/report');
 const { authRequired } = require('../../middlewares/permission');

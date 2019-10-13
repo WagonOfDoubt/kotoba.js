@@ -4,7 +4,7 @@
  */
 
 const _ = require('lodash');
-const Post = require('../models/post');
+const {Post} = require('../models/post');
 const { PermissionDeniedError } = require('../errors');
 
 

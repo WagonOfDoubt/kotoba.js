@@ -8,7 +8,7 @@ const path = require('path');
 const config = require('../json/config.json');
 const { generateBoard } = require('./generate');
 const Board = require('../models/board');
-const Post = require('../models/post');
+const {Post} = require('../models/post');
 
 
 /**

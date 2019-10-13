@@ -4,7 +4,7 @@
  * @module middlewares/reqparser
  */
 const _ = require('lodash');
-const Post = require('../models/post');
+const {Post} = require('../models/post');
 const Board = require('../models/board');
 
 

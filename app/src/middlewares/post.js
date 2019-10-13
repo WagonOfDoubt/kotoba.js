@@ -7,7 +7,7 @@ const _ = require('lodash');
 const fp = require('lodash/fp');
 const flattenObject = require('flat');
 
-const Post = require('../models/post');
+const {Post} = require('../models/post');
 const Role = require('../models/role');
 const { RequestValidationError, DocumentNotFoundError } = require('../errors');
 

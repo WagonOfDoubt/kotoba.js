@@ -15,7 +15,7 @@ const filters = require('../utils/filters');
 const config = require('../json/config.json');
 const Board = require('../models/board');
 const Style = require('../models/style');
-const Post = require('../models/post');
+const {Thread} = require('../models/post');
 const News = require('../models/news');
 const pkg = require('../package.json');
 
@@ -75,7 +75,7 @@ const renderToFile = async (dir, filename, template, data) => {
 /**
  * Generate thread reply page. Saves file board/res/[postId].html
  * @async
- * @param {module:models/post~Post} thread The op-post mongoose document
+ * @param {module:models/post~Thread} thread Thread mongoose document
  * @static
  */
 const generateThreadPage = async (thread) => {
@@ -114,7 +114,7 @@ const generateThreadPage = async (thread) => {
  *    avoid unnecessary database queries and increases overall performance.
  *    Saves file board/res/[postId]-preview.html
  * @async
- * @param {module:models/post~Post} thread The op-post mongoose document
+ * @param {module:models/post~Thread} thread Thread mongoose document
  * @static
  */
 const generateThreadPreview = async (thread) => {
@@ -160,7 +160,7 @@ const generateThreadPreview = async (thread) => {
 /**
  * Generate thread reply page and thread preview.
  * @async
- * @param {module:models/post~Post} thread The op-post mongoose document.
+ * @param {module:models/post~Thread} thread Thread mongoose document.
  * @returns {Promise}
  * @static
  */
@@ -176,8 +176,8 @@ const generateThread = async (thread) => {
 
 /**
  * Generate thread reply page and thread preview for each thread.
- * @param {Array<module:models/post~Post>} threads Array of threads to display
- *    on page.
+ * @param {Array<module:models/post~Thread>} threads Array of threads to
+ *    display on page
  * @returns {Promise}
  * @static
  */
@@ -191,8 +191,8 @@ const generateThreads = threads =>
  *    board/[pNum].html
  * @async
  * @param {module:models/board~Board} board The board mongoose document.
- * @param {Array<module:models/post~Post>} threads Array of threads to display
- *    on page.
+ * @param {Array<module:models/post~Thread>} threads Array of threads to
+ *    display on page.
  * @param {Number} pNum Current page. If 0, file will be named index.html
  * @param {Number} totalPages Number of pages for pages selector.
  * @static
@@ -265,17 +265,17 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
  *    board/1.html, ..., board/n.html
  * @async
  * @param {module:models/board~Board} board The board mongoose document.
- * @param {Array<module:models/post~Post>} threads Array of threads sorted by
- *    bump order.
+ * @param {?Array<module:models/post~Thread>} [threads] Array of threads
+ *    sorted by bump order.
  * @returns {module:models/board~Board} same board that was passed as the
  *    first argument
  * @static
  */
-const generateBoardPages = async (board, threads) => {
+const generateBoardPages = async (board, threads = null) => {
   const timeLabel = `generateBoardPages /${board.uri}/`;
   console.time(timeLabel);
   if (!threads) {
-    threads = await Post.getSortedThreads(board);
+    threads = await Thread.getSortedThreads(board);
   }
   if (!threads.length) {
     await generateBoardPage(board, [], 0, 1);
@@ -300,8 +300,8 @@ const generateBoardPages = async (board, threads) => {
  * Generate catalog of board. Saves file board/catalog.html
  * @async
  * @param {module:models/board~Board} board The board mongoose document.
- * @param {Array<module:models/post~Post>} threads Array of threads sorted by
- *    bump order.
+ * @param {?Array<module:models/post~Thread>} [threads] Array of threads
+ *    sorted by bump order.
  * @returns {module:models/board~Board} same board that was passed as the
  *    first argument
  * @static
@@ -313,7 +313,7 @@ const generateCatalog = async (board, threads = null) => {
   const timeLabel = `generateCatalog /${board.uri}/${config.catalog_filename}`;
   console.time(timeLabel);
   if (!threads) {
-    threads = await Post.getSortedThreads(board);
+    threads = await Thread.getSortedThreads(board);
   }
   const data = {
     lang: board.locale,
@@ -338,7 +338,7 @@ const generateCatalog = async (board, threads = null) => {
  * @static
  */
 const generateBoardPagesAndCatalog = async board => {
-  const threads = await Post.getSortedThreads(board);
+  const threads = await Thread.getSortedThreads(board);
   await Promise.all([
     generateBoardPages(board, threads),
     generateCatalog(board, threads)
@@ -353,7 +353,7 @@ const generateBoardPagesAndCatalog = async board => {
  * @static
  */
 const generateBoard = async board => {
-  const threads = await Post.getSortedThreads(board);
+  const threads = await Thread.getSortedThreads(board);
   await generateThreads(threads);
   await Promise.all([
     generateBoardPages(board, threads),

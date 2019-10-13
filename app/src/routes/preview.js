@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { checkSchema } = require('express-validator');
 
-const Post = require('../models/post');
+const {Post, Thread} = require('../models/post');
 const { authRequired } = require('../middlewares/permission');
 const { validateRequest } = require('../middlewares/validation');
 
@@ -69,13 +69,13 @@ router.get('/preview/replies/:board/:thread',
   async (req, res, next) => {
     try {
       const { board, thread } = req.params;
-      const query = { boardUri: board, postId: thread, isOp: true };
+      const query = { boardUri: board, postId: thread };
       const isAdmin = req.user && req.user.authority === 'admin';
       const hasBoardRole = req.user && req.user.boardRoles && req.user.boardRoles.hasOwnProperty(board);
       if (!(isAdmin || hasBoardRole)) {
         query.isDeleted = false;
       }
-      const t = await Post
+      const t = await Thread
         .findOne(query)
         .select('children')
         .populate('children');

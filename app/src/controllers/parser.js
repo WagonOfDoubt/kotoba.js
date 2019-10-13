@@ -4,7 +4,7 @@
  */
 
 const format = require('util').format;
-const Post = require('../models/post');
+const {Post} = require('../models/post');
 const wakabamark = require('../json/parser.json');
 
 
@@ -143,7 +143,7 @@ class Parser {
       });
     if (reflinksQuery.length) {
       try {
-        const results = await Post.findRefs(reflinksQuery).exec();
+        const results = await Post.findRefs(reflinksQuery);
         reflinks.forEach((ref) => {
           ref.resolved = results.find((res) => {
             const sameBoard = (ref.board || board) === res.boardUri;
