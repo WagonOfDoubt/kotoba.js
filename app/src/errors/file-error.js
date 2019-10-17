@@ -3,7 +3,7 @@
  * @module errors/file-error
  */
 
-const { ConflictError, UnsupportedMediaTypeError } = require('./base-error');
+const { ConflictError, UnsupportedMediaTypeError, PayloadTooLargeError } = require('./base-error');
 
 
 /**
@@ -93,6 +93,34 @@ class ThumbnailGenerationError extends UnsupportedMediaTypeError {
 }
 
 
+/**
+ * @apiDefine FileTooLargeError
+ * @apiError FileTooLargeError File
+ * @apiErrorExample FileTooLargeError
+ *     HTTP/1.1 413 Payload Too Large
+ *     {
+ *       "status": 413,
+ *       "error": {
+ *         "code": "FileTooLarge",
+ *         "message": "File size is too big",
+ *       }
+ *     }
+ */
+
+/**
+ * Error occurred during thumbnail creation
+ * @extends module:errors/base-error.PayloadTooLargeError
+ * @alias module:errors/file-error.FileTooLargeError
+ */
+class FileTooLargeError extends UnsupportedMediaTypeError {
+  constructor(param, value, location) {
+    super(`File size is too big`,
+      'FileTooLarge', param, value, location);
+  }
+}
+
+
 module.exports.FileAlreadyExistsError = FileAlreadyExistsError;
 module.exports.FileFormatNotSupportedError = FileFormatNotSupportedError;
 module.exports.ThumbnailGenerationError = ThumbnailGenerationError;
+module.exports.FileTooLargeError = FileTooLargeError;

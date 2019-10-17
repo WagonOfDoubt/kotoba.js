@@ -46,6 +46,37 @@ module.exports.validateRequest = (req, res, next) => {
 
 
 /**
+ * Middleware that renders error page if there are any errors from
+ *    express-validator
+ * @see {@link https://express-validator.github.io/docs/}
+ * @static
+ */
+module.exports.validateForm = (req, res, next) => {
+  try {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      const errors = result
+        .formatWith(RequestValidationError.fromExpressValidator)
+        .array()
+        .map(e => e.toObject());
+      if (errors.length === 1) {
+        return res
+          .status(400)
+          .render('errorpage', { title: 'Error', error: errors[0] });
+      } else {
+        return res
+          .status(400)
+          .render('errorpage', { title: 'Error', errors: errors });
+      }
+    }
+    next();
+  } catch (errorWhileProcessingError) {
+    next(errorWhileProcessingError);
+  }
+};
+
+
+/**
  * Create middleware that redirects to specific url if express-validator results
  * is not empty.
  * @param {string} redirect - uri to redirect to

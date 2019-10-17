@@ -272,6 +272,18 @@ class ConflictError extends BaseError {
 
 
 /**
+ * Generic "413 Payload Too Large" Error
+ * @extends module:errors/base-error.BaseError
+ * @alias module:errors/base-error.PayloadTooLargeError
+ */
+class PayloadTooLargeError extends BaseError {
+  constructor(message, code, param, value, location) {
+    super(message, code || 'PayloadTooLarge', 413, param, value, location);
+  }
+}
+
+
+/**
  * Generic "415 Unsupported Media Type" Error
  * @extends module:errors/base-error.BaseError
  * @alias module:errors/base-error.UnsupportedMediaTypeError
@@ -337,6 +349,7 @@ module.exports.UnauthorizedError = UnauthorizedError;
 module.exports.ForbiddenError = ForbiddenError;
 module.exports.NotFoundError = NotFoundError;
 module.exports.ConflictError = ConflictError;
+module.exports.PayloadTooLargeError = PayloadTooLargeError;
 module.exports.UnsupportedMediaTypeError = UnsupportedMediaTypeError;
 module.exports.UnprocessableEntityError = UnprocessableEntityError;
 module.exports.TooManyRequestsError = TooManyRequestsError;

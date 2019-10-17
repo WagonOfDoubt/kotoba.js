@@ -6,7 +6,6 @@
 
 const ObjectId = require('mongoose').Types.ObjectId;
 const { generateThread, generateThreads, generateBoardPagesAndCatalog } = require('./generate');
-const { DocumentNotFoundError, PostingError } = require('../errors');
 const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
 const { Post, Thread, Reply } = require('../models/post');
@@ -16,49 +15,254 @@ const fs = require('fs-extra');
 const config = require('../json/config');
 const path = require('path');
 const _ = require('lodash');
+const Captcha = require('../models/captcha');
+const {
+  PostingError,
+  DocumentNotFoundError,
+  CaptchaEntryNotFoundError,
+  IncorrectCaptchaError,
+  FileTooLargeError } = require('../errors');
+
+
+/**
+ * @typedef  {Object} PostingResult
+ * @property {String} location Url that leads to post
+ * @property {String} boardUri Post board
+ * @property {Number} threadId Post parent thread number
+ * @property {Number} postId Post number
+ */
+
+
+/**
+ * Create new thread or reply to thread
+ * @async
+ * @param {Object}  postData Post data
+ * @param {String}  postData.boardUri Uri of board this post is posted on
+ * @param {Number}  [postData.threadId=0] Thread to reply to. If empty or 0,
+ *    new thread will be created.
+ * @param {Date}    [postData.createdAt=Date.now()] Date of post creation
+ * @param {String}  [postData.name=""] Poster name instead.
+ * @param {String}  [postData.tripcode=""] Poster tripcode
+ * @param {String}  [postData.email=""] Poster email or other link
+ * @param {String}  [postData.subject=""] Post subject
+ * @param {String}  [postData.body=""] Post message
+ * @param {String}  [postData.password=""] Password for post deletion
+ * @param {Boolean} [postData.isSage=false] Don't bump thread
+ * @param {Array<Object>} [postData.attachments] Array of attachments info
+ *    with files from {@link
+ *    https://github.com/expressjs/multer#readme|multer}
+ * @param {Boolean} [postData.attachments.isNSFW=false] Mark attachment as
+ *    NSFW
+ * @param {Boolean} [postData.attachments.isSpoiler=false] Mark attachment as
+ *    spoiler
+ * @param {Object}  posterInfo Poster info
+ * @param {String}  posterInfo.ip Poster ip
+ * @param {Object}  posterInfo.useragent Poster useragent (parsed by {@link
+ *    https://www.npmjs.com/package/express-useragent|express-useragent}
+ *    middleware)
+ * @param {Object}  [posterInfo.user] Logged in user object
+ * @param {Object}  posterInfo.session Session info
+ * @param {Object}  options  Posting options
+ * @param {String}  [options.captcha] Answer to captcha challenge
+ * @param {Boolean} [options.regenerate=true] Whether or not to generate
+ *    static HTML files
+ * @return {Object} Created post data
+ * @see {@link https://github.com/expressjs/multer#readme}
+ * @throws {DocumentNotFoundError} If board not found
+ * @throws {PostingError} If postData has missing or invalid values
+ * @throws {CaptchaEntryNotFoundError} If captcha expired
+ * @throws {IncorrectCaptchaError} If captcha is incorrect
+ * @throws {FileFormatNotSupportedError} If attachment file type is not
+ *    supported
+ * @throws {ThumbnailGenerationError} If something went wrong during thumbnail
+ *    creation
+ * @throws {FileTooLargeError} If attachment file size exceeds
+ *    board.maxFileSize
+ * @returns {PostingResult} Created post data
+ */
+module.exports.createPost = async (postData, posterInfo, options) => {
+  if (!postData.threadId) {
+    return await module.exports.createThread(postData, posterInfo, options);
+  } else {
+    return await module.exports.createReply(postData, posterInfo, options);
+  }
+};
+
+
+const populatePostDataDefaults = (postData, posterInfo, board) => {
+  postData.ip = posterInfo.ip;
+  postData.useragent = posterInfo.useragent;
+  if (board.isForcedAnon || !postData.name) {
+    postData.name = board.defaultPosterName;
+  }
+  if (board.isForcedAnon) {
+    postData.email = '';
+  }
+  if (postData.createdAt) {
+    if (!(posterInfo.user && posterInfo.user.authority === 'admin')) {
+      delete postData.createdAt;
+    }
+  }
+  return postData;
+};
+
+
+/**
+ * Check post message
+ * @inner
+ * @param  {Object} postData Post data
+ * @param  {Board}  board    Board document
+ * @throws {PostingError} If post has no message and no attachments
+ * @throws {PostingError} If message length is more than allowed in board
+ *    preferences
+ */
+const checkComment = (postData, board) => {
+  if (!postData.body && !postData.attachments.length) {
+    throw new PostingError('No comment entered', 'message', '', 'body');
+  }
+  if (postData.body && postData.body.length > board.maxMessageLength) {
+    throw new PostingError(`Message is too long (>${board.maxMessageLength})`, 'body', postData.body.length, 'body');
+  }
+};
+
+
+/**
+ * Check post attachments
+ * @inner
+ * @param  {Object} postData Post data
+ * @param  {Board}  board    Board document
+ * @throws {PostingError} If post has more attachments than allowed by board
+ * @throws {FileTooLargeError} If size of at least one of file exceeds maximum
+ *    size allowed by board
+ */
+const checkAttachments = (postData, board) => {
+  const attachments = postData.attachments;
+  if (attachments.length > board.maxFilesPerPost) {
+    throw new PostingError('Too many files', 'attachments', attachments.length, 'body');
+  }
+  if (attachments.length) {
+    const biggestFile = _.maxBy(attachments, 'size');
+    if (biggestFile > board.maxFileSize) {
+      throw new FileTooLargeError('attachments', biggestFile, 'body');
+    }
+  }
+};
+
+
+/**
+ * Check captcha
+ * @inner
+ * @async
+ * @param  {String} action     "reply" or "thread"
+ * @param  {Board}  board      Board document
+ * @param  {String} captcha    Captcha answer
+ * @param  {Object} posterInfo Poster info
+ * @throws {CaptchaEntryNotFoundError} If captcha expired
+ * @throws {IncorrectCaptchaError} If captcha is incorrect
+ */
+const checkCatptcha = async (action, board, captcha, posterInfo) => {
+  if (board.captcha.enabled) {
+    const expireTime = action === 'thread' ?
+      board.captcha.threadExpireTime :
+      board.captcha.replyExpireTime;
+    const captchaAnswer = captcha;
+    const captchaEntry = await Captcha.validate(captchaAnswer, posterInfo.session.id,
+      action, board.uri, expireTime);
+    if (captchaEntry === null) {
+      throw new CaptchaEntryNotFoundError('captcha', captchaAnswer, 'body');
+    }
+    if (!captchaEntry.isSolved) {
+      throw new IncorrectCaptchaError('captcha', captchaAnswer, 'body');
+    }
+  }
+};
 
 
 /**
  * Create new thread by adding it to DB, updating all related records in DB,
  *    uploading attachments and generating all related HTML files
  * @async
- * @param {string} boardUri - board directory
- * @param {object} postData - an object containing all necessary fields
- *    according to Post schema
- * @param {Array.<object>} files - array of files from req.files (multer)
- * @returns {number} postId - sequential number of new thread
+ * @param {Object}  postData Post data
+ * @param {String}  postData.boardUri Uri of board this post is posted on
+ * @param {Date}    [postData.createdAt=Date.now()] Date of post creation
+ * @param {String}  [postData.name=""] Poster name instead.
+ * @param {String}  [postData.tripcode=""] Poster tripcode
+ * @param {String}  [postData.email=""] Poster email or other link
+ * @param {String}  [postData.subject=""] Post subject
+ * @param {String}  [postData.body=""] Post message
+ * @param {String}  [postData.password=""] Password for post deletion
+ * @param {Array<Object>} [postData.attachments] Array of attachments info
+ *    with files from {@link
+ *    https://github.com/expressjs/multer#readme|multer}
+ * @param {Boolean} [postData.attachments.isNSFW=false] Mark attachment as
+ *    NSFW
+ * @param {Boolean} [postData.attachments.isSpoiler=false] Mark attachment as
+ *    spoiler
+ * @param {Object}  posterInfo Poster info
+ * @param {String}  posterInfo.ip Poster ip
+ * @param {Object}  posterInfo.useragent Poster useragent (parsed by {@link
+ *    https://www.npmjs.com/package/express-useragent|express-useragent}
+ *    middleware)
+ * @param {Object}  [posterInfo.user] Logged in user object
+ * @param {Object}  posterInfo.session Session info
+ * @param {Object}  options  Posting options
+ * @param {String}  [options.captcha] Answer to captcha challenge
+ * @param {Boolean} [options.regenerate=true] Whether or not to generate
+ *    static HTML files
+ * @return {Object} Created post data
+ * @see {@link https://github.com/expressjs/multer#readme}
+ * @throws {DocumentNotFoundError} If board not found
+ * @throws {PostingError} If postData has missing or invalid values
+ * @throws {CaptchaEntryNotFoundError} If captcha expired
+ * @throws {IncorrectCaptchaError} If captcha is incorrect
+ * @throws {FileFormatNotSupportedError} If attachment file type is not
+ *    supported
+ * @throws {ThumbnailGenerationError} If something went wrong during thumbnail
+ *    creation
+ * @throws {FileTooLargeError} If attachment file size exceeds
+ *    board.maxFileSize
+ * @returns {PostingResult} Created thread data
  */
-module.exports.createThread = async (boardUri, postData, files = []) => {
+module.exports.createThread = async (postData, posterInfo, options) => {
+  _.defaults(options, {
+    regenerate: true,
+  });
+  const boardUri = postData.boardUri;
   const board = await Board.findBoard(boardUri);
   if (!board) {
     throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
   }
-  if (files.length > board.maxFilesPerPost) {
-    throw new PostingError('Too many files', 'files', files.length, 'body');
-  }
-  if (!postData.body && !files.length) {
-    throw new PostingError('No comment entered', 'message', '', 'body');
-  }
+  const attachments = postData.attachments;
+  checkAttachments(postData, board);
+  checkComment(postData, board);
   if (board.newThreadsRequired.message && !postData.body) {
-    throw new PostingError('New threads must contain message', 'message', '', 'body');
+    throw new PostingError('New threads must contain message', 'body', '', 'body');
   }
   if (board.newThreadsRequired.subject && !postData.subject) {
     throw new PostingError('New threads must contain subject', 'subject', '', 'body');
   }
-  if (board.newThreadsRequired.files && !files.length) {
-    throw new PostingError('New threads must include image', 'files', 0, 'body');
+  if (board.newThreadsRequired.files && !attachments.length) {
+    throw new PostingError('New threads must include image', 'attachments', 0, 'body');
   }
+  await checkCatptcha('thread', board, options.captcha, posterInfo);
+  // @todo Check ban
+  // @todo Check posting rates and permanent sage
 
-  if (files.length) {
-    postData.attachments = await uploadFiles(boardUri, files);
+  if (attachments.length) {
+    const uploaded = await uploadFiles(boardUri, attachments, board.keepOriginalFileName);
+    postData.attachments = _.map(
+      _.zip(postData.attachments, uploaded),
+      ([postAttachment, uploadedAttachment]) => {
+        return {
+          ...uploadedAttachment,
+          isSpoiler: postAttachment.isSpoiler,
+          isNSFW: postAttachment.isNSFW,          
+        };
+      }
+    );
   }
-
-  if (board.isForcedAnon || !postData.name) {
-    postData.name = board.defaultPosterName;
-  }
+  postData = populatePostDataDefaults(postData, posterInfo, board);
   postData.postId = board.postcount + 1;
-  postData.board = board._id;
-
 
   const thread = new Thread(postData);
   await Parser.parsePost(thread);
@@ -70,9 +274,17 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
   ]);
   // populate virtual field board to avoid another query to DB
   thread.board = board;
-  await generateThread(thread);
-  await generateBoardPagesAndCatalog(board);
-  return thread.postId;
+  if (options.regenerate) {
+    await generateThread(thread);
+    await generateBoardPagesAndCatalog(board);    
+  }
+  const location = `/${ thread.boardUri }/res/${ thread.postId }.html`;
+  return Object.freeze({
+    postId   : thread.postId,
+    boardUri : thread.boardUri,
+    threadId : thread.postId,
+    location : location,
+  });
 };
 
 
@@ -80,74 +292,137 @@ module.exports.createThread = async (boardUri, postData, files = []) => {
  * Create reply in thread by adding it to DB, updating all related records in
  *    DB, uploading attachments and generating all related HTML files
  * @async
- * @param {string} boardUri - board directory
- * @param {number} threadId - sequential number of parent post on board
- * @param {object} postData - an object containing all necessary fields
- *    according to Post schema
- * @param {Array.<object>} files - array of files from req.files (multer)
- * @returns {number} postId - sequential number of new post
+ * @param {Object}  postData Post data
+ * @param {String}  postData.boardUri Uri of board this post is posted on
+ * @param {Number}  postData.threadId Thread to reply to
+ * @param {Date}    [postData.createdAt=Date.now()] Date of post creation
+ * @param {String}  [postData.name=""] Poster name instead.
+ * @param {String}  [postData.tripcode=""] Poster tripcode
+ * @param {String}  [postData.email=""] Poster email or other link
+ * @param {String}  [postData.subject=""] Post subject
+ * @param {String}  [postData.body=""] Post message
+ * @param {String}  [postData.password=""] Password for post deletion
+ * @param {Boolean} [postData.isSage=false] Don't bump thread
+ * @param {Array<Object>} [postData.attachments] Array of attachments info
+ *    with files from {@link
+ *    https://github.com/expressjs/multer#readme|multer}
+ * @param {Boolean} [postData.attachments.isNSFW=false] Mark attachment as
+ *    NSFW
+ * @param {Boolean} [postData.attachments.isSpoiler=false] Mark attachment as
+ *    spoiler
+ * @param {Object}  posterInfo Poster info
+ * @param {String}  posterInfo.ip Poster ip
+ * @param {Object}  posterInfo.useragent Poster useragent (parsed by {@link
+ *    https://www.npmjs.com/package/express-useragent|express-useragent}
+ *    middleware)
+ * @param {Object}  [posterInfo.user] Logged in user object
+ * @param {Object}  posterInfo.session Session info
+ * @param {Object}  options  Posting options
+ * @param {String}  [options.captcha] Answer to captcha challenge
+ * @param {Boolean} [options.regenerate=true] Whether or not to generate
+ *    static HTML files
+ * @return {Object} Created post data
+ * @see {@link https://github.com/expressjs/multer#readme}
+ * @throws {DocumentNotFoundError} If board or parent thread not found
+ * @throws {PostingError} If postData has missing or invalid values
+ * @throws {CaptchaEntryNotFoundError} If captcha expired
+ * @throws {IncorrectCaptchaError} If captcha is incorrect
+ * @throws {FileFormatNotSupportedError} If attachment file type is not
+ *    supported
+ * @throws {ThumbnailGenerationError} If something went wrong during thumbnail
+ *    creation
+ * @throws {FileTooLargeError} If attachment file size exceeds
+ *    board.maxFileSize
+ * @returns {PostingResult} Created reply data
  */
-module.exports.createReply = async (boardUri, threadId, postData, files = []) => {
+module.exports.createReply = async (postData, posterInfo, options) => {
+  _.defaults(options, {
+    regenerate: true,
+  });
+  const { boardUri, threadId } = postData;
   const [thread, board] = await Promise.all([
       Thread.findThread(boardUri, threadId).exec(),
       Board.findBoard(boardUri).exec()
     ]);
-
   if (!board) {
     throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
   }
   if (!thread) {
-    throw new DocumentNotFoundError(`Thread ${ boardUri }/${ threadId } not found`, 'replythread', threadId, 'body');
+    throw new DocumentNotFoundError(`Thread ${ boardUri }/${ threadId } not found`, 'threadId', threadId, 'body');
   }
-  if (files.length > board.maxFilesPerPost) {
-    throw new PostingError('Too many files', 'files', files.length, 'body');
-  }
-  if (!postData.body && !files.length) {
-    throw new PostingError('No comment entered', 'message', '', 'body');
+  const attachments = postData.attachments;
+  checkAttachments(postData, board);
+  checkComment(postData, board);
+  await checkCatptcha('reply', board, options.captcha, posterInfo);
+  // @todo Check ban
+  // @todo Check posting rates and permanent sage
+
+  if (attachments.length) {
+    const uploaded = await uploadFiles(boardUri, attachments, board.keepOriginalFileName);
+    postData.attachments = _.map(
+      _.zip(postData.attachments, uploaded),
+      ([postAttachment, uploadedAttachment]) => {
+        return {
+          ...uploadedAttachment,
+          isSpoiler: postAttachment.isSpoiler,
+          isNSFW: postAttachment.isNSFW,          
+        };
+      }
+    );
   }
 
-  if (files.length) {
-    postData.attachments = await uploadFiles(boardUri, files);
+  if (!board.allowRepliesSubject) {
+    postData.subject = '';
   }
-
-  if (board.isForcedAnon || !postData.name) {
-    postData.name = board.defaultPosterName;
-  }
+  postData = populatePostDataDefaults(postData, posterInfo, board);
   postData.postId = board.postcount + 1;
-  postData.threadId = thread.postId;
   postData.parent = ObjectId(thread._id);
-  postData.isOp = false;
 
-  const post = new Reply(postData);
-  await Parser.parsePost(post);
+  const reply = new Reply(postData);
+  await Parser.parsePost(reply);
   board.postcount = board.postcount + 1;
   board.uniquePosts = await Post.getNumberOfUniqueUserPosts(board.uri);
-  await Promise.all([post.save(), board.save()]);
+  await Promise.all([reply.save(), board.save()]);
   if (!postData.isSage) {
     const threadUpdateParams = {};
-    threadUpdateParams.bumpedAt = post.createdAt;
+    threadUpdateParams.bumpedAt = reply.createdAt;
     await Thread
       .findByIdAndUpdate(ObjectId(thread._id), threadUpdateParams);
   }
   const updatedThread = await Thread
     .findThread(boardUri, threadId)
     .populate('children');
+  // populate virtual field board to avoid another query to DB
   updatedThread.board = board;
-  await generateThread(updatedThread);
-  await generateBoardPagesAndCatalog(board);
-
-  return post.postId;
+  if (options.regenerate) {
+    await generateThread(updatedThread);
+    await generateBoardPagesAndCatalog(board);    
+  }
+  const location =
+    `/${ reply.boardUri }/res/${ reply.threadId }.html#post-${ reply.boardUri }-${ reply.postId }`;
+  return Object.freeze({
+    postId   : reply.postId,
+    boardUri : reply.boardUri,
+    threadId : reply.threadId,
+    location : location,
+  });
 };
 
 
 /**
+ * @typedef {Object} DeletePostsResult
+ * @property {Number} threads How many threads were deleted
+ * @property {Number} replies How many replies were deleted
+ * @property {Number} attachments How many attachments were deleted
+ */
+
+/**
  * Remove selected posts from database and corresponding attachment files
  * @async
- * @param {Array.<Post>} postsToDelete - array of post mongoose documents
- * @param {boolean} regenerate - regenerate corresponding html files
- * @returns {{ threads: number, replies: number, attachments: number }} An
- *    object with fields containing a number of how many threads, replies or
- *    attachments were deleted
+ * @param {Array.<Post>} postsToDelete     Array of post mongoose documents
+ * @param {Boolean}      [regenerate=true] Regenerate corresponding html files
+ * @returns {DeletePostsResult} An object with fields containing a number of
+ *    how many threads, replies or attachments were deleted
  */
 module.exports.deletePosts = async (postsToDelete, regenerate = true) => {
   // leave only unique posts just in case
