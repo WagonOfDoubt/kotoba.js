@@ -37,6 +37,8 @@
     "features.catalog",
     "features.sage",
     "features.permanentSage",
+    "features.attachmentSpoiler",
+    "features.attachmentNSFW",
     "filetypes",
     "postcount"
   ],

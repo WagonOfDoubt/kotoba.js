@@ -106,6 +106,8 @@ block main
     +checkboxEdit('features[catalog]', 'Enable catalog', 'If set to yes, a catalog.html file will be built with the other files, displaying the original picture of every thread in a box.')
     +checkboxEdit('features[sage]', 'Enable sage', 'Allow users to reply to threads without bumping them.')
     +checkboxEdit('features[permanentSage]', 'Permanent sage', 'If set to yes, poster can only sage thread once. After that, they no longer can post in threads they saged.')
+    +checkboxEdit('features[attachmentSpoiler]', 'Spoiler attachments', 'Allow to mark attachments as Spoiler.')
+    +checkboxEdit('features[attachmentNSFW]', 'NSFW attachments', 'Allow to mark attachments as NSFW.')
 
     if board
       input#btn-update-board(type='submit', value='Update board options')

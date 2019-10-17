@@ -174,6 +174,9 @@ export class PostForm {
     this.formEl.board.value = boardUri;
     this.formEl.replythread.value = threadId;
     this.updateCaptcha();
+    const isReply = this.isReplyToThread;
+    this.formEl.classList.toggle('postform_reply', isReply);
+    this.formEl.classList.toggle('postform_thread', !isReply);
     const replytoHeader = this.quickReplyPostarea
       .querySelector('.postarea__header__title');
     if (replytoHeader) {

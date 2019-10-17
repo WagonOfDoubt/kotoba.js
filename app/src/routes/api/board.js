@@ -75,6 +75,10 @@ const localeCodes = locales.map(([t, c]) => c);
  * @apiParam {Boolean}  [data.features.permanentSage=false] If true, poster
  *    can only sage thread once. After that, they no longer can post in
  *    threads they saged.
+ * @apiParam {Boolean}  [data.features.attachmentSpoiler=true] Allow to mark
+ *    attachments as Spoiler
+ * @apiParam {Boolean}  [data.features.attachmentNSFW=true] Allow to mark
+ *    attachments as NSFW
  * @apiParam {Boolean}  [data.allowRepliesSubject=true] Display subject field
  *    in form for replying in thread.
  * @apiParam {Object}   [data.captcha] Captcha options
@@ -257,6 +261,18 @@ const boardParamsValidator = {
     in: 'body',
   },
   'data.features.permanentSage': {
+    optional: true,
+    isBoolean: true,
+    toBoolean: true,
+    in: 'body',
+  },
+  'data.features.attachmentSpoiler': {
+    optional: true,
+    isBoolean: true,
+    toBoolean: true,
+    in: 'body',
+  },
+  'data.features.attachmentNSFW': {
     optional: true,
     isBoolean: true,
     toBoolean: true,

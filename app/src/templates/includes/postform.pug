@@ -3,12 +3,15 @@ form#postform.postform.hidden(
   method='post'
   enctype='multipart/form-data'
   class={
-    'postform_forced-anon': board ? board.isForcedAnon : false,
-    'postform_reply': !isPage,
-    'postform_no-subject': !(isPage || !board || board.allowRepliesSubject),
-    'postform_no-upload': board ? board.maxFilesPerPost === 0 : false,
-    'postform_no-captcha': board ? !(board.captcha && board.captcha.enabled) : false,
-    'postform_no-sage': board ? !(board.features && board.features.sage) : false,
+    'postform_forced-anon' : board ? board.isForcedAnon : false,
+    'postform_reply'       : !isPage,
+    'postform_thread'      : isPage,
+    'postform_no-subject'  : !(board ? board.allowRepliesSubject : false),
+    'postform_no-upload'   : board ? board.maxFilesPerPost === 0 : false,
+    'postform_no-captcha'  : board ? !(board.captcha && board.captcha.enabled) : false,
+    'postform_no-sage'     : board ? !(board.features && board.features.sage) : false,
+    'postform_no-spoiler'  : board ? !(board.features && board.features.attachmentSpoiler) : false,
+    'postform_no-nsfw'     : board ? !(board.features && board.features.attachmentNSFW) : false,
   }
 )
   input(
@@ -94,6 +97,20 @@ form#postform.postform.hidden(
         type='file'
         multiple=multiple
       )
+      lebel.postform_spoiler.button_link
+        input#spoiler-input.spoiler-input(
+          name=`spoiler`,
+          type='checkbox',
+          accesskey='s',
+        )
+        | Spoiler
+      lebel.postform_nsfw.button_link
+        input#nsfw-input.nsfw-input(
+          name=`nsfw`,
+          type='checkbox',
+          accesskey='x',
+        )
+        | NSFW
   div.postform__row.postform__password
     div.postform__row__label
       label(for='postpassword-input').form-label Password

@@ -296,7 +296,12 @@ const boardSchema = Schema({
    * @property {Boolean} [sage=true] Allow users to reply to threads without
    *    bumping them.
    * @property {Boolean} [permanentSage=false] If true, poster can only sage
-   *    thread once. After that, they no longer can post in threads they saged.
+   *    thread once. After that, they no longer can post in threads they
+   *    saged.
+   * @property {Boolean} [attachmentSpoiler=true] Allow to mark attachments as
+   *    Spoiler
+   * @property {Boolean} [attachmentNSFW=true] Allow to mark attachments as
+   *    NSFW
    */
   features: {
     reporting:     { type: Boolean, default: true },
@@ -304,6 +309,8 @@ const boardSchema = Schema({
     catalog:       { type: Boolean, default: true },
     sage:          { type: Boolean, default: true },
     permanentSage: { type: Boolean, default: false },
+    attachmentSpoiler: { type: Boolean, default: true },
+    attachmentNSFW:    { type: Boolean, default: true },
   },
   /**
    * @todo Implement custom file types

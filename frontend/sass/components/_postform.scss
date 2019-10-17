@@ -93,8 +93,21 @@
     }
   }
 
+  &.postform_thread,
   &.postform_no-sage {
     .postform__sage {
+      display: none;
+    }
+  }
+
+  &.postform_no-spoiler {
+    .postform_spoiler {
+      display: none;
+    }
+  }
+
+  &.postform_no-nsfw {
+    .postform_nsfw {
       display: none;
     }
   }

@@ -66,6 +66,11 @@ router.post('/form/post',
       toBoolean: true,
       optional: true,
     },
+    nsfw: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
     sage: {
       in: 'body',
       toBoolean: true,
@@ -102,6 +107,7 @@ router.post('/form/post',
           postData.attachments,
           (fileDesc) => {
             fileDesc.isSpoiler = req.body.spoiler || false;
+            fileDesc.isNSFW = req.body.nsfw || false;
             return fileDesc;
           });
       const posterInfo = {

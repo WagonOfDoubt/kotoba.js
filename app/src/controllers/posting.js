@@ -89,6 +89,15 @@ module.exports.createPost = async (postData, posterInfo, options) => {
 };
 
 
+/**
+ * Populates some postData fields depending on board settings. Mutates
+ *    postData.
+ * @inner
+ * @param  {Object}  postData   Post data
+ * @param  {Object}  posterInfo Poster info
+ * @param  {Board}   board      Board document
+ * @return {Object}             postData
+ */
 const populatePostDataDefaults = (postData, posterInfo, board) => {
   postData.ip = posterInfo.ip;
   postData.useragent = posterInfo.useragent;
@@ -146,6 +155,41 @@ const checkAttachments = (postData, board) => {
       throw new FileTooLargeError('attachments', biggestFile, 'body');
     }
   }
+};
+
+
+/**
+ * Upload attachments if there are any. Mutates postData.
+ * @inner
+ * @async
+ * @param  {Object} postData Post data
+ * @param  {Board}  board    Board document
+ * @throws {FileFormatNotSupportedError} If attachment file type is not
+ *    supported
+ * @throws {ThumbnailGenerationError} If something went wrong during thumbnail
+ *    creation
+ * @returns {Object} postData
+ */
+const handleAttachments = async (postData, board) => {
+  const attachments = postData.attachments;
+  if (attachments.length) {
+    const uploaded = await uploadFiles(board.uri, attachments, board.keepOriginalFileName);
+    postData.attachments = _.map(
+      _.zip(postData.attachments, uploaded),
+      ([postAttachment, uploadedAttachment]) => {
+        return {
+          ...uploadedAttachment,
+          isSpoiler: board.features.attachmentSpoiler ?
+            postAttachment.isSpoiler :
+            false,
+          isNSFW: board.features.attachmentNSFW ?
+            postAttachment.isNSFW :
+            false,
+        };
+      }
+    );
+  }
+  return postData;
 };
 
 
@@ -232,7 +276,6 @@ module.exports.createThread = async (postData, posterInfo, options) => {
   if (!board) {
     throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
   }
-  const attachments = postData.attachments;
   checkAttachments(postData, board);
   checkComment(postData, board);
   if (board.newThreadsRequired.message && !postData.body) {
@@ -241,26 +284,13 @@ module.exports.createThread = async (postData, posterInfo, options) => {
   if (board.newThreadsRequired.subject && !postData.subject) {
     throw new PostingError('New threads must contain subject', 'subject', '', 'body');
   }
-  if (board.newThreadsRequired.files && !attachments.length) {
+  if (board.newThreadsRequired.files && !(postData.attachments || postData.attachments.length)) {
     throw new PostingError('New threads must include image', 'attachments', 0, 'body');
   }
   await checkCatptcha('thread', board, options.captcha, posterInfo);
   // @todo Check ban
   // @todo Check posting rates and permanent sage
-
-  if (attachments.length) {
-    const uploaded = await uploadFiles(boardUri, attachments, board.keepOriginalFileName);
-    postData.attachments = _.map(
-      _.zip(postData.attachments, uploaded),
-      ([postAttachment, uploadedAttachment]) => {
-        return {
-          ...uploadedAttachment,
-          isSpoiler: postAttachment.isSpoiler,
-          isNSFW: postAttachment.isNSFW,          
-        };
-      }
-    );
-  }
+  await handleAttachments(postData, board);
   postData = populatePostDataDefaults(postData, posterInfo, board);
   postData.postId = board.postcount + 1;
 
@@ -350,26 +380,12 @@ module.exports.createReply = async (postData, posterInfo, options) => {
   if (!thread) {
     throw new DocumentNotFoundError(`Thread ${ boardUri }/${ threadId } not found`, 'threadId', threadId, 'body');
   }
-  const attachments = postData.attachments;
   checkAttachments(postData, board);
   checkComment(postData, board);
   await checkCatptcha('reply', board, options.captcha, posterInfo);
   // @todo Check ban
   // @todo Check posting rates and permanent sage
-
-  if (attachments.length) {
-    const uploaded = await uploadFiles(boardUri, attachments, board.keepOriginalFileName);
-    postData.attachments = _.map(
-      _.zip(postData.attachments, uploaded),
-      ([postAttachment, uploadedAttachment]) => {
-        return {
-          ...uploadedAttachment,
-          isSpoiler: postAttachment.isSpoiler,
-          isNSFW: postAttachment.isNSFW,          
-        };
-      }
-    );
-  }
+  await handleAttachments(postData, board);
 
   if (!board.allowRepliesSubject) {
     postData.subject = '';
