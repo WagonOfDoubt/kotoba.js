@@ -181,6 +181,15 @@ const boardSchema = Schema({
    */
   defaultPosterName:   { type: String, default: 'Anonymous' },
   /**
+   * Whether or not to keep original file name for attachments. If false,
+   *    random numbers will be used as file name.
+   * @type {Boolean}
+   * @memberOf module:models/board~Board
+   * @instance
+   * @default true
+   */
+  keepOriginalFileName:{ type: Boolean, default: true },
+  /**
    * If true, only moderators of the board and admin can make new
    *    threads or replies
    * @type {Boolean}

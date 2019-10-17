@@ -84,6 +84,7 @@ block main
     h3 Upload rules
     +numberEdit('maxFileSize', 'Maximum file size', 'Maximum size of uploaded images, in bytes.')
     +numberEdit('maxFilesPerPost', 'Maximum files per post', '0 forbids any uploads making board text only.')
+    +checkboxEdit('keepOriginalFileName', 'Keep original file name', 'If false, uploads will be saved with random name.')
     h3 Posting rules
     +numberEdit('maxMessageLength', 'Maximum message length', 'Maximum message length.')
     +textEdit('defaultPosterName', 'Anonymous', 'Name to display when a name is not attached to a post.')

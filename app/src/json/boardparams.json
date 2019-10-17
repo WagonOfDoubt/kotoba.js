@@ -9,6 +9,7 @@
     "faviconUri",
     "maxFileSize",
     "maxFilesPerPost",
+    "keepOriginalFileName",
     "maxThreadsOnPage",
     "maxPages",
     "autosage",

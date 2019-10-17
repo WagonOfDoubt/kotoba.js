@@ -17,78 +17,77 @@ const localeCodes = locales.map(([t, c]) => c);
 
 /**
  * @apiDefine BoardParams
- * @apiParam (Board data) {String} data.name="" Board title. If empty, board
- *    uri will be used.
- * @apiParam (Board data) {String} data.desc="" Board description.
- * @apiParam (Board data) {String} data.header="" HTML under board title in
- *    page header.
- * @apiParam (Board data) {String} data.navbar="" HTML of additional
- *    navigation menu under top links.
- * @apiParam (Board data) {String[]} data.imageUri Array of URLs. Overrides
- *    the header image set in site settings. If left blank to use configured
- *    global header image.
- * @apiParam (Board data) {String} data.faviconUri Board favicon. Overrides
- *    default favicon. Leave blank to use default favicon.
- * @apiParam (Board data) {Number} data.maxFileSize=10485760 Maximum size of
- *    uploaded images, in bytes.
- * @apiParam (Board data) {Number} data.maxFilesPerPost=4 Maximum uploads in
- *    post. 0 forbids any uploads making board text only.
- * @apiParam (Board data) {Number} data.maxThreadsOnPage=10 How many threads
- *    are displayed on page.
- * @apiParam (Board data) {Number} data.maxPages=10 Number of pages on board.
- * @apiParam (Board data) {Number} data.showReplies=5 Number of replies to
- *    show on a board page.
- * @apiParam (Board data) {Number} data.showRepliesSticky=1 Number of replies
- *    to show on a board page when the thread set as sticky.
- * @apiParam (Board data) {Number} data.autosage=500 The number of replies a
- *    thread can have before autosaging. Also known as bump limit.
- * @apiParam (Board data) {Number} data.maxMessageLength=9001 Maximum number
- *    of characters in post.
- * @apiParam (Board data) {String} data.defaultPosterName="Anonymous" Name to
- *    display when a name is not attached to a post.
- * @apiParam (Board data) {Boolean} data.isLocked=false Only moderators of the
- *    board and admin can make new posts/replies.
- * @apiParam (Board data) {Boolean} data.isHidden=false Do not display this
- *    board in navigation menu.
- * @apiParam (Board data) {Boolean} data.isForcedAnon=false If true, users
- *    will not be allowed to enter a name, forcing to use default instead.
- * @apiParam (Board data) {String} data.defaultStyle="" The style which will
- *    be set when the user first visits the board.
- * @apiParam (Board data) {String} data.locale="en" Locale to use on this
- *    board. Leave blank to use the locale defined in site settings.
- * @apiParam (Board data) {Object} data.newThreadsRequired Object with boolean
- *    values representing which fields are required for new threads.
- * @apiParam (Board data) {Boolean} data.newThreadsRequired.files=false If
- *    true, new threads will require at least one attachment.
- * @apiParam (Board data) {Boolean} data.newThreadsRequired.message=false If
- *    true, new threads will require message.
- * @apiParam (Board data) {Boolean} data.newThreadsRequired.subject=false If
- *    true, new threads will require subject.
- * @apiParam (Board data) {Object} data.features Object with boolean values
+ * @apiParam {String}   [data.name] Board title. If empty, board uri will be
+ *    used.
+ * @apiParam {String}   [data.desc] Board description.
+ * @apiParam {String}   [data.header] HTML under board title in page header.
+ * @apiParam {String}   [data.navbar] HTML of additional navigation menu under
+ *    top links.
+ * @apiParam {String[]} [data.imageUri] Array of URLs. Overrides the header
+ *    image set in site settings. If left blank to use configured global
+ *    header image.
+ * @apiParam {String}   [data.faviconUri] Board favicon. Overrides default
+ *    favicon. Leave blank to use default favicon.
+ * @apiParam {Number}   [data.maxFileSize=10485760] Maximum size of uploaded
+ *    images, in bytes.
+ * @apiParam {Number}   [data.maxFilesPerPost=4] Maximum uploads in post. 0
+ *    forbids any uploads making board text only.
+ * @apiParam {Number}   [data.maxThreadsOnPage=10] How many threads are
+ *    displayed on page.
+ * @apiParam {Number}   [data.maxPages=10] Number of pages on board.
+ * @apiParam {Number}   [data.showReplies=5] Number of replies to show on a
+ *    board page.
+ * @apiParam {Number}   [data.showRepliesSticky=1] Number of replies to show
+ *    on a board page when the thread set as sticky.
+ * @apiParam {Number}   [data.autosage=500] The number of replies a thread can
+ *    have before autosaging. Also known as bump limit.
+ * @apiParam {Number}   [data.maxMessageLength=9001] Maximum number of
+ *    characters in post.
+ * @apiParam {String}   [data.defaultPosterName="Anonymous"] Name to display
+ *    when a name is not attached to a post.
+ * @apiParam {Boolean}  [data.isLocked=false] Only moderators of the board and
+ *    admin can make new posts/replies.
+ * @apiParam {Boolean}  [data.isHidden=false] Do not display this board in
+ *    navigation menu.
+ * @apiParam {Boolean}  [data.isForcedAnon=false] If true, users will not be
+ *    allowed to enter a name, forcing to use default instead.
+ * @apiParam {String}   [data.defaultStyle] The style which will be set when
+ *    the user first visits the board.
+ * @apiParam {String}   [data.locale="en"] Locale to use on this board. Leave
+ *    blank to use the locale defined in site settings.
+ * @apiParam {Object}   [data.newThreadsRequired] Object with boolean values
+ *    representing which fields are required for new threads.
+ * @apiParam {Boolean}  [data.newThreadsRequired.files=false] If true, new
+ *    threads will require at least one attachment.
+ * @apiParam {Boolean}  [data.newThreadsRequired.message=false] If true, new
+ *    threads will require message.
+ * @apiParam {Boolean}  [data.newThreadsRequired.subject=false] If true, new
+ *    threads will require subject.
+ * @apiParam {Object}   [data.features] Object with boolean values
  *    representing which features on board turned on or off.
- * @apiParam (Board data) {Boolean} data.features.reporting=true Allow users
- *    to report posts.
- * @apiParam (Board data) {Boolean} data.features.archive=true Enable/disable
- *    thread archiving.
- * @apiParam (Board data) {Boolean} data.features.catalog=true Generate
- *    catalog.html.
- * @apiParam (Board data) {Boolean} data.features.sage=true Allow users to
- *    reply to threads without bumping them.
- * @apiParam (Board data) {Boolean} data.features.permanentSage=false If true,
- *    poster can only sage thread once. After that, they no longer can post in
+ * @apiParam {Boolean}  [data.features.reporting=true] Allow users to report
+ *    posts.
+ * @apiParam {Boolean}  [data.features.archive=true] Enable/disable thread
+ *    archiving.
+ * @apiParam {Boolean}  [data.features.catalog=true] Generate catalog.html.
+ * @apiParam {Boolean}  [data.features.sage=true] Allow users to reply to
+ *    threads without bumping them.
+ * @apiParam {Boolean}  [data.features.permanentSage=false] If true, poster
+ *    can only sage thread once. After that, they no longer can post in
  *    threads they saged.
- * @apiParam (Board data) {Boolean} data.allowRepliesSubject=true Display
- *    subject field in form for replying in thread.
- * @apiParam (Board data) {Object} data.captcha Captcha options
- * @apiParam (Board data) {Boolean} data.captcha.enabled Enable captcha
- * @apiParam (Board data) {Boolean} data.captcha.unsolvedExpireTime Number of
- *    minutes until unsolved captcha is removed and need to be refreshed
- * @apiParam (Board data) {Boolean} data.captcha.replyExpireTime Number of
- *    minutes when solved captcha is still valid after reply
- * @apiParam (Board data) {Boolean} data.captcha.threadExpireTime Number of
- *    minutes when solved captcha is still valid after creating new thread
- * @apiParam (Board data) {Boolean} data.captcha.provider Captcha provider.
- *    Currently supported is: "wakabtcha" - default captcha from Wakaba
+ * @apiParam {Boolean}  [data.allowRepliesSubject=true] Display subject field
+ *    in form for replying in thread.
+ * @apiParam {Object}   [data.captcha] Captcha options
+ * @apiParam {Boolean}  [data.captcha.enabled] Enable captcha
+ * @apiParam {Boolean}  [data.captcha.unsolvedExpireTime=10] Number of minutes
+ *    until unsolved captcha is removed and need to be refreshed
+ * @apiParam {Boolean}  [data.captcha.replyExpireTime=0] Number of minutes
+ *    when solved captcha is still valid after reply
+ * @apiParam {Boolean}  [data.captcha.threadExpireTime=0] Number of minutes
+ *    when solved captcha is still valid after creating new thread
+ * @apiParam {Boolean}  [data.captcha.provider="wakabtcha"] Captcha provider.
+ *    Currently supported is:
+ *    - "wakabtcha" - default captcha from Wakaba
  */
 const boardParamsValidator = {
   'data.name': {
@@ -131,6 +130,12 @@ const boardParamsValidator = {
     optional: true,
     isInt: true,
     toInt: true,
+    in: 'body',
+  },
+  'data.keepOriginalFileName': {
+    optional: true,
+    isBoolean: true,
+    toBoolean: true,
     in: 'body',
   },
   'data.maxThreadsOnPage': {
@@ -293,8 +298,8 @@ const boardParamsValidator = {
 
 /**
  * @apiDefine BoardUri
- * @apiParam (Board data) {Object} data Object with board data. Required.
- * @apiParam (Board data) {String} data.uri Board uri. Must contain only
+ * @apiParam {Object} data Object with board data. Required.
+ * @apiParam {String} data.uri Board uri. Must contain only
  * letters, numbers or underscore (a-z, A-Z, 0-9, _). Letters will be
  * converted to lower case. Board uri is immutable. Required.
  */
@@ -444,54 +449,29 @@ router.get(
  * @apiGroup Board
  * @apiPermission admin
  * @apiDescription Create new board with parameters defined by object *data*.
- * Only data.uri is required to create board, other fields are optional and
- * can be changed later.
+ *    Only data.uri is required to create board, other fields are optional and
+ *    can be changed later.
  * @apiUse BoardUri
  * @apiUse BoardParams
+ *
  * @apiSuccessExample
  *     HTTP/1.1 201 Created
  *     Location: /b
  *     {
- *       "newThreadsRequired": {
- *         "files": false,
- *         "message": false,
- *         "subject": false
- *       },
- *       "captcha": {
- *         "enabled": false
- *       },
- *       "features": {
- *         "reporting": true,
- *         "archive": true,
- *         "catalog": true,
- *         "sage": true,
- *         "permanentSage": false
- *       },
  *       "name": "",
  *       "desc": "",
- *       "header": "",
- *       "navbar": "",
- *       "imageUri": "",
- *       "faviconUri": "",
- *       "maxFileSize": 10485760,
- *       "maxFilesPerPost": 4,
- *       "maxThreadsOnPage": 10,
- *       "maxPages": 10,
- *       "autosage": 500,
- *       "showReplies": 5,
- *       "showRepliesSticky": 1,
- *       "maxMessageLength": 9001,
- *       "defaultPosterName": "Anonymous",
- *       "isLocked": false,
- *       "isHidden": false,
- *       "isForcedAnon": false,
- *       "defaultStyle": "",
- *       "locale": "en",
- *       "allowRepliesSubject": true,
- *       "filetypes": [],
- *       "postcount": 0,
  *       "uri": "b",
- *       "createdAt": "2019-01-12T03:40:59.741Z"
+ *       "createdAt": "2019-01-12T03:40:59.741Z",
+ *       "newThreadsRequired": {
+ *         ...
+ *       },
+ *       "captcha": {
+ *         ...
+ *       },
+ *       "features": {
+ *         ...
+ *       },
+ *       ...
  *     }
  *
  * @apiUse AuthRequiredError
@@ -538,57 +518,30 @@ router.post(
  * @apiDescription Partially update parameters of board. Accepts object with
  *    new values and changes board parameters accordingly. All changes are
  *    recorded to ModLog.
- * @apiParam (options) {Boolean} regenerate Whether or not to update
- *    associated HTML files. Board pages are updated on every post, while
- *    thread pages are updated only on reply to each thread. Choosing
- *    regenerate will update all threads and board pages instantly.
+ * @apiParam {Boolean} regenerate Whether or not to update associated HTML
+ *    files. Board pages are updated on every post, while thread pages are
+ *    updated only on reply to each thread. Choosing regenerate will update
+ *    all threads and board pages instantly.
  * @apiUse BoardUri
  * @apiUse BoardParams
  *
  * @apiSuccessExample
- *     HTTP/1.1 201 Created
- *     Location: /b
+ *     HTTP/1.1 200 Success
  *     {
- *       "newThreadsRequired": {
- *         "files": false,
- *         "message": false,
- *         "subject": false
- *       },
- *       "captcha": {
- *         "enabled": false
- *       },
- *       "features": {
- *         "reporting": true,
- *         "archive": true,
- *         "catalog": true,
- *         "sage": true,
- *         "permanentSage": false
- *       },
  *       "name": "",
  *       "desc": "",
- *       "header": "",
- *       "navbar": "",
- *       "imageUri": "",
- *       "faviconUri": "",
- *       "maxFileSize": 10485760,
- *       "maxFilesPerPost": 4,
- *       "maxThreadsOnPage": 10,
- *       "maxPages": 10,
- *       "autosage": 500,
- *       "showReplies": 5,
- *       "showRepliesSticky": 1,
- *       "maxMessageLength": 9001,
- *       "defaultPosterName": "Anonymous",
- *       "isLocked": false,
- *       "isHidden": false,
- *       "isForcedAnon": false,
- *       "defaultStyle": "",
- *       "locale": "en",
- *       "allowRepliesSubject": true,
- *       "filetypes": [],
- *       "postcount": 0,
  *       "uri": "b",
- *       "createdAt": "2019-01-12T03:40:59.741Z"
+ *       "createdAt": "2019-01-12T03:40:59.741Z",
+ *       "newThreadsRequired": {
+ *         ...
+ *       },
+ *       "captcha": {
+ *         ...
+ *       },
+ *       "features": {
+ *         ...
+ *       },
+ *       ...
  *     }
  *
  * @apiUse AuthRequiredError
