@@ -139,11 +139,10 @@ const uploadFiles = (boardUri, files, keepFilename = true) =>
  * @async
  * @param {String} boardUri - board directory
  * @param {Object} file - file object from multer package
- * {@link https://www.npmjs.com/package/multer}
  * @param {boolean} keepFilename - whether or not to store original file name,
- * if false, random numbers will be used instead
- * @returns { object } attachment object to be saved to database
- * @static
+ *    if false, random numbers will be used instead
+ * @see {@link https://www.npmjs.com/package/multer}
+ * @returns {Object} attachment object to be saved to database
  */
 const uploadFile = async (boardUri, file, keepFilename = true) => {
   const ext = getExtensionByMime(file.mimetype);

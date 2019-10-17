@@ -59,40 +59,40 @@ const postSchema = new Schema({
     index: -1,
   },
   /**
-   * INPUT. Poster name. Can be edited by original poster with password or by
-   *    user with role with permission to edit other's posts.
+   * Poster name. Can be edited by original poster with password or by user
+   *    with role with permission to edit other's posts.
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
    */
   name:                { type: String, default: '' },
   /**
-   * INPUT. Poster tripcode.
+   * Poster tripcode.
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
    */
   tripcode:            { type: String, default: '' },
   /**
-   * INPUT. Poster link or e-mail. Can be edited by original poster with
-   *    password or by user with role with permission to edit other's posts.
+   * Poster link or e-mail. Can be edited by original poster with password or
+   *    by user with role with permission to edit other's posts.
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
    */
   email:               { type: String, default: '' },
   /**
-   * INPUT. Post subject. Can be edited by original poster with password or by
-   *    user with role with permission to edit other's posts.
+   * Post subject. Can be edited by original poster with password or by user
+   *    with role with permission to edit other's posts.
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
    */
   subject:             { type: String, default: '' },
   /**
-   * INPUT. Unparsed original post body as it was written by poster. Can be
-   *    edited by original poster with password or by user with role with
-   *    permission to edit other's posts.
+   * Unparsed original post body as it was written by poster. Can be edited by
+   *    original poster with password or by user with role with permission to
+   *    edit other's posts.
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
@@ -107,9 +107,8 @@ const postSchema = new Schema({
    */
   parsed:              [ ],
   /**
-   * Refs to posts that are referencing this post. Replies are
-   *    reflinks on separate line, and therefore can be used to divide post
-   *    into sections.
+   * Refs to posts that are referencing this post. Replies are reflinks on
+   *    separate line, and therefore can be used to divide post into sections.
    * @see module:models/schema/reflink
    * @type {Array<module:models/schema/reflink~Reflink>}
    * @memberOf module:models/post~Post
@@ -126,7 +125,7 @@ const postSchema = new Schema({
    */
   references:          [ reflinkSchema ],
   /**
-   * INPUT. Array of post's attachments.
+   * Array of post's attachments.
    * @see models/schema/attachment
    * @type {Array<module:models/schema/attachment~Attachment>}
    * @memberOf module:models/post~Post
@@ -134,9 +133,9 @@ const postSchema = new Schema({
    */
   attachments:         [ attachmentSchema ],
   /**
-   * INPUT. Do not bump thread. This field can be changed by user with role
-   *    with write permission which assigned on board to which this posts
-   *    belongs or by password.
+   * Do not bump thread. This field can be changed by user with role with
+   *    write permission which assigned on board to which this posts belongs
+   *    or by password.
    * @type {Boolean}
    * @memberOf module:models/post~Post
    * @instance
@@ -161,7 +160,7 @@ const postSchema = new Schema({
    */
   password:            { type: String, default: '', immutable: true },
   /**
-   * INPUT. Parsed useragent of poster.
+   * Parsed useragent of poster.
    * @see models/schema/useragent
    * @type {module:models/schema/useragent~Useragent}
    * @memberOf module:models/post~Post

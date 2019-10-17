@@ -12,12 +12,12 @@ block header
 
 block main
   if error
-    div.error #{ error.name }: #{ error.message }
+    div.error #{error.code || error.name} #{ error.param }: #{ error.message }
     if error.stack
       pre.error= error.stack
   if errors
     for e in errors
-      div.error #{ error.param }: #{ error.msg }
+      div.error #{error.code || error.name} #{ error.param }: #{ error.msg }
 
 block scripts
   script(src='/.static/js/kotoba.js')

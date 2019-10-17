@@ -178,7 +178,7 @@ router.get('/api/captcha/:boardUri/:action',
 
 
 /**
- * @api {get} /api/captcha/:boardUri/:action Validate captcha
+ * @api {post} /api/captcha/:boardUri/:action Validate captcha
  * @apiName CheckCaptcha
  * @apiGroup Captcha
  * @apiPermission anyone
