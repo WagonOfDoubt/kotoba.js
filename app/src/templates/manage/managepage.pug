@@ -17,30 +17,36 @@ block main
 
   h2 Technical Info
   section#manage-info-status
-    p Uptime: #[+fromSeconds(process.uptime())]
+    p Uptime: #[strong #[+fromSeconds(process.uptime())]]
     - var cpuUsage = process.cpuUsage()
-    p CPU usage (microseconds): user - #{cpuUsage.user}, system - #{cpuUsage.system}
+    p CPU usage (microseconds):
+      ul.list.list_unmarked
+        li user - #[strong=cpuUsage.user]
+        li system - #[strong=cpuUsage.system]
     - var memoryUsage = process.memoryUsage()
     p Memory usage:
       ul.list.list_unmarked
-        li Heap - #{filters.readableSize(memoryUsage.heapUsed)}/#{filters.readableSize(memoryUsage.heapTotal)} 
-        li External - #{filters.readableSize(memoryUsage.external)}
-        li #[abbr(title='Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the process, which includes the heap, code segment and stack.') RSS] - #{filters.readableSize(memoryUsage.rss)}
-    p Debug port: #{process.debugPort}
+        li Heap - #[strong=filters.readableSize(memoryUsage.heapUsed)]/#[strong=filters.readableSize(memoryUsage.heapTotal)] 
+        li External - #[strong=filters.readableSize(memoryUsage.external)]
+        li #[abbr(title='Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the process, which includes the heap, code segment and stack.') RSS] - #[strong=filters.readableSize(memoryUsage.rss)]
+    p Debug port: #[strong=process.debugPort] (see #[a(href='https://nodejs.org/en/docs/guides/debugging-getting-started/') Node.js Debugging Guide])
+    p App port: #[strong=process.env.KOT_APP_PORT]
+    p #[abbr(title='Docker container id') Host name]: #[strong=process.env.HOSTNAME]
   section#manage-info-node
     h3 Node.js
     -var nodeVersion = process.version
-    p #[a(href='https://nodejs.org/') Node] version: #{nodeVersion}
+    p #[a(href='https://nodejs.org/') Node] version: #[strong=nodeVersion]
+    p Environment: #[strong=process.env.NODE_ENV]
     -var nodeRelatedStuff = process.versions
     p Node details: 
       +showOmittedBtn(Object.keys(nodeRelatedStuff).length, `#manage-info-node-versions`)
     div#manage-info-node-versions.hidden
       for v, k in nodeRelatedStuff
-        div #{k}: #{v}
+        div #{k}: #[strong=v]
   section#manage-info-mongo
     h3 Mongo version
-    p #[a(href='https://www.mongodb.com/') MongoDB] version: #{kot_mongo_version}
-    p #[a(href='https://mongoosejs.com/') Mongoose] version: #{kot_mongoose_version}
+    p #[a(href='https://www.mongodb.com/') MongoDB] version: #[strong=kot_mongo_version]
+    p #[a(href='https://mongoosejs.com/') Mongoose] version: #[strong=kot_mongoose_version]
 
   section#manage-info-ffmpeg
     h3 ffmpeg
@@ -67,24 +73,24 @@ block main
       +showOmittedBtn(Object.keys(ffmpegData.filters).length, `#manage-info-ffmpeg-filters`)
     div#manage-info-ffmpeg-filters.hidden
       +ffmpegFeatureList(ffmpegData.filters)
-    p ffmpeg path: #[span= ffmpegData.ffmpegPath]
-    p ffprobe path: #[span= ffmpegData.ffprobePath]
+    p ffmpeg path: #[strong= ffmpegData.ffmpegPath]
+    p ffprobe path: #[strong= ffmpegData.ffprobePath]
 
   section#manage-info-sharp
     h3 Sharp libraries versions
-    ul(style='column-width: 10rem;')
+    ul.list.list_unmarked(style='column-width: 10rem;')
       for value, key in kot_sharp_versions
         li #[strong= key]: #{value}
 
   section#manage-info-dependencies
     h3 Dependencies
-    ul(style='column-width: 15rem;')
+    ul.list.list_unmarked(style='column-width: 15rem;')
       for value, key in pkg.dependencies
         li #[a(href=`https://www.npmjs.com/package/${key}`)=key]: #[=value]
 
   section#manage-info-routes
     h3 Routes
-    ul(style='column-width: 20rem;')
+    ul.list.list_unmarked(style='column-width: 20rem;')
      for methods, route in kot_routes
       li
         for method, i in methods
