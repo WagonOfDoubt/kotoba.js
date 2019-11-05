@@ -54,10 +54,10 @@
 }
 
 
-.list_buttons {
+.list_nav {
   display: inline-flex;
   list-style: none;
-  align-items: baseline;
+  align-items: center;
   padding: 0;
   white-space: nowrap;
 
@@ -80,5 +80,30 @@
 
   li {
     display: inline-flex;
+    align-items: center;
+  }
+}
+
+
+.list_buttons {
+  display: inline-flex;
+  list-style: none;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
+
+  li::before {
+    content: '[';
+  }
+
+  li::after {
+    content: ']';
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    margin-right: .5rem;
   }
 }
