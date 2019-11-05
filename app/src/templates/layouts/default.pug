@@ -6,6 +6,7 @@ doctype html
 html(lang=lang)&attributes(headAttributes)
   include ../includes/head.pug
   body.layout-default(class=bodyClass)
+    a#top
     header
       block header
     main
@@ -14,4 +15,5 @@ html(lang=lang)&attributes(headAttributes)
       block footer
       include ../includes/footer.pug
     block modals
+    a#bottom
     include ../includes/scripts.pug

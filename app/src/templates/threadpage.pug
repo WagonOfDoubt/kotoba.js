@@ -12,8 +12,21 @@ block header
   include includes/boardheader.pug
 
 block main
-  .return-link.return-link-top.button.button_link
-    a(href='/' + board.uri) Return
+  nav.navlinks.navlink_top
+    ul.list_buttons
+      li
+        a(href='/' + board.uri) Return
+    if board.features.catalog
+      ul.list_buttons
+        li
+          a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
+    if board.features.archive
+      ul.list_buttons
+        li
+          a(href='/' + board.uri + '/arch/res') Archive
+    ul.list_buttons
+      li
+        a(href='#bottom') Bottom
 
   noscript
     .page-title Reply to thread
@@ -26,12 +39,25 @@ block main
     include includes/thread.pug
     include includes/delpostform.pug
 
-  .return-link.return-link-bottom.button.button_link
-    a(href='/' + board.uri) Return
-
   div.postarea.postarea_bottom
     span.button.button_link
       a.js-toggle-postform(href='#') Reply
+
+  nav.navlinks.navlink_bottom
+    ul.list_buttons
+      li
+        a(href='/' + board.uri) Return
+    if board.features.catalog
+      ul.list_buttons
+        li
+          a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
+    if board.features.archive
+      ul.list_buttons
+        li
+          a(href='/' + board.uri + '/arch/res') Archive
+    ul.list_buttons
+      li
+        a(href='#top') Top
 
 block footer
   include includes/boardfooter.pug
