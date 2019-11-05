@@ -5,6 +5,8 @@
 }
 
 form {
+  text-align: left;
+  
   .form-group {
     display: grid;
     grid-template-columns: 12rem auto 1fr;
@@ -26,6 +28,7 @@ form {
     small {
       align-self: center;
       padding: .75rem;
+      text-align: left;
     }
 
     select {

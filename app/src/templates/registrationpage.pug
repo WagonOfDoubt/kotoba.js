@@ -17,7 +17,7 @@ block main
     div.errors
       for error in errors
         //- pre= JSON.stringify(error, null, 2)
-        div.error= error.msg || error
+        div.message.message_danger= error.msg || error
   div.text-center
     img(src='/.static/img/kotoba_logo_md.png')
   form.text-center(

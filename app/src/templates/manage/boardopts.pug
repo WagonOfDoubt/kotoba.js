@@ -116,8 +116,9 @@ block main
 
   if board
     h2 Danger zone
-    div.button.button_link
-      a(href='/manage/boards/delete/' + board.uri) Delete board
+    div.message.message_danger
+      div.button.button_link
+        a(href='/manage/boards/delete/' + board.uri) Delete board
 
 block modals
   +confirmPrompt('dialog-update-board', 'Update board options', 'Save changes')
