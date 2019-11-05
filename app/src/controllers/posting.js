@@ -307,6 +307,8 @@ const getPosterRole = async (boardUri, user) => {
  *    instead of name in form
  * @param {Boolean} [options.displayStaffStatus=false] Display user staff
  *    status (authority or role)
+ * @param {Boolean} [options.useMarkdown=false] Use markdown parser with raw
+ *    HTML tags instead of default markup
  * @return {Object} Created post data
  * @see {@link https://github.com/expressjs/multer#readme}
  * @throws {DocumentNotFoundError} If board not found

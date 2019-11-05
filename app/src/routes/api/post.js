@@ -48,6 +48,12 @@ const upload = multer();
  *    spoiler
  * @apiParam {Boolean}  [regenerate=true] Whether or not to generate static
  *    HTML files
+ * @param {Boolean} [useUserName=false] Use logged in user name instead of
+ *    name in form
+ * @param {Boolean} [displayStaffStatus=false] Display user staff status
+ *    (authority or role)
+ * @param {Boolean} [useMarkdown=false] Use markdown parser with raw HTML tags
+ *    instead of default markup
  * @apiUse FileFormatNotSupportedError
  * @apiUse ThumbnailGenerationError
  * @apiUse FileTooLargeError
@@ -161,6 +167,21 @@ router.post('/api/post',
       trim: true,
       optional: true,
     },
+    displayStaffStatus: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
+    useUserName: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
+    useMarkdown: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
     regenerate: {
       in: 'body',
       isBoolean: true,
@@ -207,6 +228,9 @@ router.post('/api/post',
       const options = _.pick(req.body, [
         'captcha',
         'regenerate',
+        'displayStaffStatus',
+        'useUserName',
+        'useMarkdown',
       ]);
       const result = await createPost(postData, posterInfo, options);
       return res
