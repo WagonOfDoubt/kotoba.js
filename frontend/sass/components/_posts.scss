@@ -7,6 +7,13 @@
   color: var(--name-color);
 }
 
+.post__header__staff {
+  &::before, &::after {
+    content: '★★';
+  }
+  color: var(--semantic-color-info-background);
+}
+
 .post__header__subject {
   color: var(--subject-color);
   font-weight: bold;

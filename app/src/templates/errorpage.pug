@@ -5,19 +5,31 @@ block bodyClass
 
 block header
   nav.text-right
-    span.section-wrapper
-      span.link-wrapper
+    ul.list.list_nav
+      li
+        a(href=referrer onclick='javascript:history.back(); return false;') Return
+      li
         a(href='/') Home
   h1.text-center Kuso!
 
+mixin error(e)
+  div.error.message.message_danger
+    strong.error_code= (e.code || e.name)
+    if e.param
+      |  e.param
+    |:
+    |
+    span.error_message #{ e.msg || e.message }
+    if e.stack
+      pre= e.stack
+
 block main
-  if error
-    div.message.message_danger #{error.code || error.name} #{ error.param }: #{ error.message }
-    if error.stack
-      pre.message.message_danger= error.stack
-  if errors
-    for e in errors
-      div.message.message_danger #{error.code || error.name} #{ error.param }: #{ error.msg }
+  div.text-center
+    if error
+      +error(error)
+    if errors
+      for e in errors
+        +error(e)
 
 block scripts
   script(src='/.static/js/kotoba.js')

@@ -4,11 +4,17 @@ mixin shortAccess(role, permissions, prop)
   -var access = role && role[permissions] && role[permissions][prop] && role[permissions][prop].access
   if (access)
     if (access === 'no-access')
-      abbr.badge.badge_danger(title='no access') #[+icon('ban', 'small')] n
+      abbr.badge.badge_danger(title='No access') #[+icon('ban', 'small')]
     else if (access === 'read-only')
-      abbr.badge.badge_info(title='read only') #[+icon('eye', 'small')] r
+      abbr.badge.badge_info(title='Read only') #[+icon('eye', 'small')]
     else
-      abbr.badge.badge_success(title='write') #[+icon('edit', 'small')] w
+      abbr.badge.badge_success(title='Write') #[+icon('edit', 'small')]
   else
-    abbr.error(title='undefined') #[+icon('question', 'small')] n/a
+    abbr.badge.badge_warning(title='Unknown') #[+icon('question', 'small')]
 
+
+mixin booleanVal(val)
+  if val
+    abbr.badge.badge_success(title='Yes') #[+icon('check', 'small')]
+  else
+    abbr.badge.badge_danger(title='No') #[+icon('times', 'small')]

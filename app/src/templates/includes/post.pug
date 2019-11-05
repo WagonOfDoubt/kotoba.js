@@ -42,6 +42,10 @@ div(
           span.post__header__name= post.name
         |
         |
+      if post.staffStatus
+        span.post__header__staff(class=`staff-${post.staffStatus}`)= post.staffStatusDisplay || post.staffStatus
+        |
+        |
       +datetime(post.createdAt)
       |
       |

@@ -5,7 +5,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Mixed = mongoose.Schema.Types.Mixed;
-const _ =require('lodash');
+const _ = require('lodash');
+const deepFreeze = require('deep-freeze-strict');
 
 
 /**
@@ -85,6 +86,17 @@ const roleSchema = Schema({
     immutable: true,
   },
   /**
+   * Readable role name that displayed in posts
+   * @type {String}
+   * @memberOf module:models/role~Role#
+   * @instance
+   * @readOnly
+   */
+  displayName: {
+    type: String,
+    default: '',
+  },
+  /**
    * Position of role in hierarchy. Serves as default priority for all
    *    actions.
    * @type {Number}
@@ -116,11 +128,11 @@ const roleSchema = Schema({
    * @instance
    */
   postPermissions: {
-    'isSticky': { type: propertyAccessSchema },
-    'isClosed': { type: propertyAccessSchema },
-    'isSage': { type: propertyAccessSchema },
-    'isApproved': { type: propertyAccessSchema },
-    'isDeleted': { type: propertyAccessSchema },
+    isSticky   : { type: propertyAccessSchema },
+    isClosed   : { type: propertyAccessSchema },
+    isSage     : { type: propertyAccessSchema },
+    isApproved : { type: propertyAccessSchema },
+    isDeleted  : { type: propertyAccessSchema },
   },
   /**
    * Access to post fields
@@ -135,12 +147,29 @@ const roleSchema = Schema({
    * @instance
    */
   attachmentPermissions: {
-    'isDeleted': { type: propertyAccessSchema },
-    'isNSFW': { type: propertyAccessSchema },
-    'isSpoiler': { type: propertyAccessSchema },
+    isDeleted : { type: propertyAccessSchema },
+    isNSFW    : { type: propertyAccessSchema },
+    isSpoiler : { type: propertyAccessSchema },
   },
+  /**
+   * Posting privileges
+   * @type {Object}
+   * @property {Boolean} ignoreCaptcha User is not required to solve captcha
+   * @property {Boolean} ignoreClosed  User can post in closed threads or
+   *    boards
+   * @property {Boolean} ignoreForcedAnon User can enter name regardless of
+   *    board options
+   * @property {Boolean} canUseMarkdown User can post with markdown markup
+   *    instead of default markup
+   */
+  postingPrivileges: {
+    ignoreCaptcha    : { type: Boolean, default: false },
+    ignoreClosed     : { type: Boolean, default: false },
+    ignoreForcedAnon : { type: Boolean, default: false },
+    canUseMarkdown   : { type: Boolean, default: false },
+    canFakeTimestamp : { type: Boolean, default: false },
+  }
 });
-
 
 
 /**
@@ -201,6 +230,148 @@ roleSchema.statics.findAllAndSort = () => {
       $sort: { hierarchy: -1 }
     }
   ]);
+};
+
+
+const adminRole = deepFreeze({
+  roleName: '__admin',
+  displayName: 'Admin',
+  hierarchy: 9999,
+  postPermissions: {
+    isSticky: {
+      priority: 9999,
+      access: 'write-any',
+    },
+    isClosed: {
+      priority: 9999,
+      access: 'write-any',
+    },
+    isSage: {
+      priority: 9999,
+      access: 'write-any',
+    },
+    isApproved: {
+      priority: 9999,
+      access: 'write-any',
+    },
+    isDeleted: {
+      priority: 9999,
+      access: 'write-any',
+    },
+  },
+  attachmentPermissions: {
+    isDeleted: {
+      priority: 9999,
+      access: 'write-any',
+    },
+    isNSFW: {
+      priority: 9999,
+      access: 'write-any',
+    },
+    isSpoiler: {
+      priority: 9999,
+      access: 'write-any',
+    },
+  },
+  postingPrivileges: {
+    ignoreCaptcha    : true,
+    ignoreClosed     : true,
+    ignoreForcedAnon : true,
+    canUseMarkdown   : true,
+    canFakeTimestamp : true,
+  }
+});
+
+
+const anonymousRole = {
+  roleName: '__anonymous',
+  displayName: 'Anonymous',
+  hierarchy: 0,
+  postPermissions: {
+    // anonymous can delete their own post, but can't restore it
+    // and only admin can restore it
+    isDeleted: {
+      access: 'write-value',
+      values: [
+        { eq: true,  priority: 9999 },
+      ]
+    },
+    // anonymous can close their own thread (but only once)
+    // and any staff member with permission can un-close it
+    isClosed: {
+      access: 'write-value',
+      values: [
+        { eq: true,  priority: 1 },
+      ]
+    },
+    // anonymous can add sage (but only once)
+    // and only admin can un-sage it
+    // anonymous can remove sage
+    // and any staff member with permission can add sage
+    isSage: {
+      access: 'write-value',
+      values: [
+        { eq: true,  priority: 9999 },
+        { eq: false, priority: 1 },
+      ]
+    },
+  },
+  attachmentPermissions: {
+    // anonymous can delete attachments in their own post, but can't restore it
+    // and only admin can restore it
+    isDeleted: {
+      access: 'write-value',
+      values: [
+        { eq: true,  priority: 9999 },
+      ]
+    },
+    // anonymous can set or unset NSFW (but only once)
+    // and any staff member with permission can undo it
+    isNSFW: {
+      access: 'write-value',
+      values: [
+        { eq: true,  priority: 2 },
+        { eq: false, priority: 1 },
+      ]
+    },
+    // anonymous can set or unset spoiler (but only once)
+    // and any staff member with permission can undo it
+    isSpoiler: {
+      access: 'write-value',
+      values: [
+        { eq: true,  priority: 2 },
+        { eq: false, priority: 1 },
+      ]
+    },
+  },
+  postingPrivileges: {
+    ignoreCaptcha    : false,
+    ignoreClosed     : false,
+    ignoreForcedAnon : false,
+    canUseMarkdown   : false,
+    canFakeTimestamp : false,
+  },
+};
+
+
+
+/**
+ * Get predefined role
+ * @param {String} specialRoleName What role to return (admin, anonymous)
+ * @memberOf module:models/role~Role
+ * @alias module:models/role~Role.getSpecialRole
+ * @static
+ * @async
+ * @return {?Object} Frozen role object
+ */
+roleSchema.statics.getSpecialRole = async (specialRoleName) => {
+  if (specialRoleName == 'admin') {
+    return adminRole;
+  }
+  if (specialRoleName == 'anonymous') {
+    return anonymousRole;
+  }
+  return null;
 };
 
 

@@ -10,12 +10,14 @@ const { uploadFiles } = require('./upload');
 const Board = require('../models/board');
 const { Post, Thread, Reply } = require('../models/post');
 const ModlogEntry = require('../models/modlog');
+const Role = require('../models/role');
 const Parser = require('./parser');
 const fs = require('fs-extra');
 const config = require('../json/config');
 const path = require('path');
 const _ = require('lodash');
 const Captcha = require('../models/captcha');
+const { markdown } = require('../utils/filters');
 const {
   PostingError,
   DocumentNotFoundError,
@@ -90,27 +92,39 @@ module.exports.createPost = async (postData, posterInfo, options) => {
 
 
 /**
- * Populates some postData fields depending on board settings. Mutates
- *    postData.
+ * Populates or changes some postData fields depending on board settings and
+ *    user role. Mutates postData. Politically correct function.
  * @inner
  * @param  {Object}  postData   Post data
  * @param  {Object}  posterInfo Poster info
  * @param  {Board}   board      Board document
  * @return {Object}             postData
  */
-const populatePostDataDefaults = (postData, posterInfo, board) => {
+const checkPrivileges = (postData, posterInfo, board, options) => {
   postData.ip = posterInfo.ip;
   postData.useragent = posterInfo.useragent;
-  if (board.isForcedAnon || !postData.name) {
+  const ignoreForcedAnon = _.get(posterInfo, 'role.postingPrivileges.ignoreForcedAnon', false);
+  if (!postData.name) {
     postData.name = board.defaultPosterName;
   }
-  if (board.isForcedAnon) {
-    postData.email = '';
+  if (board.isForcedAnon && !ignoreForcedAnon) {
+    postData.name = board.defaultPosterName;
   }
-  if (postData.createdAt) {
-    if (!(posterInfo.user && posterInfo.user.authority === 'admin')) {
-      delete postData.createdAt;
+  if (board.isForcedAnon && !ignoreForcedAnon) {
+    delete postData.email;
+  }
+  if (options.useUserName && posterInfo.user) {
+    if (!board.isForcedAnon || ignoreForcedAnon) {
+      postData.name = posterInfo.user.name || posterInfo.user.login;
     }
+  }
+  const canFakeTimestamp = _.get(posterInfo, 'role.postingPrivileges.canFakeTimestamp', false);
+  if (postData.createdAt && !canFakeTimestamp) {
+    delete postData.createdAt;
+  }
+  if (options.displayStaffStatus && posterInfo.user) {
+    postData.staffStatus = _.get(posterInfo, 'role.roleName', '');
+    postData.staffStatusDisplay = _.get(posterInfo, 'role.displayName', '');
   }
   return postData;
 };
@@ -194,6 +208,24 @@ const handleAttachments = async (postData, board) => {
 
 
 /**
+ * Parse post body in one way or another. Mutates post.
+ * @param {Post} post       Post document
+ * @param {Object} posterInfo Poster Info
+ * @param {Object} [posterInfo.role] Role object (retrieved by {@link
+ *    module:controllers/posting~getPosterRole|getPosterRole} function)
+ * @param {Object} options  Posting options
+ */
+const handleMarkup = async (post, posterInfo, options) => {
+  const canUseMarkdown = _.get(posterInfo, 'role.postingPrivileges.canUseMarkdown');
+  if (options.useMarkdown && canUseMarkdown) {
+    post.parsed = markdown(post.body);
+  } else {
+    await Parser.parsePost(post);
+  }
+};
+
+
+/**
  * Check captcha
  * @inner
  * @async
@@ -201,11 +233,15 @@ const handleAttachments = async (postData, board) => {
  * @param  {Board}  board      Board document
  * @param  {String} captcha    Captcha answer
  * @param  {Object} posterInfo Poster info
+ * @param  {Object}  [posterInfo.role] Role object (retrieved by {@link
+ *    module:controllers/posting~getPosterRole|getPosterRole} function)
+ * @param  {Object}  posterInfo.session Session info
  * @throws {CaptchaEntryNotFoundError} If captcha expired
  * @throws {IncorrectCaptchaError} If captcha is incorrect
  */
 const checkCatptcha = async (action, board, captcha, posterInfo) => {
-  if (board.captcha.enabled) {
+  const ignoreCaptcha = _.get(posterInfo, 'role.postingPrivileges.ignoreCaptcha', false);
+  if (board.captcha.enabled && !ignoreCaptcha) {
     const expireTime = action === 'thread' ?
       board.captcha.threadExpireTime :
       board.captcha.replyExpireTime;
@@ -219,6 +255,20 @@ const checkCatptcha = async (action, board, captcha, posterInfo) => {
       throw new IncorrectCaptchaError('captcha', captchaAnswer, 'body');
     }
   }
+};
+
+
+/**
+ * Get role of user on given board
+ * @param  {String} boardUri   What board
+ * @param  {?User}  [user]     User document
+ * @return {Object}            Role.postingPrivileges
+ */
+const getPosterRole = async (boardUri, user) => {
+  if (user) {
+    return await user.getRoleForBoard(boardUri);
+  }
+  return Role.getSpecialRole('anonymous');
 };
 
 
@@ -253,6 +303,10 @@ const checkCatptcha = async (action, board, captcha, posterInfo) => {
  * @param {String}  [options.captcha] Answer to captcha challenge
  * @param {Boolean} [options.regenerate=true] Whether or not to generate
  *    static HTML files
+ * @param {Boolean} [options.useUserName=false] Use logged in user name
+ *    instead of name in form
+ * @param {Boolean} [options.displayStaffStatus=false] Display user staff
+ *    status (authority or role)
  * @return {Object} Created post data
  * @see {@link https://github.com/expressjs/multer#readme}
  * @throws {DocumentNotFoundError} If board not found
@@ -270,11 +324,21 @@ const checkCatptcha = async (action, board, captcha, posterInfo) => {
 module.exports.createThread = async (postData, posterInfo, options) => {
   _.defaults(options, {
     regenerate: true,
+    useUserName: false,
+    displayStaffStatus: false,
+    useMarkdown: false,
   });
   const boardUri = postData.boardUri;
   const board = await Board.findBoard(boardUri);
   if (!board) {
     throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
+  }
+  posterInfo.role = await getPosterRole(boardUri, posterInfo.user);
+  const ignoreClosed = _.get(posterInfo, 'role.postingPrivileges.ignoreClosed', false);
+  if (!ignoreClosed) {
+    if (board.isLocked) {
+      throw new PostingError(`Board /${ boardUri }/ is closed`);
+    }
   }
   checkAttachments(postData, board);
   checkComment(postData, board);
@@ -291,11 +355,11 @@ module.exports.createThread = async (postData, posterInfo, options) => {
   // @todo Check ban
   // @todo Check posting rates and permanent sage
   await handleAttachments(postData, board);
-  postData = populatePostDataDefaults(postData, posterInfo, board);
+  postData = checkPrivileges(postData, posterInfo, board, options);
   postData.postId = board.postcount + 1;
 
   const thread = new Thread(postData);
-  await Parser.parsePost(thread);
+  await handleMarkup(thread, posterInfo, options);
   board.postcount = board.postcount + 1;
   board.uniquePosts = await Post.getNumberOfUniqueUserPosts(board.uri);
   await Promise.all([
@@ -351,6 +415,10 @@ module.exports.createThread = async (postData, posterInfo, options) => {
  * @param {String}  [options.captcha] Answer to captcha challenge
  * @param {Boolean} [options.regenerate=true] Whether or not to generate
  *    static HTML files
+ * @param {Boolean} [options.useUserName=false] Use logged in user name
+ *    instead of name in form
+ * @param {Boolean} [options.displayStaffStatus=false] Display user staff
+ *    status (authority or role)
  * @return {Object} Created post data
  * @see {@link https://github.com/expressjs/multer#readme}
  * @throws {DocumentNotFoundError} If board or parent thread not found
@@ -368,6 +436,9 @@ module.exports.createThread = async (postData, posterInfo, options) => {
 module.exports.createReply = async (postData, posterInfo, options) => {
   _.defaults(options, {
     regenerate: true,
+    useUserName: false,
+    displayStaffStatus: false,
+    useMarkdown: false,
   });
   const { boardUri, threadId } = postData;
   const [thread, board] = await Promise.all([
@@ -378,7 +449,17 @@ module.exports.createReply = async (postData, posterInfo, options) => {
     throw new DocumentNotFoundError('No such board: ' + boardUri, 'board', boardUri, 'body');
   }
   if (!thread) {
-    throw new DocumentNotFoundError(`Thread ${ boardUri }/${ threadId } not found`, 'threadId', threadId, 'body');
+    throw new DocumentNotFoundError(`Thread /${ boardUri }/${ threadId } not found`, 'threadId', threadId, 'body');
+  }
+  posterInfo.role = await getPosterRole(boardUri, posterInfo.user);
+  const ignoreClosed = _.get(posterInfo, 'role.postingPrivileges.ignoreClosed', false);
+  if (!ignoreClosed) {
+    if (board.isLocked) {
+      throw new PostingError(`Board /${ boardUri }/ is closed`);
+    }
+    if (thread.isClosed) {
+      throw new PostingError(`Thread /${ boardUri }/${ threadId } is closed`);
+    }
   }
   checkAttachments(postData, board);
   checkComment(postData, board);
@@ -388,14 +469,14 @@ module.exports.createReply = async (postData, posterInfo, options) => {
   await handleAttachments(postData, board);
 
   if (!board.allowRepliesSubject) {
-    postData.subject = '';
+    delete postData.subject;
   }
-  postData = populatePostDataDefaults(postData, posterInfo, board);
+  postData = checkPrivileges(postData, posterInfo, board, options);
   postData.postId = board.postcount + 1;
   postData.parent = ObjectId(thread._id);
 
   const reply = new Reply(postData);
-  await Parser.parsePost(reply);
+  await handleMarkup(reply, posterInfo, options);
   board.postcount = board.postcount + 1;
   board.uniquePosts = await Post.getNumberOfUniqueUserPosts(board.uri);
   await Promise.all([reply.save(), board.save()]);

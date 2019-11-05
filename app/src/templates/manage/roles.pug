@@ -41,7 +41,17 @@ block main
         input(type='hidden', name='roleName', value=values.roleName)
       else
         +textEdit('roleName', 'Role name', 'Must contain only Latin letters and numbers, e.g.: janitor, moderator, supermoderator, boardowner, etc.', true)
+      +textEdit('displayName', 'Display name', 'Role name to display in post header', true)
       +numberEdit('hierarchy', 'Hierarchy', 'Defines maximum priority for all actions. Avoid creating roles with same value. Assign hierarchy in increments of 100 to leave space for new roles and for adjustments of individual permissions.', true)
+      h3 Posting privileges
+      +checkboxEdit('postingPrivileges.ignoreCaptcha', 'Ignore captcha', 'User is not required to solve captcha')
+      +checkboxEdit('postingPrivileges.ignoreClosed', 'Ignore closed threads/boards', 'User can post in closed threads or boards')
+      +checkboxEdit('postingPrivileges.ignoreForcedAnon', 'Ignore forced anonymous', 'User can enter name regardless of board options')
+      div.message.message_danger
+        strong Warning!
+        div Posting raw HTML may potentially allow for execution of arbitrary code embedded in post or may open possibility for other exploits. Check option below only for most trusted staff members.
+        +checkboxEdit('postingPrivileges.canUseMarkdown', 'Can post raw HTML/Markdown', 'User can post raw HTML tags with markdown markup instead of default markup.')
+      +checkboxEdit('postingPrivileges.canFakeTimestamp', 'Can specify post time', 'Whether or not user can specify createdAt date while posting. This can only be used through api. Useful for importing posts from other sources or for modgets.')
       h3 Threads
       +comboboxEdit('postPermissions.isSticky.access', 'isSticky', publicAccessOpts, 'Allow staff member to set threads as sticky.', true)
       +comboboxEdit('postPermissions.isClosed.access', 'isClosed', publicAccessOpts, 'Allow staff member to close discussion.', true)
@@ -60,52 +70,71 @@ block main
 
   if isRead
     div.info Note: only roles that are not assigned to any user can be deleted.
-    table.table
+    table.table.table_compact
       thead
         tr.table__row.table__row_header
           th.table__header Delete
           th.table__header.table__header_sortable(data-sort-field='role', data-sort-type='string') Role
           th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='hierarchy', data-sort-type='number', data-sort-order='descending') Hierarchy
           th.table__header.table__header_sortable(data-sort-field='used', data-sort-type='number') Used
+
+          th.table__header.table__header_vertical ignoreCaptcha
+          th.table__header.table__header_vertical ignoreClosed
+          th.table__header.table__header_vertical ignoreForcedAnon
+          th.table__header.table__header_vertical canUseMarkdown
+          th.table__header.table__header_vertical canFakeTimestamp
+
           th.table__header.table__header_vertical thread.isSticky
           th.table__header.table__header_vertical thread.isClosed
+
           th.table__header.table__header_vertical post.isSage
           th.table__header.table__header_vertical post.isApproved
           th.table__header.table__header_vertical post.isDeleted
+
           th.table__header.table__header_vertical attachment.isDeleted
           th.table__header.table__header_vertical attachment.isNSFW
           th.table__header.table__header_vertical attachment.isSpoiler
       tbody
-      for role in roles
-        tr.table__row(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes)
-          td
-            if (role.usedTimes === 0)
-              form.js-api-form.js-reload-on-success(action='/api/role', 'data-method'='DELETE')
-                input(type='hidden', name='roleName', value=role.roleName)
-                input(type='submit', value='Delete')
-            else
-              | -
-          td
-            a(href=`/manage/roles/edit/${ role.roleName }/` title='Edit this role')= role.roleName
-          td= role.hierarchy
-          td
-            if (role.usedTimes)
-              a(href=`/manage/staff?role=${role.roleName}` title='Find users with this role')= role.usedTimes
-            else
-              | 0
-          td
-            +shortAccess(role, 'postPermissions', 'isSticky')
-          td
-            +shortAccess(role, 'postPermissions', 'isClosed')
-          td
-            +shortAccess(role, 'postPermissions', 'isSage')
-          td
-            +shortAccess(role, 'postPermissions', 'isApproved')
-          td
-            +shortAccess(role, 'postPermissions', 'isDeleted')
-          td
-            +shortAccess(role, 'attachmentPermissions', 'isDeleted')
-          td
-            +shortAccess(role, 'attachmentPermissions', 'isNSFW')
-          td
-            +shortAccess(role, 'attachmentPermissions', 'isSpoiler')
+        for role in roles
+          tr.table__row(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes)
+            td
+              if (role.usedTimes === 0)
+                form.js-api-form.js-reload-on-success(action='/api/role', 'data-method'='DELETE')
+                  input(type='hidden', name='roleName', value=role.roleName)
+                  input(type='submit', value='Delete')
+              else
+                | -
+            td
+              a(href=`/manage/roles/edit/${ role.roleName }/` title='Edit this role')= role.roleName
+            td= role.hierarchy
+            td
+              if (role.usedTimes)
+                a(href=`/manage/staff?role=${role.roleName}` title='Find users with this role')= role.usedTimes
+              else
+                | 0
+            td
+              +booleanVal(filters.getParam('postingPrivileges.ignoreCaptcha', role))
+            td
+              +booleanVal(filters.getParam('postingPrivileges.ignoreClosed', role))
+            td
+              +booleanVal(filters.getParam('postingPrivileges.ignoreForcedAnon', role))
+            td
+              +booleanVal(filters.getParam('postingPrivileges.canUseMarkdown', role))
+            td
+              +booleanVal(filters.getParam('postingPrivileges.canFakeTimestamp', role))
+            td
+              +shortAccess(role, 'postPermissions', 'isSticky')
+            td
+              +shortAccess(role, 'postPermissions', 'isClosed')
+            td
+              +shortAccess(role, 'postPermissions', 'isSage')
+            td
+              +shortAccess(role, 'postPermissions', 'isApproved')
+            td
+              +shortAccess(role, 'postPermissions', 'isDeleted')
+            td
+              +shortAccess(role, 'attachmentPermissions', 'isDeleted')
+            td
+              +shortAccess(role, 'attachmentPermissions', 'isNSFW')
+            td
+              +shortAccess(role, 'attachmentPermissions', 'isSpoiler')

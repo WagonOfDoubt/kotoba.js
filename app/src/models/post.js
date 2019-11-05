@@ -67,6 +67,22 @@ const postSchema = new Schema({
    */
   name:                { type: String, default: '' },
   /**
+   * roleName of Poster's role on board (if display staff status option is
+   *    checked)
+   * @type {String}
+   * @memberOf module:models/post~Post
+   * @instance
+   */
+  staffStatus:         { type: String, 'default': '' },
+  /**
+   * Role display name of Poster's role on board (if display staff status
+   *    option is checked)
+   * @type {String}
+   * @memberOf module:models/post~Post
+   * @instance
+   */
+  staffStatusDisplay:  { type: String, 'default': '' },
+  /**
    * Poster tripcode.
    * @type {String}
    * @memberOf module:models/post~Post

@@ -26,6 +26,7 @@ module.exports.globalTemplateVariables = async (req, res, next) => {
   res.locals.lang = s.locale;
   res.locals.pkg = pkg;
   res.locals.basedir = config.html_path;
+  res.locals.referrer = req.headers.referer || req.headers.referrer;
   res.locals.filters = filters;
   res.locals.config = config;
   res.locals.user = req.user && {

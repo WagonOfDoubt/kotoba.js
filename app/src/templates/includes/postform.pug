@@ -97,20 +97,21 @@ form#postform.postform.hidden(
         type='file'
         multiple=multiple
       )
-      lebel.postform_spoiler.button_link
-        input#spoiler-input.spoiler-input(
-          name=`spoiler`,
-          type='checkbox',
-          accesskey='s',
-        )
-        | Spoiler
-      lebel.postform_nsfw.button_link
-        input#nsfw-input.nsfw-input(
-          name=`nsfw`,
-          type='checkbox',
-          accesskey='x',
-        )
-        | NSFW
+      ul.list_buttons
+        li.postform_spoiler.button_link
+          input#spoiler-input.spoiler-input(
+            name=`spoiler`,
+            type='checkbox',
+            accesskey='s',
+          )
+          label(for='spoiler-input') Spoiler
+        li.postform_nsfw.button_link
+          input#nsfw-input.nsfw-input(
+            name=`nsfw`,
+            type='checkbox',
+            accesskey='x',
+          )
+          label(for='nsfw-input') NSFW
   div.postform__row.postform__password
     div.postform__row__label
       label(for='postpassword-input').form-label Password
@@ -145,13 +146,22 @@ form#postform.postform.hidden(
     div.postform__row__label
       label.form-label Options
     div.postform__row__inputs
-      div.form-input-group
-        span.postform__sage.button.button_link
+      ul.list_buttons
+        li.postform__sage
           input#sage(name='sage', type='checkbox')
-          label(for='sage') säge
-        span.postform__noko.button.button_link
-          input#noko(name='postredir', value='1', type='checkbox')
-          label(for='noko') nöko
+          label(for='sage') #[abbr(title=`Don't bump thread`) säge]
+        li.postform__noko
+          input#noko(name='postredir', value='on', type='checkbox')
+          label(for='noko') #[abbr(title=`Return to thread after posting`) nöko]
+        li.postform__staffstatus
+          input#staffstatus(name='staffstatus', type='checkbox')
+          label(for='staffstatus') #[abbr(title='Display staff status (Mod/Admin)') Staff]
+        li.postform__staffname
+          input#staffname(name='staffname', type='checkbox')
+          label(for='staffname') #[abbr(title='Use staff name') Name]
+        li.postform__markdown
+          input#markdown(name='markdown', type='checkbox')
+          label(for='markdown') #[abbr(title='Markdown + HTML, reflinks will not be parsed') Raw]
   div.postform__row.postform__rules
     if board
       ul

@@ -8,6 +8,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const bcrypt = require('bcrypt');
 const config = require('../json/config.json');
+const Role = require('./role');
 
 
 /**
@@ -90,6 +91,32 @@ userSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, config.salt_rounds);
   next();
 });
+
+
+/**
+ * Get user role for board
+ * @async
+ * @param {String} boardUri Board uri
+ * @returns {Object} Frozen Role object (Document#toObject)
+ * @memberOf module:models/user~User#
+ * @name getRoleForBoard
+ * @function
+ * @instance
+ */
+userSchema.methods.getRoleForBoard = async function(boardUri) {
+  if (this.authority === 'admin') {
+    return Role.getSpecialRole(this.authority);
+  }
+  const roleId = this.boardRoles && this.boardRoles.get(boardUri);
+  if (!roleId) {
+    return null;
+  }
+  const role = await Role.findById(roleId).select({
+    _id: 0,
+    __v: 0,
+  });
+  return Object.freeze(role.toObject());
+};
 
 
 /**

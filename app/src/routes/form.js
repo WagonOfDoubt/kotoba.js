@@ -81,6 +81,21 @@ router.post('/form/post',
       toBoolean: true,
       optional: true,
     },
+    staffstatus: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
+    staffname: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
+    markdown: {
+      in: 'body',
+      toBoolean: true,
+      optional: true,
+    },
     captcha: {
       in: 'body',
       trim: true,
@@ -119,6 +134,9 @@ router.post('/form/post',
       const options = {
         captcha: req.body.captcha,
         regenerate: true,
+        useUserName: req.body.staffname,
+        displayStaffStatus: req.body.staffstatus,
+        useMarkdown: req.body.markdown,
       };
       const result = await createPost(postData, posterInfo, options);
       if (req.body.postredir) {
