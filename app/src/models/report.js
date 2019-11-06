@@ -26,8 +26,7 @@ const reportSchema = Schema({
    */
   createdAt:           { type: Date, default: Date.now, immutable: true },
   /**
-   * Poster IP. Users are required to have role on post's board with
-   *    permission.
+   * Poster IP
    * @type {String}
    * @memberOf module:models/report~Report
    * @instance
@@ -35,8 +34,7 @@ const reportSchema = Schema({
    */
   ip:                  { type: String, required: true, immutable: true },
   /**
-   * Poster IP md5 hash with salt. Users are required to have role on post's
-   *    board with permission.
+   * Poster IP md5 hash with salt
    * @type {String}
    * @memberOf module:models/report~Report
    * @instance

@@ -13,6 +13,7 @@ const reflinkSchema = require('./schema/reflink');
 const attachmentSchema = require('./schema/attachment');
 const useragentSchema = require('./schema/useragent');
 const { createRegExpFromArray, regExpTester } = require('../utils/regexp');
+const crypto = require('crypto');
 
 
 /**
@@ -159,14 +160,21 @@ const postSchema = new Schema({
    */
   isSage:              { type: Boolean, default: false },
   /**
-   * Poster IP. Users are required to have role on post's board with
-   *    permission.
+   * Poster IP
    * @type {String}
    * @memberOf module:models/post~Post
    * @instance
    * @readOnly
    */
   ip:                  { type: String, required: true, immutable: true },
+  /**
+   * Poster IP md5 hash with salt
+   * @type {String}
+   * @memberOf module:models/post~Post
+   * @instance
+   * @readOnly
+   */
+  iphash:              { type: String, required: true, immutable: true },
   /**
    * Hash of poster posting password (for edition/deletion)
    * @type {String}
@@ -278,6 +286,17 @@ const threadSchema = new Schema({
    * @default false
    */
   isClosed:            { type: Boolean, default: false },
+});
+
+
+postSchema.pre('validate', function(next) {
+  if (this.isNew) {
+    this.iphash = crypto
+      .createHmac('md5', process.env.RANDOM_SEED)
+      .update(this.ip)
+      .digest('hex');
+  }
+  next();
 });
 
 

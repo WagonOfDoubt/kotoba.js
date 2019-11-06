@@ -9,6 +9,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const flatten = require('flat');
 const useragentSchema = require('./schema/useragent');
 const changeSchema = require('./schema/change');
+const crypto = require('crypto');
 
 
 /**
@@ -33,6 +34,14 @@ const modlogEntrySchema = Schema({
    * @readOnly
    */
   ip:                  { type: String, required: true, immutable: true },
+  /**
+   * User IP md5 hash with salt
+   * @type {String}
+   * @memberOf module:models/post~Post
+   * @instance
+   * @readOnly
+   */
+  iphash:              { type: String, required: true, immutable: true },
   /**
    * useragent of user who initiated action
    * @type {module:models/schema/useragent~Useragent}
@@ -127,6 +136,17 @@ modlogEntrySchema.statics.diff = (model, target, oldValues, newValues, prioritie
     }));
   return changes;
 };
+
+
+modlogEntrySchema.pre('validate', function(next) {
+  if (this.isNew) {
+    this.iphash = crypto
+      .createHmac('md5', process.env.RANDOM_SEED)
+      .update(this.ip)
+      .digest('hex');
+  }
+  next();
+});
 
 
 module.exports = mongoose.model('ModlogEntry', modlogEntrySchema);
