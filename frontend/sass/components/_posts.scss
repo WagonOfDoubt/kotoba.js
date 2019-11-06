@@ -195,8 +195,36 @@
   }
 }
 
+.reflink-dead {
+  text-decoration: line-through;
+}
+
+.reflink-external::after {
+  content: '→';
+}
+
 .reflink-op::after {
   content: ' (OP)';
+}
+
+.reflink-you::after {
+  content: ' (you)';
+}
+
+.reflink-you.reflink-external::after {
+  content: ' (you)→';
+}
+
+.reflink-you.reflink-op::after {
+  content: ' (you)(OP)';
+}
+
+.reflink-op.reflink-external::after {
+  content: ' (OP)→';
+}
+
+.reflink-you.reflink-op.reflink-external::after {
+  content: ' (you)(OP)→';
 }
 
 /* hidden posts */

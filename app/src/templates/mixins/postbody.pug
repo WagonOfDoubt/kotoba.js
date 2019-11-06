@@ -1,4 +1,5 @@
 mixin reflink(ref, type, match)
+  - var external = (post && post.threadId) !== ref.threadId;
   if !ref
     strong #[span.badge.badge_danger POST DELETED]
   else
@@ -11,6 +12,7 @@ mixin reflink(ref, type, match)
         'reflink-op': ref.isOp,
         'reflink-reply': type === 'reply',
         'reflink-reference': type === 'reference',
+        'reflink-external': external,
         'js-reflink-popup': true,
       }
       data-post= ref.postId
