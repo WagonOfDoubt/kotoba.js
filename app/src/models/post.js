@@ -358,7 +358,6 @@ postSchema.statics.findRefs = (postsQueryList) => {
   return Post
     .find({$or: postsQueryList})
     .select({
-      _id: 0,
       __t: 1,
       postId: 1,
       threadId: 1,
