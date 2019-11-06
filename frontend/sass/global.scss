@@ -91,6 +91,7 @@
 @import './components/sidebar';
 @import './components/buttons';
 @import './components/text';
+@import './components/board';
 
 body {
   color: var(--text-color);
@@ -135,14 +136,6 @@ hr {
   width: 100%;
 }
 
-.board-header {
-  display: flex;
-
-  .board-header__content {
-    margin: 0 auto;
-  }
-}
-
 .no-content-placeholder {
   font-size: 5em;
   text-align: center;
@@ -155,18 +148,6 @@ hr {
 
   img {
     max-width: 100%;
-  }
-}
-
-.thread-container {
-  border-bottom: 1px solid var(--border-color);
-  padding: 5px 0 15px 0;
-  overflow: hidden;  // zalgo protection
-
-  &:after {
-    content: ' ';
-    display: block;
-    clear: left;
   }
 }
 

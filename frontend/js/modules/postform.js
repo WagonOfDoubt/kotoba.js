@@ -294,7 +294,7 @@ export const init = () => {
   }
 
   $('body').on('click', '.js-toggle-postform', (e) => {
-    const postarea = e.target.closest('.postarea');
+    const postarea = e.target.closest('.postarea') || document.querySelector(e.target.dataset.postarea);
     postform.togglePostarea(postarea);
     e.preventDefault();
   });

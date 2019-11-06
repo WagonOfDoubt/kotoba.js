@@ -1,4 +1,5 @@
 extends layouts/default.pug
+include mixins/icons.pug
 
 block bodyClass
   -
@@ -11,28 +12,40 @@ block bodyClass
 block header
   include includes/boardheader.pug
 
+mixin stats()
+  - var replies = thread.children.length;
+  - var images = thread.numberOfAttachmentsInThread;
+  div.thread__stats
+    span.thread__replies(title='Number of replies') #[+icon('comments', 'small')] #[data(value=replies)= replies]
+    |
+    |
+    span.thread__attachments(title='Number of attachments') #[+icon('paperclip', 'small')] #[data(value=images)= images]
+
 block main
-  nav.navlinks.navlink_top
-    ul.list_buttons
-      li
-        a(href='/' + board.uri) Return
-    if board.features.catalog
+  div.board-panel.board-panel_top
+    nav.navlinks.navlink_top
       ul.list_buttons
         li
-          a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
-    if board.features.archive
+          a(href='/' + board.uri) Return
+      if board.features.catalog
+        ul.list_buttons
+          li
+            a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
+      if board.features.archive
+        ul.list_buttons
+          li
+            a(href='/' + board.uri + '/arch/res') Archive
       ul.list_buttons
         li
-          a(href='/' + board.uri + '/arch/res') Archive
-    ul.list_buttons
-      li
-        a(href='#bottom') Bottom
+          a(href='#bottom') Bottom
+    div.board-panel__center
+      span.button.button_link
+        a.js-toggle-postform(href='#' data-postarea=".postarea_top") Reply
+    +stats()
 
   noscript
     .page-title Reply to thread
   div#postbox.postarea.postarea_top
-    span.button.button_link
-      a.js-toggle-postform(href='#') Reply
     include includes/postform.pug
 
   form#delform.admin-form(action='/form/delpost', method='post')
@@ -43,21 +56,23 @@ block main
     span.button.button_link
       a.js-toggle-postform(href='#') Reply
 
-  nav.navlinks.navlink_bottom
-    ul.list_buttons
-      li
-        a(href='/' + board.uri) Return
-    if board.features.catalog
+  div.board-panel.board-panel_top
+    nav.navlinks.navlink_bottom
       ul.list_buttons
         li
-          a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
-    if board.features.archive
+          a(href='/' + board.uri) Return
+      if board.features.catalog
+        ul.list_buttons
+          li
+            a(href='/' + board.uri + '/' + config.catalog_filename) Catalog
+      if board.features.archive
+        ul.list_buttons
+          li
+            a(href='/' + board.uri + '/arch/res') Archive
       ul.list_buttons
         li
-          a(href='/' + board.uri + '/arch/res') Archive
-    ul.list_buttons
-      li
-        a(href='#top') Top
+          a(href='#top') Top
+    +stats()
 
 block footer
   include includes/boardfooter.pug

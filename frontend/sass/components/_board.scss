@@ -1,0 +1,33 @@
+.thread-container {
+  border-bottom: 1px solid var(--border-color);
+  padding: 5px 0 15px 0;
+  overflow: hidden;  // zalgo protection
+
+  &:after {
+    content: ' ';
+    display: block;
+    clear: left;
+  }
+}
+
+.board-header {
+  display: flex;
+
+  .board-header__content {
+    margin: 0 auto;
+  }
+}
+
+.board-panel {
+  display: flex;
+  justify-content: space-between;
+}
+
+.board-panel__center {
+  position: absolute;
+  left: 50%;
+
+  .button {
+    margin-left: -50%;
+  }
+}
