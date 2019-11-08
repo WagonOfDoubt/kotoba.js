@@ -48,7 +48,8 @@
     "passport-local": "^1.0.0",
     "pug": "^2.0.4",
     "sharp": "^0.23.0",
-    "streamifier": "^0.1.1"
+    "streamifier": "^0.1.1",
+    "unix-crypt-td-js": "^1.1.4"
   },
   "devDependencies": {},
   "jshintConfig": {

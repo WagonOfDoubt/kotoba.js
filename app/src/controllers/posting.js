@@ -18,6 +18,7 @@ const path = require('path');
 const _ = require('lodash');
 const Captcha = require('../models/captcha');
 const { markdown } = require('../utils/filters');
+const detectTrip = require('../utils/tripcode');
 const {
   PostingError,
   DocumentNotFoundError,
@@ -43,8 +44,7 @@ const {
  * @param {Number}  [postData.threadId=0] Thread to reply to. If empty or 0,
  *    new thread will be created.
  * @param {Date}    [postData.createdAt=Date.now()] Date of post creation
- * @param {String}  [postData.name=""] Poster name instead.
- * @param {String}  [postData.tripcode=""] Poster tripcode
+ * @param {String}  [postData.name=""] Poster name (can contain tripcode)
  * @param {String}  [postData.email=""] Poster email or other link
  * @param {String}  [postData.subject=""] Post subject
  * @param {String}  [postData.body=""] Post message
@@ -109,6 +109,10 @@ const checkPrivileges = (postData, posterInfo, board, options) => {
   }
   if (board.isForcedAnon && !ignoreForcedAnon) {
     postData.name = board.defaultPosterName;
+  } else {
+    const { name, tripcode } = detectTrip(postData.name);
+    postData.name = name;
+    postData.tripcode = tripcode;
   }
   if (board.isForcedAnon && !ignoreForcedAnon) {
     delete postData.email;
@@ -279,8 +283,7 @@ const getPosterRole = async (boardUri, user) => {
  * @param {Object}  postData Post data
  * @param {String}  postData.boardUri Uri of board this post is posted on
  * @param {Date}    [postData.createdAt=Date.now()] Date of post creation
- * @param {String}  [postData.name=""] Poster name instead.
- * @param {String}  [postData.tripcode=""] Poster tripcode
+ * @param {String}  [postData.name=""] Poster name (can contain tripcode)
  * @param {String}  [postData.email=""] Poster email or other link
  * @param {String}  [postData.subject=""] Post subject
  * @param {String}  [postData.body=""] Post message
@@ -392,8 +395,7 @@ module.exports.createThread = async (postData, posterInfo, options) => {
  * @param {String}  postData.boardUri Uri of board this post is posted on
  * @param {Number}  postData.threadId Thread to reply to
  * @param {Date}    [postData.createdAt=Date.now()] Date of post creation
- * @param {String}  [postData.name=""] Poster name instead.
- * @param {String}  [postData.tripcode=""] Poster tripcode
+ * @param {String}  [postData.name=""] Poster name (can contain tripcode)
  * @param {String}  [postData.email=""] Poster email or other link
  * @param {String}  [postData.subject=""] Post subject
  * @param {String}  [postData.body=""] Post message

@@ -7,6 +7,10 @@
   color: var(--name-color);
 }
 
+.post__header__tripcode {
+  color: var(--trip-color);
+}
+
 .post__header__staff {
   &::before, &::after {
     content: '★★';

@@ -29,9 +29,9 @@ const upload = multer();
  *    posting date or else this fields will be ignored and current date will
  *    be used instead.
  * @apiParam {String}   [name] Poster name. Depending on board preferences,
- *    this field can be ignored and default name will be used instead.
- * @apiParam {String}   [tripcode] Poster tripcode. Depending on board
- *    preferences, this field can be ignored.
+ *    this field can be ignored and default name will be used instead. Letters
+ *    after "#" or "!" will be interpreted as tripcode. Use (name)#trip for
+ *    regular and (name)#trip1#trip2 for secure tripcode.
  * @apiParam {String}   [email] Poster email or other link
  * @apiParam {String}   [subject] Post subject. Depending on board
  *    preferences, this can be ignored for replies.
@@ -66,14 +66,14 @@ const upload = multer();
  * @apiSuccess (Success 201) {Number} threadId Post parent thread number
  * @apiSuccess (Success 201) {Number} postId Post number
  * @apiSuccessExample {json} Success response:
- *     HTTP/1.1 201 Created
- *     Location: /b/res/386.html#post-b-392
- *     {
- *       "postId": 392,
- *       "boardUri": "b",
- *       "threadId": 386,
- *       "location": "/b/res/386.html#post-b-392"
- *     }
+ *   HTTP/1.1 201 Created
+ *   Location: /b/res/386.html#post-b-392
+ *   {
+ *     "postId": 392,
+ *     "boardUri": "b",
+ *     "threadId": 386,
+ *     "location": "/b/res/386.html#post-b-392"
+ *   }
  */
 router.post('/api/post',
   upload.array('attachments'),

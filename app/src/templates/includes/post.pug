@@ -40,6 +40,9 @@ div(
           a.post__header__name(href=`mailto:${ post.email }`)= post.name
         else
           span.post__header__name= post.name
+      if post.tripcode
+        span.post__header__tripcode= post.tripcode
+      if post.name || post.tripcode
         |
         |
       if post.staffStatus
