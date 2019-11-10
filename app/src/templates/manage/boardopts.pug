@@ -1,5 +1,6 @@
 extends managepage.pug
 
+include ../mixins/icons.pug
 include ../mixins/inputs.pug
 include ../mixins/modals.pug
 
@@ -91,7 +92,7 @@ block main
     +checkboxEdit('isForcedAnon', 'Forced anonymous', 'If set to yes, users will not be allowed to enter a name, making everyone appear as Anonymous.')
     +checkboxEdit('allowRepliesSubject', 'Enable subject field for replies', 'Who needs it anyway?')
     h3 Captcha
-    small.hint Rebuild all board pages when changing captcha settings, or else posting can become impossible due to lack of captcha field in posting form
+    div.alert.alert_warning #[+icon('exclamation-triangle', 'small')] #[strong Important!] Rebuild all board pages when changing captcha settings, or else posting can become impossible due to lack of captcha field in posting form
     +checkboxEdit('captcha[enabled]', 'Enable captcha', 'Enable/disable captcha system for this board. If captcha is enabled, in order for a user to post, they must first correctly enter the text on an image.')
     +numberEdit('captcha[unsolvedExpireTime]', 'Expiration time for unsolved captcha', 'Number of minutes until unsolved captcha expires and need to be refreshed. Set it to reasonable value, like 10 minutes.')
     +numberEdit('captcha[replyExpireTime]', 'Expiration time after reply', 'Number of minutes when solved captcha is still valid after reply.')
@@ -116,7 +117,7 @@ block main
 
   if board
     h2 Danger zone
-    div.message.message_danger
+    div.alert.alert_danger
       div.button.button_link
         a(href='/manage/boards/delete/' + board.uri) Delete board
 

@@ -48,22 +48,62 @@
 
   --spinner-color: #70c542;
 
-  --semantic-color-primary-text: #fff;
-  --semantic-color-primary-background: #007bff;
-  --semantic-color-secondary-text: #fff;
-  --semantic-color-secondary-background: #6c757d;
-  --semantic-color-success-text: #fff;
-  --semantic-color-success-background: #28a745;
-  --semantic-color-danger-text: #fff;
-  --semantic-color-danger-background: #dc3545;
-  --semantic-color-warning-text: #212529;
-  --semantic-color-warning-background: #ffc107;
-  --semantic-color-info-text: #fff;
-  --semantic-color-info-background: #17a2b8;
-  --semantic-color-light-text: #212529;
-  --semantic-color-light-background: #f8f9fa;
-  --semantic-color-dark-text: #fff;
-  --semantic-color-dark-background: #343a40;
+  --badge-color-primary-text: #fff;
+  --badge-color-primary-background: #007bff;
+
+  --badge-color-secondary-text: #fff;
+  --badge-color-secondary-background: #6c757d;
+
+  --badge-color-success-text: #fff;
+  --badge-color-success-background: #28a745;
+
+  --badge-color-danger-text: #fff;
+  --badge-color-danger-background: #dc3545;
+
+  --badge-color-warning-text: #212529;
+  --badge-color-warning-background: #ffc107;
+
+  --badge-color-info-text: #fff;
+  --badge-color-info-background: #17a2b8;
+
+  --badge-color-light-text: #212529;
+  --badge-color-light-background: #f8f9fa;
+
+  --badge-color-dark-text: #fff;
+  --badge-color-dark-background: #343a40;
+
+  --alert-color-primary-text: #004085;
+  --alert-color-primary-background: #cce5ff;
+  --alert-color-primary-border: #b8daff;
+
+  --alert-color-secondary-text: #383d41;
+  --alert-color-secondary-background: #e2e3e5;
+  --alert-color-secondary-border: #d6d8db;
+
+  --alert-color-success-text: #155724;
+  --alert-color-success-background: #d4edda;
+  --alert-color-success-border: #c3e6cb;
+
+  --alert-color-danger-text: #721c24;
+  --alert-color-danger-background: #f8d7da;
+  --alert-color-danger-border: #f5c6cb;
+
+  --alert-color-warning-text: #856404;
+  --alert-color-warning-background: #fff3cd;
+  --alert-color-warning-border: #ffeeba;
+
+  --alert-color-info-text: #0c5460;
+  --alert-color-info-background: #d1ecf1;
+  --alert-color-info-border: #bee5eb;
+
+  --alert-color-light-text: #818182;
+  --alert-color-light-background: #fefefe;
+  --alert-color-light-border: #fdfdfe;
+
+  --alert-color-dark-text: #1b1e21;
+  --alert-color-dark-background: #d6d8d9;
+  --alert-color-dark-border: #c6c8ca;
+
 }
 
 
@@ -86,7 +126,7 @@
 @import './components/tabs';
 @import './components/table';
 @import './components/badge';
-@import './components/message';
+@import './components/alert';
 @import './components/list';
 @import './components/news';
 @import './components/sidebar';

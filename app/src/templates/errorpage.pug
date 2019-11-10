@@ -13,7 +13,7 @@ block header
   h1.text-center Kuso!
 
 mixin error(e)
-  div.error.message.message_danger
+  div.error.alert.alert_danger
     strong.error_code= (e.code || e.name)
     if e.param
       |  e.param

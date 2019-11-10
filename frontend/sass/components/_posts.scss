@@ -15,7 +15,7 @@
   &::before, &::after {
     content: '★★';
   }
-  color: var(--semantic-color-info-background);
+  color: var(--badge-color-info-background);
 }
 
 .post__header__subject {
@@ -85,23 +85,23 @@
 .post__badge_closed,
 .post__badge_deleted,
 .post__badge_autosage {
-  background: var(--semantic-color-danger-background);
+  background: var(--badge-color-danger-background);
   svg {
-    fill: var(--semantic-color-danger-text);
+    fill: var(--badge-color-danger-text);
   }
 }
 
 .post__badge_sticky {
-  background: var(--semantic-color-primary-background);
+  background: var(--badge-color-primary-background);
   svg {
-    fill: var(--semantic-color-primary-text);
+    fill: var(--badge-color-primary-text);
   }
 }
 
 .post__badge_sage {
-  background: var(--semantic-color-dark-background);
+  background: var(--badge-color-dark-background);
   svg {
-    fill: var(--semantic-color-dark-text);
+    fill: var(--badge-color-dark-text);
   }
 }
 
@@ -177,7 +177,7 @@
 }
 
 .post_reply:target {
-  box-shadow: 0 0 3px 1px var(--semantic-color-primary-background);
+  box-shadow: 0 0 3px 1px var(--badge-color-primary-background);
 }
 
 .reply-container {

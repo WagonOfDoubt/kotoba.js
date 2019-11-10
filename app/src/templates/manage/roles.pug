@@ -1,6 +1,7 @@
 extends managepage.pug
 
 include ../mixins/inputs.pug
+include ../mixins/icons.pug
 include ../mixins/modals.pug
 include ../mixins/text.pug
 
@@ -47,8 +48,8 @@ block main
       +checkboxEdit('postingPrivileges.ignoreCaptcha', 'Ignore captcha', 'User is not required to solve captcha')
       +checkboxEdit('postingPrivileges.ignoreClosed', 'Ignore closed threads/boards', 'User can post in closed threads or boards')
       +checkboxEdit('postingPrivileges.ignoreForcedAnon', 'Ignore forced anonymous', 'User can enter name regardless of board options')
-      div.message.message_danger
-        strong Warning!
+      div.alert.alert_danger
+        | #[+icon('exclamation-triangle', 'small')] #[strong Warning!]
         div Posting raw HTML may potentially allow for execution of arbitrary code embedded in post or may open possibility for other exploits. Check option below only for most trusted staff members.
         +checkboxEdit('postingPrivileges.canUseMarkdown', 'Can post raw HTML/Markdown', 'User can post raw HTML tags with markdown markup instead of default markup.')
       +checkboxEdit('postingPrivileges.canFakeTimestamp', 'Can specify post time', 'Whether or not user can specify createdAt date while posting. This can only be used through api. Useful for importing posts from other sources or for modgets.')

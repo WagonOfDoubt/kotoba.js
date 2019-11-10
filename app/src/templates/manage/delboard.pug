@@ -1,5 +1,6 @@
 extends managepage.pug
 include ../mixins/modals.pug
+include ../mixins/icons.pug
 
 block header
   -
@@ -33,8 +34,8 @@ block header
           a(href='/manage/boards/edit/' + board.uri) Back to board options
 
 block main
-  div.message.message_danger
-    strong Warning!
+  div.alert.alert_danger
+    | #[+icon('exclamation-triangle', 'small')] #[strong Warning!]
     div This action can not be undone!  
     form#form-delete-board(method='post', data-method='delete', action='/api/board/')
       input(type='hidden', name='uri', value=board.uri)

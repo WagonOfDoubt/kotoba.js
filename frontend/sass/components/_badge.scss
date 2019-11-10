@@ -11,58 +11,58 @@
 }
 
 .badge_primary {
-  color: var(--semantic-color-primary-text);
-  background-color: var(--semantic-color-primary-background);
+  color: var(--badge-color-primary-text);
+  background-color: var(--badge-color-primary-background);
   svg {
-    fill: var(--semantic-color-primary-text);
+    fill: var(--badge-color-primary-text);
   }
 }
 .badge_secondary {
-  color: var(--semantic-color-secondary-text);
-  background-color: var(--semantic-color-secondary-background);
+  color: var(--badge-color-secondary-text);
+  background-color: var(--badge-color-secondary-background);
   svg {
-    fill: var(--semantic-color-secondary-text);
+    fill: var(--badge-color-secondary-text);
   }
 }
 .badge_success {
-  color: var(--semantic-color-success-text);
-  background-color: var(--semantic-color-success-background);
+  color: var(--badge-color-success-text);
+  background-color: var(--badge-color-success-background);
   svg {
-    fill: var(--semantic-color-success-text);
+    fill: var(--badge-color-success-text);
   }
 }
 .badge_danger {
-  color: var(--semantic-color-danger-text);
-  background-color: var(--semantic-color-danger-background);
+  color: var(--badge-color-danger-text);
+  background-color: var(--badge-color-danger-background);
   svg {
-    fill: var(--semantic-color-danger-text);
+    fill: var(--badge-color-danger-text);
   }
 }
 .badge_warning {
-  color: var(--semantic-color-warning-text);
-  background-color: var(--semantic-color-warning-background);
+  color: var(--badge-color-warning-text);
+  background-color: var(--badge-color-warning-background);
   svg {
-    fill: var(--semantic-color-warning-text);
+    fill: var(--badge-color-warning-text);
   }
 }
 .badge_info {
-  color: var(--semantic-color-info-text);
-  background-color: var(--semantic-color-info-background);
+  color: var(--badge-color-info-text);
+  background-color: var(--badge-color-info-background);
   svg {
-    fill: var(--semantic-color-info-text);
+    fill: var(--badge-color-info-text);
   }
 }
 .badge_light {
-  color: var(--semantic-color-light-text);
-  background-color: var(--semantic-color-light-background);
+  color: var(--badge-color-light-text);
+  background-color: var(--badge-color-light-background);
   svg {
-    fill: var(--semantic-color-light-text);
+    fill: var(--badge-color-light-text);
   }
 }
 .badge_dark {
-  color: var(--semantic-color-dark-text);
-  background-color: var(--semantic-color-dark-background);
+  color: var(--badge-color-dark-text);
+  background-color: var(--badge-color-dark-background);
   svg {
-    fill: var(--semantic-color-dark-text);
+    fill: var(--badge-color-dark-text);
   }
 }
