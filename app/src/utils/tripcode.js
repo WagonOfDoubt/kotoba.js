@@ -38,6 +38,8 @@ const rot13 = (str) => {
  *  - "name#trip"
  *  - "name!trip!securetrip"
  *  - "name#trip#securetrip"
+ *  - "name!!securetrip"
+ *  - "name##securetrip"
  * @return {ParseTripResult} Object with fields "name", "trip1", "trip2"
  */
 const parseTrip = (nameStr) => {
@@ -85,9 +87,14 @@ const detectTrip = (nameStr) => {
     secureTripcode = rot13(secureTripcode);
     secureTripcode = secureTripcode.substr(2, 10);
   }
-  const tripcode = secureTripcode ?
-    `!${normalTripcode}!!${secureTripcode}` :
-    `!${normalTripcode}`;
+  const tripcode =
+    normalTripcode && secureTripcode ?
+      `!${normalTripcode}!!${secureTripcode}` :
+    normalTripcode ?
+      `!${normalTripcode}` :
+    secureTripcode ?
+      `!!${secureTripcode}` :
+      '';
   return { name, tripcode };
 };
 
