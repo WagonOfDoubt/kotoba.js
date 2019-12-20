@@ -5,15 +5,18 @@ block bodyClass
 doctype html
 html(lang=lang)&attributes(headAttributes)
   include ../includes/head.pug
-  body.layout-sidebar(class=bodyClass)
+  body.layout-navigator(class=bodyClass)
+    a.hidden#top
+    include ../includes/menubar.pug
     header
       block header
     main
       block main
-    aside.markdown.sidebar.sidebar_left
-      block aside
+    //- aside
+    //-   block aside
     footer
       block footer
       include ../includes/footer.pug
     block modals
+    a.hidden#bottom
     include ../includes/scripts.pug

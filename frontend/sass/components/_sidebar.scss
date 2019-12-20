@@ -2,9 +2,10 @@
  * Navigation sidebar
  */
 
-// use of calsses is avoided because content is generated from markdown
-
-aside {
+.markdown {
+  
+  // classes are avoided inside because content is generated from markdown
+  
   border-color: var(--border-color);
   background-color: var(--background-color);
 

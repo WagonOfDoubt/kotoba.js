@@ -1,0 +1,75 @@
+include ../mixins/icons.pug
+
+div.menu-container
+  nav.menu-bar.menu-bar_top.menu-bar_sticky
+    block menu
+      div.menu-bar__group
+        button.button.menu-bar__button.menu-bar__button_board-selector.js-toggle-visibility(data-target='.menu-bar__menu_left', data-visible='false')
+          if board
+            span
+              span.board-selector__board-uri /#{board.uri}/
+              if board.name
+                span.board-selector__em-dash — 
+                span.board-selector__board-name #{board.name}
+          else
+            span Go to board
+          +icon('chevron-down', 'small')
+      div.menu-bar__group
+        //- if site.features.favorites
+        //-   button.button.menu-bar__button.menu-bar__button_favorites.js-toggle-visibility(
+        //-       title='Favourite threads',
+        //-       data-target='.menu-bar__menu_right',
+        //-       data-visible='false',
+        //-       data-hide='#settings-menu, #search-menu',
+        //-       data-group='.menu-bar__button',
+        //-       data-show='#favorites-menu',
+        //-     )
+        //-     +icon('star', 'medium')
+        if board && board.features.catalog
+          a.button.menu-bar__button.menu-bar__button_catalog(
+              href=`/${board.uri}/${config.catalog_filename}`,
+              title='Catalog'
+            )
+            +icon('th', 'medium')
+        if board && board.features.archive
+          a.button.menu-bar__button.menu-bar__button_archive(
+              href=`/${board.uri}/arch/res`,
+              title='Archive'
+            )
+            +icon('save', 'medium')
+        //- button.button.menu-bar__button.menu-bar__button_search.js-toggle-visibility(
+        //-     title='search'
+        //-     data-target='.menu-bar__menu_right',
+        //-     data-visible='false',
+        //-     data-hide='#settings-menu, #favorites-menu',
+        //-     data-group='.menu-bar__button',
+        //-     data-show='#search-menu',
+        //-   )
+        //-   +icon('search', 'medium')
+        //- button.button.menu-bar__button.menu-bar__button_settings.js-toggle-visibility(
+        //-     title='Settings'
+        //-     data-target='.menu-bar__menu_right',
+        //-     data-visible='false',
+        //-     data-hide='#search-menu, #favorites-menu',
+        //-     data-group='.menu-bar__button',
+        //-     data-show='#settings-menu',
+        //-   )
+        //-   +icon('cog', 'medium')
+        a.button.menu-bar__button.menu-bar__button_home(
+            href='/',
+            title='Home'
+          )
+          +icon('home', 'medium')
+        a.button.menu-bar__button.menu-bar__button_manage(
+            href='/manage',
+            title='Manage'
+          )
+          +icon('yin-yang', 'medium')
+  div.markdown.menu-bar__menu.menu-bar__menu_right.hidden
+    div#settings-menu.markdown
+      h4 Settings
+    div#search-menu.markdown
+      h4 Search
+    div#favorites-menu.markdown
+      h4 Favorites
+  div.markdown.menu-bar__menu.menu-bar__menu_left.hidden!= filters.markdown(site.frame)

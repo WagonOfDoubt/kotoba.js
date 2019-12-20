@@ -1,4 +1,4 @@
-extends layouts/default.pug
+extends layouts/navigator.pug
 include mixins/icons.pug
 
 block bodyClass
@@ -34,7 +34,7 @@ block main
       if board.features.archive
         ul.list_buttons
           li
-            a(href='/' + board.uri + '/arch/res') Archive
+            a(href=`/${board.uri}/arch/res`) Archive
       ul.list_buttons
         li
           a(href='#bottom') Bottom
