@@ -42,7 +42,6 @@
       "container-padding": "1.5rem",
       "container-undo-padding-margin": "-1.5rem",
       "post-border-radius": "5px",
-      "sidebar-width": "20vw",
       "tab-border-radius": "5px",
       "tab-padding": "5px"
     },
@@ -91,7 +90,6 @@
       "container-padding": "1.5rem",
       "container-undo-padding-margin": "-1.5rem",
       "post-border-radius": "0",
-      "sidebar-width": "20vw",
       "tab-border-radius": "5px",
       "tab-padding": "5px"
     },
@@ -140,7 +138,6 @@
       "container-padding": "1.5rem",
       "container-undo-padding-margin": "-1.5rem",
       "post-border-radius": "0",
-      "sidebar-width": "20vw",
       "tab-border-radius": "5px",
       "tab-padding": "5px"
     },
@@ -189,7 +186,6 @@
       "container-padding": "1.5rem",
       "container-undo-padding-margin": "-1.5rem",
       "post-border-radius": "0",
-      "sidebar-width": "20vw",
       "tab-border-radius": "5px",
       "tab-padding": "5px"
     },
@@ -238,7 +234,6 @@
       "container-padding": "1.5rem",
       "container-undo-padding-margin": "-1.5rem",
       "post-border-radius": "5px",
-      "sidebar-width": "20vw",
       "tab-border-radius": "5px",
       "tab-padding": "5px"
     },
@@ -287,7 +282,6 @@
       "container-padding": "1.5rem",
       "container-undo-padding-margin": "-1.5rem",
       "post-border-radius": "0",
-      "sidebar-width": "20vw",
       "tab-border-radius": "5px",
       "tab-padding": "5px"
     },
