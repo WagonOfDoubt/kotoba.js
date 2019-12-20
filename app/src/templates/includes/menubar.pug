@@ -3,7 +3,7 @@ include ../mixins/icons.pug
 div.menu-container
   nav.menu-bar.menu-bar_top.menu-bar_sticky
     block menu
-      div.menu-bar__group
+      div.menu-bar__group.menu-bar__group_left
         button.button.menu-bar__button.menu-bar__button_board-selector.js-toggle-visibility(data-target='.menu-bar__menu_left', data-visible='false')
           if board
             span
@@ -14,14 +14,14 @@ div.menu-container
           else
             span Go to board
           +icon('chevron-down', 'small')
-      div.menu-bar__group
+      div.menu-bar__group.menu-bar__group_right
         //- if site.features.favorites
         //-   button.button.menu-bar__button.menu-bar__button_favorites.js-toggle-visibility(
         //-       title='Favourite threads',
         //-       data-target='.menu-bar__menu_right',
         //-       data-visible='false',
         //-       data-hide='#settings-menu, #search-menu',
-        //-       data-group='.menu-bar__button',
+        //-       data-group='.menu-bar__group_right .menu-bar__button',
         //-       data-show='#favorites-menu',
         //-     )
         //-     +icon('star', 'medium')
@@ -42,7 +42,7 @@ div.menu-container
         //-     data-target='.menu-bar__menu_right',
         //-     data-visible='false',
         //-     data-hide='#settings-menu, #favorites-menu',
-        //-     data-group='.menu-bar__button',
+        //-     data-group='.menu-bar__group_right .menu-bar__button',
         //-     data-show='#search-menu',
         //-   )
         //-   +icon('search', 'medium')
@@ -51,7 +51,7 @@ div.menu-container
         //-     data-target='.menu-bar__menu_right',
         //-     data-visible='false',
         //-     data-hide='#search-menu, #favorites-menu',
-        //-     data-group='.menu-bar__button',
+        //-     data-group='.menu-bar__group_right .menu-bar__button',
         //-     data-show='#settings-menu',
         //-   )
         //-   +icon('cog', 'medium')

@@ -111,8 +111,6 @@
 @import './components/fonts.scss';
 @import './components/icons';
 @import './components/attachments';
-@import './components/media_print';
-@import './components/media_mobile';
 @import './components/posts';
 @import './components/formatting';
 @import './components/postform';
@@ -133,6 +131,10 @@
 @import './components/buttons';
 @import './components/text';
 @import './components/board';
+
+@import './media/media_print';
+@import './media/media_small';
+@import './media/media_medium';
 
 body {
   color: var(--text-color);

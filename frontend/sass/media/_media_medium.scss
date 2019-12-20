@@ -1,0 +1,15 @@
+@media only screen and (max-width: 800px) and (min-width: 480px) {
+  :root {
+    --sidebar-width: 50vw;
+  }
+
+  .menu-bar__button_board-selector {
+    justify-content: flex-start;
+  }
+}
+
+@media only screen and (max-width: 1024px) and (min-width: 800px)  {
+  :root {
+    --sidebar-width: 25vw;
+  }
+}

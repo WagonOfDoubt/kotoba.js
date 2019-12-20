@@ -1,5 +1,9 @@
 
 @media only screen and (max-width: 480px) {
+  :root {
+    --sidebar-width: 100vw;
+  }
+
   .reply-container {
     margin-top: 4px;
     display: flex;
@@ -100,5 +104,26 @@
   .postform__subject input {
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .menu-bar__button_board-selector {
+    width: auto;
+  }
+
+  .menu-container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'menu'
+      'center';
+  }
+
+  .menu-bar__menu_right,
+  .menu-bar__menu_left {
+    grid-area: center;
+  }
+
+  .board-selector__em-dash,
+  .board-selector__board-name {
+    display: none;
   }
 }
