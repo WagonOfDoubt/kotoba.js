@@ -13,7 +13,7 @@ block header
   include includes/boardheader.pug
 
 mixin stats()
-  - var replies = thread.children.length;
+  - var replies = thread.children ? thread.children.length : 0;
   - var images = thread.numberOfAttachmentsInThread;
   div.thread__stats
     span.thread__replies(title='Number of replies') #[+icon('comments', 'small')] #[data(value=replies)= replies]

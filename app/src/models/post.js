@@ -666,12 +666,13 @@ threadSchema.statics.getSortedThreads = async (board) => {
  * @returns {Number} Number of attachments
  */
 threadSchema.virtual('numberOfAttachmentsInThread').get(function () {
-  if (!this.children.length) {
-    return 0;
+  const opAttachments = this.attachments ? this.attachments.length : 0;
+  if (!this.children || !this.children.length) {
+    return opAttachments;
   }
   return this.children.reduce((acc, child) => {
     return acc + (child.attachments ? child.attachments.length : 0);
-  }, 0);
+  }, opAttachments);
 });
 
 
