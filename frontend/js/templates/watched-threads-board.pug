@@ -1,0 +1,4 @@
+include ./mixins/watched.pug
+
+-var isCurrentBoard = boardUri === currentBoard;
++board(threads, boardUri, isCurrentBoard)

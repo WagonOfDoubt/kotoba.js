@@ -16,16 +16,18 @@
   }
 
   li {
-    a {
-      padding: .5rem 1.25rem;
-      display: block;
-      color: var(--board-link-color);
-      text-decoration: none;
+    padding: .5rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
 
-      &:hover {
-        color: var(--board-link-color);
-        background-color: var(--board-link-background);
-      }
+    a {
+      color: var(--board-link-color);
+      text-decoration: none;      
+    }
+
+    &:hover {
+      color: var(--board-link-color);
+      background-color: var(--board-link-background);
     }
   }
 
@@ -35,6 +37,11 @@
     padding: 2px .5rem;
     background-color: var(--postblock-background-color);
     color: var(--postblock-color);
+
+    a {
+      color: var(--board-link-color);
+      text-decoration: none;      
+    }
   }
 
   h4 {
@@ -43,6 +50,11 @@
     border-bottom: 1px solid var(--border-color);
     background-color: var(--postblock-background-color);
     color: var(--postblock-color);
+
+    a {
+      color: var(--board-link-color);
+      text-decoration: none;      
+    }
   }
 
   p {

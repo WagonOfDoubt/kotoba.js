@@ -139,6 +139,13 @@
 }
 
 
+.thread_watched {
+  .post__button_favorite {
+    color: var(--post-buttons-color-active);
+  }
+}
+
+
 .thread-page, .board-page {
   .post_reply .post__header::after {
     content: var(--post-counter-prefix)counter(thr-cnt);

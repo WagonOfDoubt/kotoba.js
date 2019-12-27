@@ -16,6 +16,7 @@
   --page-title-color: #fff;
   --post-buttons-color: #dd0000;
   --post-buttons-color-hover: #0000ee;
+  --post-buttons-color-active: #ffe100;
   --post-counter-color: #707070;
   --postblock-background-color: #f1c984;
   --postblock-color: #403c0f;
@@ -204,4 +205,28 @@ hr {
 
 .option_default {
   font-weight: bold;
+}
+
+.favorites__title {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+
+.chevron {
+  .icon {
+    transition: transform .4s cubic-bezier(.68,-0.55,.27,1.55)
+  }
+
+  &[data-visible='true'] {
+    .icon_chevron-down {
+      transform: scaleY(-1);
+    }
+  }
+}
+
+.chevron_wide {
+  display: flex;
+  justify-content: space-between;
 }

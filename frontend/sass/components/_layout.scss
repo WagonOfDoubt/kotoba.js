@@ -136,16 +136,6 @@ body.layout-navigator {
 .menu-bar__button_board-selector {
   width: var(--sidebar-width);
   justify-content: space-between;
-
-  .icon {
-    transition: transform .4s cubic-bezier(.68,-0.55,.27,1.55)
-  }
-}
-
-.menu-bar__button_board-selector[data-visible='true'] {
-  .icon_chevron-down {
-    transform: scaleY(-1);
-  }
 }
 
 .menu-bar__button[data-visible='true'] {

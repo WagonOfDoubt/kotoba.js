@@ -1,0 +1,17 @@
+include ./icons.pug
+
+mixin watchedItem(thread, boardUri, threadId)
+  li.favorites__thread(data-board=boardUri, data-thread=threadId)
+    a.favorites__title(href=`/${boardUri}/res/${threadId}.html`, title=thread.txt) #{threadId} - #{thread.txt}
+    a.js-toggle-watched(data-thread=threadId, data-board=boardUri, href='#', title='Remove from watched') #[+icon('times', 'small')]
+
+mixin board(threads, boardUri, isCurrentBoard)
+  -var visible = isCurrentBoard ? 'true' : 'false';
+  div.favorites__board(data-board=boardUri)
+    h4
+      a.js-toggle-visibility.chevron.chevron_wide(href='#', data-target=`.favlist_board-${boardUri}`, data-visible=visible)
+        span /#{boardUri}/
+        +icon('chevron-down', 'small')
+    ul.favlist(class=`favlist_board-${boardUri}`, class={hidden: !isCurrentBoard})
+      for thread, threadId in threads
+        +watchedItem(thread, boardUri, threadId)
