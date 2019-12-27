@@ -12,7 +12,7 @@ import { localizeTime } from './time';
  */
 export const initExpandThread = () => {
   $('body').on('click', '.post__button_expand', e => {
-    const thread = $(e.currentTarget).closest('.thread-container');
+    const thread = $(e.currentTarget).closest('.thread');
     const { threadId, boardUri } = thread.data();
     const omitted = thread.find('.omittedposts');
     const replies = thread.find('.replies-container');

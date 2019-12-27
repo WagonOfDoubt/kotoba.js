@@ -92,7 +92,7 @@ export class PostForm {
     if (replyContainer) {
       replyContainer.insertAdjacentElement('afterend', this.quickReplyContainer);
     } else {
-      const threadContainer = postEl.closest('.thread-container');
+      const threadContainer = postEl.closest('.thread');
       const repliesContainer = threadContainer.querySelector('.replies-container');
       repliesContainer.insertAdjacentElement('afterbegin', this.quickReplyContainer);
     }

@@ -1,5 +1,5 @@
-div.thread-container(
-  id=`thread${ thread.postId }${ thread.boardUri }`
+div.thread(
+  id=`thread-${ thread.boardUri }-${ thread.postId }`
   style={ 'counter-reset': `thr-cnt ${ omittedPosts }` }
   data-thread-id=thread.postId
   data-board-uri=thread.boardUri
