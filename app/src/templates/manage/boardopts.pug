@@ -40,7 +40,7 @@ block main
     var values = board || boardDefaults
     var defaults = boardDefaults
     var action = '/api/board/';
-    var getUrl = board ? `/api/board/${board.uri}?select=!all` : null;
+    var getUrl = board ? `/api/board?filter=uri:"${board.uri}"&limit=1` : null;
     var method = board ? 'PATCH' : 'POST';
   form#form-update-board(method='POST', action=action, data-method=method, data-get-url=getUrl)
     if !board

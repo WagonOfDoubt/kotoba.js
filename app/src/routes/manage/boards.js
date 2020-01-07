@@ -32,7 +32,10 @@ router.get('/boards/edit/:board',
   async (req, res, next) => {
     try {
       const boardUri = req.params.board;
-      const board = await Board.findOne({ uri: boardUri }).exec();
+      const board = await Board.apiQuery({
+        filter: { uri: boardUri },
+        limit: 1,
+      });
       res.render('manage/boardopts', {
         activity: 'manage-page-boardopts',
         board: board,

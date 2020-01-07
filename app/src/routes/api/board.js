@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { checkSchema } = require('express-validator');
 const _ = require('lodash');
+const XRegExp = require('xregexp');
 
 const boardController = require('../../controllers/board');
 const Board = require('../../models/board');
@@ -14,6 +15,31 @@ const { DocumentNotFoundError, DocumentAlreadyExistsError, DocumentNotModifiedEr
 const locales = require('../../json/locales.json');
 const localeCodes = locales.map(([t, c]) => c);
 
+
+const reQueryFilter = new XRegExp(`
+(?<=\\s|^)  # start
+(?<pair>
+  (?<field>\\w+?)
+  \\:  # field:value separator
+  (?<value>
+    (?<oparg>
+      (?<operator>\\$\\S+)  # $operator
+      \\(  # argument starts with (
+      (?<argument>
+        (?:\\"(?<stringArg>.+?)\\") | # String  "string"
+        (?:\\[(?<arrayArg>.+?)\\])  | # Array   [array]
+        (?<integerArg>\\d+)        | # Integer 265
+        (?<numberArg>[\\d\\.]+)       # Float   3.14
+      )
+      \\)  # argument ends with )
+    ) |
+    # simple values
+    (?:\\"(?<stringVal>.+?)\\") | # String  "string"
+    (?<integerVal>\\d+)        | # Integer 265
+    (?<numberVal>[\\d\\.]+)       # Float   3.14
+  )
+)
+(?:$|\\s)  # end`, 'gx');
 
 /**
  * @apiDefine BoardParams
@@ -337,50 +363,86 @@ const _boardUriValidator = {
 
 
 /**
- * @api {get} /api/board/:uri? Get Boards
+ * @api {get} /api/board/ Get Boards
  * @apiName GetBoard
  * @apiGroup Board
  * @apiPermission anyone
- * @apiParam (params) {String} uri="" Optional. If specified, returns one
- *    board object. If empty, returns array of all boards.
- * @apiParam (query) {String} select Optional. Comma-separated values that
- *    define which parameters of board to return. If empty, default set of
- *    params will be returned, as shown below. If equals "!all", all
- *    parameters will be returned.
+ * @apiDescription Find one or more boards based on query. Text search is
+ *    performed on fields `uri`, `name`, `desc`.
+ * @apiParam (query) {String} [search=""] Search text in fields with text
+ *    index
+ * @apiParam (query) {String} [filter=""] Filter documents that match
+ *    specified condition. Filter must contain `field:value` pairs separated
+ *    by spaces. String values must be enclosed in double quotes (`"`), but
+ *    **NOT** single (`'`) quotes. Use 1 and 0 for boolean values. Simple
+ *    `field:value` pair specifies equality condition. For other conditions
+ *    operators can be used with following syntax:
+ *    `field:$operator(argument)`.
  *
- * @apiSuccessExample GET /api/board/:
- *     HTTP/1.1 200 OK
- *     [
- *        {
- *          "name": "Random",
- *          "desc": "General discussion",
- *          "isLocked": false,
- *          "locale": "en",
- *          "postcount": 4815162342,
- *          "uri": "b"
- *        },
- *        {
- *          "name": "Anime",
- *          "desc": "Anime discussion",
- *          "isLocked": false,
- *          "locale": "jp",
- *          "postcount": 9000000,
- *          "uri": "a"
- *        }
- *      ]
+ *    Supported operators are:
+ *    - `$eq`   Matches values that are equal to a specified value.
+ *    - `$ne`   Matches all values that are not equal to a specified value.
+ *    - `$gt`   Matches values that are greater than a specified value.
+ *    - `$gte`  Matches values that are greater than or equal to a specified value.
+ *    - `$lt`   Matches values that are less than a specified value.
+ *    - `$lte`  Matches values that are less than or equal to a specified value.
+ *    - `$in`   Matches any of the values specified in an array.
+ *    - `$nin`  Matches none of the values specified in an array.
+ *    
+ *    For operators `$in` and `$nin` argument must be an array defined by
+ *    enclosing values separated by `|` character in square brackets `[]`.
  *
- * @apiSuccessExample GET /api/board/b:
+ *    Examples:
+ *    - `?filter=uri:"b"`
+ *    - `?filter=isLocked:1`
+ *    - `?filter=uri:$in(["a"|"b"]) postcount:$gte(42)`
+ *
+ *    Invalid `field:value` pairs are ignored without errors.
+ *
+ * @apiParam (query) {String} [select=""] List of field names to return
+ *    separated by spaces
+ * @apiParam (query) {String} [sort=""] List of field names to sort by
+ *    separated by spaces. Sort order by default is ascending, to specify
+ *    descending order, place `-` character before the field name.
+ *
+ * Example: - `?sort=postcount -createdAt`
+ * @apiParam (query) {Number} [skip=0] Number of documents to skip
+ * @apiParam (query) {Number} [limit=100] Maximum number of documents to
+ *    return. If limit=1, single document will be returned. Otherwise,
+ *    object with fields `docs` (array of documents) and `count` (number of
+ *    matched documents without limit) will be returned. Minimum value is
+ *    `1` and maximum value is `1000`.
+ *
+ * @apiSuccess {Object[]} docs (if limit > 1) Array of matched documents
+ * @apiSuccess {Number}   count (if limit > 1) Number of matched documents (without limit)
+ * 
+ * @apiSuccessExample Get multiple documents
+ *     GET /api/board?filter=uri:$in(["b"|"a"])&select=name desc isLocked locale postcount uri&sort=-postcount
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "Random",
- *       "desc": "General discussion",
- *       "isLocked": false,
- *       "locale": "en",
- *       "postcount": 4815162342,
- *       "uri": "b"
+ *       docs: [
+ *         {
+ *           "name": "Random",
+ *           "desc": "General discussion",
+ *           "isLocked": false,
+ *           "locale": "en",
+ *           "postcount": 4815162342,
+ *           "uri": "b"
+ *         },
+ *         {
+ *           "name": "Anime",
+ *           "desc": "Anime discussion",
+ *           "isLocked": false,
+ *           "locale": "jp",
+ *           "postcount": 9000000,
+ *           "uri": "a"
+ *         }
+ *       ],
+ *       count: 2
  *     }
  *
- * @apiSuccessExample GET /api/board/b?select=createdAt,postcount:
+ * @apiSuccessExample Get one document
+ *     GET /api/board?filter=uri:b&select=createdAt postcount&limit=1
  *     HTTP/1.1 200 OK
  *     {
  *       "postcount": 4815162342,
@@ -391,73 +453,132 @@ const _boardUriValidator = {
  * @apiUse RequestValidationError
  */
 router.get(
-  '/api/board/:uri?',
+  '/api/board/',
   checkSchema({
-    uri: {
-      in: 'params',
+    search: {
+      in: 'query',
       optional: true,
-      isLength: {
-        options: { min: 1 },
-        errorMessage: 'Board uri must not be empty',
+    },
+    filter: {
+      in: 'query',
+      optional: true,
+      customValidator: {
+        options: (value) => {
+          return XRegExp.test(value, reQueryFilter);
+        },
       },
-      matches: {
-        options: [/^[a-zA-Z0-9_]*$/],
-        errorMessage: 'Board uri can contain only letters and numbers or underscore',
-      },
-      custom: {
-        options: (v) => !boardparams.uriBlacklist.includes(v),
-        errorMessage: 'This board uri is not allowed',
+      customSanitizer: {
+        options: (value, {req, location, path}) => {
+          if (!value) {
+            return {};
+          }
+          const filter = {};
+          XRegExp.forEach(value, reQueryFilter, (matches) => {
+            const { field, operator } = matches;
+            let value;
+            if (operator) {
+              const { stringArg, arrayArg, numberArg, integerArg } = matches;
+              let argument = stringArg || Number.parseFloat(numberArg) || Number.parseInt(integerArg);
+              if (arrayArg) {
+                argument = arrayArg.split('|').map(arg => {
+                  if (arg.startsWith('"') && arg.endsWith('"')) {
+                    return arg.substring(1, arg.length - 1);
+                  }
+                  if (arg.match(/^\d+$/)) {
+                    return Number.parseInt(arg);
+                  }
+                  if (arg.match(/^[\.\d]+$/)) {
+                    return Number.parseFloat(arg);
+                  }
+                  return null;
+                });
+              }
+              value = {};
+              value[operator] = argument;
+            } else {
+              const { stringVal, numberVal, integerVal } = matches;
+              value = stringVal || Number.parseFloat(numberVal) || Number.parseInt(integerVal);
+            }
+            filter[field] = value;
+          });
+          return filter;
+        },
       },
     },
     select: {
       in: 'query',
       optional: true,
-    }
+      customSanitizer: {
+        options: (value, {req, location, path}) => {
+          return _.split(value, ' ') || [];
+        },
+      },
+    },
+    sort: {
+      in: 'query',
+      optional: true,
+      customSanitizer: {
+        options: (value, {req, location, path}) => {
+          const result = {};
+          const keys = value.split(' ');
+          for (let key of keys) {
+            let value = 1;
+            if (!key || !key.length || key === '-') {
+              continue;
+            }
+            if (key.startsWith('-')) {
+              value = -1;
+              key = key.substring(1);
+            }
+            result[key] = value;
+          }
+          return result;
+        },
+      },
+    },
+    skip: {
+      in: 'query',
+      isInt: {
+        options: { min: 0 },
+        errorMessage: 'skip must be a positive integer'
+      },
+      toInt: true,
+      optional: true,
+    },
+    limit: {
+      in: 'query',
+      isInt: {
+        options: { min: 1, max: 1000 },
+        errorMessage: 'limit must be an integer in range [1, 1000]'
+      },
+      toInt: true,
+      optional: true,
+    },
   }),
   validateRequest,
   filterMatched,
   async (req, res, next) => {
     try {
-      let selectQuery = (req.query.select && req.query.select.split(',')) || [];
-      if (selectQuery.length === 0) {
-        selectQuery = boardparams.defaultGetFields;
+      const result = await Board.apiQuery({
+        search: req.query.search,
+        filter: req.query.filter,
+        select: req.query.select,
+        sort: req.query.sort,
+        skip: req.query.skip,
+        limit: req.query.limit,
+      });
+      if (!result) {
+        const e = new DocumentNotFoundError('Board', 'filter', req.query.filter, 'query');
+        return e.respond(res);
       }
-      if (selectQuery.includes('!all')) {
-        selectQuery = ['-_id', '-__v'];
-      } else {
-        selectQuery = selectQuery.filter(q => boardparams.allFields.includes(q));
-        selectQuery = [...selectQuery, '-_id'];
-      }
-      const boardUri = req.params.uri && req.params.uri.toLowerCase();
-      const q = {};
-      if (!req.user) {
-        q.isHidden = false;
-      }
-      if (boardUri) {
-        if (boardUri) {
-          q.uri = boardUri;
-        }
-        const board = await Board.findOne(q, selectQuery).exec();
-        if (board) {
-          return res
-            .status(200)
-            .json(board.toObject({ minimize: false }));
-        } else {
-          const e = new DocumentNotFoundError('Board', 'uri', boardUri, 'params');
-          return e.respond(res);
-        }
-      } else {
-        const boards = await Board.find(q, selectQuery).exec();
-        return res
-          .status(200)
-          .json(boards);
-      }
+      return res
+        .status(200)
+        .json(result);
     } catch (err) {
-      return next(err);
+      next(err);
     }
   }
 );
-
 
 /**
  * @api {post} /api/board/ Create Board

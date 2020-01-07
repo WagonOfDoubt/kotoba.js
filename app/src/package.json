@@ -49,7 +49,8 @@
     "pug": "^2.0.4",
     "sharp": "^0.23.0",
     "streamifier": "^0.1.1",
-    "unix-crypt-td-js": "^1.1.4"
+    "unix-crypt-td-js": "^1.1.4",
+    "xregexp": "^4.2.4"
   },
   "devDependencies": {},
   "jshintConfig": {
