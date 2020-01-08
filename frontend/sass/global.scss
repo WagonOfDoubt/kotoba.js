@@ -132,6 +132,7 @@
 @import './components/buttons';
 @import './components/text';
 @import './components/board';
+@import './components/menus';
 
 @import './media/media_print';
 @import './media/media_small';
@@ -201,6 +202,14 @@ hr {
 
 .hidden {
   display: none;
+}
+
+.hidden_important {
+  display: none !important;
+}
+
+.invisible {
+  visibility: hidden;
 }
 
 .option_default {

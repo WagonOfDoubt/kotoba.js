@@ -72,24 +72,6 @@ body.layout-navigator {
   pointer-events: auto;
 }
 
-.menu-bar__menu {
-  grid-area: menu;
-  background-color: var(--background-color);
-  pointer-events: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.menu-bar__menu_right {
-  grid-area: right;
-  border-left: 1px solid var(--border-color);
-}
-
-.menu-bar__menu_left {
-  grid-area: left;
-  border-right: 1px solid var(--border-color);
-}
-
 .menu-bar__group {
   display: flex;
 }

@@ -10,12 +10,17 @@ import $ from 'jquery';
  */
 export const initToggleVisibility = () => {
   $('body').on('click', '.js-toggle-visibility', e => {
+    e.preventDefault();
     const btn = e.currentTarget;
     const isVisible = btn.dataset.visible === 'false';
+    const isSticky = btn.dataset.sticky === 'true';
     if (isVisible && btn.dataset.group) {
       $(btn.dataset.group).each((i, el) => {
         el.dataset.visible = 'false';
       });
+    }
+    if (!isVisible && isSticky) {
+      return;
     }
     btn.dataset.visible = isVisible ? 'true' : 'false';
     if (btn.dataset.captionHide && isVisible) {
@@ -33,6 +38,5 @@ export const initToggleVisibility = () => {
     if (isVisible && btn.dataset.show) {
       $(btn.dataset.show).toggleClass('hidden', false);
     }
-    e.preventDefault();
   });
 };

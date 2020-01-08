@@ -1,0 +1,43 @@
+include mixins/icons.pug
+
+li.boards-list__item(
+    data-uri=board.uri, 
+    data-desc=board.desc, 
+    data-name=board.name,
+    class={
+      'board-list__item_fav': board.isFavorite || false,
+    }
+  )
+  a(title=board.desc, href=`/${board.uri}`)
+    if board.name
+      | /#{board.uri}/ - #{board.name}
+    else
+      | /#{board.uri}/
+  div.boards-list__item__addons
+    if board.isHidden || board.isLocked || board.isForcedAnon
+      | 
+      small
+        if board.isHidden
+          abbr.badge.badge_light(title='Hidden board')
+            +icon('eye-slash', 'extrasmall')
+        if board.isLocked
+          abbr.badge.badge_danger(title='Locked board')
+            +icon('lock', 'extrasmall')
+        //- if board.isForcedAnon
+        //-   abbr.badge.badge_dark(title='Anonymous board')
+        //-     +icon('user-secret', 'extrasmall')
+    | 
+    - var newPosts = board.lastVisitPostcount ? Math.max(board.postcount - board.lastVisitPostcount, 0) : 0;
+    span.badge.badge_primary(title='New posts', class={invisible:newPosts === 0})
+      if newPosts >= 1000000
+        |#{Math.round(newPosts / 1000000)}M
+      else if newPosts >= 1000
+        |#{Math.round(newPosts / 1000)}k
+      else if newPosts === 0
+        |00
+      else
+        |#{newPosts}
+    | 
+    button.button.button_post.board-list__button_togglefav
+      +icon('heart', 'small')
+      +icon('heart-broken', 'small')

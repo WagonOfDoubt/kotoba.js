@@ -39,3 +39,67 @@
 
   display: inline-block;
 }
+
+
+@mixin clean-button-element {
+  &::-moz-focus-inner {
+    outline: none;
+    border: none;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  /*&:focus {
+    outline-style: dashed;
+    outline-width: 1px;
+    outline-offset: -1px;
+    outline-color: var(--board-link-background);
+  }*/
+
+  border: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+
+.button_material {
+  @include clean-button-element();
+  background: var(--background-color);
+  color: var(--board-link-color);
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 1.8rem;
+  font-weight: lighter;
+
+  &:hover {
+    background: var(--board-link-background);
+    color: var(--board-link-color);
+  }
+
+  transition: background .2s ease-in-out;
+}
+
+
+.button_post {
+  @include clean-button-element();
+  border-radius: 3px;
+  padding: 2px;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background: none;
+
+  fill: var(--post-buttons-color);
+  color: var(--post-buttons-color);
+
+  &:hover svg {
+    fill: var(--post-buttons-color-hover);
+    color: var(--post-buttons-color-hover);
+  }
+}

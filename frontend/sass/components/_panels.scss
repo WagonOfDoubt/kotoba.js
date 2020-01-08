@@ -1,0 +1,83 @@
+.panel {
+  grid-area: menu;
+  background-color: var(--background-color);
+  pointer-events: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel__content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.panel__scroll {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  flex-grow: 1;
+}
+
+.panel_right {
+  grid-area: right;
+  border-left: 1px solid var(--border-color);
+}
+
+.panel_left {
+  grid-area: left;
+  border-right: 1px solid var(--border-color);
+}
+
+.panel__tabs {
+  height: 2.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0;
+}
+
+.boards-list__item {
+  .button {
+    visibility: hidden;
+  }
+
+  &:hover {
+    .button {
+      visibility: visible;
+    }
+  }
+
+  .board-list__button_togglefav {
+    .icon_heart-broken {
+      display: none;
+    }
+  }
+
+  a {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .boards-list__item__addons {
+    white-space: nowrap;
+  }
+}
+
+.board-list__item_fav {
+  .board-list__button_togglefav:hover {
+    .icon_heart-broken {
+      display: inherit;
+    }
+    .icon_heart {
+      display: none;
+    }
+  }
+
+  .board-list__button_togglefav {
+    color: var(--post-buttons-color-active);
+    visibility: visible;
+  }
+}

@@ -1,3 +1,12 @@
+.input-group {
+  display: flex;
+  align-items: baseline;
+  input {
+    min-width: 0;
+    flex-grow: 1;
+  }
+}
+
 .form_inline {
   .form-group {
     display: inline-block;

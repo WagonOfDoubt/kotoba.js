@@ -16,6 +16,7 @@ import { initReflinks } from './modules/reflink-popup';
 import { initChangeStyle } from './modules/change-style';
 import { initHandlers } from './modules/misc-handlers';
 import { initFavorites } from './modules/favorites';
+import { initBoardsList } from './modules/boards-list';
 
 
 $(() => {
@@ -35,6 +36,7 @@ $(() => {
   initChangeStyle();
   initHandlers();
   initFavorites();
+  initBoardsList();
 
   // init login form
   $('[name=redirectHash]').val(window.location.hash);

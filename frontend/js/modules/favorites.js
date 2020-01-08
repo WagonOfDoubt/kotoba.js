@@ -23,7 +23,7 @@ const addToWatched = (boardUri, threadId, threadData) => {
   data[boardUri][threadId] = threadData;
   setWatched(data);
   const currentBoard = document.documentElement.dataset.board;
-  const $favMenu = $('#favorites-menu');
+  const $favMenu = $('#favorites-menu .panel__scroll');
   const $category = $favMenu.find(`.favorites__board[data-board=${boardUri}]`);
   if (!$category.length) {
     const threads = data[boardUri];
@@ -39,7 +39,7 @@ const removeFromWatched = (boardUri, threadId) => {
   const data = getWatched();
   if (data[boardUri]) {
     delete data[boardUri][threadId];
-    const $favMenu = $('#favorites-menu');
+    const $favMenu = $('#favorites-menu .panel__scroll');
     if (!Object.keys(data[boardUri]).length) {
       delete data[boardUri];
       $favMenu
@@ -59,7 +59,7 @@ const removeFromWatched = (boardUri, threadId) => {
 const renderWatchedThreadsList = (data) => {
   const currentBoard = document.documentElement.dataset.board;
   const html = favoritesPanelTemplate({data, currentBoard});
-  $('#favorites-menu').html(html);
+  $('#favorites-menu .panel__scroll').html(html);
 };
 
 

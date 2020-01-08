@@ -4,7 +4,7 @@ div.menu-container
   nav.menu-bar.menu-bar_top.menu-bar_sticky
     block menu
       div.menu-bar__group.menu-bar__group_left
-        button.button.menu-bar__button.menu-bar__button_board-selector.chevron.js-toggle-visibility(data-target='.menu-bar__menu_left', data-visible='false')
+        button.button.menu-bar__button.menu-bar__button_board-selector.chevron.js-toggle-visibility(data-target='.panel_left', data-visible='false')
           if board
             span
               span.board-selector__board-uri /#{board.uri}/
@@ -18,7 +18,7 @@ div.menu-container
         if site.features.favorites
           button.button.menu-bar__button.menu-bar__button_favorites.js-toggle-visibility(
               title='Favorite threads',
-              data-target='.menu-bar__menu_right',
+              data-target='.panel_right',
               data-visible='false',
               data-hide='#settings-menu, #search-menu',
               data-group='.menu-bar__group_right .menu-bar__button',
@@ -39,7 +39,7 @@ div.menu-container
             +icon('save', 'medium')
         //- button.button.menu-bar__button.menu-bar__button_search.js-toggle-visibility(
         //-     title='search'
-        //-     data-target='.menu-bar__menu_right',
+        //-     data-target='.panel_right',
         //-     data-visible='false',
         //-     data-hide='#settings-menu, #favorites-menu',
         //-     data-group='.menu-bar__group_right .menu-bar__button',
@@ -48,7 +48,7 @@ div.menu-container
         //-   +icon('search', 'medium')
         //- button.button.menu-bar__button.menu-bar__button_settings.js-toggle-visibility(
         //-     title='Settings'
-        //-     data-target='.menu-bar__menu_right',
+        //-     data-target='.panel_right',
         //-     data-visible='false',
         //-     data-hide='#search-menu, #favorites-menu',
         //-     data-group='.menu-bar__group_right .menu-bar__button',
@@ -65,11 +65,60 @@ div.menu-container
             title='Manage'
           )
           +icon('yin-yang', 'medium')
-  div.markdown.menu-bar__menu.menu-bar__menu_right.hidden
-    div#settings-menu.markdown
+  div.markdown.panel.panel_right.hidden
+    div.panel__content#settings-menu.markdown
       h4 Settings
-    div#search-menu.markdown
+      div.panel__scroll
+    div.panel__content#search-menu.markdown
       h4 Search
-    div#favorites-menu.markdown
-      h4 Favorites
-  div.markdown.menu-bar__menu.menu-bar__menu_left.hidden!= filters.markdown(site.frame)
+      div.panel__scroll
+    div.panel__content#favorites-menu.markdown
+      h4 Favorite threads
+      div.panel__scroll
+  div.markdown.panel.panel_left.hidden
+    div.panel__tabs#menu-boards-tabs-group
+      button.button.menu-bar__button.menu-bar__button_hometab.js-toggle-visibility(
+          title='Featured links',
+          data-visible='true',
+          data-sticky='true',
+          data-hide='#boards-menu, #favboards-menu',
+          data-group='#menu-boards-tabs-group .menu-bar__button',
+          data-show='#home-menu',
+        )
+        +icon('home', 'medium')
+      button.button.menu-bar__button.menu-bar__button_boardstab.js-toggle-visibility(
+          title='All boards',
+          data-visible='false',
+          data-sticky='true',
+          data-hide='#home-menu, #favboards-menu',
+          data-group='#menu-boards-tabs-group .menu-bar__button',
+          data-show='#boards-menu',
+        )
+        +icon('bars', 'medium')
+      button.button.menu-bar__button.menu-bar__button_favboardstab.js-toggle-visibility(
+          title='Favorite boards',
+          data-visible='false',
+          data-sticky='true',
+          data-hide='#home-menu, #boards-menu',
+          data-group='#menu-boards-tabs-group .menu-bar__button',
+          data-show='#favboards-menu',
+        )
+        +icon('heart', 'medium')
+    div.panel__content#home-menu.markdown
+      div.panel__scroll!= filters.markdown(site.frame)
+    div.panel__content#boards-menu.markdown.hidden
+      h4 All boards
+      div.input-group
+        input#boards-menu__search_all.js-search-list(type='text', data-target='.boards-menu__boards-list li', data-fields='uri name desc' placeholder='Search...')
+        button.button.js-clear-input.button_post(data-target='#boards-menu__search_all', title='Clear')
+          +icon('times', 'small')
+      div.panel__scroll
+        ul.boards-menu__boards-list
+    div.panel__content#favboards-menu.markdown.hidden
+      h4 Favorite boards
+      div.input-group
+        input#boards-menu__search_fav.js-search-list(type='text', data-target='.boards-menu__favboards-list li', data-fields='uri name desc' placeholder='Search...')
+        button.button.js-clear-input.button_post(data-target='#boards-menu__search_fav', title='Clear')
+          +icon('times', 'small')
+      div.panel__scroll
+        ul.boards-menu__favboards-list

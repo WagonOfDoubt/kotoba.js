@@ -61,10 +61,47 @@ const initSendForm = () => {
   });
 };
 
+
+const initClearInput = () => {
+  $('body').on('click', '.js-clear-input', (e) => {
+    e.preventDefault();
+    const inputSelector = e.currentTarget.dataset.target;
+    const $input = $(inputSelector);
+    $input.val('');
+    $input.trigger('input');
+  });
+};
+
+
+const initFilterList = () => {
+  $('body').on('input', '.js-search-list', (e) => {
+    e.preventDefault();
+    const target = e.currentTarget.dataset.target;
+    const fields = e.currentTarget.dataset.fields;
+    if (!fields || !target) {
+      return;
+    }
+    const value = e.currentTarget.value;
+    const fieldsList = fields.split(' ');
+    const wordsList = value.split(' ');
+    $(target).each((i, t) => {
+      const searchFields = Array.from(Object.entries(t.dataset))
+        .filter(([key, value]) => fieldsList.includes(key))
+        .map(([key, value]) => value)
+        .join(' ');
+      const isMatched = wordsList.some(word => searchFields.includes(word));
+      t.classList.toggle('hidden_important', !isMatched);
+    });
+  });
+};
+
+
 const initHandlers = () => {
   initCheckboxes();
   initSelectDeselect();
   initSendForm();
+  initClearInput();
+  initFilterList();
 };
 
 export { initHandlers };
