@@ -1,14 +1,12 @@
 extends layouts/navigator.pug
 include mixins/icons.pug
 
-block bodyClass
+block append bodyClass
   -
-    var bodyClass = 'thread-page';
-    var headAttributes = {
-      'data-board': board && board.uri,
-      'data-thread': thread && thread.postId,
-      'data-postcount': board && board.postcount,
-    };
+    bodyClass = 'thread-page'
+    headAttributes['data-board'] = board && board.uri;
+    headAttributes['data-thread'] = thread && thread.postId;
+    headAttributes['data-postcount'] = board && board.postcount;
 
 block header
   include includes/boardheader.pug

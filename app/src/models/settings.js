@@ -12,6 +12,7 @@ const faqDefault = fs.readFileSync('txt/faq_default.md');
 const rulesDefault = fs.readFileSync('txt/rules_default.md');
 const menuDefault = fs.readFileSync('txt/menu_default.md');
 const frameDefault = fs.readFileSync('txt/frame_default.md');
+const config = require('../json/config.json');
 
 
 /**
@@ -92,7 +93,7 @@ const settingsSchema = Schema({
    * @memberOf module:models/settings~Settings#
    * @instance
    */
-  defaultStyle:   { type: String, default: 'umnochan' },
+  defaultStyle:   { type: String, default: config.default_style_name },
   /**
    * Type of style selector at the top of page
    * @type {String}

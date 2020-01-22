@@ -22,13 +22,38 @@ head
   meta(name="description", content=desc)
   link(rel="stylesheet", href="/.static/css/global.css")
   -
-    var defaultStyleName =
+    var defaultBoardStyleName =
       board && board.defaultStyle ?
         board.defaultStyle :
+        config.default_style_name;
+    var defaultGlobalStyleName =
       site && site.defaultStyle ?
         site.defaultStyle :
-        'umnochan';
+        config.default_style_name;
+    var defaultStyleName =
+      board ?
+        defaultBoardStyleName :
+      site ?
+        defaultGlobalStyleName :
+        config.default_style_name;
     var defaultStyle = styles.find(s => s.name === defaultStyleName);
+  if styles && styles.length
+    for s in styles
+      -
+        let isBoardDefault = s.name === defaultBoardStyleName;
+        let isGlobalDefault = s.name === defaultGlobalStyleName;
+        let isCurrentDefault = s.name === defaultStyleName;
+      link(
+        rel="alternate stylesheet",
+        title=s.capitalizedName,
+        href=`/api/style?name=${s.name}&raw`,
+        disabled,
+        data-style=s.name,
+        data-board-default=isBoardDefault,
+        data-global-default=isGlobalDefault,
+        data-default=isCurrentDefault,
+        data-updated-at=s.updatedAt,
+      )
   if defaultStyle
     style#user-style(data-style=defaultStyle.name)!= defaultStyle.rawCSS
   else

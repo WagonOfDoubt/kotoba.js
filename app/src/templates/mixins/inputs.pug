@@ -10,7 +10,7 @@ mixin hintText(hint, def)
 mixin textArea(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_textarea
     if label
       label(for=param) #{ label }:
     textarea(data-default=def, name=param, id=param, rows='10', required=required)= val
@@ -23,7 +23,7 @@ mixin textArea(param, label, hint, required)
 mixin textEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_text
     if label
       label(for=param) #{ label }:
     input(data-default=def, name=param, id=param, type='text', value=val, required=required)&attributes(attributes)
@@ -37,7 +37,7 @@ mixin arrayEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
   - var rows = (val || []).join('\n')
-  div.form-group
+  div.form-group.form-group_list
     if label
       label(for=param) #{ label }:
     textarea(data-default=def, name=`${param}:list`, id=param, rows='10', required=required)= rows
@@ -50,7 +50,7 @@ mixin arrayEdit(param, label, hint, required)
 mixin passwordEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_password
     if label
       label(for=param) #{ label }:
     input(data-default=def, name=param, id=param, type='password', value=val, required=required)
@@ -63,7 +63,7 @@ mixin passwordEdit(param, label, hint, required)
 mixin numberEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_number
     if label
       label(for=param) #{ label }:
     input(data-default=def, name=param+':number', id=param, type='number', value=val, required=required)
@@ -76,7 +76,7 @@ mixin numberEdit(param, label, hint, required)
 mixin checkboxEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_checkbox
     if label
       label(for=param) #{ label }:
     input(data-default=def, name=param+':boolean', id=param, type='checkbox', checked=val, required=required)
@@ -89,7 +89,7 @@ mixin checkboxEdit(param, label, hint, required)
 mixin comboboxEdit(param, label, options, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_combobox
     if label
       label(for=param) #{ label }:
     select(data-default=def, name=param, id=param, required=required)
@@ -107,7 +107,7 @@ mixin comboboxEdit(param, label, options, hint, required)
 mixin colorEdit(param, label, hint, required)
   - var val = filters.getParam(param, values);
   - var def = filters.getParam(param, defaults);
-  div.form-group
+  div.form-group.form-group_color
     if label
       label(for=param) #{ label }:
     input(data-default=def, name=param, id=param, type='color', value=val, required=required)
@@ -120,7 +120,7 @@ mixin colorEdit(param, label, hint, required)
 
 mixin nothingEdit(param, label, hint)
   - var val = filters.getParam(param, values);
-  div.form-group
+  div.form-group.form-group_dummy
     if label
       label #{ label }:
     input(disabled, value=val)
@@ -131,14 +131,15 @@ mixin nothingEdit(param, label, hint)
       +hintText(hint, def)
 
 
-mixin styleSelector(styles, selectedStyle)
+mixin styleSelector(styles, selectedStyle, scope)
   if styles && styles.length
-    select.style-select.js-set-style
+    select.style-select.js-set-style(data-default=selectedStyle, data-scope=scope)
       for s in styles
         -var isSelected = s.name === selectedStyle
         option(
           value=s.name,
           selected=isSelected,
+          data-default=isSelected,
           class={
             'option_default': isSelected,
           })= s.capitalizedName

@@ -17,8 +17,9 @@ div.adminbar.adminbar_top
             board.defaultStyle :
           site && site.defaultStyle ?
             site.defaultStyle :
-            'umnochan';
-      +styleSelector(styles, defaultStyleName)
+            config.default_style_name;
+        var styleSelectorScope = board ? 'board' : 'global';
+      +styleSelector(styles, defaultStyleName, styleSelectorScope)
     block adminbar-links
       span.button.button_link
         a(href='/') Home

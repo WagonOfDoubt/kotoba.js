@@ -5,5 +5,6 @@
   "salt_rounds": 10,
   "catalog_filename": "kotolog.html",
   "session_age": 2592000000,
-  "session_cookie_name": "kot.session"
+  "session_cookie_name": "kot.session",
+  "default_style_name": "futaba"
 }

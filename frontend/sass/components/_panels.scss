@@ -20,6 +20,10 @@
   flex-grow: 1;
 }
 
+.panel__block {
+  padding: 0 .5rem;
+}
+
 .panel_right {
   grid-area: right;
   border-left: 1px solid var(--border-color);
