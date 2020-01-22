@@ -1,11 +1,11 @@
 extends layouts/navigator.pug
 include mixins/pagination.pug
 
-block append bodyClass
+block append attributes
   -
-    bodyClass = 'board-page'
-    headAttributes['data-board'] = board && board.uri;
-    headAttributes['data-postcount'] = board && board.postcount;
+    bodyClass['board-page'] = true;
+    htmlAttributes['data-board'] = board && board.uri;
+    htmlAttributes['data-postcount'] = board && board.postcount;
 
 block header
   include includes/boardheader.pug

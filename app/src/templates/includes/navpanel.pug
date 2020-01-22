@@ -1,0 +1,50 @@
+include ../mixins/icons.pug
+include ../mixins/inputs.pug
+
+
+div.panel__tabs#menu-boards-tabs-group
+  button.button.menu-bar__button.menu-bar__button_hometab.js-toggle-visibility(
+      title='Featured links',
+      data-visible='true',
+      data-sticky='true',
+      data-hide='#boards-menu, #favboards-menu',
+      data-group='#menu-boards-tabs-group .menu-bar__button',
+      data-show='#home-menu',
+    )
+    +icon('home', 'medium')
+  button.button.menu-bar__button.menu-bar__button_boardstab.js-toggle-visibility(
+      title='All boards',
+      data-visible='false',
+      data-sticky='true',
+      data-hide='#home-menu, #favboards-menu',
+      data-group='#menu-boards-tabs-group .menu-bar__button',
+      data-show='#boards-menu',
+    )
+    +icon('bars', 'medium')
+  button.button.menu-bar__button.menu-bar__button_favboardstab.js-toggle-visibility(
+      title='Favorite boards',
+      data-visible='false',
+      data-sticky='true',
+      data-hide='#home-menu, #boards-menu',
+      data-group='#menu-boards-tabs-group .menu-bar__button',
+      data-show='#favboards-menu',
+    )
+    +icon('heart', 'medium')
+div.panel__content#home-menu.markdown
+  div.panel__scroll!= filters.markdown(site.frame)
+div.panel__content#boards-menu.markdown.hidden
+  h4 All boards
+  div.input-group
+    input#boards-menu__search_all.js-search-list(type='text', data-target='.boards-menu__boards-list li', data-fields='uri name desc' placeholder='Search...')
+    button.button.js-clear-input.button_post(data-target='#boards-menu__search_all', title='Clear')
+      +icon('times', 'small')
+  div.panel__scroll
+    ul.boards-menu__boards-list
+div.panel__content#favboards-menu.markdown.hidden
+  h4 Favorite boards
+  div.input-group
+    input#boards-menu__search_fav.js-search-list(type='text', data-target='.boards-menu__favboards-list li', data-fields='uri name desc' placeholder='Search...')
+    button.button.js-clear-input.button_post(data-target='#boards-menu__search_fav', title='Clear')
+      +icon('times', 'small')
+  div.panel__scroll
+    ul.boards-menu__favboards-list

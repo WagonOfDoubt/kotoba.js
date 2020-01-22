@@ -1,0 +1,37 @@
+include ../mixins/icons.pug
+include ../mixins/inputs.pug
+
+
+div.panel__content#settings-menu.markdown
+  h4 Settings
+  -
+    var defaultBoardStyleName =
+      board && board.defaultStyle ?
+        board.defaultStyle :
+      site && site.defaultStyle ?
+        site.defaultStyle :
+        config.default_style_name;
+    var defaultSiteStyleName =
+      site && site.defaultStyle ?
+        site.defaultStyle :
+        config.default_style_name;
+  div.panel__scroll
+    h5 Style
+    div.panel__block
+      if board
+        div.form-group.form-group_compact
+          label Board style
+          +styleSelector(styles, defaultBoardStyleName, 'board')
+          button.js-set-style(data-style='', data-scope='board') Reset
+      div.form-group.form-group_compact
+        label Global style
+        +styleSelector(styles, defaultSiteStyleName, 'global')
+        button.js-set-style(data-style='', data-scope='global') Reset
+      //- +checkboxEdit('useGlobalStyleEverywhere', 'Use site style for all boards')
+
+div.panel__content#search-menu.markdown
+  h4 Search
+  div.panel__scroll
+div.panel__content#favorites-menu.markdown
+  h4 Favorite threads
+  div.panel__scroll

@@ -3,13 +3,14 @@ include ../mixins/timestamp.pug
 div.news-entry(id='news-' + n.number)
   div.news__header
     span.news__subject= n.subject
-    | 
-    | by
-    | 
-    if n.email
-      a.news__author(href='mailto:' + n.email)= n.name
-    else
-      span.news__author= n.name
+    if n.name
+      | 
+      | by
+      | 
+      if n.email
+        a.news__author(href='mailto:' + n.email)= n.name
+      else
+        span.news__author= n.name
     if n.createdAt
       | 
       | -

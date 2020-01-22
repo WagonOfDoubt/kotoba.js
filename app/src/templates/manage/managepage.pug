@@ -2,8 +2,10 @@ extends ../layouts/sidebar.pug
 include ../mixins/controls.pug
 include ../mixins/timestamp.pug
 
-block bodyClass
-  - var bodyClass = 'manage-page ' + activity
+block append attributes
+  -
+    bodyClass['manage-page'] = true;
+    bodyClass[activity] = true;
 
 block aside
   include sidepanel.pug

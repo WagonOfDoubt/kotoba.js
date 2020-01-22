@@ -1,7 +1,8 @@
 extends layouts/default.pug
 
-block bodyClass
-  - var bodyClass = 'registration-page'
+block append attributes
+  -
+    bodyClass['registration-page'] = true;
 
 block header
   nav.text-right

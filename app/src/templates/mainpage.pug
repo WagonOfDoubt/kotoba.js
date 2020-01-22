@@ -26,7 +26,7 @@ block main
   //- pre= JSON.stringify(site, null, 2)
 
 block aside
-  != filters.markdown(site.frame)
+  include includes/navpanel.pug
 
 block scripts
   script(src='/.static/js/kotoba.js')

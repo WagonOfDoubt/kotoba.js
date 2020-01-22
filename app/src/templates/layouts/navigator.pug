@@ -1,22 +1,14 @@
-block bodyClass
+extends default.pug
+
+block append attributes
   -
-    var bodyClass = '';
-    var headAttributes = {};
-doctype html
-html(lang=lang)&attributes(headAttributes)
-  include ../includes/head.pug
-  body.layout-navigator(class=bodyClass)
-    a.hidden#top
+    bodyClass['layout-default'] = false;
+    bodyClass['layout-navigator'] = true;
+
+block navigation
+  div.menu-container
     include ../includes/menubar.pug
-    header
-      block header
-    main
-      block main
-    //- aside
-    //-   block aside
-    footer
-      block footer
-      include ../includes/footer.pug
-    block modals
-    a.hidden#bottom
-    include ../includes/scripts.pug
+    div.markdown.panel.panel_left.hidden
+      include ../includes/navpanel.pug
+    div.markdown.panel.panel_right.hidden
+      include ../includes/controlpanel.pug

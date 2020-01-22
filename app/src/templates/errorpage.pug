@@ -1,7 +1,8 @@
 extends layouts/default.pug
 
-block bodyClass
-  - var bodyClass = 'error-page'
+block append attributes
+  -
+    bodyClass['error-page'] = true;
 
 block header
   nav.text-right

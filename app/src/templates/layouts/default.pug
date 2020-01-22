@@ -1,19 +1,26 @@
-block bodyClass
+block attributes
   -
-    var bodyClass = '';
-    var headAttributes = {};
+    var bodyClass = {};
+    var htmlClass = {};
+    var bodyAttributes = {};
+    var htmlAttributes = {};
+    bodyClass['layout-default'] = true;
+
 doctype html
-html(lang=lang)&attributes(headAttributes)
+html(lang=lang, class=htmlClass)&attributes(htmlAttributes)
   include ../includes/head.pug
-  body.layout-default(class=bodyClass)
-    a#top
+  body(class=bodyClass)&attributes(bodyAttributes)
+    a.hidden#top
+    block navigation
     header
       block header
+    block beforemain
     main
       block main
+    block aftermain
     footer
       block footer
-      include ../includes/footer.pug
+        include ../includes/footer.pug
     block modals
-    a#bottom
+    a.hidden#bottom
     include ../includes/scripts.pug

@@ -1,19 +1,10 @@
-block bodyClass
+extends default.pug
+
+block append attributes
   -
-    var bodyClass = '';
-    var headAttributes = {};
-doctype html
-html(lang=lang)&attributes(headAttributes)
-  include ../includes/head.pug
-  body.layout-sidebar(class=bodyClass)
-    header
-      block header
-    main
-      block main
-    aside.markdown.sidebar.sidebar_left
-      block aside
-    footer
-      block footer
-      include ../includes/footer.pug
-    block modals
-    include ../includes/scripts.pug
+    bodyClass['layout-default'] = false;
+    bodyClass['layout-sidebar'] = true;
+
+block aftermain
+  aside.markdown.sidebar.sidebar_left
+    block aside

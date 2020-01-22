@@ -2,8 +2,9 @@ extends layouts/navigator.pug
 include mixins/attachments.pug
 include mixins/timestamp.pug
 
-block bodyClass
-  - var bodyClass = 'catalog-page'
+block append attributes
+  -
+    bodyClass['catalog-page'] = true;
 
 block header
   include includes/boardheader.pug

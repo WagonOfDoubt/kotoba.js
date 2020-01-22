@@ -57,6 +57,9 @@ router.post('/api/regenerate',
         clearTemplateCache();
       }
       const options = _.pick(req.body, ['boards', 'mainpage']);
+      if (!req.body.mainpage) {
+        options.mainpage = false;
+      }
       await regenerateAll(options);
 
       const end = new Date();
