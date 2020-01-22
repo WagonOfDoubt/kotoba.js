@@ -1,28 +1,46 @@
-mixin pagination(current, pages)
+//- modern list pagination
+mixin pagination(pageInfo)
   div.pages.pagelist
-    //- "border=1" for compatibility with fhird-party code for wakaba and others
+    ul.list.list_buttons
+      li
+        if pageInfo.prevPage
+          a(href=pageInfo.prevPage.url, rel='prev', title='Previous page') ←
+        else
+          span ←
+      for page, pNum in pageInfo.pages
+        li
+          if pNum === pageInfo.current
+            | #{page.label}
+          else
+            | #[a(href=page.url, title=`Page ${page.label}`)= page.label]
+      li
+        if pageInfo.nextPage
+          a(href=pageInfo.nextPage.url, rel='next', title='Next page') →
+        else
+          span →
+
+
+//- legacy table pagination
+mixin paginationOld(pageInfo)
+  div.pages.pagelist
     table(border='1')
       tbody
         tr
           td
-            if current === 0
-              span ←
+            if pageInfo.prevPage
+              a(href=pageInfo.prevPage.url, rel='prev', title='Previous page') ←
             else
-              a(href=pages[current - 1].url, rel='prev') ←
+              span ←
           td
-            //- pages
-            - var p = 0
-            for page in pages
-              if p === current
+            for page, pNum in pageInfo.pages
+              if pNum === pageInfo.current
                 | 
-                | [#{ p }]
+                | [#{ page.label }]
               else
                 |
                 | [#[a(href=page.url)= page.label]]
-              - p++
           td
-            //- next page button
-            if current === pages.length - 1
-              span →
+            if pageInfo.nextPage
+              a(href=pageInfo.nextPage.url, rel='next', title='Next page') →
             else
-              a(href=pages[current + 1].url, rel='next') →
+              span →

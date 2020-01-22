@@ -237,16 +237,27 @@ const generateBoardPage = async (board, threads, pNum, totalPages) => {
     url: `/${ board.uri }/${ getPageUrl(i) }`,
     label: getPageLabel(i),
   }));
+  const nextPageNum = pNum + 1;
+  const prevPageNum = pNum - 1;
+  const hasNextPage = nextPageNum < pages.length;
+  const hasPrevPage = prevPageNum >= 0;
   const data = {
     board: board,
     threads: threadPreivews,
     isPage: true,
     pagination: {
       current: pNum,
-      pages: pages
+      pages: pages,
+      totalPages: totalPages,
     },
     stats: {},
   };
+  if (hasNextPage) {
+    data.pagination.nextPage = pages[nextPageNum];
+  }
+  if (hasPrevPage) {
+    data.pagination.prevPage = pages[prevPageNum];
+  }
   data.stats.uniqueUserPosts = board.uniquePosts;
   if (board.locale) {
     data.lang = board.locale;

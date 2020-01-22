@@ -20,6 +20,11 @@ head
         site.desc :
         pkg.description;
   meta(name="description", content=desc)
+  if pagination
+    if pagination.prevPage
+      link(rel="prev", href=pagination.prevPage.url)
+    if pagination.nextPage
+      link(rel="next", href=pagination.nextPage.url)
   link(rel="stylesheet", href="/.static/css/global.css")
   -
     var defaultBoardStyleName =
@@ -45,6 +50,7 @@ head
         let isCurrentDefault = s.name === defaultStyleName;
       link(
         rel="alternate stylesheet",
+        type="text/css",
         title=s.capitalizedName,
         href=`/api/style?name=${s.name}&raw`,
         disabled,
