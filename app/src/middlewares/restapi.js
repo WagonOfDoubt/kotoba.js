@@ -357,7 +357,41 @@ const applyAndValidateDocuments = (arrayName) => {
 };
 
 
+/**
+ * Create generic GET request handler for that uses apiQuery function
+ * @see module:utils/model~createApiQueryHandler
+ * @param  {String} modelName Name of mongoose model
+ * @return {function}         Express middleware
+ * @static
+ */
+const createGetRequestHandler = (modelName) => {
+  const model = mongoose.model(modelName);
+  return async (req, res, next) => {
+    try {
+      const result = await model.apiQuery({
+        search : req.query.search,
+        filter : req.query.filter,
+        select : req.query.select,
+        sort   : req.query.sort,
+        skip   : req.query.skip,
+        limit  : req.query.limit,
+      });
+      if (!result) {
+        const e = new DocumentNotFoundError(modelName, 'filter', req.query.filter, 'query');
+        return e.respond(res);
+      }
+      return res
+        .status(200)
+        .json(result);
+    } catch (err) {
+      next(err);
+    }
+  };
+};
+
+
 module.exports.populateDocumentsByIds = populateDocumentsByIds;
 module.exports.removeDuplicates = removeDuplicates;
 module.exports.compareRequestWithDocuments = compareRequestWithDocuments;
 module.exports.applyAndValidateDocuments = applyAndValidateDocuments;
+module.exports.createGetRequestHandler = createGetRequestHandler;

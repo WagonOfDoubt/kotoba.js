@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { checkSchema } = require('express-validator');
 const _ = require('lodash');
-const XRegExp = require('xregexp');
 
 const boardController = require('../../controllers/board');
 const Board = require('../../models/board');
@@ -10,36 +9,13 @@ const ModlogEntry = require('../../models/modlog');
 const captchaProviders = require('../../captcha');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest, filterMatched } = require('../../middlewares/validation');
+const { restGetQuerySchema } = require('../../middlewares/reqparser');
+const { createGetRequestHandler } = require('../../middlewares/restapi');
 const boardparams = require('../../json/boardparams');
 const { DocumentNotFoundError, DocumentAlreadyExistsError, DocumentNotModifiedError } = require('../../errors');
 const locales = require('../../json/locales.json');
 const localeCodes = locales.map(([t, c]) => c);
 
-
-const reQueryFilter = new XRegExp(`
-(?<=\\s|^)  # start
-(?<pair>
-  (?<field>\\w+?)
-  \\:  # field:value separator
-  (?<value>
-    (?<oparg>
-      (?<operator>\\$\\S+)  # $operator
-      \\(  # argument starts with (
-      (?<argument>
-        (?:\\"(?<stringArg>.+?)\\") | # String  "string"
-        (?:\\[(?<arrayArg>.+?)\\])  | # Array   [array]
-        (?<integerArg>\\d+)        | # Integer 265
-        (?<numberArg>[\\d\\.]+)       # Float   3.14
-      )
-      \\)  # argument ends with )
-    ) |
-    # simple values
-    (?:\\"(?<stringVal>.+?)\\") | # String  "string"
-    (?<integerVal>\\d+)        | # Integer 265
-    (?<numberVal>[\\d\\.]+)       # Float   3.14
-  )
-)
-(?:$|\\s)  # end`, 'gx');
 
 /**
  * @apiDefine BoardParams
@@ -454,130 +430,10 @@ const _boardUriValidator = {
  */
 router.get(
   '/api/board/',
-  checkSchema({
-    search: {
-      in: 'query',
-      optional: true,
-    },
-    filter: {
-      in: 'query',
-      optional: true,
-      customValidator: {
-        options: (value) => {
-          return XRegExp.test(value, reQueryFilter);
-        },
-      },
-      customSanitizer: {
-        options: (value, {req, location, path}) => {
-          if (!value) {
-            return {};
-          }
-          const filter = {};
-          XRegExp.forEach(value, reQueryFilter, (matches) => {
-            const { field, operator } = matches;
-            let value;
-            if (operator) {
-              const { stringArg, arrayArg, numberArg, integerArg } = matches;
-              let argument = stringArg || Number.parseFloat(numberArg) || Number.parseInt(integerArg);
-              if (arrayArg) {
-                argument = arrayArg.split('|').map(arg => {
-                  if (arg.startsWith('"') && arg.endsWith('"')) {
-                    return arg.substring(1, arg.length - 1);
-                  }
-                  if (arg.match(/^\d+$/)) {
-                    return Number.parseInt(arg);
-                  }
-                  if (arg.match(/^[\.\d]+$/)) {
-                    return Number.parseFloat(arg);
-                  }
-                  return null;
-                });
-              }
-              value = {};
-              value[operator] = argument;
-            } else {
-              const { stringVal, numberVal, integerVal } = matches;
-              value = stringVal || Number.parseFloat(numberVal) || Number.parseInt(integerVal);
-            }
-            filter[field] = value;
-          });
-          return filter;
-        },
-      },
-    },
-    select: {
-      in: 'query',
-      optional: true,
-      customSanitizer: {
-        options: (value, {req, location, path}) => {
-          return _.split(value, ' ') || [];
-        },
-      },
-    },
-    sort: {
-      in: 'query',
-      optional: true,
-      customSanitizer: {
-        options: (value, {req, location, path}) => {
-          const result = {};
-          const keys = value.split(' ');
-          for (let key of keys) {
-            let value = 1;
-            if (!key || !key.length || key === '-') {
-              continue;
-            }
-            if (key.startsWith('-')) {
-              value = -1;
-              key = key.substring(1);
-            }
-            result[key] = value;
-          }
-          return result;
-        },
-      },
-    },
-    skip: {
-      in: 'query',
-      isInt: {
-        options: { min: 0 },
-        errorMessage: 'skip must be a positive integer'
-      },
-      toInt: true,
-      optional: true,
-    },
-    limit: {
-      in: 'query',
-      isInt: {
-        options: { min: 1, max: 1000 },
-        errorMessage: 'limit must be an integer in range [1, 1000]'
-      },
-      toInt: true,
-      optional: true,
-    },
-  }),
+  checkSchema(restGetQuerySchema),
   validateRequest,
   filterMatched,
-  async (req, res, next) => {
-    try {
-      const result = await Board.apiQuery({
-        search: req.query.search,
-        filter: req.query.filter,
-        select: req.query.select,
-        sort: req.query.sort,
-        skip: req.query.skip,
-        limit: req.query.limit,
-      });
-      if (!result) {
-        const e = new DocumentNotFoundError('Board', 'filter', req.query.filter, 'query');
-        return e.respond(res);
-      }
-      return res
-        .status(200)
-        .json(result);
-    } catch (err) {
-      next(err);
-    }
-  }
+  createGetRequestHandler('Board'),
 );
 
 /**
