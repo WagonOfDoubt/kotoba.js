@@ -343,88 +343,22 @@ const _boardUriValidator = {
  * @apiName GetBoard
  * @apiGroup Board
  * @apiPermission anyone
- * @apiDescription Find one or more boards based on query. Text search is
- *    performed on fields `uri`, `name`, `desc`.
- * @apiParam (query) {String} [search=""] Search text in fields with text
- *    index
- * @apiParam (query) {String} [filter=""] Filter documents that match
- *    specified condition. Filter must contain `field:value` pairs separated
- *    by spaces. String values must be enclosed in double quotes (`"`), but
- *    **NOT** single (`'`) quotes. Use 1 and 0 for boolean values. Simple
- *    `field:value` pair specifies equality condition. For other conditions
- *    operators can be used with following syntax:
- *    `field:$operator(argument)`.
+ * @apiDescription Find one or more boards based on query.
+ * Text search is performed on fields `uri`, `name`, `desc`.
  *
- *    Supported operators are:
- *    - `$eq`   Matches values that are equal to a specified value.
- *    - `$ne`   Matches all values that are not equal to a specified value.
- *    - `$gt`   Matches values that are greater than a specified value.
- *    - `$gte`  Matches values that are greater than or equal to a specified value.
- *    - `$lt`   Matches values that are less than a specified value.
- *    - `$lte`  Matches values that are less than or equal to a specified value.
- *    - `$in`   Matches any of the values specified in an array.
- *    - `$nin`  Matches none of the values specified in an array.
- *    
- *    For operators `$in` and `$nin` argument must be an array defined by
- *    enclosing values separated by `|` character in square brackets `[]`.
+ * Filter can be applied by: `uri`, `name`, `desc`, `createdAt`, `isLocked`,
+ *    `isHidden`, `isForcedAnon`, `captcha`, `postcount`.
  *
- *    Examples:
- *    - `?filter=uri:"b"`
- *    - `?filter=isLocked:1`
- *    - `?filter=uri:$in(["a"|"b"]) postcount:$gte(42)`
+ * Selectable fields are: `uri`, `name`, `desc`, `header`, `navbar`,
+ *    `imageUri`, `faviconUri`, `maxFileSize`, `maxFilesPerPost`,
+ *    `maxThreadsOnPage`, `maxPages`, `autosage`, `showReplies`,
+ *    `showRepliesSticky`, `maxMessageLength`, `createdAt`,
+ *    `defaultPosterName`, `keepOriginalFileName`, `isLocked`, `isHidden`,
+ *    `isForcedAnon`, `defaultStyle`, `locale`, `newThreadsRequired`,
+ *    `allowRepliesSubject`, `captcha`, `features`, `filetypes`, `postcount`,
+ *    `uniquePosts`.
  *
- *    Invalid `field:value` pairs are ignored without errors.
- *
- * @apiParam (query) {String} [select=""] List of field names to return
- *    separated by spaces
- * @apiParam (query) {String} [sort=""] List of field names to sort by
- *    separated by spaces. Sort order by default is ascending, to specify
- *    descending order, place `-` character before the field name.
- *
- * Example: - `?sort=postcount -createdAt`
- * @apiParam (query) {Number} [skip=0] Number of documents to skip
- * @apiParam (query) {Number} [limit=100] Maximum number of documents to
- *    return. If limit=1, single document will be returned. Otherwise,
- *    object with fields `docs` (array of documents) and `count` (number of
- *    matched documents without limit) will be returned. Minimum value is
- *    `1` and maximum value is `1000`.
- *
- * @apiSuccess {Object[]} docs (if limit > 1) Array of matched documents
- * @apiSuccess {Number}   count (if limit > 1) Number of matched documents (without limit)
- * 
- * @apiSuccessExample Get multiple documents
- *     GET /api/board?filter=uri:$in(["b"|"a"])&select=name desc isLocked locale postcount uri&sort=-postcount
- *     HTTP/1.1 200 OK
- *     {
- *       docs: [
- *         {
- *           "name": "Random",
- *           "desc": "General discussion",
- *           "isLocked": false,
- *           "locale": "en",
- *           "postcount": 4815162342,
- *           "uri": "b"
- *         },
- *         {
- *           "name": "Anime",
- *           "desc": "Anime discussion",
- *           "isLocked": false,
- *           "locale": "jp",
- *           "postcount": 9000000,
- *           "uri": "a"
- *         }
- *       ],
- *       count: 2
- *     }
- *
- * @apiSuccessExample Get one document
- *     GET /api/board?filter=uri:b&select=createdAt postcount&limit=1
- *     HTTP/1.1 200 OK
- *     {
- *       "postcount": 4815162342,
- *       "createdAt": "2019-01-12T17:37:55.337Z"
- *     }
- *
+ * @apiUse GenericGetApi
  * @apiUse DocumentNotFoundError
  * @apiUse RequestValidationError
  */

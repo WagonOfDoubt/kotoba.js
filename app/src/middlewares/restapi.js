@@ -361,23 +361,37 @@ const applyAndValidateDocuments = (arrayName) => {
  * Create generic GET request handler for that uses apiQuery function
  * @see module:utils/model~createApiQueryHandler
  * @param  {String} modelName Name of mongoose model
+ * @param  {Boolean} search Is model supports text search
  * @return {function}         Express middleware
  * @static
  */
-const createGetRequestHandler = (modelName) => {
+const createGetRequestHandler = (modelName, search = true) => {
   const model = mongoose.model(modelName);
   return async (req, res, next) => {
     try {
-      const result = await model.apiQuery({
-        search : req.query.search,
+      const q = {
         filter : req.query.filter,
         select : req.query.select,
         sort   : req.query.sort,
         skip   : req.query.skip,
         limit  : req.query.limit,
-      });
+        count  : _.has(req.query, 'count'),
+      };
+      if (search) {
+        q.search = req.query.search;
+      }
+      const result = await model.apiQuery(q);
       if (!result) {
-        const e = new DocumentNotFoundError(modelName, 'filter', req.query.filter, 'query');
+        let param;
+        let value;
+        if (req.query.filter) {
+          param = 'filter';
+          value = req.query.filter;
+        } else if (req.query.search) {
+          param = 'search';
+          value = req.query.search;
+        }
+        const e = new DocumentNotFoundError(modelName, param, value, 'query');
         return e.respond(res);
       }
       return res

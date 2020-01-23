@@ -449,40 +449,128 @@ boardSchema.statics.findBoard = (boardUri) => {
  * @alias module:models/board~Board.apiQuery
  * @memberOf module:models/board~Board
  */
-boardSchema.statics.apiQuery = createApiQueryHandler(
-  // selectable fields:
-  [
-    'uri',
-    'name',
-    'desc',
-    'header',
-    'navbar',
-    'imageUri',
-    'faviconUri',
-    'maxFileSize',
-    'maxFilesPerPost',
-    'maxThreadsOnPage',
-    'maxPages',
-    'autosage',
-    'showReplies',
-    'showRepliesSticky',
-    'maxMessageLength',
-    'createdAt',
-    'defaultPosterName',
-    'keepOriginalFileName',
-    'isLocked',
-    'isHidden',
-    'isForcedAnon',
-    'defaultStyle',
-    'locale',
-    'newThreadsRequired',
-    'allowRepliesSubject',
-    'captcha',
-    'features',
-    'filetypes',
-    'postcount',
-    'uniquePosts',
-  ]);
+boardSchema.statics.apiQuery = createApiQueryHandler({
+    'uri': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'name': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'desc': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'header': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'navbar': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'imageUri': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'faviconUri': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'maxFileSize': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'maxFilesPerPost': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'maxThreadsOnPage': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'maxPages': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'autosage': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'showReplies': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'showRepliesSticky': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'maxMessageLength': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'createdAt': {
+      selectByDefault: false,
+      filter: true,
+    },
+    'defaultPosterName': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'keepOriginalFileName': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'isLocked': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'isHidden': {
+      selectByDefault: false,
+      filter: true,
+    },
+    'isForcedAnon': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'defaultStyle': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'locale': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'newThreadsRequired': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'allowRepliesSubject': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'captcha': {
+      selectByDefault: false,
+      filter: true,
+    },
+    'features': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'filetypes': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'postcount': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'uniquePosts': {
+      selectByDefault: false,
+      filter: false,
+    },
+  });
 
 
 const Board = module.exports = mongoose.model('Board', boardSchema);

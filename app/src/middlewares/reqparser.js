@@ -240,4 +240,7 @@ module.exports.restGetQuerySchema = {
     toInt: true,
     optional: true,
   },
+  count: {
+    in: 'query',
+  }
 };
