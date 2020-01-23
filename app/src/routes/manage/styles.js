@@ -3,6 +3,7 @@ const express = require('express');
 const Style = require('../../models/style');
 const defaultSyles = require('../../json/defaultstyles.json');
 const { authRequired } = require('../../middlewares/permission');
+const config = require('../../json/config.json');
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.get('/styles/',
   async (req, res, next) => {
     try {
       const initialValues = Object.assign({},
-        defaultSyles.find(o => o.name === 'futaba'));
+        defaultSyles.find(o => o.name === config.default_style_name));
       initialValues.name = '';
       res.render('manage/styles', {
         activity: 'manage-page-styles',
@@ -36,7 +37,7 @@ router.get('/styles/edit/:stylename',
         return res.redirect('/manage/styles/');
       }
       const initialValues = Object.assign({},
-        defaultSyles.find(o => o.name === 'futaba'));
+        defaultSyles.find(o => o.name === config.default_style_name));
       initialValues.name = '';
       res.render('manage/styles', {
         activity: 'manage-page-styles',
@@ -57,7 +58,7 @@ router.get('/styles/create',
   async (req, res, next) => {
     try {
       const initialValues = Object.assign({},
-        defaultSyles.find(o => o.name === 'futaba'));
+        defaultSyles.find(o => o.name === config.default_style_name));
       initialValues.name = '';
       res.render('manage/styles', {
         activity: 'manage-page-styles',

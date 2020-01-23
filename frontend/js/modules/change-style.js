@@ -9,7 +9,7 @@ export const applyStyle = (styleData) => {
 
 
 const fetchStyle = (stylename) => {
-  return fetch(`/api/style?name=${stylename}`)
+  return fetch(`/api/style?filter=name:"${stylename}"&select=name updatedAt rawCSS&limit=1`)
     .then(res => {
       return res
         .json()

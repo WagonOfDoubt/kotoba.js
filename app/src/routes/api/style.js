@@ -12,6 +12,8 @@ const Style = require('../../models/style');
 
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest, filterMatched } = require('../../middlewares/validation');
+const { restGetQuerySchema } = require('../../middlewares/reqparser');
+const { createGetRequestHandler } = require('../../middlewares/restapi');
 
 const { DocumentNotFoundError, DocumentAlreadyExistsError } = require('../../errors');
 
@@ -55,56 +57,88 @@ const styleParamsValidator = {
   },
 };
 
+
 /**
- * @api {get} /api/style/ Get styles
- * @apiName GetStyle
+ * @api {get} /api/style/:name.css Get CSS
+ * @apiName GetStyleCSS
  * @apiGroup Style
- * @apiParam {String} name Name of style to get. If not present, array of all styles
- *    will be returned.
- * @apiSuccess {String} name Name of style.
- * @apiSuccess {Date} updatedAt When style was last updated.
- * @apiSuccess {rawCSS} CSS to insert on page.
- * @apiUse RequestValidationError
- * @apiUse DocumentNotFoundError
- * @apiUse AuthRequiredError
- * @apiUse PermissionDeniedError
+ * @apiPermission anyone
+ * @apiDescription Returns raw CSS file of style without any json
+ *
+ * @apiParam (params) {Sting} name Style name (lowercase)
+ *
+ * @apiSuccessExample {css} Style found:
+ *     HTTP/1.1 200 OK
+ *     :root {--background-color: #ffffee;...
+ *     }
+ *     
+ *     .post__header__name {
+ *       font-weight: bold;
+ *     }
+ *     
+ *     .form-label {
+ *       font-weight: bold;
+ *     }
+ * 
+ * @apiErrorExample Style not found:
+ *     HTTP/1.1 404 Not Found
  */
 router.get(
-  '/api/style/',
+  '/api/style/:name.css',
   checkSchema({
     name: {
-      in: 'query',
+      in: 'params',
       matches: {
         options: [validStyleNameRegexp],
         errorMessage: 'Style name can contain only lowercase letters and numbers'
       },
       trim: true,
+      required: true,
     }
   }),
   validateRequest,
   async (req, res, next) => {
     try {
-      const styleName = req.query.name;
-      if (styleName) {
-        const style = await Style.findByName(styleName);
-        if (!style) {
-          const err = new DocumentNotFoundError('Style', 'name', styleName, 'query');
-          return err.respond(res);
-        }
-        const styleObj = _.pick(style, ['name', 'updatedAt', 'rawCSS']);
-        return res
-          .status(200)
-          .json(styleObj);
+      const styleName = req.params.name;
+      const style = await Style.findByName(styleName);
+      if (!style) {
+        return res.status(404).end();
       }
-      const styles = await Style.findAll();
-      const stylesObj = styles.map(s => _.pick(s, ['name', 'updatedAt']));
+      const css = style.rawCSS;
       return res
-        .status(200)
-        .json(stylesObj);
+        .status(200).type('css').send(css).end();
     } catch (err) {
       return next(err);
     }
   }
+);
+
+
+/**
+ * @api {get} /api/style/ Get Styles
+ * @apiName GetStyle
+ * @apiGroup Style
+ * @apiPermission anyone
+ * @apiDescription Find one or more style based on query.
+ *
+ * Search is ignored.
+ * 
+ * Filter can be applied by: `name`, `createdAt`, `updatedAt`.
+ *
+ * Selectable fields are: `name`, `createdBy`, `name`, `login`, `authority`,
+ *    `createdAt`, `updatedAt`, `colors`, `strings`, `variables`, `css`,
+ *    `rawCSS`.
+ * 
+ * @apiUse GenericGetApi
+ * @apiUse DocumentNotFoundError
+ * @apiUse RequestValidationError
+ */
+router.get(
+  '/api/style/',
+  checkSchema(restGetQuerySchema),
+  validateRequest,
+  filterMatched,
+  createGetRequestHandler('Style', false),
 );
 
 

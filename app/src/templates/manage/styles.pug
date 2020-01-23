@@ -6,9 +6,10 @@ include ../mixins/modals.pug
 
 mixin styleEdit(style)
   if style.colors
-    for color, param in style.colors
-      -var paramname = param.split('-').join(' ')
-      +colorEdit(`colors[${param}]`, paramname)
+    div.auto-columns
+      for color, param in style.colors
+        -var paramname = param.split('-').join(' ')
+        +colorEdit(`colors[${param}]`, paramname)
 
   if style.strings
     for value, param in style.strings

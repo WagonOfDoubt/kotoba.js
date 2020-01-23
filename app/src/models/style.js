@@ -11,6 +11,7 @@ const path = require('path');
 const _ = require('lodash');
 const config = require('../json/config.json');
 const pug = require('pug');
+const { createApiQueryHandler } = require('../utils/model');
 const userStyleTemplate = pug.compileFile(
   path.join(config.templates_path, 'includes/userstyle.pug'));
 
@@ -252,6 +253,104 @@ styleSchema.virtual('rawCSS').get(function () {
     css: this.css,
   });
 });
+
+
+/**
+ * A helper function to read documents from DB based on user-defined query
+ * @async
+ * @param  {String}   [options.search=""] Search string.
+ * @param  {Object}   [options.filter={}] Filter object. Fields are field
+ *    names and values are either desired values to match or object with one
+ *    key-value pair where key is one of operators:
+ *    
+ *    - `$eq`   Matches values that are equal to a specified value.
+ *    - `$gt`   Matches values that are greater than a specified value.
+ *    - `$gte`  Matches values that are greater than or equal to a specified value.
+ *    - `$in`   Matches any of the values specified in an array.
+ *    - `$lt`   Matches values that are less than a specified value.
+ *    - `$lte`  Matches values that are less than or equal to a specified value.
+ *    - `$ne`   Matches all values that are not equal to a specified value.
+ *    - `$nin`  Matches none of the values specified in an array.
+ *
+ * @param  {String[]} [options.select=[]] Which document fields to include. If
+ *    empty, all available fields will be selected.
+ * @param  {Object}   [options.sort={}]   Specify in the sort parameter the
+ *    field or fields to sort by and a value of 1 or -1 to specify an
+ *    ascending or descending sort respectively.
+ * @param  {Number}   [options.skip=0]    How many documents to skip at the
+ *    start.
+ * @param  {Number}   [options.limit=50] How many documents to return. If
+ *    limit is 1, returns single matched document, if limit > 1, object with
+ *    array of documents and count of documents.
+ * @return {(Document|module:utils/model~ApiQueryResponse)}   If limit = 1,
+ *    returns single matched document, if limit > 1, object with array of
+ *    documents and count of matched documents.
+ *
+ * @throws {TypeError} If skip or limit parameter is not an integer
+ * @throws {TypeError} If argument for $-operator in filter object is invalid
+ * @alias module:models/board~Board.apiQuery
+ * @memberOf module:models/board~Board
+ */
+styleSchema.statics.apiQuery = createApiQueryHandler({
+    'name': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'createdBy': {
+      selectByDefault: false,
+      filter: false,
+      alias: ['createdBy.name', 'createdBy.login', 'createdBy.authority'],
+    },
+    'createdBy.name': {
+      selectByDefault: false,
+      filter: false,
+      populate: ['createdBy', 'name'],
+    },
+    'createdBy.login': {
+      selectByDefault: false,
+      filter: false,
+      populate: ['createdBy', 'login'],
+    },
+    'createdBy.authority': {
+      selectByDefault: false,
+      filter: false,
+      populate: ['createdBy', 'authority'],
+    },
+    'createdAt': {
+      selectByDefault: false,
+      filter: true,
+    },
+    'updatedAt': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'colors': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'strings': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'variables': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'css': {
+      selectByDefault: false,
+      filter: false,
+    },
+    'rawCSS': {
+      selectByDefault: true,
+      filter: false,
+      dependsOn: [
+        'colors',
+        'variables',
+        'strings',
+        'css',
+      ],
+    },
+  });
 
 
 const Style = module.exports = mongoose.model('Style', styleSchema);
