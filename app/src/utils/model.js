@@ -4,7 +4,130 @@
  */
 
 const _ = require('lodash');
+const fp = require('lodash/fp');
 const assert = require('assert');
+
+
+/**
+ * A helper function that acts like lodash _.pick, but also picks paths in
+ *    objects contained in nested arrays
+ * @inner
+ * @param  {Object}   obj   Source object
+ * @param  {String[]} paths Array of paths to pick
+ * @return {Object}         Filtered object
+ * @example
+ * const obj = {
+ *   a1: 1,
+ *   a2: 2,
+ *   b: {
+ *     b1: 11, b2: 12, b3: 13
+ *   },
+ *   c: [
+ *     { c1: 21, c2: 22, c3: 23 },
+ *     { c1: 24, c2: 25, c3: 26 },
+ *     { c1: 27, c2: 28, c3: 29 }
+ *   ],
+ *   d: [
+ *     {
+ *       e: { e1: 111, e2: 112, e3: 113 },
+ *       f: { f1: 121, f2: 122, f3: 123 }
+ *     },
+ *     {
+ *       e: { e1: 211, e2: 212, e3: 213 },
+ *       f: { f1: 221, f2: 222, f3: 223 }
+ *     }
+ *   ]
+ * };
+ * 
+ * const select = ['a2', "b.b1", "b.b3", "c.c1", "c.c3","d.f"];
+ * 
+ * const pickObj = pickRecursive(obj, select);
+ * 
+ * // returns
+ * {
+ *   "a2": 2,
+ *   "b": {
+ *     "b1": 11,
+ *     "b3": 13
+ *   },
+ *   "c": [
+ *     {
+ *       "c1": 21,
+ *       "c3": 23
+ *     },
+ *     {
+ *       "c1": 24,
+ *       "c3": 26
+ *     },
+ *     {
+ *       "c1": 27,
+ *       "c3": 29
+ *     }
+ *   ],
+ *   "d": [
+ *     {
+ *       "f": {
+ *         "f1": 121,
+ *         "f2": 122,
+ *         "f3": 123
+ *       }
+ *     },
+ *     {
+ *       "f": {
+ *         "f1": 221,
+ *         "f2": 222,
+ *         "f3": 223
+ *       }
+ *     }
+ *   ]
+ * }
+ */
+const pickRecursive = (obj, paths) => {
+  const checkPath = (key) =>
+  (p) => p && p.length && p[0] === key;
+
+  const checkIfKeyInPaths = (key, paths) =>
+    _.some(paths, checkPath(key));
+
+  const getSubpaths = (key, paths) => {
+    return _.flow([
+      fp.filter(checkPath(key)),
+      fp.map(_.tail),
+      fp.filter(a => a && a.length)
+    ])(paths);
+  };
+
+  const recursionFn = (obj, paths) => {
+    const result = {};
+    for (const [key, value] of _.toPairs(obj)) {
+      const keyInPath = checkIfKeyInPaths(key, paths);
+      if (keyInPath) {
+        const subpaths = getSubpaths(key, paths);
+        if (!subpaths.length) {
+          result[key] = value;
+        } else if (_.isArray(value)) {
+          result[key] = _.flow([
+            fp.map((a) => recursionFn(a, subpaths)),
+            fp.filter(_.negate(_.isEmpty)),
+          ])(value);
+        } else if (_.isObject(value)) {
+          const pickedObj = recursionFn(value, subpaths);
+          console.log(key, pickedObj);
+          if (!_.isEmpty(pickedObj)) {
+            result[key] = pickedObj;
+          }
+        } else {
+          result[key] = value;
+        }
+      }
+    }
+    return result;
+  };
+
+  paths = _.map(paths, (v) => v.split('.'));
+  return recursionFn(obj, paths);
+};
+
 
 /**
  * @apiDefine GenericGetApi
@@ -108,6 +231,33 @@ const assert = require('assert');
  */
 module.exports.createApiQueryHandler = (modelFieldsConfig) => {
   assert(_.isObject(modelFieldsConfig));
+  const isValidField = (key) => _.has(modelFieldsConfig, key);
+  const allowedOperators = [
+    '$eq',  // equal
+    '$ne',  // not equal
+    '$gt',  // greater than
+    '$gte', // greater than or equal
+    '$lt',  // less than
+    '$lte', // less than or equal
+    '$in',  // in array
+    '$nin', // not in array
+  ];
+  const getOperators = _.flow([
+    fp.pick(allowedOperators),
+    fp.toPairs,
+  ]);
+  const selectByDefault = _.flow([
+    fp.pickBy((v, k) => v.selectByDefault),
+    fp.keys,
+  ])(modelFieldsConfig);
+  const replaceSelectAliases = (field) => modelFieldsConfig[field].alias || field;
+  const processSelectObj = fp.flow([
+    fp.filter((v, k) => isValidField(v)),
+    fp.uniq,
+    fp.map(replaceSelectAliases),
+    fp.flatten,
+  ]);
+
   /*
    * @inner
    * @async
@@ -142,7 +292,17 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
    * @throws {TypeError} If skip or limit parameter is not an integer
    * @throws {TypeError} If argument for $-operator in filter object is invalid
    */
-  const apiQueryFn = async function ({ search = '', filter = {}, select = [], sort = {}, skip = 0, limit = 50, count = false } = {}) {
+  const apiQueryFn = async function (
+      {
+        search = '',
+        filter = {},
+        select = selectByDefault,
+        sort = {},
+        skip = 0,
+        limit = 50,
+        count = false
+      } = {}
+    ) {
     if (!_.isInteger(limit)) {
       throw new TypeError('limit must be an integer');
     }
@@ -150,39 +310,17 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
       throw new TypeError('skip must be an integer');
     }
     // preprocessing arguments
-    const filterSelectableFields = (obj) => _.pickBy(obj, (v, k) => _.has(modelFieldsConfig, k));
     filter = _.pickBy(filter, (v, k) => {
-      if (!_.has(modelFieldsConfig, k)) {
+      if (!isValidField(k)) {
         return false;
       }
       const config = modelFieldsConfig[k];
       return config.filter;
     });
-    sort = filterSelectableFields(sort);
-    select = _.filter(select, (v, k) => _.has(modelFieldsConfig, v));
-    select = _.map(select, (field) => {
-      const config = modelFieldsConfig[field];
-      if (config.alias) {
-        return config.alias;
-      }
-      return field;
-    });
-    select = _.flatten(select);
+    sort = _.pickBy(sort, (v, k) => isValidField(k));
+    // select
+    select = processSelectObj(select);
 
-    const alwaysExclude = [
-      'id',
-      '_id',
-    ];
-    const allowedOperators = [
-      '$eq',  // equal
-      '$ne',  // not equal
-      '$gt',  // greater than
-      '$gte', // greater than or equal
-      '$lt',  // less than
-      '$lte', // less than or equal
-      '$in',  // in array
-      '$nin', // not in array
-    ];
     const conditions = {};
     const projection = {};
     const options = {};
@@ -195,7 +333,7 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
     if (!_.isEmpty(filter)) {
       for (const [field, value] of _.toPairs(filter)) {
         if (_.isObject(value)) {
-          const operators = _.toPairs(_.pick(value, allowedOperators));
+          const operators = getOperators(value);
           if (!operators.length) {
             throw new Error('Filter object contains no valid operators');
           }
@@ -219,37 +357,26 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
         }
       }
     }
-    // select
-    if (_.isEmpty(select)) {
-      select = _.keys(_.pickBy(modelFieldsConfig, (v, k) => v.selectByDefault));
-    }
-
-    const addProjection = (field) => {
-      const config = modelFieldsConfig[field];
-      if (config.populate) {
-        const [populateField, populateSelect] = config.populate;
-        if (!populate[populateField]) {
-          populate[populateField] = [];
-        }
-        populate[populateField].push(populateSelect);
-      } else {
-        projection[field] = 1;
-      }
-      const dependencies = config.dependsOn;
-      if (dependencies && dependencies.length) {
-        for (const dependency of dependencies) {
-          projection[dependency] = 1;
-        }
-      }
-    };
 
     for (const field of select) {
-      if (_.has(modelFieldsConfig, field)) {
-        addProjection(field);
+      if (isValidField(field)) {
+        const config = modelFieldsConfig[field];
+        if (config.populate) {
+          const [populateField, populateSelect] = config.populate;
+          if (!populate[populateField]) {
+            populate[populateField] = [];
+          }
+          populate[populateField].push(populateSelect);
+        } else {
+          projection[field] = 1;
+        }
+        const dependencies = config.dependsOn;
+        if (dependencies && dependencies.length) {
+          for (const dependency of dependencies) {
+            projection[dependency] = 1;
+          }
+        }
       }
-    }
-    for (const field of alwaysExclude) {
-      delete projection[field];
     }
     // limit
     if (limit) {
@@ -270,11 +397,10 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
         virtuals: true,
         flattenMaps: true,
       });
-      const excl = _.omit(obj, alwaysExclude);
       if (!_.isEmpty(select)) {
-        return _.pick(excl, select);
+        return pickRecursive(obj, select);
       }
-      return excl;
+      return obj;
     };
     let query;
     if (limit === 1) {
