@@ -150,7 +150,9 @@ body.layout-navigator {
   // box-shadow: 0 0 5px 2px rgba(0,0,0,0.5)
   border-right: 1px solid transparent;
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 main {

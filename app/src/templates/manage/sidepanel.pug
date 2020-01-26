@@ -1,63 +1,63 @@
 include ../mixins/icons.pug
 
-// a.logo(href='/')
-  img(src='/.static/img/kotoba_logo_sm.png', alt='Home', title='Home')
-nav
-  ul
-    li
-      a(href='/') #[+icon('home', 'small')] Home
-    li
-      a(href='/manage/') #[+icon('chart-line', 'small')] Dashboard
-  h4 Profile
-  ul
-    li
-      a(href='/manage/profile') #[+icon('id-card', 'small')] My Profile
-    li
-      a(href='/manage/logout') #[+icon('sign-out-alt', 'small')] Log out
-  h4 Moderation
-  ul
-    li
-      a(href='/manage/reports') #[+icon('flag', 'small')] Reports
-    li
-      a(href='/manage/modlog') #[+icon('scroll', 'small')] ModLog
-    li
-      a(href='/manage/posts') #[+icon('comments', 'small')] Recent posts
-    li
-      a(href='/manage/uploads') #[+icon('paperclip', 'small')] Recent uploads
-  h4 Site management
-  ul
-    li
-      a(href='/manage/spaceused') #[+icon('hdd', 'small')] Disk space used
-    li
-      a(href='/manage/sitesettings') #[+icon('cog', 'small')] Site settings
-    li
-      a(href='/manage/styles') #[+icon('palette', 'small')] Styles
-    li
-      a(href='/manage/maintenance') #[+icon('toolbox', 'small')] Site maintenance
-    li
-      a(href=pkg.homepage, target='_blank') #[+icon('external-link-square-alt', 'small')] Check for new version
-  h4 Administration
-  ul
-    li
-      a(href='/manage/staff') #[+icon('users', 'small')] Staff
-    li
-      a(href='/manage/roles') #[+icon('user-tag', 'small')] Roles
-    li
-      a(href='/manage/boards') #[+icon('layer-group', 'small')] Manage boards
-    li
-      a(href='/manage/news') #[+icon('newspaper', 'small')] News
-    li
-      a(href='/manage/assets') #[+icon('images', 'small')] Assets
-    li
-      a(href='/manage/trash')  #[+icon('trash', 'small')] Recycle Bin
-  h4 TODO
-  ul
-    li Bans
-    li BanDelAll
-    li Move thread
-    li Wordfilter
-    li Ban proxy list
-    li Blotter
-    li Search posts
-    li View deleted thread
-    li Edit filetypes
+div.panel__content.markdown
+  div.panel__scroll
+    nav
+      ul
+        li
+          a(href='/') #[+icon('home', 'small')] Home
+        li
+          a(href='/manage/') #[+icon('chart-line', 'small')] Dashboard
+      h4 Profile
+      ul
+        li
+          a(href='/manage/profile') #[+icon('id-card', 'small')] My Profile
+        li
+          a(href='/manage/logout') #[+icon('sign-out-alt', 'small')] Log out
+      h4 Moderation
+      ul
+        li
+          a(href='/manage/reports') #[+icon('flag', 'small')] Reports
+        li
+          a(href='/manage/modlog') #[+icon('scroll', 'small')] ModLog
+        li
+          a(href='/manage/posts') #[+icon('comments', 'small')] Recent posts
+        li
+          a(href='/manage/uploads') #[+icon('paperclip', 'small')] Recent uploads
+      h4 Site management
+      ul
+        li
+          a(href='/manage/spaceused') #[+icon('hdd', 'small')] Disk space used
+        li
+          a(href='/manage/sitesettings') #[+icon('cog', 'small')] Site settings
+        li
+          a(href='/manage/styles') #[+icon('palette', 'small')] Styles
+        li
+          a(href='/manage/maintenance') #[+icon('toolbox', 'small')] Site maintenance
+        li
+          a(href=pkg.homepage, target='_blank') #[+icon('external-link-square-alt', 'small')] Check for new version
+      h4 Administration
+      ul
+        li
+          a(href='/manage/staff') #[+icon('users', 'small')] Staff
+        li
+          a(href='/manage/roles') #[+icon('user-tag', 'small')] Roles
+        li
+          a(href='/manage/boards') #[+icon('layer-group', 'small')] Manage boards
+        li
+          a(href='/manage/news') #[+icon('newspaper', 'small')] News
+        li
+          a(href='/manage/assets') #[+icon('images', 'small')] Assets
+        li
+          a(href='/manage/trash')  #[+icon('trash', 'small')] Recycle Bin
+      h4 TODO
+      ul
+        li Bans
+        li BanDelAll
+        li Move thread
+        li Wordfilter
+        li Ban proxy list
+        li Blotter
+        li Search posts
+        li View deleted thread
+        li Edit filetypes
