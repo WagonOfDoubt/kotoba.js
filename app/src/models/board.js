@@ -570,7 +570,31 @@ boardSchema.statics.apiQuery = createApiQueryHandler({
       selectByDefault: false,
       filter: false,
     },
-  });
+  },
+  (user, userRoles) => {
+    const conditions = {};
+    const projection = {};
+    const options = {};
+    const populate = {};
+    if (!user) {
+      conditions.isHidden = false;
+    } else {
+      if (user.authority !== 'admin') {
+        conditions.$or = [
+          {
+            isHidden: false
+          },
+          {
+            uri: {
+              $in: Array.from(Object.keys(userRoles))
+            }
+          },
+        ];
+      }
+    }
+    return { conditions, projection, options, populate };
+  }
+);
 
 
 const Board = module.exports = mongoose.model('Board', boardSchema);

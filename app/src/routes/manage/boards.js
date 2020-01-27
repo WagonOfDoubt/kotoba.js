@@ -2,20 +2,36 @@ const express = require('express');
 const Board = require('../../models/board');
 const locales = require('../../json/locales');
 const { authRequired } = require('../../middlewares/permission');
+const { findUserRoles } = require('../../middlewares/post');
 
 const router = express.Router();
 
 router.get('/boards/',
   authRequired,
+  findUserRoles,
   async (req, res, next) => {
     try {
-      const boards = await Board
-        .find()
-        .select('uri name desc createdAt isLocked isHidden isForcedAnon postcount')
-        .exec();
-      res.render('manage/boardselect', {
+      const boards = await Board.apiQuery({
+        select: [
+          'uri',
+          'name',
+          'desc',
+          'createdAt',
+          'isLocked',
+          'isHidden',
+          'isForcedAnon',
+          'postcount',
+        ],
+        limit: 1000,
+        user: req.user,
+        userRoles: req.userRoles,
+      });
+      if (!boards.docs || !boards.docs.length) {
+        return res.status(404).render('manage/404');
+      }
+      return res.render('manage/boardselect', {
         activity: 'manage-page-boardselect',
-        boards: boards,
+        boards: boards.docs,
         title: 'Board options',
         locales: locales,
         crud: 'read',
@@ -29,14 +45,20 @@ router.get('/boards/',
 
 router.get('/boards/edit/:board',
   authRequired,
+  findUserRoles,
   async (req, res, next) => {
     try {
       const boardUri = req.params.board;
       const board = await Board.apiQuery({
         filter: { uri: boardUri },
         limit: 1,
+        user: req.user,
+        userRoles: req.userRoles,
       });
-      res.render('manage/boardopts', {
+      if (!board) {
+        return res.status(404).render('manage/404');
+      }
+      return res.render('manage/boardopts', {
         activity: 'manage-page-boardopts',
         board: board,
         boardDefaults: Board.defaults(),
@@ -53,6 +75,7 @@ router.get('/boards/edit/:board',
 
 router.get('/boards/create',
   authRequired,
+  findUserRoles,
   async (req, res, next) => {
     try {
       res.render('manage/boardopts', {
@@ -71,16 +94,26 @@ router.get('/boards/create',
 
 router.get('/boards/delete/:board',
   authRequired,
+  findUserRoles,
   async (req, res, next) => {
     try {
-      const board = await Board.findOne({ uri: req.params.board }).exec();
+      const board = await Board.apiQuery({
+        filter: { uri: req.params.board },
+        select: [
+          'uri',
+          'name',
+          'desc',
+        ],
+        limit: 1,
+        user: req.user,
+        userRoles: req.userRoles,
+      });
 
       if (!board) {
-        res.status(404).send();
-        return;
+        return res.status(404).render('manage/404');
       }
 
-      res.render('manage/delboard', {
+      return res.render('manage/delboard', {
         activity: 'manage-page-delboard',
         board: board,
         title: 'Delete board',

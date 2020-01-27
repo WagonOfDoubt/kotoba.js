@@ -5,7 +5,7 @@
 
 const _ = require('lodash');
 const {Post} = require('../models/post');
-const { PermissionDeniedError } = require('../errors');
+const { PermissionDeniedError, AuthRequiredError } = require('../errors');
 
 
 /**
@@ -347,14 +347,8 @@ module.exports.authRequired = (req, res, next) => {
 module.exports.apiAuthRequired = (req, res, next) => {
   try {
     if (!req.isAuthenticated() || !req.user) {
-      return res
-        .status(401)
-        .json({
-          'error': {
-            'msg': `User must be logged in to perform this action`,
-            'type': 'AuthRequired'
-          }
-        });
+      const err = new AuthRequiredError();
+      return err.respond(res);
     }
     next();
   } catch (err) {
@@ -373,24 +367,12 @@ module.exports.apiAuthRequired = (req, res, next) => {
 module.exports.adminOnly = (req, res, next) => {
   try {
     if (!req.isAuthenticated() || !req.user) {
-      return res
-        .status(401)
-        .json({
-          'error': {
-            'msg': `User must be logged in to perform this action`,
-            'type': 'AuthRequired'
-          }
-        });
+      const err = new AuthRequiredError();
+      return err.respond(res);
     }
     if (req.user.authority !== 'admin') {
-      return res
-        .status(403)
-        .json({
-          'error': {
-            'msg': `User don't have rigths to perform this action`,
-            'type': 'PermissionDenied'
-          }
-        });
+      const err = new PermissionDeniedError();
+      return err.respond(res);
     }
     next();
   } catch (err) {

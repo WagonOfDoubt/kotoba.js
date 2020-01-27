@@ -34,39 +34,42 @@ block header
           a(href='/manage/boards/edit/' + board.uri) Back to board options
 
 block main
-  table.table
-    thead
-      tr.table__row.table__row_header
-        th.table__header.table__header_sortable(data-sort-field='board', data-sort-type='string') Uri
-        th.table__header.table__header_sortable(data-sort-field='name', data-sort-type='string') Name
-        th.table__header Description
-        th.table__header.table__header_sortable.table__header_sort-ascending(data-sort-field='created', data-sort-type='date', data-sort-order='ascending') Created
-        th.table__header.table__header_sortable(data-sort-field='postcount', data-sort-type='number') Post count
-        th.table__header Features
-        th.table__heaeder Staff
-    tbody
-      for b in boards
-        tr.table__row(data-board=b.uri, data-name=b.name, data-created=b.createdAt, data-postcount=b.postcount)
-          td
-            a(href='/manage/boards/edit/' + b.uri) /#{ b.uri }/
-          td= b.name
-          td= b.desc
-          td
-            +date(b.createdAt)
-          td= b.postcount
-          td
-            if b.isHidden
-              | 
-              abbr.badge.badge_light(title='Hidden board')
-                +icon('eye-slash', 'small')
-            if b.isLocked
-              | 
-              abbr.badge.badge_danger(title='Locked board')
-                +icon('lock', 'small')
-            if b.isForcedAnon
-              | 
-              abbr.badge.badge_dark(title='Anonymous board')
-                +icon('user-secret', 'small')
-          td
-            span.button.button_link
-              a(href=`/manage/staff?board=${b.uri}`) staff
+  if boards && boards.length
+    table.table
+      thead
+        tr.table__row.table__row_header
+          th.table__header.table__header_sortable(data-sort-field='board', data-sort-type='string') Uri
+          th.table__header.table__header_sortable(data-sort-field='name', data-sort-type='string') Name
+          th.table__header Description
+          th.table__header.table__header_sortable.table__header_sort-ascending(data-sort-field='created', data-sort-type='date', data-sort-order='ascending') Created
+          th.table__header.table__header_sortable(data-sort-field='postcount', data-sort-type='number') Post count
+          th.table__header Features
+          th.table__heaeder Staff
+      tbody
+        for b in boards
+          tr.table__row(data-board=b.uri, data-name=b.name, data-created=b.createdAt, data-postcount=b.postcount)
+            td
+              a(href='/manage/boards/edit/' + b.uri) /#{ b.uri }/
+            td= b.name
+            td= b.desc
+            td
+              +date(b.createdAt)
+            td= b.postcount
+            td
+              if b.isHidden
+                | 
+                abbr.badge.badge_light(title='Hidden board')
+                  +icon('eye-slash', 'small')
+              if b.isLocked
+                | 
+                abbr.badge.badge_danger(title='Locked board')
+                  +icon('lock', 'small')
+              if b.isForcedAnon
+                | 
+                abbr.badge.badge_dark(title='Anonymous board')
+                  +icon('user-secret', 'small')
+            td
+              span.button.button_link
+                a(href=`/manage/staff?board=${b.uri}`) staff
+  else
+    div.no-content-placeholder No boards found. #[a(href='/manage/boards/create') Create one].

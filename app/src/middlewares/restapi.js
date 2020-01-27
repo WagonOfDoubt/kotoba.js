@@ -376,6 +376,8 @@ const createGetRequestHandler = (modelName, search = true) => {
         skip   : req.query.skip,
         limit  : req.query.limit,
         count  : _.has(req.query, 'count'),
+        user   : req.user,
+        userRoles: req.userRoles,
       };
       if (search) {
         q.search = req.query.search;

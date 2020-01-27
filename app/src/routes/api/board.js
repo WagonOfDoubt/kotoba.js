@@ -15,6 +15,7 @@ const boardparams = require('../../json/boardparams');
 const { DocumentNotFoundError, DocumentAlreadyExistsError, DocumentNotModifiedError } = require('../../errors');
 const locales = require('../../json/locales.json');
 const localeCodes = locales.map(([t, c]) => c);
+const { findUserRoles } = require('../../middlewares/post');
 
 
 /**
@@ -367,6 +368,7 @@ router.get(
   checkSchema(restGetQuerySchema),
   validateRequest,
   filterMatched,
+  findUserRoles,
   createGetRequestHandler('Board'),
 );
 

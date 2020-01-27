@@ -112,7 +112,6 @@ const pickRecursive = (obj, paths) => {
           ])(value);
         } else if (_.isObject(value)) {
           const pickedObj = recursionFn(value, subpaths);
-          console.log(key, pickedObj);
           if (!_.isEmpty(pickedObj)) {
             result[key] = pickedObj;
           }
@@ -171,7 +170,7 @@ const pickRecursive = (obj, paths) => {
  * Example: - `?sort=postcount -createdAt`
  * @apiParam (query) {Number} [skip=0] Number of documents to skip
  *
- * @apiParam (query) {Number} [limit=100] Maximum number of documents to
+ * @apiParam (query) {Number} [limit=50] Maximum number of documents to
  *    return. If limit=1 and count is not present, single document will be
  *    returned. Otherwise, object with field `docs` (array of documents) will
  *    be returned. Minimum value is `1` and maximum value is `1000`.
@@ -225,11 +224,17 @@ const pickRecursive = (obj, paths) => {
 /**
  * Creates a function that returns documents from DB based on user-defined
  *    query
- * @param {Object} modelFieldsConfig Configuration object that defines document
- *    fields that can be read by user
+ * @param {Object} modelFieldsConfig Configuration object that defines
+ *    document fields that can be read by user
+ * @param {function} [queryMutationFn] A function that takes arguments `user`
+ *    and `userRoles` and returns object with `conditions`, `projection`,
+ *    `options` and `populate` objects that override corresponding objects in
+ *    mongodb query. Used for access control to documents.
+ * @param {function} [responseMutationFn] A function that takes arguments
+ *    `user`, `userRoles` and `response` and returns new `response` object.
  * @returns {function} async function
  */
-module.exports.createApiQueryHandler = (modelFieldsConfig) => {
+module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, responseMutationFn) => {
   assert(_.isObject(modelFieldsConfig));
   const isValidField = (key) => _.has(modelFieldsConfig, key);
   const allowedOperators = [
@@ -285,6 +290,8 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
    * @param  {Number}   [options.limit=50] How many documents to return. If
    *    limit is 1, returns single matched document, if limit > 1, object with
    *    array of documents and count of documents.
+   * @param  {Document} [options.user=null] User who's accessing DB
+   * @param  {Object}   [options.userRoles=null] User's board roles
    * @return {(Document|module:utils/model~ApiQueryResponse)}   If limit = 1,
    *    returns single matched document, if limit > 1, object with array of
    *    documents and count of matched documents.
@@ -300,7 +307,9 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
         sort = {},
         skip = 0,
         limit = 50,
-        count = false
+        count = false,
+        user = null,
+        userRoles = null,
       } = {}
     ) {
     if (!_.isInteger(limit)) {
@@ -323,8 +332,8 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
 
     const conditions = {};
     const projection = {};
-    const options = {};
-    const populate = {};
+    const options    = {};
+    const populate   = {};
     // search
     if (search) {
       conditions.$text = { $search: search };
@@ -392,16 +401,26 @@ module.exports.createApiQueryHandler = (modelFieldsConfig) => {
     }
 
     const processResponse = (res) => {
-      const obj = res.toObject({
+      let obj = res.toObject({
         minimize: false,
         virtuals: true,
         flattenMaps: true,
       });
       if (!_.isEmpty(select)) {
-        return pickRecursive(obj, select);
+        obj = pickRecursive(obj, select);
+      }
+      if (responseMutationFn) {
+        obj = responseMutationFn(user, userRoles, obj);
       }
       return obj;
     };
+    if (queryMutationFn) {
+      const mutations = queryMutationFn(user, userRoles);
+      _.assign(conditions, mutations.conditions);
+      _.assign(projection, mutations.projection);
+      _.assign(options,    mutations.options);
+      _.assign(populate,   mutations.populate);
+    }
     let query;
     if (limit === 1) {
       query = this.findOne(conditions, projection, options);
