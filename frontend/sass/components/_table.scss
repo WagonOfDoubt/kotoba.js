@@ -26,6 +26,13 @@ table.table {
     .table__header_vertical {
       writing-mode: vertical-lr;
       vertical-align: bottom;
+
+      // chrome(ium) has bug with vertical text directly inside table cells,
+      // nested divs helps avoid it
+      div {      
+        writing-mode: vertical-lr;
+        vertical-align: bottom;
+      }
     }
 
     .table__header_sortable {

@@ -141,8 +141,13 @@
 body {
   color: var(--text-color);
   background-color: var(--background-color);
+  font-family: sans-serif;
   // needed for correct positioning of popups
   position: relative;
+}
+
+button {
+  font-family: ui, system-ui, sans-serif;
 }
 
 a {
@@ -230,6 +235,13 @@ hr {
 .auto-columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
 }
 
 

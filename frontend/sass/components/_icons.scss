@@ -4,32 +4,32 @@
   vertical-align: top;
 }
 
-.icon_extrasmall {
-  width: 10px;
-  height: 10px;
+@mixin icon_size($size) {
+  width: $size;
+  height: $size;
 
   svg {
-    width: 10px;
-    height: 10px;
+    width: $size;
+    height: $size;
   }
+}
+
+.icon_extrasmall {
+  @include icon_size(10px);
 }
 
 .icon_small {
-  width: 16px;
-  height: 16px;
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
+  @include icon_size(16px);
 }
 
 .icon_medium {
-  width: 32px;
-  height: 32px;
+  @include icon_size(32px);
+}
 
-  svg {
-    width: 32px;
-    height: 32px;
-  }
+.icon_large {
+  @include icon_size(48px);
+}
+
+.icon_extralarge {
+  @include icon_size(64px);
 }

@@ -5,6 +5,7 @@
 
 .post__header__name {
   color: var(--name-color);
+  font-family: serif;
 }
 
 .post__header__tripcode {
@@ -12,14 +13,12 @@
 }
 
 .post__header__staff {
-  &::before, &::after {
-    content: '★★';
-  }
   color: var(--badge-color-info-background);
 }
 
 .post__header__subject {
   color: var(--subject-color);
+  font-family: serif;
   font-weight: bold;
   font-size: 1.2rem;
 }
@@ -168,6 +167,7 @@
 
 .post__body {
   word-wrap: break-word;
+  font-family: serif;
 }
 
 .post_reply {
@@ -349,4 +349,5 @@
   overflow-x: auto;
   background: var(--background-color);
   border-top: 1px solid var(--border-color);
+  margin-top: 1rem;
 }

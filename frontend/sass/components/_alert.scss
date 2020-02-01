@@ -1,13 +1,18 @@
 .alert {
-  display: inline-block;
+  display: block;
   border: 1px solid transparent;
   padding: .75rem 1.25rem;
+  margin: .5rem;
   text-align: center;
   vertical-align: baseline;
   border-radius: .25rem;
 
   pre {
     text-align: left;
+  }
+
+  a, a:hover {
+    color: inherit;
   }
 }
 
