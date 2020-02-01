@@ -450,6 +450,41 @@ boardSchema.statics.findBoard = (boardUri) => {
  * @memberOf module:models/board~Board
  */
 boardSchema.statics.apiQuery = createApiQueryHandler({
+    'all': {
+      selectByDefault: false,
+      alias: [
+        'uri',
+        'name',
+        'desc',
+        'header',
+        'navbar',
+        'imageUri',
+        'faviconUri',
+        'maxFileSize',
+        'maxFilesPerPost',
+        'maxThreadsOnPage',
+        'maxPages',
+        'autosage',
+        'showReplies',
+        'showRepliesSticky',
+        'maxMessageLength',
+        'createdAt',
+        'defaultPosterName',
+        'keepOriginalFileName',
+        'isLocked',
+        'isHidden',
+        'isForcedAnon',
+        'defaultStyle',
+        'locale',
+        'newThreadsRequired',
+        'allowRepliesSubject',
+        'captcha',
+        'features',
+        'filetypes',
+        'postcount',
+        'uniquePosts',
+      ]
+    },
     'uri': {
       selectByDefault: true,
       filter: true,

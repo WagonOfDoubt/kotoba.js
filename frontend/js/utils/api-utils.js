@@ -39,6 +39,22 @@ const errorToHTML = (error) => {
 };
 
 
+const getErrorMessage = (data) => {
+  if (data.responseJSON.errors) {
+    return `${Object.values(data.responseJSON.errors)
+      .map(errorToHTML)
+      .join('<br>')}`;
+  }
+  if (data.responseJSON.error) {
+    return `${errorToHTML(data.responseJSON.error)}`;
+  }
+  if (data.status && data.statusText) {
+    return `${ data.status } ${ data.statusText }`;
+  }
+  return 'Something went wrong';
+};
+
+
 export const alertErrorHandler = (data) => {
   console.error(data);
   const {status, statusText} = data;
@@ -47,14 +63,7 @@ export const alertErrorHandler = (data) => {
     return modal.alert('Error', errorText);
   }
 
-  let alertMessage = `${ status } ${ statusText }`;
-  if (data.responseJSON.errors) {
-    alertMessage = `${Object.values(data.responseJSON.errors)
-      .map(errorToHTML)
-      .join('<br>')}`;
-  } else if (data.responseJSON.error) {
-    alertMessage = `${errorToHTML(data.responseJSON.error)}`;
-  }
+  let alertMessage = getErrorMessage(data);
   return modal.alert(`Error: ${ status } ${ statusText }`, alertMessage);
 };
 
@@ -122,10 +131,13 @@ export const fetchChanges = ($form, $populateContainer) => {
   $.getJSON(getRoute)
     .done((data) => {
       const diff = Object.entries(objectDiff(formData, data));
+      const hasExistingValues = diff.some(val => val.old !== undefined);
       if (diff.length) {
         const $table = $(tableTemplate({
-          body: diff.map(([key, value]) => [key, value.old, value.new ]),
-          head: [['Property', 'Current value', 'New value']],
+          body: diff.map(([key, value]) => hasExistingValues ? [key, value.old, value.new ] : [key, value.new ]),
+          head: [
+            hasExistingValues ? ['Property', 'Current value', 'New value'] : ['Property', 'Value']
+          ],
           filter: str => truncate(str, { length: 100 }),
         }));
         $populateContainer.text('').append($table);        
@@ -134,15 +146,7 @@ export const fetchChanges = ($form, $populateContainer) => {
       }
     })
     .fail((data) => {
-      if (data.responseJSON) {
-        const errors = data.responseJSON.errors;
-        const errorsMsg = Object.values(errors)
-          .map(error => error.msg)
-          .join('<br>');
-        $populateContainer.html(errorsMsg);
-      } else {
-        $populateContainer.text('Error ' + data.status);
-      }
+      $populateContainer.html(getErrorMessage(data));
     });
 };
 

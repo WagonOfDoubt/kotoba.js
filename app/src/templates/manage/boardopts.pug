@@ -39,10 +39,19 @@ block main
   -
     var values = board || boardDefaults
     var defaults = boardDefaults
-    var action = '/api/board/';
-    var getUrl = board ? `/api/board?filter=uri:"${board.uri}"&limit=1` : null;
+    var getUrl = board ? `/api/board?filter=uri:"${board.uri}"&limit=1&select=all` : null;
     var method = board ? 'PATCH' : 'POST';
-  form#form-update-board(method='POST', action=action, data-method=method, data-get-url=getUrl)
+  form#form-update-board(
+      method='POST',
+      action='/api/board/',
+      data-method=method,
+      data-get-url=getUrl,
+      data-data-field='data',
+      data-success-url='/manage/boards/',
+      data-confirm-dialog='dialog-update-board-confirm',
+      data-success-dialog='dialog-update-board-success',
+      data-changes-list='update-board-changes-list',
+    )
     if !board
       +textEdit('uri', 'Directory', 'The directory of the board.', true)
     else
@@ -122,9 +131,9 @@ block main
         a(href='/manage/boards/delete/' + board.uri) Delete board
 
 block modals
-  +confirmPrompt('dialog-update-board', 'Update board options', 'Save changes')
+  +confirmPrompt('dialog-update-board-confirm', 'Update board options', 'Save changes')
     p Following options will be changed:
-    div.changes-list
+    div#update-board-changes-list
     label
       input(type="checkbox", checked, name="regenerate:boolean")
       | Regenerate board

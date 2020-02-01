@@ -52,6 +52,7 @@ router.get('/boards/edit/:board',
       const board = await Board.apiQuery({
         filter: { uri: boardUri },
         limit: 1,
+        select: ['all'],
         user: req.user,
         userRoles: req.userRoles,
       });

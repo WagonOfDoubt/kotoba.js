@@ -54,26 +54,54 @@ const managePage_addBoard = () => {
 };
 
 
-const managePage_updateBoard = () => {
-  const $form = $('#form-update-board');
+const updateModelWithChangesList = ($form) => {
   const action = $form.attr('action');
   const method = $form.data('method');
+  const confirmDialogId = $form.data('confirmDialog');
+  const successDialogId = $form.data('successDialog');
+  const changesListId   = $form.data('changesList');
+  const confirmDialog   = document.getElementById(confirmDialogId);
+  const successDialog   = document.getElementById(successDialogId);
+  const changesList     = document.getElementById(changesListId);
+  const successUrl      = $form.data('successUrl');
+  const dataField       = $form.data('dataField');
+
+  const onSuccess = () => {
+    return modal
+      .dialogPromise(successDialog)
+      .finally(() => window.location.href = successUrl);
+  };
+
+  const onConfirm = ({ formData }) => {
+    const mainFormData = serializeForm($form);
+    let data = {};
+    if (dataField) {
+      data[dataField] = mainFormData;
+    } else {
+      data = mainFormData;
+    }
+    if (formData) {
+      data = Object.assign(data, formData);
+    }
+    return sendJSON(action, method, data)
+      .then(onSuccess)
+      .catch(alertErrorHandler);
+  };
+
   $form.submit((e) => {
-    modal
-      .dialogPromise(document.getElementById('dialog-update-board'), ['ok'])
-      .then(({ formData }) => {
-        sendJSON(action, method, Object.assign({ data: serializeForm($form) }, formData))
-          .then(() => {
-            modal
-              .dialogPromise(document.getElementById('dialog-update-board-success'))
-              .finally(() => window.location.href = '/manage/boards/');
-          })
-          .catch(alertErrorHandler);
-      });
-    fetchChanges($form, $('#dialog-update-board .changes-list'));
     e.preventDefault();
+    modal
+      .dialogPromise(confirmDialog, ['ok'])
+      .then(onConfirm);
+    if (changesList) {
+      fetchChanges($form, $(changesList));
+    }
   });
 };
+
+
+const managePage_updateBoard = () =>
+  updateModelWithChangesList($('#form-update-board'));
 
 
 const managePage_deleteBoard = () => {
