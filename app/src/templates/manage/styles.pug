@@ -26,18 +26,28 @@ mixin styleEdit(style)
   div.alert.alert_info
     | Avoid embedding large image files in CSS here. Use #[a(href='/manage/assets') assets] to store them as separate files instead.
   div.alert.alert_danger
-    | Warning: CSS rules are not safe and may have exploits, including the ones that can freeze whole OS for hours! Don't copy & paste here CSS from untrusted sources and don't allow editing of CSS rules by anyone you don't trust. Always make sure that you know that you're doing.
+    | Warning: CSS rules are not safe and may have exploits, including the ones that can freeze whole OS for hours! Don't copy &amp; paste here CSS from untrusted sources and don't allow editing of CSS rules by anyone you don't trust. Always make sure that you know that you're doing.
 
   +textArea('css', 'Additional CSS', 'Any other CSS rules goes here')
 
 
-mixin swatch(color)
-  div(style={
-    'background-color': color,
-    'width': '25px',
-    'height': '25px',
-    'display': 'inline-block',
-  })
+mixin swatch(color, name)
+  div(
+    title=`${name}: ${color}`,
+    style={
+      'background-color': color,
+      'grid-column-end': 'span 2',
+      'grid-row-end': 'span 2',
+    }
+  )
+
+mixin swatchSmall(color, name)
+  div(
+    title=`${name}: ${color}`,
+    style={
+      'background-color': color,
+    }
+  )
 
 block header
   -
@@ -64,8 +74,8 @@ block header
 block main
   -
     var values = initialValues;
-    var action = '/api/style/';
     var method = style ? 'PATCH' : 'POST';
+    var getUrl = style ? `/api/style?filter=name:"${style.name}"&limit=1&select=all` : null;
   if isRead
     if !styles || !styles.length
       div.no-content-placeholder No styles. Start by creating one.
@@ -78,7 +88,7 @@ block main
             th.table__header.table__header_sortable(data-sort-field='updated', data-sort-type='date') Last change
             th.table__header.table__header_sortable(data-sort-field='createdby', data-sort-type='string') Added by
             th.table__header Color scheme
-            th.table__header Del
+            th.table__header Delete
         tbody
           for s in styles
             tr.table__row(data-name=s.name, data-created=s.createdAt, data-updated=s.updatedAt, data-createdby=s.createdBy && s.createdBy.login)
@@ -96,7 +106,7 @@ block main
               td
                 if s.colors
                   -
-                    var representativeColors = [
+                    var mainColors = [
                       'background-color',
                       'border-color',
                       'primary-color',
@@ -107,20 +117,48 @@ block main
                       'link-color',
                       'link-color-hover',
                     ];
-                  for colorname in representativeColors
-                    - var color = s.colors.get(colorname)
-                    +swatch(color)
+                    var otherColors = Array.from(s.colors.keys()).filter(k => !mainColors.includes(k))
+                  div(
+                      style={
+                        'display': 'grid',
+                        'grid-template-columns': 'repeat(19, 15px)',
+                        'grid-template-rows': 'repeat(3, 15px)',
+                        'grid-auto-flow': 'dence',
+                      }
+                    )
+                    for colorname in mainColors
+                      - var color = s.colors.get(colorname)
+                      +swatch(color, colorname)
+                    for colorname in otherColors
+                      - var color = s.colors.get(colorname)
+                      +swatchSmall(color, colorname)
               td
-                form(method='post', action='/api/style', data-method='delete')
+                form.form-delete-style(
+                    method='POST',
+                    action='/api/style/',
+                    data-method='DELETE',
+                    data-success-url='/manage/styles/',
+                    data-confirm-dialog='dialog-delete-style-confirm',
+                    data-success-dialog='dialog-delete-style-success',
+                  )
                   input(type='hidden', name='name', value=s.name)
-                  button(type='button', class='btn', data-style=s.name, data-action='delete') Delete
+                  input(type='submit', value='Delete')
   else
     //- create or edit
     div.alert.alert_info
       | Styles only appear in style selector after page is rebuilt.
       | For board pages, it will be rebuilt as soon as someone post a new message.
       | Consider #[a(href='/manage/maintenance#form-regenerate-all') rebuilding main page] manually.
-    form#form-edit-styles(action=action, data-method=method)
+    form#form-edit-styles(
+        method='POST',
+        action='/api/style/',
+        data-method=method,
+        data-get-url=getUrl,
+        data-success-url='/manage/styles/',
+        data-confirm-dialog='dialog-update-style-confirm',
+        data-success-dialog='dialog-update-style-success',
+        data-changes-list='update-style-changes-list',
+      )
       if (!style)
         +textEdit('name', 'Style name', 'Must contain only lowercase letters and numbers without spaces. Can not be changed later.', true)(pattern='^[a-z0-9_]*$')
         +styleEdit(values)
@@ -188,19 +226,30 @@ block main
             "createdAt" : new Date("2019-09-03T19:06:40.900Z"),
           }
         ];
-      h2 Preview
-      include ../includes/thread.pug
-    //- if omittedPosts > 0
-    //-   span.omittedposts
-    //-     if omittedAttachments
-    //-       | #{ omittedPosts } posts and #{ omittedAttachments } images omitted.
-    //-     else
-    //-       | #{ omittedPosts } posts omitted.
-    //-     | 
-    //-     span.clickreplytoview
-    //-       | Click Reply to view.
-    //- div.replies-container
-    //-   for post in replies
-    //-     if !post.isDeleted
-    //-       div.reply-container(id=`reply${ post.postId }`)
-    //-         include post.pug
+      h2 Preview #[+showHideBtn('#style-preview', true)]
+      div#style-preview.hidden
+        include ../includes/thread.pug
+
+
+block modals
+  -
+    var title = style ? 'Update style' : 'Create style';
+    var okBtnCaption = style ? 'Save changes' : 'Create style';
+  +confirmPrompt('dialog-update-style-confirm', title, okBtnCaption)
+    if style
+      p Save following changes:
+    else
+      p Create new style:
+    div#update-style-changes-list
+
+  +alertPrompt('dialog-update-style-success', 'Success')
+    if style
+      p Style was updated
+    else
+      p Style was created
+
+  +confirmPrompt('dialog-delete-style-confirm', 'Delete style', 'Delete')
+    | Delete style?
+
+  +alertPrompt('dialog-delete-style-success', 'Success')
+    p Style was deleted

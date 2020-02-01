@@ -1,5 +1,19 @@
+mixin showHideBtn(target, isInitiallyHidden)
+  span.button.button_link
+    a.js-toggle-visibility(
+      href=`#`,
+      data-caption-show='show',
+      data-caption-hide='hide',
+      data-target=target,
+      data-visible=isInitiallyHidden ? 'false' : 'true'
+    )
+      if isInitiallyHidden
+        | show
+      else
+        | hide
+
 mixin showOmittedBtn(nomitted, target, what)
   if what
-    span.omitted (#{nomitted} #{what} omitted #[span.button.button_link #[a.js-toggle-visibility(href=`#`, data-caption-show='show' data-caption-hide='hide' data-target=target data-visible='false') show]])
+    span.omitted (#{nomitted} #{what} omitted #[+showHideBtn(target, true)])
   else
-    span.omitted (#{nomitted} omitted #[span.button.button_link #[a.js-toggle-visibility(href=`#`, data-caption-show='show' data-caption-hide='hide' data-target=target data-visible='false') show]])
+    span.omitted (#{nomitted} omitted #[+showHideBtn(target, true)]])

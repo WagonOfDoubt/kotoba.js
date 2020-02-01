@@ -431,48 +431,25 @@ const managePage_modlog = () => {
 
 
 const managePage_styles = () => {
-    $('button[data-action="delete"]').click(e => {
-      const btn = e.currentTarget;
-      const styleName = btn.dataset.style;
-      const data = { name: styleName };
-      modal
-        .confirmPrompt('Delete style', `Delete style ${styleName}?`, 'Delete')
-        .then(() => {
-          sendJSON('/api/style/', 'DELETE', data)
-            .then(() => {
-              modal
-                .alert('Success', 'Style was deleted')
-                .finally(() => window.location = '/manage/styles');
-            })
-            .catch(alertErrorHandler);
-        });
-  });
+  const $delForms = $('.form-delete-style');
+  updateModelWithChangesList($delForms);
 
   const $form = $('#form-edit-styles');
+  if ($form.length) {
+    const updateStyle = () => {
+      const data = serializeForm($form);
+      const s = userstyleTemplate(data);
+      const el = document.getElementById('user-style');
+      el.innerHTML = s;
+    };
 
-  const updateStyle = () => {
-    const data = serializeForm($form);
-    const s = userstyleTemplate(data);
-    const el = document.getElementById('user-style');
-    el.innerHTML = s;
-  };
-
-  $form.on('change input', 'input, textarea', (e) => {
+    $form.on('change input', 'input, textarea', (e) => {
+      updateStyle();
+    });
     updateStyle();
-  });
 
-  updateStyle();
-
-  $form.submit((e) => {
-    const data = serializeForm($form);
-    const action = $form.attr('action');
-    const method = $form.data('method');
-    const successMessage = method === 'POST' ? 'Style added' : 'Style updated';
-    sendJSON(action, method, data)
-      .then(successErrorHandler(successMessage))
-      .catch(alertErrorHandler);
-    e.preventDefault();
-  });
+    updateModelWithChangesList($form);
+  }
 };
 
 

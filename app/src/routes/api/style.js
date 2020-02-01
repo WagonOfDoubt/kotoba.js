@@ -127,7 +127,7 @@ router.get(
  *
  * Selectable fields are: `name`, `createdBy`, `name`, `login`, `authority`,
  *    `createdAt`, `updatedAt`, `colors`, `strings`, `variables`, `css`,
- *    `rawCSS`.
+ *    `rawCSS`, `capitalizedName`.
  * 
  * @apiUse GenericGetApi
  * @apiUse DocumentNotFoundError

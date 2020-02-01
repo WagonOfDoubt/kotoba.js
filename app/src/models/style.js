@@ -292,9 +292,28 @@ styleSchema.virtual('rawCSS').get(function () {
  * @memberOf module:models/board~Board
  */
 styleSchema.statics.apiQuery = createApiQueryHandler({
+    'all': {
+      selectByDefault: false,
+      alias: [
+        'name',
+        'capitalizedName',
+        'createdBy.name', 'createdBy.login', 'createdBy.authority',
+        'createdAt',
+        'updatedAt',
+        'colors',
+        'strings',
+        'variables',
+        'css',
+        'rawCSS',
+      ],
+    },
     'name': {
       selectByDefault: true,
       filter: true,
+    },
+    capitalizedName: {
+      selectByDefault: false,
+      dependsOn: ['name'],
     },
     'createdBy': {
       selectByDefault: false,
