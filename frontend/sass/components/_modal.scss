@@ -25,6 +25,7 @@
   visibility: hidden;
   overflow: hidden;
   display: flex;
+  color: var(--text-color);
   // Prevent Chrome on Windows from adding a focus outline. For details, see
   // https://github.com/twbs/bootstrap/pull/10951.
   outline: 0;
