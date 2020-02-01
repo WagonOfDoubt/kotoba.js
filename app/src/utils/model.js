@@ -84,7 +84,7 @@ const assert = require('assert');
  */
 const pickRecursive = (obj, paths) => {
   const checkPath = (key) =>
-  (p) => p && p.length && p[0] === key;
+    (p) => p && p.length && p[0] === key;
 
   const checkIfKeyInPaths = (key, paths) =>
     _.some(paths, checkPath(key));
@@ -324,11 +324,17 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
         return false;
       }
       const config = modelFieldsConfig[k];
+      if (!config) {
+        return false;
+      }
       return config.filter;
     });
     sort = _.pickBy(sort, (v, k) => isValidField(k));
     // select
     select = processSelectObj(select);
+    if (_.isEmpty(select)) {
+      select = selectByDefault;
+    }
 
     const conditions = {};
     const projection = {};
@@ -367,23 +373,24 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
       }
     }
 
+
     for (const field of select) {
-      if (isValidField(field)) {
-        const config = modelFieldsConfig[field];
-        if (config.populate) {
-          const [populateField, populateSelect] = config.populate;
-          if (!populate[populateField]) {
-            populate[populateField] = [];
-          }
-          populate[populateField].push(populateSelect);
-        } else {
-          projection[field] = 1;
+      const config = modelFieldsConfig[field];
+      if (!config) {
+        continue;
+      }
+      if (config.populate) {
+        const [populateField, populateSelect] = config.populate;
+        if (!populate[populateField]) {
+          populate[populateField] = [];
         }
-        const dependencies = config.dependsOn;
-        if (dependencies && dependencies.length) {
-          for (const dependency of dependencies) {
-            projection[dependency] = 1;
-          }
+        populate[populateField].push(populateSelect);
+      }
+      projection[field] = 1;
+      const dependencies = config.dependsOn;
+      if (dependencies && dependencies.length) {
+        for (const dependency of dependencies) {
+          projection[dependency] = 1;
         }
       }
     }
@@ -403,12 +410,55 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
     const processResponse = (res) => {
       let obj = res.toObject({
         minimize: false,
-        virtuals: true,
+        virtuals: false,
         flattenMaps: true,
       });
       if (!_.isEmpty(select)) {
         obj = pickRecursive(obj, select);
       }
+
+      const reduceVirtuals = (acc, selectedPath) => {
+        if (res.schema.pathType(selectedPath) === 'virtual') {
+          acc[selectedPath] = res.get(selectedPath, { virtuals: true, getters: true });
+        } else {
+          // Document.get doesn't work on virtuals nested in array
+          // This solves this problem only in case when array is on top level
+          // @todo Write more generic solution when needed
+          const pathKeys = _.split(selectedPath, '.');
+          const topKey = pathKeys[0];
+          if (acc[topKey]) {
+            return acc;
+          }
+          if (res.schema.pathType(topKey) === 'virtual') {
+            const subpaths = _.flow([
+              fp.filter(subpath => subpath.startsWith(topKey + '.')),
+              fp.map(_.flow([
+                fp.split('.'),
+                fp.tail,
+                fp.join('.'),
+              ])),
+            ])(select);
+            if (!subpaths.length) {
+              return acc;
+            }
+            const subdocs = res.get(topKey, { virtuals: true, getters: true });
+            if (!subdocs.length) {
+              return acc;
+            }
+            const mappedDocs = _.map(subdocs, (subdoc) => {
+              return pickRecursive(subdoc.toObject({
+                minimize: false,
+                virtuals: false,
+                flattenMaps: true,
+              }), subpaths);
+            });
+            acc[topKey] = mappedDocs;
+          }
+        }
+        return acc;
+      };
+
+      obj = _.reduce(select, reduceVirtuals, obj);
       if (responseMutationFn) {
         obj = responseMutationFn(user, userRoles, obj);
       }
@@ -421,6 +471,12 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
       _.assign(options,    mutations.options);
       _.assign(populate,   mutations.populate);
     }
+    if (_.isEmpty(projection)) {
+      // If projection is empty, query will return all fields of selected
+      // documents, including ones that may contain sensitive information
+      // like IPs, therefore list of fields must always be explicit.
+      throw new Error('Projection object must not be empty');
+    }
     let query;
     if (limit === 1) {
       query = this.findOne(conditions, projection, options);
@@ -430,7 +486,7 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
     if (!_.isEmpty(populate)) {
       for (const [populateField, populateSelect] of _.toPairs(populate)) {
         query.populate(populateField, populateSelect);
-      }      
+      }
     }
     let response;
     if (count) {
