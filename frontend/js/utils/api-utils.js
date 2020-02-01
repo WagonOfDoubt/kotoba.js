@@ -121,14 +121,17 @@ export const fetchChanges = ($form, $populateContainer) => {
   const getRoute = $form.data('getUrl') || $form.attr('action');
   $.getJSON(getRoute)
     .done((data) => {
-      const diff = objectDiff(formData, data);
-      const $table = $(tableTemplate({
-        body: Object.entries(diff)
-          .map(([key, value]) => [key, value.old, value.new ]),
-        head: [['Property', 'Current value', 'New value']],
-        filter: str => truncate(str, { length: 100 }),
-      }));
-      $populateContainer.text('').append($table);
+      const diff = Object.entries(objectDiff(formData, data));
+      if (diff.length) {
+        const $table = $(tableTemplate({
+          body: diff.map(([key, value]) => [key, value.old, value.new ]),
+          head: [['Property', 'Current value', 'New value']],
+          filter: str => truncate(str, { length: 100 }),
+        }));
+        $populateContainer.text('').append($table);        
+      } else {
+        $populateContainer.text('No changes detected');
+      }
     })
     .fail((data) => {
       if (data.responseJSON) {

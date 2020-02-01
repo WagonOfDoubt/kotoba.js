@@ -1,13 +1,24 @@
 include mixins/reflink.pug
 
+mixin error(error)
+  if (error.stack)
+    pre.error= error.stack
+  else if error.param
+    //- express-validator error
+    div.error #{ error.param }: #{ error.msg || error.message }
+  else if (error.name)
+    div.error #{ error.name }: #{ error.msg || error.message }
+  else
+    div.error #{ error.msg || error.message }
 
 if (success && success.length)
   | Successfully changed:
   if success[0].ref
-    ul.list_unmarked
+    ul.list.list_inline
       for item in success
         if (item.ref)
-          +reflink(item.ref)
+          li.list__item
+            +reflink(item.ref)
   else
     |  #[strong= success.length] item(s)
 
@@ -23,3 +34,7 @@ if (fail && fail.length)
           |  (Nothing to change)
         else if (item.error)
           |  (#{ item.error.message })
+      else
+        pre= JSON.stringify(item, null, 2)
+if error
+  +error(error)

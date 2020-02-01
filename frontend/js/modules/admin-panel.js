@@ -188,7 +188,7 @@ const initAdminPanel = () => {
     checkAdminForm($form);
   });
 
-  $('.js-select-attachment, .js-select-modlog-item').on('change', (e) => {
+  $('.js-select-attachment, .js-select-modlog-item, .js-select-report').on('change', (e) => {
     checkAdminForm($form);
   });
 

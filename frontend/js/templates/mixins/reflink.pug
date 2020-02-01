@@ -1,5 +1,19 @@
 mixin reflink(ref)
-  if (ref.threadId)
-    a(href=`/${ref.boardUri}/res/${ref.threadId}.html#post-${ref.boardUri}-${ref.postId}`) &gt;&gt;/#{ref.boardUri}/#{ref.postId}
+  if !ref
+    strong #[span.badge.badge_danger POST DELETED]
   else
-    a(href=`#post-${ref.boardUri}-${ref.postId}`) &gt;&gt;/#{ref.boardUri}/#{ref.postId}
+    - var isRelative = board && ref.boardUri === board.uri;
+    a(
+      class= {
+        'reflink': true,
+        'reflink-op': ref.isOp,
+        'reflink-reply': false,
+        'reflink-reference': true,
+        'reflink-external': false,
+        'js-reflink-popup': true,
+      }
+      data-post= ref.postId
+      data-board= ref.boardUri
+      data-thread= ref.threadId
+      href= `/${ ref.boardUri }/res/${ ref.threadId }.html#post-${ ref.boardUri }-${ ref.postId }`
+    )= `>>${ isRelative ? '' : '/' + ref.boardUri + '/' }${ ref.postId }`
