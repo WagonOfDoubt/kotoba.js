@@ -6,6 +6,8 @@ const Role = require('../../models/role');
 const { adminOnly } = require('../../middlewares/permission');
 const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const { DocumentAlreadyExistsError, DocumentNotFoundError, ConflictError } = require('../../errors');
+const { restGetQuerySchema } = require('../../middlewares/reqparser');
+const { createGetRequestHandler } = require('../../middlewares/restapi');
 
 
 /**
@@ -246,86 +248,83 @@ const rolePermissionsValidator = {
   'postPermissions.isSticky.priority': _priorityValidator,
   'postPermissions.isSticky.access': _accessValidator,
   'postPermissions.isSticky.values.*.priority': _priorityValidator,
-  'postPermissions.isSticky.values.*.min': _valuesValidator.min,
-  'postPermissions.isSticky.values.*.max': _valuesValidator.max,
   'postPermissions.isSticky.values.*.eq': _valuesValidator.eq,
-  'postPermissions.isSticky.values.*.regexp': _valuesValidator.regexp,
+
   'postPermissions.isClosed.priority': _priorityValidator,
   'postPermissions.isClosed.access': _accessValidator,
   'postPermissions.isClosed.values.*.priority': _priorityValidator,
-  'postPermissions.isClosed.values.*.min': _valuesValidator.min,
-  'postPermissions.isClosed.values.*.max': _valuesValidator.max,
   'postPermissions.isClosed.values.*.eq': _valuesValidator.eq,
-  'postPermissions.isClosed.values.*.regexp': _valuesValidator.regexp,
+
   'postPermissions.isSage.priority': _priorityValidator,
   'postPermissions.isSage.access': _accessValidator,
   'postPermissions.isSage.values.*.priority': _priorityValidator,
-  'postPermissions.isSage.values.*.min': _valuesValidator.min,
-  'postPermissions.isSage.values.*.max': _valuesValidator.max,
   'postPermissions.isSage.values.*.eq': _valuesValidator.eq,
-  'postPermissions.isSage.values.*.regexp': _valuesValidator.regexp,
+
   'postPermissions.isApproved.priority': _priorityValidator,
   'postPermissions.isApproved.access': _accessValidator,
   'postPermissions.isApproved.values.*.priority': _priorityValidator,
-  'postPermissions.isApproved.values.*.min': _valuesValidator.min,
-  'postPermissions.isApproved.values.*.max': _valuesValidator.max,
   'postPermissions.isApproved.values.*.eq': _valuesValidator.eq,
-  'postPermissions.isApproved.values.*.regexp': _valuesValidator.regexp,
+
   'postPermissions.isDeleted.priority': _priorityValidator,
   'postPermissions.isDeleted.access': _accessValidator,
   'postPermissions.isDeleted.values.*.priority': _priorityValidator,
-  'postPermissions.isDeleted.values.*.min': _valuesValidator.min,
-  'postPermissions.isDeleted.values.*.max': _valuesValidator.max,
   'postPermissions.isDeleted.values.*.eq': _valuesValidator.eq,
-  'postPermissions.isDeleted.values.*.regexp': _valuesValidator.regexp,
+
   'attachmentPermissions.isDeleted.priority': _priorityValidator,
   'attachmentPermissions.isDeleted.access': _accessValidator,
   'attachmentPermissions.isDeleted.values.*.priority': _priorityValidator,
-  'attachmentPermissions.isDeleted.values.*.min': _valuesValidator.min,
-  'attachmentPermissions.isDeleted.values.*.max': _valuesValidator.max,
   'attachmentPermissions.isDeleted.values.*.eq': _valuesValidator.eq,
-  'attachmentPermissions.isDeleted.values.*.regexp': _valuesValidator.regexp,
+
   'attachmentPermissions.isNSFW.priority': _priorityValidator,
   'attachmentPermissions.isNSFW.access': _accessValidator,
   'attachmentPermissions.isNSFW.values.*.priority': _priorityValidator,
-  'attachmentPermissions.isNSFW.values.*.min': _valuesValidator.min,
-  'attachmentPermissions.isNSFW.values.*.max': _valuesValidator.max,
   'attachmentPermissions.isNSFW.values.*.eq': _valuesValidator.eq,
-  'attachmentPermissions.isNSFW.values.*.regexp': _valuesValidator.regexp,
+
   'attachmentPermissions.isSpoiler.priority': _priorityValidator,
   'attachmentPermissions.isSpoiler.access': _accessValidator,
   'attachmentPermissions.isSpoiler.values.*.priority': _priorityValidator,
-  'attachmentPermissions.isSpoiler.values.*.min': _valuesValidator.min,
-  'attachmentPermissions.isSpoiler.values.*.max': _valuesValidator.max,
   'attachmentPermissions.isSpoiler.values.*.eq': _valuesValidator.eq,
-  'attachmentPermissions.isSpoiler.values.*.regexp': _valuesValidator.regexp,
+
   'postingPrivileges.ignoreCaptcha': _privilegeValidator,
   'postingPrivileges.ignoreClosed': _privilegeValidator,
   'postingPrivileges.ignoreForcedAnon': _privilegeValidator,
   'postingPrivileges.canUseMarkdown': _privilegeValidator,
   'postingPrivileges.canFakeTimestamp': _privilegeValidator,
+
+  'reportActions.canViewReports': _privilegeValidator,
+  'reportActions.canDeleteReports': _privilegeValidator,
+
+  'reportPermissions.isDeleted.priority': _priorityValidator,
+  'reportPermissions.isDeleted.access': _accessValidator,
+  'reportPermissions.isDeleted.values.*.priority': _priorityValidator,
+  'reportPermissions.isDeleted.values.*.eq': _valuesValidator.eq,
 };
 
 
 /**
- * @api {get} /api/role Get roles
+ * @api {get} /api/style/ Get Roles
  * @apiName GetRole
  * @apiGroup Role
  * @apiPermission admin
- * @apiDescription Not implemented
+ * @apiDescription Find one or more role based on query.
+ * Search is ignored.
+ *
+ * Filter can be applied by: `roleName`, `displayName`, `hierarchy`.
+ *
+ * Selectable fields are: `roleName`, `displayName`, `hierarchy`,
+ *    `postPermissions`, `attachmentPermissions`, `postingPrivileges`,
+ *    `reportActions`, `reportPermissions`.
+ * @apiUse GenericGetApi
+ * @apiUse DocumentNotFoundError
+ * @apiUse RequestValidationError
  */
 router.get(
   '/api/role/',
   adminOnly,
+  checkSchema(restGetQuerySchema),
   validateRequest,
   filterMatched,
-  async (req, res, next) => {
-    try {
-      return res.status(501);
-    } catch (err) {
-      return next(err);
-    }
-  }
+  createGetRequestHandler('Role', false),
 );
 
 

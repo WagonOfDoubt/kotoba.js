@@ -193,21 +193,27 @@ const getQuerySortParser = (value, {req, location, path}) => {
   return result;
 };
 
-module.exports.restGetQuerySchema = {
-  search: {
-    in: 'query',
-    optional: true,
-  },
+
+module.exports.restGetQueryFilter = {
   filter: {
     in: 'query',
     optional: true,
-    customValidator: {
+    custom: {
       options: getQueryFilterValidator,
     },
     customSanitizer: {
       options: getQueryFilterParser,
     },
+  }
+};
+
+
+module.exports.restGetQuerySchema = {
+  search: {
+    in: 'query',
+    optional: true,
   },
+  ...module.exports.restGetQueryFilter,
   select: {
     in: 'query',
     optional: true,

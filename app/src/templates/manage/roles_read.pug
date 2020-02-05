@@ -1,0 +1,160 @@
+mixin RoleDetails(r)
+  div
+    h5 Threads
+    div.flex-row
+      span
+        +shortAccess(r, 'postPermissions', 'isSticky')
+      span .isSticky
+    div.flex-row
+      span
+        +shortAccess(r, 'postPermissions', 'isClosed')
+      span .isClosed
+  div
+    h5 Posts
+    div.flex-row
+      span
+        +shortAccess(r, 'postPermissions', 'isSage')
+      span .isSage
+    div.flex-row
+      span
+        +shortAccess(r, 'postPermissions', 'isApproved')
+      span .isApproved
+    div.flex-row
+      span
+        +shortAccess(r, 'postPermissions', 'isDeleted')
+      span .isDeleted
+  div
+    h5 Attachments
+    div.flex-row
+      span
+        +shortAccess(r, 'attachmentPermissions', 'isDeleted')
+      span .isDeleted
+    div.flex-row
+      span
+        +shortAccess(r, 'attachmentPermissions', 'isNSFW')
+      span .isNSFW
+    div.flex-row
+      span
+        +shortAccess(r, 'attachmentPermissions', 'isSpoiler')
+      span .isSpoiler
+  div
+    h5 Reports
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('reportActions.canViewReports', r))
+      span Can view reports
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('reportActions.canDeleteReports', r))
+      span Can delete reports permanently
+    div.flex-row
+      span
+        +shortAccess(r, 'reportPermissions', 'isDeleted')
+      span .isDeleted
+  div
+    h5 Posting privileges
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('postingPrivileges.ignoreCaptcha', r))
+      span Can ignore captcha
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('postingPrivileges.ignoreClosed', r))
+      span Can post in closed threads or boards
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('postingPrivileges.ignoreForcedAnon', r))
+      span Can post with name on anonymous boards
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('postingPrivileges.canUseMarkdown', r))
+      span Can post with markdown
+    div.flex-row
+      span
+        +booleanVal(filters.getParam('postingPrivileges.canFakeTimestamp', r))
+      span Can post with fake timestamp
+
+
+table.table.table_compact
+  thead
+    tr.table__row.table__row_header
+      th.table__header Delete
+      th.table__header.table__header_sortable(data-sort-field='role', data-sort-type='string') Role
+      th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='hierarchy', data-sort-type='number', data-sort-order='descending') Hierarchy
+      th.table__header.table__header_sortable(data-sort-field='used', data-sort-type='number') Used
+
+      th.table__header.table__header_vertical
+        div ignoreCaptcha
+      th.table__header.table__header_vertical
+        div ignoreClosed
+      th.table__header.table__header_vertical
+        div ignoreForcedAnon
+      th.table__header.table__header_vertical
+        div canUseMarkdown
+      th.table__header.table__header_vertical
+        div canFakeTimestamp
+
+      th.table__header.table__header_vertical
+        div thread.isSticky
+      th.table__header.table__header_vertical
+        div thread.isClosed
+
+      th.table__header.table__header_vertical
+        div post.isSage
+      th.table__header.table__header_vertical
+        div post.isApproved
+      th.table__header.table__header_vertical
+        div post.isDeleted
+
+      th.table__header More
+  tbody
+    for role in roles
+      tr.table__row(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes)
+        td
+          if (role.usedTimes === 0)
+            form.js-api-form(
+              method='POST',
+              action='/api/role/',
+              data-method='DELETE',
+              data-success-url='/manage/roles/',
+              data-confirm-dialog='dialog-delete-role-confirm',
+              data-success-dialog='dialog-delete-role-success',
+            )
+              input(type='hidden', name='roleName', value=role.roleName)
+              button(type='submit', value='Delete')
+                +icon('trash', 'small')
+        td
+          a(href=`/manage/roles/edit/${ role.roleName }/` title='Edit this role')= role.roleName
+        td= role.hierarchy
+        td
+          if (role.usedTimes)
+            a(href=`/manage/staff?role=${role.roleName}` title='Find users with this role')= role.usedTimes
+          else
+            | 0
+        td
+          +booleanVal(filters.getParam('postingPrivileges.ignoreCaptcha', role))
+        td
+          +booleanVal(filters.getParam('postingPrivileges.ignoreClosed', role))
+        td
+          +booleanVal(filters.getParam('postingPrivileges.ignoreForcedAnon', role))
+        td
+          +booleanVal(filters.getParam('postingPrivileges.canUseMarkdown', role))
+        td
+          +booleanVal(filters.getParam('postingPrivileges.canFakeTimestamp', role))
+        td
+          +shortAccess(role, 'postPermissions', 'isSticky')
+        td
+          +shortAccess(role, 'postPermissions', 'isClosed')
+        td
+          +shortAccess(role, 'postPermissions', 'isSage')
+        td
+          +shortAccess(role, 'postPermissions', 'isApproved')
+        td
+          +shortAccess(role, 'postPermissions', 'isDeleted')
+        td
+          +showHideBtn(`#role_details_${role.roleName}`, true)
+      tr.table__row.hidden(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes, id=`role_details_${role.roleName}`)
+        td(colspan=18)
+          div.role__details.auto-columns
+            +RoleDetails(role)
+div.alert.alert_info Note: only roles that are not assigned to any user can be deleted.

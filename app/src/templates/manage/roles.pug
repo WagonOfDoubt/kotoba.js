@@ -11,13 +11,15 @@ block header
     const isCreate = crud === 'create';
     const isUpdate = crud === 'update';
     const isDelete = crud === 'delete';
-    const isRead = crud === 'read';
+    const isRead   = crud === 'read';
+
   if isUpdate
     h1 Edit role #{ role.roleName }
-  if isRead
+  else if isRead
     h1 Roles
-  if isCreate
+  else if isCreate
     h1 Create role
+
   nav
     ul.list.list_nav
       if !isRead
@@ -30,112 +32,35 @@ block header
 
 block main
   if !isRead
-    -
-      var action = '/api/role/';
-      var method = isUpdate ? 'PATCH' : 'POST';
-      var values = role ? role : {}
-      var accessOpts = [ { value: 'no-access', label: 'No access' }, { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
-      var publicAccessOpts = [ { value: 'read-only', label: 'Read only' }, { value: 'write-any', label: 'Write' } ]
-    form#form-edit-role.js-api-form.js-reload-on-success(action=action, data-method=method)
-      if role
-        +nothingEdit('roleName', 'Role name')
-        input(type='hidden', name='roleName', value=values.roleName)
-      else
-        +textEdit('roleName', 'Role name', 'Must contain only Latin letters and numbers, e.g.: janitor, moderator, supermoderator, boardowner, etc.', true)
-      +textEdit('displayName', 'Display name', 'Role name to display in post header', true)
-      +numberEdit('hierarchy', 'Hierarchy', 'Defines maximum priority for all actions. Avoid creating roles with same value. Assign hierarchy in increments of 100 to leave space for new roles and for adjustments of individual permissions.', true)
-      h3 Posting privileges
-      +checkboxEdit('postingPrivileges.ignoreCaptcha', 'Ignore captcha', 'User is not required to solve captcha')
-      +checkboxEdit('postingPrivileges.ignoreClosed', 'Ignore closed threads/boards', 'User can post in closed threads or boards')
-      +checkboxEdit('postingPrivileges.ignoreForcedAnon', 'Ignore forced anonymous', 'User can enter name regardless of board options')
-      div.alert.alert_danger
-        | #[+icon('exclamation-triangle', 'small')] #[strong Warning!]
-        div Posting raw HTML may potentially allow for execution of arbitrary code embedded in post or may open possibility for other exploits. Check option below only for most trusted staff members.
-        +checkboxEdit('postingPrivileges.canUseMarkdown', 'Can post raw HTML/Markdown', 'User can post raw HTML tags with markdown markup instead of default markup.')
-      +checkboxEdit('postingPrivileges.canFakeTimestamp', 'Can specify post time', 'Whether or not user can specify createdAt date while posting. This can only be used through api. Useful for importing posts from other sources or for modgets.')
-      h3 Threads
-      +comboboxEdit('postPermissions.isSticky.access', 'isSticky', publicAccessOpts, 'Allow staff member to set threads as sticky.', true)
-      +comboboxEdit('postPermissions.isClosed.access', 'isClosed', publicAccessOpts, 'Allow staff member to close discussion.', true)
-      h3 Posts
-      +comboboxEdit('postPermissions.isSage.access', 'isSage', publicAccessOpts, 'Allow staff member to add sage to posts to sink threads.', true)
-      +comboboxEdit('postPermissions.isApproved.access', 'isApproved', accessOpts, 'Approved flag does nothing at this point, will find a purpose or get rid of this in the future.', true)
-      +comboboxEdit('postPermissions.isDeleted.access', 'isDeleted', accessOpts, 'Read-only access gives ability to view deleted posts, write access allows to delete or restore posts.', true)
-      h3 Attachments
-      +comboboxEdit('attachmentPermissions.isDeleted.access', 'isDeleted', accessOpts, 'Read-only access gives ability to view deleted attachments, write access allows to delete or restore attachment.', true)
-      +comboboxEdit('attachmentPermissions.isNSFW.access', 'isNSFW', publicAccessOpts, 'Allow to (un)mark attachments as NSFW.', true)
-      +comboboxEdit('attachmentPermissions.isSpoiler.access', 'isSpoiler', publicAccessOpts, 'Allow to (un)mark attachments as Spoiler.', true)
-      if (isCreate)
-        input#btn-add-role(type='submit', value='Create role')
-      else
-        input#btn-update-role(type='submit', value='Save changes')
+    include ./roles_edit.pug
+  if isRead
+    include ./roles_read.pug
+
+
+block modals
+  if isCreate
+    +confirmPrompt('dialog-update-role-confirm', 'Create role', 'Create role')
+      p Create new role:
+      div#update-role-changes-list
+    +alertPrompt('dialog-update-role-success', 'Success')
+      p.text-center
+        +icon('check', 'large')
+      p Role was created
+
+  if isUpdate
+    +confirmPrompt('dialog-update-role-confirm', 'Update role', 'Save changes')
+      p Save following changes:
+      div#update-role-changes-list
+    +alertPrompt('dialog-update-role-success', 'Success')
+      p.text-center
+        +icon('check', 'large')
+      p Role was updated
 
   if isRead
-    div.info Note: only roles that are not assigned to any user can be deleted.
-    table.table.table_compact
-      thead
-        tr.table__row.table__row_header
-          th.table__header Delete
-          th.table__header.table__header_sortable(data-sort-field='role', data-sort-type='string') Role
-          th.table__header.table__header_sortable.table__header_sort-descending(data-sort-field='hierarchy', data-sort-type='number', data-sort-order='descending') Hierarchy
-          th.table__header.table__header_sortable(data-sort-field='used', data-sort-type='number') Used
+    +confirmPrompt('dialog-delete-role-confirm', 'Delete role', 'Delete')
+      p Delete role?
 
-          th.table__header.table__header_vertical ignoreCaptcha
-          th.table__header.table__header_vertical ignoreClosed
-          th.table__header.table__header_vertical ignoreForcedAnon
-          th.table__header.table__header_vertical canUseMarkdown
-          th.table__header.table__header_vertical canFakeTimestamp
-
-          th.table__header.table__header_vertical thread.isSticky
-          th.table__header.table__header_vertical thread.isClosed
-
-          th.table__header.table__header_vertical post.isSage
-          th.table__header.table__header_vertical post.isApproved
-          th.table__header.table__header_vertical post.isDeleted
-
-          th.table__header.table__header_vertical attachment.isDeleted
-          th.table__header.table__header_vertical attachment.isNSFW
-          th.table__header.table__header_vertical attachment.isSpoiler
-      tbody
-        for role in roles
-          tr.table__row(data-role=role.roleName, data-hierarchy=role.hierarchy, data-used=role.usedTimes)
-            td
-              if (role.usedTimes === 0)
-                form.js-api-form.js-reload-on-success(action='/api/role', 'data-method'='DELETE')
-                  input(type='hidden', name='roleName', value=role.roleName)
-                  input(type='submit', value='Delete')
-              else
-                | -
-            td
-              a(href=`/manage/roles/edit/${ role.roleName }/` title='Edit this role')= role.roleName
-            td= role.hierarchy
-            td
-              if (role.usedTimes)
-                a(href=`/manage/staff?role=${role.roleName}` title='Find users with this role')= role.usedTimes
-              else
-                | 0
-            td
-              +booleanVal(filters.getParam('postingPrivileges.ignoreCaptcha', role))
-            td
-              +booleanVal(filters.getParam('postingPrivileges.ignoreClosed', role))
-            td
-              +booleanVal(filters.getParam('postingPrivileges.ignoreForcedAnon', role))
-            td
-              +booleanVal(filters.getParam('postingPrivileges.canUseMarkdown', role))
-            td
-              +booleanVal(filters.getParam('postingPrivileges.canFakeTimestamp', role))
-            td
-              +shortAccess(role, 'postPermissions', 'isSticky')
-            td
-              +shortAccess(role, 'postPermissions', 'isClosed')
-            td
-              +shortAccess(role, 'postPermissions', 'isSage')
-            td
-              +shortAccess(role, 'postPermissions', 'isApproved')
-            td
-              +shortAccess(role, 'postPermissions', 'isDeleted')
-            td
-              +shortAccess(role, 'attachmentPermissions', 'isDeleted')
-            td
-              +shortAccess(role, 'attachmentPermissions', 'isNSFW')
-            td
-              +shortAccess(role, 'attachmentPermissions', 'isSpoiler')
+    +alertPrompt('dialog-delete-role-success', 'Success')
+      p.text-center
+        +icon('check', 'large')
+      p Role was deleted

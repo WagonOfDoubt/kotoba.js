@@ -193,13 +193,7 @@ const managePage_news = () => {
 };
 
 
-const managePage_roles = () => {
-  const onDone = (data) => {
-    modal.alert('Success', JSON.stringify(data))
-      .then(() => window.location.reload());
-  };
-  addSubmitListener($('.js-api-form'), onDone);
-};
+const managePage_roles = () => updateModelWithChangesList($('.js-api-form'));
 
 
 const addSubmitListener = ($form, callback) => {
@@ -354,34 +348,6 @@ const managePage_assets = () => {
 };
 
 
-const managePage_trash = () => {
-  $('.js-modify-and-send-form').click((e) => {
-    const btn = e.target;
-    const $form = $(btn.dataset.target);
-    let data = $form.serializeJSON();
-    const f = $form[0];
-    const method = btn.dataset.method || f.dataset.method;
-    const action = btn.dataset.action || f.dataset.action || f.action;
-    const payload = JSON.parse(btn.dataset.payload || '{}');
-    const modalQuery = btn.dataset.prompt;
-    const prompt = modalQuery ? document.querySelector(modalQuery) : null;
-    data = assignDeep(data, payload);
-    if (prompt) {
-      modal
-        .dialogPromise(prompt, ['ok'])
-        .then(({ returnValue, formData }) => {
-          data = Object.assign(data, formData);
-          sendJSON(action, method, data)
-            .then(successErrorHandler(`Changes saved`))
-            .then(() => window.location.reload())
-            .catch(alertErrorHandler);
-        });
-    }
-    e.preventDefault();
-  });
-};
-
-
 const managePage_modlog = () => {
     $('#modlog-form').on('send', (e) => {
     const $targetForm = $(e.target);
@@ -476,7 +442,6 @@ export const init = () => {
     'manage-page-maintenance': managePage_maintenance,
     'manage-page-profile': managePage_profile,
     'manage-page-assets': managePage_assets,
-    'manage-page-trash': managePage_trash,
     'manage-page-modlog': managePage_modlog,
     'manage-page-styles': managePage_styles,
   };
@@ -486,4 +451,29 @@ export const init = () => {
   if (currentActivity) {
     activities[currentActivity].call();
   }
+
+  $('.js-modify-and-send-form').click((e) => {
+    e.preventDefault();
+    const btn = e.target;
+    const $form = $(btn.dataset.target);
+    let data = $form.serializeJSON();
+    const f = $form[0];
+    const method = btn.dataset.method || f.dataset.method;
+    const action = btn.dataset.action || f.dataset.action || f.action;
+    const payload = JSON.parse(btn.dataset.payload || '{}');
+    const modalQuery = btn.dataset.prompt;
+    const prompt = modalQuery ? document.querySelector(modalQuery) : null;
+    data = assignDeep(data, payload);
+    if (prompt) {
+      modal
+        .dialogPromise(prompt, ['ok'])
+        .then(({ returnValue, formData }) => {
+          data = Object.assign(data, formData);
+          sendJSON(action, method, data)
+            .then(successErrorHandler(`Changes saved`))
+            .then(() => window.location.reload())
+            .catch(alertErrorHandler);
+        });
+    }
+  });
 };

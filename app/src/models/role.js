@@ -7,6 +7,7 @@ const Schema = mongoose.Schema;
 const Mixed = mongoose.Schema.Types.Mixed;
 const _ = require('lodash');
 const deepFreeze = require('deep-freeze-strict');
+const { createApiQueryHandler } = require('../utils/model');
 
 
 /**
@@ -20,7 +21,18 @@ const deepFreeze = require('deep-freeze-strict');
  *    value, range or pattern
  */
 const propertyAccessSchema = Schema({
-  priority: {
+  access: {
+    type: String,
+    enum: ['no-access', 'read-only', 'write-any', 'write-value'],
+    required: true,
+    default: 'no-access',
+  },
+},
+{ discriminatorKey: 'access', _id: false });
+
+
+const writeAccessSchema = Schema({
+    priority: {
     type: Number,
     min: 0,
     max: 9999,
@@ -28,12 +40,10 @@ const propertyAccessSchema = Schema({
     set: v => Math.round(v),
     required: true,
   },
-  access: {
-    type: String,
-    enum: ['no-access', 'read-only', 'write-any', 'write-value'],
-    required: true,
-    default: 'no-access',
-  },
+}, { _id: false });
+
+
+const conditinalWriteAccessSchema = Schema({
   values: [
     /**
      * @typedef {Object} PropertyAccessCondition
@@ -57,8 +67,8 @@ const propertyAccessSchema = Schema({
       max:    { type: Number },
       regexp: { type: String },
     }
-  ]
-});
+  ],
+}, { _id: false });
 
 
 /**
@@ -168,8 +178,86 @@ const roleSchema = Schema({
     ignoreForcedAnon : { type: Boolean, default: false },
     canUseMarkdown   : { type: Boolean, default: false },
     canFakeTimestamp : { type: Boolean, default: false },
-  }
+  },
+  /**
+   * Actions related to reports
+   * @type {Object}
+   * @property {Boolean} canViewReports User can view reports on board
+   * @property {Boolean} canDeleteReports User can delete reports on board
+   *    (permanently)
+   */
+  reportActions: {
+    canViewReports    : { type: Boolean, default: false },
+    canDeleteReports  : { type: Boolean, default: false },
+  },
+  /**
+   * Access to post fields
+   * @type {Object}
+   * @property {module:models/role~PropertyAccess} isDeleted Access to
+   *    report.isDeleted property
+   * @memberOf module:models/role~Role
+   * @instance
+   */
+  reportPermissions: {
+    isDeleted : { type: propertyAccessSchema },
+  },
 });
+
+
+/**
+ * Each property with access control has an individual priority but to avoid
+ *    complication value of hierarchy field is used as priority for all
+ *    properties
+ */
+roleSchema.pre('validate', function () {
+  const defaultPriority = (currentValue, defaultValue) => {
+    if (_.isFinite(currentValue)) {
+      return currentValue;
+    }
+    return defaultValue;
+  };
+
+  const defaultPermission = (permissions, permissionName) => {
+    this[permissions][permissionName] =
+      this[permissions][permissionName] || {};
+    const access = this[permissions][permissionName].access;
+    if (!access || access === 'no-access' || access === 'read-only') {
+      return;
+    }
+    this[permissions][permissionName].priority =
+      defaultPriority(this[permissions][permissionName].priority, this.hierarchy);
+  };
+
+  defaultPermission('postPermissions',       'isSticky');
+  defaultPermission('postPermissions',       'isClosed');
+  defaultPermission('postPermissions',       'isSage');
+  defaultPermission('postPermissions',       'isApproved');
+  defaultPermission('postPermissions',       'isDeleted');
+  defaultPermission('attachmentPermissions', 'isDeleted');
+  defaultPermission('attachmentPermissions', 'isNSFW');
+  defaultPermission('attachmentPermissions', 'isSpoiler');
+  defaultPermission('reportPermissions',     'isDeleted');
+});
+
+
+roleSchema.path('postPermissions.isSticky').discriminator('write-any', writeAccessSchema);
+roleSchema.path('postPermissions.isApproved').discriminator('write-any', writeAccessSchema);
+
+roleSchema.path('postPermissions.isClosed').discriminator('write-any', writeAccessSchema);
+roleSchema.path('postPermissions.isClosed').discriminator('write-value', conditinalWriteAccessSchema);
+roleSchema.path('postPermissions.isSage').discriminator('write-any', writeAccessSchema);
+roleSchema.path('postPermissions.isSage').discriminator('write-value', conditinalWriteAccessSchema);
+roleSchema.path('postPermissions.isDeleted').discriminator('write-any', writeAccessSchema);
+roleSchema.path('postPermissions.isDeleted').discriminator('write-value', conditinalWriteAccessSchema);
+
+roleSchema.path('attachmentPermissions.isDeleted').discriminator('write-any', writeAccessSchema);
+roleSchema.path('attachmentPermissions.isDeleted').discriminator('write-value', writeAccessSchema);
+roleSchema.path('attachmentPermissions.isNSFW').discriminator('write-any', writeAccessSchema);
+roleSchema.path('attachmentPermissions.isNSFW').discriminator('write-value', writeAccessSchema);
+roleSchema.path('attachmentPermissions.isSpoiler').discriminator('write-any', writeAccessSchema);
+roleSchema.path('attachmentPermissions.isSpoiler').discriminator('write-value', writeAccessSchema);
+
+roleSchema.path('reportPermissions.isDeleted').discriminator('write-any', writeAccessSchema);
 
 
 /**
@@ -279,7 +367,17 @@ const adminRole = deepFreeze({
     ignoreForcedAnon : true,
     canUseMarkdown   : true,
     canFakeTimestamp : true,
-  }
+  },
+  reportActions: {
+    canViewReports   : true,
+    canDeleteReports : true,
+  },
+  reportPermissions: {
+    isDeleted : {
+      priority: 9999,
+      access: 'write-any',
+    },
+  },
 });
 
 
@@ -351,6 +449,16 @@ const anonymousRole = {
     canUseMarkdown   : false,
     canFakeTimestamp : false,
   },
+  reportActions: {
+    canViewReports   : false,
+    canDeleteReports : false,
+  },
+  reportPermissions: {
+    isDeleted : {
+      priority: 0,
+      access: 'no-access',
+    },
+  },
 };
 
 
@@ -375,30 +483,96 @@ roleSchema.statics.getSpecialRole = async (specialRoleName) => {
 };
 
 
-roleSchema.pre('validate', function () {
-  const defaultPriority = (currentValue, defaultValue) => {
-    if (_.isFinite(currentValue)) {
-      return currentValue;
-    }
-    return defaultValue;
-  };
-
-  const defaultPermission = (permissions, permissionName) => {
-    this[permissions][permissionName] =
-      this[permissions][permissionName] || {};
-    this[permissions][permissionName].priority =
-      defaultPriority(this[permissions][permissionName].priority, this.hierarchy);
-  };
-
-  defaultPermission('postPermissions',       'isSticky');
-  defaultPermission('postPermissions',       'isClosed');
-  defaultPermission('postPermissions',       'isSage');
-  defaultPermission('postPermissions',       'isApproved');
-  defaultPermission('postPermissions',       'isDeleted');
-  defaultPermission('attachmentPermissions', 'isDeleted');
-  defaultPermission('attachmentPermissions', 'isNSFW');
-  defaultPermission('attachmentPermissions', 'isSpoiler');
-});
+roleSchema.statics.apiQuery = createApiQueryHandler({
+    'all': {
+      selectByDefault: false,
+      alias: [
+        'roleName',
+        'displayName',
+        'hierarchy',
+        'postPermissions.isSticky',
+        'postPermissions.isClosed',
+        'postPermissions.isSage',
+        'postPermissions.isApproved',
+        'postPermissions.isDeleted',
+        'attachmentPermissions.isDeleted',
+        'attachmentPermissions.isNSFW',
+        'attachmentPermissions.isSpoiler',
+        'postingPrivileges.ignoreCaptcha',
+        'postingPrivileges.ignoreClosed',
+        'postingPrivileges.ignoreForcedAnon',
+        'postingPrivileges.canUseMarkdown',
+        'postingPrivileges.canFakeTimestamp',
+        'reportActions.canViewReports',
+        'reportActions.canDeleteReports',
+        'reportPermissions.isDeleted',
+      ],
+    },
+    'roleName': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'displayName': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'hierarchy': {
+      selectByDefault: true,
+      filter: true,
+    },
+    'postPermissions': {
+      alias: [
+        'postPermissions.isSticky',
+        'postPermissions.isClosed',
+        'postPermissions.isSage',
+        'postPermissions.isApproved',
+        'postPermissions.isDeleted',
+      ],
+    },
+    'attachmentPermissions': {
+      alias: [
+        'attachmentPermissions.isDeleted',
+        'attachmentPermissions.isNSFW',
+        'attachmentPermissions.isSpoiler',
+      ],
+    },
+    'postingPrivileges': {
+      alias: [
+        'postingPrivileges.ignoreCaptcha',
+        'postingPrivileges.ignoreClosed',
+        'postingPrivileges.ignoreForcedAnon',
+        'postingPrivileges.canUseMarkdown',
+        'postingPrivileges.canFakeTimestamp',
+      ],
+    },
+    'reportActions': {
+      alias: [
+        'reportActions.canViewReports',
+        'reportActions.canDeleteReports',
+      ],
+    },
+    'reportPermissions': {
+      alias: [
+        'reportPermissions.isDeleted',
+      ],
+    },
+    'postPermissions.isSticky'           : { selectByDefault: true, filter: false },
+    'postPermissions.isClosed'           : { selectByDefault: true, filter: false },
+    'postPermissions.isSage'             : { selectByDefault: true, filter: false },
+    'postPermissions.isApproved'         : { selectByDefault: true, filter: false },
+    'postPermissions.isDeleted'          : { selectByDefault: true, filter: false },
+    'attachmentPermissions.isDeleted'    : { selectByDefault: true, filter: false },
+    'attachmentPermissions.isNSFW'       : { selectByDefault: true, filter: false },
+    'attachmentPermissions.isSpoiler'    : { selectByDefault: true, filter: false },
+    'postingPrivileges.ignoreCaptcha'    : { selectByDefault: true, filter: false },
+    'postingPrivileges.ignoreClosed'     : { selectByDefault: true, filter: false },
+    'postingPrivileges.ignoreForcedAnon' : { selectByDefault: true, filter: false },
+    'postingPrivileges.canUseMarkdown'   : { selectByDefault: true, filter: false },
+    'postingPrivileges.canFakeTimestamp' : { selectByDefault: true, filter: false },
+    'reportActions.canViewReports'       : { selectByDefault: true, filter: false },
+    'reportActions.canDeleteReports'     : { selectByDefault: true, filter: false },
+    'reportPermissions.isDeleted'        : { selectByDefault: true, filter: false },
+  });
 
 
 const Role = module.exports = mongoose.model('Role', roleSchema);

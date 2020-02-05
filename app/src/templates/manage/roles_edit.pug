@@ -1,0 +1,97 @@
+-
+  var action = '/api/role/';
+  var method = isUpdate ? 'PATCH' : 'POST';
+  var values = role ? role : {};
+  var ACCESS_NO = { value: 'no-access', label: 'No access' };
+  var ACCESS_RO = { value: 'read-only', label: 'Read only' };
+  var ACCESS_RW = { value: 'write-any', label: 'Read&Write' };
+  var access_all = [
+    ACCESS_NO,
+    ACCESS_RO,
+    ACCESS_RW,
+  ];
+  var access_public = [
+    ACCESS_RO,
+    ACCESS_RW,
+  ];
+  var access_immutable = [
+    ACCESS_NO,
+    ACCESS_RO,
+  ];
+  var getUrl = role ? `/api/role?filter=roleName:"${role.roleName}"&limit=1` : null;
+  var method = role ? 'PATCH' : 'POST';
+
+
+form.js-api-form(
+    method='POST',
+    action='/api/role/',
+    data-method=method,
+    data-get-url=getUrl,
+    data-success-url='/manage/roles/',
+    data-confirm-dialog='dialog-update-role-confirm',
+    data-success-dialog='dialog-update-role-success',
+    data-changes-list='update-role-changes-list',
+  )
+  if role
+    +nothingEdit('roleName', 'Role name')
+    input(type='hidden', name='roleName', value=values.roleName)
+  else
+    +textEdit('roleName', 'Role name', 'Must contain only Latin letters and numbers, e.g.: janitor, moderator, supermoderator, boardowner, etc.', true)
+
+  +textEdit('displayName', 'Display name', 'Role name to display in post header', true)
+
+  +numberEdit('hierarchy', 'Hierarchy', 'Defines maximum priority for all actions. Avoid creating roles with same value. Assign hierarchy in increments of 100 to leave space for new roles and for adjustments of individual permissions.', true)
+
+
+  h3 Posting privileges
+
+  +checkboxEdit('postingPrivileges.ignoreCaptcha', 'Ignore captcha', 'User is not required to solve captcha')
+
+  +checkboxEdit('postingPrivileges.ignoreClosed', 'Ignore closed threads/boards', 'User can post in closed threads or boards')
+
+  +checkboxEdit('postingPrivileges.ignoreForcedAnon', 'Ignore forced anonymous', 'User can enter name regardless of board options')
+
+  div.alert.alert_danger
+    | #[+icon('exclamation-triangle', 'small')] #[strong Warning!]
+    div Posting raw HTML may potentially allow for execution of arbitrary code embedded in post or may open possibility for other exploits. Check option below only for most trusted staff members.
+    +checkboxEdit('postingPrivileges.canUseMarkdown', 'Can post raw HTML/Markdown', 'User can post raw HTML tags with markdown markup instead of default markup.')
+  +checkboxEdit('postingPrivileges.canFakeTimestamp', 'Can specify post time', 'Whether or not user can specify createdAt date while posting. This can only be used through api. Useful for importing posts from other sources or for modgets.')
+
+
+  h3 Threads
+  
+  +comboboxEdit('postPermissions.isSticky.access', 'isSticky', access_public, 'Allow staff member to set threads as sticky.', true)
+  
+  +comboboxEdit('postPermissions.isClosed.access', 'isClosed', access_public, 'Allow staff member to close discussion.', true)
+
+
+  h3 Posts
+  
+  +comboboxEdit('postPermissions.isSage.access', 'isSage', access_public, 'Allow staff member to add sage to posts to sink threads.', true)
+  
+  +comboboxEdit('postPermissions.isApproved.access', 'isApproved', access_all, 'Approved flag does nothing at this point, will find a purpose or get rid of this in the future.', true)
+  
+  +comboboxEdit('postPermissions.isDeleted.access', 'isDeleted', access_all, 'Read-only access gives ability to view deleted posts, write access allows to delete or restore posts.', true)
+
+
+  h3 Attachments
+
+  +comboboxEdit('attachmentPermissions.isDeleted.access', 'isDeleted', access_all, 'Read-only access gives ability to view deleted attachments, write access allows to delete or restore attachment.', true)
+
+  +comboboxEdit('attachmentPermissions.isNSFW.access', 'isNSFW', access_public, 'Allow to (un)mark attachments as NSFW.', true)
+
+  +comboboxEdit('attachmentPermissions.isSpoiler.access', 'isSpoiler', access_public, 'Allow to (un)mark attachments as Spoiler.', true)
+
+
+  h3 Reports
+
+  +checkboxEdit('reportActions.canViewReports', 'View reports', 'Allow to view reports on board')
+
+  +checkboxEdit('reportActions.canDeleteReports', 'Delete reports', 'Allow to permanently delete reports on board')
+
+  +comboboxEdit('reportPermissions.isDeleted.access', 'isDeleted', access_all, 'Allow to (un)mark reports as deleted.', true)
+
+  if (isCreate)
+    input#btn-add-role(type='submit', value='Create role')
+  else
+    input#btn-update-role(type='submit', value='Save changes')
