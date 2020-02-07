@@ -93,7 +93,6 @@ router.get(
         errorMessage: 'Style name can contain only lowercase letters and numbers'
       },
       trim: true,
-      required: true,
     }
   }),
   validateRequest,

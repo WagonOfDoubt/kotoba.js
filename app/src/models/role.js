@@ -8,6 +8,7 @@ const Mixed = mongoose.Schema.Types.Mixed;
 const _ = require('lodash');
 const deepFreeze = require('deep-freeze-strict');
 const { createApiQueryHandler } = require('../utils/model');
+const { PermissionDeniedError } = require('../errors');
 
 
 /**
@@ -381,8 +382,8 @@ const adminRole = deepFreeze({
 });
 
 
-const anonymousRole = {
-  roleName: '__anonymous',
+const posterRole = {
+  roleName: '__poster',
   displayName: 'Anonymous',
   hierarchy: 0,
   postPermissions: {
@@ -455,12 +456,170 @@ const anonymousRole = {
   },
   reportPermissions: {
     isDeleted : {
-      priority: 0,
       access: 'no-access',
     },
   },
 };
 
+
+/**
+ * User has no write access
+ * @type {Number}
+ */
+const PRIORITY_NO_ACCESS        = -1;
+/**
+ * User has no role assigned for this board
+ * @type {Number}
+ */
+const PRIORITY_NO_ROLE          = -10;
+/**
+ * Invalid field name
+ * @type {Number}
+ */
+const PRIORITY_INVALID_FIELD    = -20;
+/**
+ * User permissions for this action is undefined
+ * @type {Number}
+ */
+const PRIORITY_EMPTY_PERMISSION = -30;
+/**
+ * User has no permission to set field to this value
+ * @type {Number}
+ */
+const PRIORITY_INVALID_VALUE    = -40;
+/**
+ * User is not logged in and post password is incorrect
+ * @type {Number}
+ */
+const PRIORITY_NO_PASSWORD      = -50;
+
+
+/**
+ * Check if new priority allows to change property
+ * @param  {Number} newPriority New priority
+ * @param  {Number} [currentPriority=0] Existing priority of previous change
+ * @return {Boolean} true, if new priority allows to change property
+ * @throws {PermissionDeniedError} If new priority is invalid or less than
+ *    current priority
+ * @memberOf module:models/role~Role
+ * @alias module:models/role~Role.checkPriorities
+ * @static
+ */
+roleSchema.statics.checkPriorities = (newPriority, currentPriority = 0) => {
+  if (newPriority === PRIORITY_NO_ACCESS) {
+    throw new PermissionDeniedError(
+      `User has no write access for this field`);
+  }
+  if (newPriority === PRIORITY_NO_ROLE) {
+    throw new PermissionDeniedError(
+      `User has no role assigned for this board`);
+  }
+  if (newPriority === PRIORITY_INVALID_FIELD) {
+    throw new PermissionDeniedError(
+      `Field is not editable or invalid`);
+  }
+  if (newPriority === PRIORITY_EMPTY_PERMISSION) {
+    throw new PermissionDeniedError(
+      `User permissions for this action is undefined`);
+  }
+  if (newPriority === PRIORITY_INVALID_VALUE) {
+    throw new PermissionDeniedError(
+      `User has no permission to set field to this value`);
+  }
+  if (newPriority === PRIORITY_NO_PASSWORD) {
+    throw new PermissionDeniedError(
+      `User is not logged in and post password is incorrect`);
+  }
+  if (newPriority < currentPriority) {
+    throw new PermissionDeniedError(
+      `User priority ${newPriority} is less than current priority ${currentPriority}`);
+  }
+  return true;
+};
+
+
+/**
+ * Get priority for modifying document field
+ * @param  {Role} role             Role document
+ * @param  {String} permissionName Key of permissions object
+ * @param  {String} fieldName      Name of modified field
+ * @param  {}       newValue       Value of modified field
+ * @return {Number}                Priority of change action. Negative values
+ *    indicate invalid priorities.
+ * @memberOf module:models/role~Role
+ * @alias module:models/role~Role.getWritePriority
+ * @static
+ */
+roleSchema.statics.getWritePriority = (role, permissionName, fieldName, newValue) => {
+  if (!role) {
+    // user has no role assigned to this board
+    return PRIORITY_NO_ROLE;
+  }
+  if (!role[permissionName]) {
+    // permission is empty
+    return PRIORITY_EMPTY_PERMISSION;
+  }
+  if (!role[permissionName][fieldName]) {
+    // invalid field
+    return PRIORITY_INVALID_FIELD;
+  }
+  const permission = role[permissionName][fieldName];
+  if (permission.access === 'write-value') {
+    const condition = permission.values.find((v) => {
+      if (_.has(v, 'eq')) {
+        return v.eq === newValue;
+      }
+      if (_.has(v, 'regexp')) {
+        return v.regexp.test(newValue);
+      }
+      if (_.has(v, 'min') && _.has(v, 'max')) {
+        return v.min <= newValue && v.max >= newValue;
+      }
+      if (_.has(v, 'min')) {
+        return v.min <= newValue;
+      }
+      if (_.has(v, 'max')) {
+        return v.max >= newValue;
+      }
+      return false;
+    });
+    if (condition) {
+      return condition.priority;
+    }
+    return PRIORITY_INVALID_VALUE;
+  }
+  if (permission.access === 'write-any') {
+    return permission.priority;
+  }
+  // user has no write permission
+  return PRIORITY_NO_ACCESS;
+};
+
+
+/**
+ * Get maximum priority for modifying document field from array of roles
+ * @param  {Role[]} role           Array of roles
+ * @param  {String} permissionName Key of permissions object
+ * @param  {String} fieldName      Name of modified field
+ * @param  {}       newValue       Value of modified field
+ * @return {Object}                Object with fields `priority`, `roleName`
+ * @memberOf module:models/role~Role
+ * @alias module:models/role~Role.getMaxWritePriority
+ * @static
+ */
+roleSchema.statics.getMaxWritePriority = (roles, permissionName, fieldName, newValue) => {
+  if (!roles.length) {
+    return {
+      roleName: '',
+      priority: PRIORITY_NO_PASSWORD,
+    };
+  }
+  const prioities = _.sortBy(_.map(roles, role => ({
+    roleName: role.roleName,
+    priority: Role.getWritePriority(role, permissionName, fieldName, newValue)
+  })), 'priority');
+  return _.last(prioities);
+};
 
 
 /**
@@ -469,15 +628,14 @@ const anonymousRole = {
  * @memberOf module:models/role~Role
  * @alias module:models/role~Role.getSpecialRole
  * @static
- * @async
  * @return {?Object} Frozen role object
  */
-roleSchema.statics.getSpecialRole = async (specialRoleName) => {
+roleSchema.statics.getSpecialRole = (specialRoleName) => {
   if (specialRoleName == 'admin') {
     return adminRole;
   }
-  if (specialRoleName == 'anonymous') {
-    return anonymousRole;
+  if (specialRoleName == 'poster') {
+    return posterRole;
   }
   return null;
 };

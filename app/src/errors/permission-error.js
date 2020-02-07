@@ -53,8 +53,8 @@ class AuthRequiredError extends UnauthorizedError {
  * @alias module:errors/permission-error.PermissionDeniedError
  */
 class PermissionDeniedError extends ForbiddenError {
-  constructor() {
-    super(`User don't have rights to perform this action`, 'PermissionDenied');
+  constructor(message) {
+    super(message || `User don't have rights to perform this action`, 'PermissionDenied');
   }
 }
 
