@@ -6,6 +6,7 @@
 const _ = require('lodash');
 const fp = require('lodash/fp');
 const assert = require('assert');
+const { RequestValidationError } = require('../errors');
 
 
 /**
@@ -296,8 +297,8 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
    *    returns single matched document, if limit > 1, object with array of
    *    documents and count of matched documents.
    *
-   * @throws {TypeError} If skip or limit parameter is not an integer
-   * @throws {TypeError} If argument for $-operator in filter object is invalid
+   * @throws {RequestValidationError} If skip or limit parameter is not an integer
+   * @throws {RequestValidationError} If argument for $-operator in filter object is invalid
    */
   const apiQueryFn = async function (
       {
@@ -313,10 +314,10 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
       } = {}
     ) {
     if (!_.isInteger(limit)) {
-      throw new TypeError('limit must be an integer');
+      throw new RequestValidationError('limit must be an integer');
     }
     if (!_.isInteger(skip)) {
-      throw new TypeError('skip must be an integer');
+      throw new RequestValidationError('skip must be an integer');
     }
     // preprocessing arguments
     filter = _.pickBy(filter, (v, k) => {
@@ -350,19 +351,19 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
         if (_.isObject(value)) {
           const operators = getOperators(value);
           if (!operators.length) {
-            throw new Error('Filter object contains no valid operators');
+            throw new RequestValidationError('Filter object contains no valid operators');
           }
           if (operators.length > 1) {
-            throw new Error('No more than one operator per field is supported');
+            throw new RequestValidationError('No more than one operator per field is supported');
           }
           let [operator, argument] = _.first(operators);
           if (['$in', '$nin'].includes(operator)) {
             if (!_.isArray(argument)) {
-              throw new TypeError(`Argument for operator ${operator} must be an array`);
+              throw new RequestValidationError(`Argument for operator ${operator} must be an array`);
             }
           } else {
             if (!_.isString(argument) && !_.isNumber(argument)) {
-              throw new TypeError(`Argument for operator "${operator}" must be a string or number`);
+              throw new RequestValidationError(`Argument for operator "${operator}" must be a string or number`);
             }
           }
           conditions[field] = {};
@@ -467,7 +468,13 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
     if (queryMutationFn) {
       const mutations = queryMutationFn(user, userRoles);
       _.assign(conditions, mutations.conditions);
-      _.assign(projection, mutations.projection);
+      _.forEach(mutations.projection, (value, key) => {
+        if (value === 0) {
+          delete projection[key];
+        } else {
+          projection[key] = value;
+        }
+      });
       _.assign(options,    mutations.options);
       _.assign(populate,   mutations.populate);
     }
@@ -475,7 +482,7 @@ module.exports.createApiQueryHandler = (modelFieldsConfig, queryMutationFn, resp
       // If projection is empty, query will return all fields of selected
       // documents, including ones that may contain sensitive information
       // like IPs, therefore list of fields must always be explicit.
-      throw new Error('Projection object must not be empty');
+      throw new RequestValidationError('Projection object must not be empty');
     }
     let query;
     if (limit === 1) {

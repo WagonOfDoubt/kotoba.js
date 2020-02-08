@@ -4,34 +4,48 @@ const { checkSchema } = require('express-validator');
 const _ = require('lodash');
 const fp = require('lodash/fp');
 
-const { adminOnly } = require('../../middlewares/permission');
+const { adminOnly, apiAuthRequired } = require('../../middlewares/permission');
+const { findUserRoles } = require('../../middlewares/post');
 const { validateRequest, filterMatched } = require('../../middlewares/validation');
 const { filterPostTargetItems,
   populatePostUpdateItems } = require('../../middlewares/post');
 const Report = require('../../models/report');
+const Role = require('../../models/role');
+const { PermissionDeniedError } = require('../../errors');
 const { populateDocumentsByIds,
   removeDuplicates,
   compareRequestWithDocuments,
   applyAndValidateDocuments } = require('../../middlewares/restapi');
+const { restGetQuerySchema } = require('../../middlewares/reqparser');
+const { createGetRequestHandler } = require('../../middlewares/restapi');
 
 
 /**
- * @api {get} /api/report Get reports
+ * @api {get} /api/report Get Reports
  * @apiName GetReport
  * @apiGroup Report
- * @apiPermission admin
- * @apiDescription Not implemented
+ * @apiPermission Role.reportActions.canViewReports
+ * @apiDescription Find one or more report based on query.
+ * 
+ * Search is ignored.
+ *
+ * Filter can be applied by: `_id`, `createdAt`, `boardUri`, `isDeleted`.
+ *
+ * Selectable fields are: `_id`, `createdAt`, `posts`, `posts`, `reflinks`,
+ *    `reason`, `boardUri`, `isDeleted`.
+ *
+ * @apiUse GenericGetApi
+ * @apiUse DocumentNotFoundError
+ * @apiUse RequestValidationError
  */
-router.get('/api/report',
-  adminOnly,
+router.get(
+  '/api/report',
+  checkSchema(restGetQuerySchema),
   validateRequest,
-  async (req, res, next) => {
-    try {
-      return res.status(501);
-    } catch (err) {
-      next(err);
-    }
-  });
+  filterMatched,
+  findUserRoles,
+  createGetRequestHandler('Report', false),
+);
 
 
 /**
@@ -96,21 +110,23 @@ router.post('/api/report',
       const reason = req.body.reason;
       const ip = req.ip;
       const useragent = req.useragent;
-
-      const reportData = {
-        ip: ip,
-        useragent: useragent,
-        reason: reason,
-        reflinks: reflinks,
-      };
-
-      const newReport = new Report(reportData);
-      await newReport.save();
+      const boards = _.groupBy(reflinks, 'boardUri');
+      const newReports = _.map(_.toPairs(boards), ([boardUri, refs]) => {
+        return new Report({
+          ip        : ip,
+          useragent : useragent,
+          reason    : reason,
+          reflinks  : refs,
+          boardUri  : boardUri,
+        });
+      });
+      const savedDocs = await Promise.all(_.map(newReports, r => r.save()));
+      const savedReflinks = _.flatten(_.map(savedDocs, 'reflinks'));
 
       res
         .status(200)
         .json({
-          success: reflinks.map(r => ({ref: r}))
+          success: _.map(savedReflinks, (r) => ({ref: r})),
         });
     } catch (err) {
       next(err);
@@ -122,12 +138,12 @@ router.post('/api/report',
  * @api {patch} /api/report Modify report
  * @apiName ModifyReport
  * @apiGroup Report
- * @apiPermission admin
+ * @apiPermission Role.reportPermissions.*
  * @apiParam {Object[]} items Array of reports and updates
- * @apiParam {Object}   target Reference to specific report
- * @apiParam {ObjectId} target._id Report mongo ObjectId
- * @apiParam {Object}   update Update object
- * @apiParam {Boolean}  update.isDeleted True marks report as deleted
+ * @apiParam {Object}   items.target Reference to specific report
+ * @apiParam {ObjectId} items.target._id Report mongo ObjectId
+ * @apiParam {Object}   items.update Update object
+ * @apiParam {Boolean}  items.update.isDeleted True marks report as deleted
  * @apiSuccess {Object[]} success List of successful updates
  * @apiSuccess {Object}   success._id Report mongo ObjectId
  * @apiSuccess {Object[]} fail List of updates that were rejected
@@ -165,7 +181,7 @@ router.post('/api/report',
  *   }
  */
 router.patch('/api/report',
-  adminOnly,
+  apiAuthRequired,
   checkSchema({
     reports: {
       isArray: true,
@@ -188,32 +204,102 @@ router.patch('/api/report',
       in: 'body',
       errorMessage: 'report.isDeleted must be a boolean',
     },
-    'reports.*.reason': {
-      optional: true,
-      trim: true,
-      in: 'body',
-    }
+    // 'reports.*.reason': {
+    //   optional: true,
+    //   trim: true,
+    //   in: 'body',
+    // }
   }),
   validateRequest,
   filterMatched,
   populateDocumentsByIds(Report, 'reports'),
-  removeDuplicates('reports', ['isDeleted', 'reason']),
+  removeDuplicates('reports', [
+    'isDeleted',
+    // 'reason',
+  ]),
   compareRequestWithDocuments('reports'),
   applyAndValidateDocuments('reports'),
+  findUserRoles,
   async (req, res, next) => {
     try {
-      const items = req.body.reports;
-      const updateReportQuery = _.map(items, item =>
-        ({
-          updateOne: {
-            filter: _.pick(item, '_id'),
-            update: _.omit(item, '_id'),
-          },
-        }));
+      res.locals.success = res.locals.success || [];
+      res.locals.fail = res.locals.fail || [];
+      const documents = res.locals.documents;
+      const user = req.user;
+      const roles = req.userRoles;
+
+
+      const checkReport = (reportDocument, updateObj) => {
+        const relevantRoles = [];
+        if (user && user.authority === 'admin') {
+          relevantRoles.push(Role.getSpecialRole('admin'));
+        }
+        if (roles && roles[reportDocument.boardUri]) {
+          relevantRoles.push(roles[reportDocument.boardUri]);
+        }
+        const permissionName = 'reportPermissions';
+        const checkedUpdates = _.mapValues(updateObj, (value, field) => {
+          const {roleName, priority} = Role.getMaxWritePriority(relevantRoles, permissionName, field, value);
+          const oldPriority = _.get(reportDocument, ['changes', field], 0);
+          try {
+            Role.checkPriorities(priority, oldPriority);
+          } catch (err) {
+            return {
+              _id: reportDocument._id,
+              status: 403,
+              update: { [field]: value },
+              roleName: roleName,
+              userPriority: priority,
+              currentPriority: oldPriority,
+              error: err.toObject(),
+            };
+          }
+          return { value, priority, roleName };
+        });
+        const update = _.pickBy(checkedUpdates, (u) => !_.has(u, 'error'));
+        const denied = _.pickBy(checkedUpdates, (u) => _.has(u, 'error'));
+        return {
+          target: _.pick(reportDocument._id),
+          granted: update,
+          denied: denied,
+        };
+      };
+
+      const updateReportQuery = [];
+      for (const item of req.body.reports) {
+        const reportDocument = documents[item._id];
+        const updateObj = _.omit(item, '_id');
+        const { granted, denied } = checkReport(reportDocument, updateObj);
+        if (!_.isEmpty(denied)) {
+          res.locals.fail.push(..._.values(denied));
+        }
+        if (!_.isEmpty(granted)) {
+          const updateValues = _.mapValues(granted, 'value');
+          const updatePriorities = _.mapValues(granted, 'priority');
+          updateReportQuery.push({
+            updateOne: {
+              filter: { _id: item._id },
+              update: {
+                ...updateValues,
+                changes: updatePriorities,
+              }
+            }
+          });
+          res.locals.success.push({
+            _id: item._id,
+            ...updateValues,
+          });
+        }
+      }
+
+      const { success, fail } = res.locals;
+      if (!success.length) {
+        const status = _.map(fail, 'status')[0];
+        return res.status(status).json({fail});
+      }
+
       await Report.bulkWrite(updateReportQuery);
 
-      res.locals.success = items;
-      const { success, fail } = res.locals;
       return res
         .status(200)
         .json({ success, fail });
@@ -227,7 +313,8 @@ router.patch('/api/report',
  * @api {delete} /api/report Delete report
  * @apiName DeleteReport
  * @apiGroup Report
- * @apiPermission admin
+ * @apiPermission Role.reportActions.canDeleteReports
+ * @apiDescription Delete report documents from database (permanently)
  * @apiParam {Object[]} reports Array of reports
  * @apiParam {String}   reports._id Report mongo ObjectId
  * @apiSuccess {Object[]} success List of successful updates
@@ -244,7 +331,7 @@ router.patch('/api/report',
  * @apiError AuthRequiredError      User is not authenticated
  */
 router.delete('/api/report',
-  adminOnly,
+  apiAuthRequired,
   checkSchema({
     reports: {
       in: 'body',
@@ -264,13 +351,51 @@ router.delete('/api/report',
   validateRequest,
   filterMatched,
   populateDocumentsByIds(Report, 'reports', ''),
+  findUserRoles,
   async (req, res, next) => {
     try {
-      const reports = req.body.reports;
+      res.locals.success = res.locals.success || [];
+      res.locals.fail = res.locals.fail || [];
+      const documents = res.locals.documents;
+      const user = req.user;
+      const roles = req.userRoles;
 
-      const ids = _.map(reports, '_id');
+      const ids = [];
+      for (const item of req.body.reports) {
+        const reportDocument = documents[item._id];
+        const relevantRoles = [];
+        if (user && user.authority === 'admin') {
+          relevantRoles.push(Role.getSpecialRole('admin'));
+        }
+        if (roles && roles[reportDocument.boardUri]) {
+          relevantRoles.push(roles[reportDocument.boardUri]);
+        }
+        const canDeleteReports = _.some(relevantRoles, r => _.get(r, 'reportActions.canDeleteReports', false));
+        if (!canDeleteReports) {
+          const err = new PermissionDeniedError();
+          res.locals.fail.push({
+              _id: reportDocument._id,
+              status: 403,
+              error: err.toObject(),
+            });
+        } else {
+          ids.push(reportDocument._id);
+          res.locals.success.push({
+            _id: reportDocument._id,
+          });
+        }
+      }
+
+      if (!res.locals.success.length) {
+        return res
+          .status(403)
+          .json({
+            fail: res.locals.fail,
+          });
+      }
+
       await Report.deleteMany({ _id: { $in: ids }});
-      res.locals.success = _.map(reports, fp.pick(['_id']));
+
       return res
         .status(200)
         .json({

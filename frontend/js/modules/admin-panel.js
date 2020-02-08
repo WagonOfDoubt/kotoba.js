@@ -100,7 +100,7 @@ const addAdminPanel = ($form) => {
     const collection = formData[col];
 
     const reports = collection.map(reportId => {
-      const update = { _id: reportId };
+      const update = reportId;
       update[name] = value === 'true';
       return update;
     });
@@ -147,7 +147,7 @@ const checkAdminForm = ($form) => {
     'posts': 'input[name="posts[]"]:checked',
     'threads': '.post_op input[name="posts[]"]:checked',
     'attachments': 'input[name="attachments[]"]:checked',
-    'reports': 'input[name="reports[]"]:checked',
+    'reports': 'input[name="reports[][_id]"]:checked',
   };
   let hasSelected = false;
   const tabsVisible = {};

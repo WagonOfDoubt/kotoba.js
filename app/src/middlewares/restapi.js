@@ -382,7 +382,16 @@ const createGetRequestHandler = (modelName, search = true) => {
       if (search) {
         q.search = req.query.search;
       }
-      const result = await model.apiQuery(q);
+      let result = null;
+      try {
+        result = await model.apiQuery(q);
+      } catch (err) {
+        if (err.respond) {
+          return err.respond(res);
+        } else {
+          throw err;
+        }
+      }
       if (!result) {
         let param;
         let value;

@@ -80,9 +80,6 @@ router.get('/trash/posts',
         .sort({'createdAt': -1})
         .limit(postsLimit);
 
-      const deletedAssets = await Asset.find({ isDeleted: true }).exec();
-      const deletedPosts = await Post.find({ isDeleted: true }).exec();
-
       res.render('manage/trash', {
         activity: 'manage-page-trash',
         deletedPosts: posts,
@@ -114,25 +111,5 @@ router.get('/trash/assets',
   }
 );
 
-
-router.get('/trash/reports',
-  authRequired,
-  async (req, res, next) => {
-    try {
-      
-      const deletedReports = await Report
-        .find({ isDeleted: true })
-        .sort({'createdAt': -1}).exec();
-
-      res.render('manage/trash', {
-        activity: 'manage-page-trash',
-        deletedReports: deletedReports,
-        title: 'Recycle Bin'
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
 
 module.exports = router;

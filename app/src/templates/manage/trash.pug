@@ -16,6 +16,14 @@ mixin assetEdit(asset)
 
 block header
   h1 Recycle Bin
+  if (deletedPosts || deletedAssets || deletedReports)
+    nav
+      ul.list.list_nav
+        if (deletedReports)
+          li.list__item
+            a(href='/manage/trash/') Recycle Bin
+          li.list__item
+            a(href='/manage/reports') All reports
 
 block main
   if (numberOfDeletedPosts || numberOfDeletedAssets || numberOfDeletedReports)
@@ -29,9 +37,6 @@ block main
       if (numberOfDeletedReports)
         li
           a(href='/manage/trash/reports') Deleted reports: #{numberOfDeletedReports}
-  else
-    span.button.button_link
-      a(href='/manage/trash/') Return
   if (deletedAssets && deletedAssets.length)
     section
       h2 Deleted Assets

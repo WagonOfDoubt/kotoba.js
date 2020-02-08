@@ -34,4 +34,5 @@ module.exports = Schema({
 {
   strict: true,
   minimize: true,
+  _id: false,
 });

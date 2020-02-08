@@ -60,8 +60,11 @@ class DocumentAlreadyExistsError extends ConflictError {
  */
 class DocumentNotFoundError extends NotFoundError {
   constructor(documentName, param, value, location) {
-    super(`${documentName} "${value}" not found`,
-      'DocumentNotFound', param, value, location);
+    let msg = `${documentName} "${value}" not found`;
+    if (value === undefined) {
+      msg = `${documentName} not found`;
+    }
+    super(msg, 'DocumentNotFound', param, value, location);
   }
 }
 

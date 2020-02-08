@@ -12,29 +12,32 @@ mixin error(error)
     div.error #{ error.msg || error.message }
 
 if (success && success.length)
-  | Successfully changed:
-  if success[0].ref
-    ul.list.list_inline
-      for item in success
-        if (item.ref)
-          li.list__item
-            +reflink(item.ref)
-  else
-    |  #[strong= success.length] item(s)
+  div
+    | Successfully changed:
+    if success[0].ref
+      ul.list.list_inline
+        for item in success
+          if (item.ref)
+            li.list__item
+              +reflink(item.ref)
+    else
+      |  #[strong= success.length] item(s)
 
 if (fail && fail.length)
-  | Not changed:
-  ul.list_unmarked
-    for item in fail
-      if (item.ref)
-        +reflink(item.ref)
-      else if (item.target)
-        +reflink(item.target)
-        if (item.status === 204)
-          |  (Nothing to change)
-        else if (item.error)
-          |  (#{ item.error.message })
-      else
-        pre= JSON.stringify(item, null, 2)
+  div
+    | Not changed:
+    ul.list_unmarked
+      for item in fail
+        if (item.ref)
+          +reflink(item.ref)
+        else if (item.target)
+          +reflink(item.target)
+          if (item.status === 204)
+            |  (Nothing to change)
+          else if (item.error)
+            |  (#{ item.error.message })
+        else
+          pre= JSON.stringify(item, null, 2)
+
 if error
   +error(error)

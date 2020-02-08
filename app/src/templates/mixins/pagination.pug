@@ -1,23 +1,24 @@
 //- modern list pagination
 mixin pagination(pageInfo)
-  div.pages.pagelist
-    ul.list.list_buttons
-      li
-        if pageInfo.prevPage
-          a(href=pageInfo.prevPage.url, rel='prev', title='Previous page') ←
-        else
-          span ←
-      for page, pNum in pageInfo.pages
+  if pageInfo
+    div.pages.pagelist
+      ul.list.list_buttons
         li
-          if pNum === pageInfo.current
-            | #{page.label}
+          if pageInfo.prevPage
+            a(href=pageInfo.prevPage.url, rel='prev', title='Previous page') ←
           else
-            | #[a(href=page.url, title=`Page ${page.label}`)= page.label]
-      li
-        if pageInfo.nextPage
-          a(href=pageInfo.nextPage.url, rel='next', title='Next page') →
-        else
-          span →
+            span ←
+        for page, pNum in pageInfo.pages
+          li
+            if pNum === pageInfo.current
+              | #{page.label}
+            else
+              | #[a(href=page.url, title=`Page ${page.label}`)= page.label]
+        li
+          if pageInfo.nextPage
+            a(href=pageInfo.nextPage.url, rel='next', title='Next page') →
+          else
+            span →
 
 
 //- legacy table pagination

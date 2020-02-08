@@ -1,56 +1,114 @@
 extends managepage.pug
 include ../mixins/timestamp.pug
 include ../mixins/postbody.pug
+include ../mixins/icons.pug
+include ../mixins/controls.pug
+include ../mixins/pagination.pug
+include ../mixins/modals.pug
+
+
+mixin report(report)
+  -var entryId = report._id;
+  li.report-entry(id=`report${entryId}`)
+    div.report-entry__header
+      label
+        input.report-entry__checkbox.js-select-report.js-checkbox-master(
+          type='checkbox',
+          name='reports[][_id]',
+          value=entryId,
+          data-target=`#report${entryId} .post__header__checkbox`)
+        if report.isDeleted
+          | 
+          span.post__badge.post__badge_deleted(title='Deleted')
+            +icon('trash', 'small') DELETED
+          | 
+        span Report
+        | 
+        if report.boardUri
+          a(href=`/${report.boardUri}`) /#{report.boardUri}/
+          | 
+        +datetime(report.createdAt)
+      if report.iphash
+        | 
+        span.posterip IP hash: #[= report.iphash]
+    blockquote
+      if report.reason
+        div
+          | Reason: 
+          span.report-entry__reason= report.reason
+      if report.reflinks
+        div
+          | Refs:
+          | 
+          ul.list.list_inline.report-entry__reflinks(style={ display: 'inline' })
+            for ref in report.reflinks
+              li.list__item
+                +reflink(ref)
+      if report.posts
+        | Posts: (#{report.posts.length}) #[+showHideBtn(`#report${entryId} .report-entry__posts`, true)]
+        div.report-entry__posts.hidden
+          for post in report.posts
+            div.reply-container
+              include ../includes/post.pug
 
 block header
-  h1 Reports
-  //- form(method='GET', action='/manage/reports')
-  //-   ul.list.list_inline
-  //-     for board in boards
-  //-       - var isSelected = selectedBoards.includes(board)
-  //-       li.list__item
-  //-         label
-  //-           input.js-set-uri-param(type='checkbox', value=board.uri, name='filter[]', checked=isSelected)
-  //-           span /#{board.uri}/
-  //-   input(type='submit', value='Filter')
+  if isTrash
+    h1 Deleted reports
+  else
+    h1 Reports
+  nav
+    ul.list.list_nav
+      if (isTrash)
+        li.list__item
+          a(href='/manage/trash/') Recycle Bin
+        li.list__item
+          a(href='/manage/reports') Active reports
+      else
+        li.list__item
+          a(href='/manage/trash/reports') Deleted reports
+
+  div.board-filter
+    label
+      input.js-checkbox-master(type='checkbox', data-target='.board-filter__checkbox')
+      span Select all
+    form.js-filter-form(method='GET')
+      ul.list.list_inline
+        for board in boards
+          - var isSelected = selectedBoards.includes(board)
+          li.list__item
+            label
+              input.js-checkbox-slave.board-filter__checkbox(type='checkbox', value=board.uri, name='boards', checked=isSelected, data-target='.board-filter .js-checkbox-master')
+              span /#{board.uri}/
+      input(type='submit', value='Filter')
 
 
 block main
   if reports.length
-    form.admin-form.replies-container
+    form#form-reports.admin-form.replies-container(method='POST', action='/api/report', enctype='multipart/form-data')
       ul.list.list_unmarked
         for report in reports
-          if report.isDeleted
-            li.report-entry(id=entryId)
-              div.report-entry__header
-                input(type='checkbox', disabled)
-                label
-                  a(href='/manage/trash/reports') Deleted report
-                  | 
-                  +datetime(report.createdAt)
-              
-          else
-            -var entryId = report._id;
-            li.report-entry(id=entryId)
-              div.report-entry__header
-                label
-                  input.report-entry__checkbox.js-checkbox-master(
-                    type='checkbox',
-                    name='reports[]',
-                    value=entryId,
-                    data-target=`#${entryId} .post__header__checkbox`)
-                  span Report
-                  | 
-                  +datetime(report.createdAt)
-                | 
-                span.posterip IP hash: #[= report.iphash]
-              blockquote.report-entry__reason= report.reason
-              div.report-entry__posts
-                for post in report.posts
-                  div.reply-container(id=`reply${ post.postId }`)
-                    include ../includes/post.pug
+          +report(report)
+      if isTrash
+        button.js-modify-and-send-form(
+            data-target='#form-reports', 
+            data-method='DELETE', 
+            data-prompt='#modal-confirm-delete',
+          ) Delete
+        button.js-modify-and-send-form(
+            data-target='#form-reports', 
+            data-method='PATCH', 
+            data-payload='{"reports[][isDeleted]": false}', 
+            data-prompt='#modal-confirm-restore',
+          ) Restore
   else
-    | No more entries
-  if (reports.length)
-    - var lastEntry = reports[reports.length - 1]
-    a(href=`/manage/reports/${lastEntry.createdAt && lastEntry.createdAt.getTime()}`) More entries
+    div.no-content-placeholder No more reports
+  include ../includes/postform.pug
+
+block prepend footer
+  +pagination(pagination)
+
+block modals
+  +confirmPrompt('modal-confirm-delete', 'Delete items', 'Delete')
+    | Delete selected items?
+  +confirmPrompt('modal-confirm-restore', 'Restore items', 'Restore')
+    | Restore selected items?

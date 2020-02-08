@@ -110,79 +110,24 @@ const _privilegeValidator = {
  * @apiParam {Object} postPermissions Permissions for editing post fields
  * @apiParam {Object} postPermissions.isSticky [OP only] Make thread sticky
  * @apiParam {Number} postPermissions.isSticky.priority [0-9999]
- * @apiParam {String} postPermissions.isSticky.access One of: "no-access",
- *    "read-only", "write-any", "write-value"
- * @apiParam {Object[]} postPermissions.isSticky.values Conditions for
- *    "write-value" access
- * @apiParam {Number} postPermissions.isSticky.values.priority Priority for
- *    this condition
- * @apiParam {Mixed} postPermissions.isSticky.values.eq Equals condition
- * @apiParam {Number} postPermissions.isSticky.values.min Condition applied to
- *    range of numbers
- * @apiParam {Number} postPermissions.isSticky.values.max Condition applied to
- *    range of numbers
- * @apiParam {Number} postPermissions.isSticky.values.regexp Condition applied
- *    if string matches expression
+ * @apiParam {String} postPermissions.isSticky.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @apiParam {Object} postPermissions.isClosed [OP only] Close thread
  * @apiParam {Number} postPermissions.isClosed.priority [0-9999]
- * @apiParam {String} postPermissions.isClosed.access One of: "no-access",
- *    "read-only", "write-any", "write-value"
- * @apiParam {Object[]} postPermissions.isClosed.values Conditions for
- *    "write-value" access
- * @apiParam {Number} postPermissions.isClosed.values.priority Priority for
- *    this condition
- * @apiParam {Mixed} postPermissions.isClosed.values.eq Equals condition
- * @apiParam {Number} postPermissions.isClosed.values.min Condition applied to
- *    range of numbers
- * @apiParam {Number} postPermissions.isClosed.values.max Condition applied to
- *    range of numbers
- * @apiParam {Number} postPermissions.isClosed.values.regexp Condition applied
- *    if string matches expression
+ * @apiParam {String} postPermissions.isClosed.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @apiParam {Object} postPermissions.isSage Set post sage
  * @apiParam {Number} postPermissions.isSage.priority [0-9999]
- * @apiParam {String} postPermissions.isSage.access One of: "no-access",
- *    "read-only", "write-any", "write-value"
- * @apiParam {Object[]} postPermissions.isSage.values Conditions for
- *    "write-value" access
- * @apiParam {Number} postPermissions.isSage.values.priority Priority for this
- *    condition
- * @apiParam {Mixed} postPermissions.isSage.values.eq Equals condition
- * @apiParam {Number} postPermissions.isSage.values.min Condition applied to
- *    range of numbers
- * @apiParam {Number} postPermissions.isSage.values.max Condition applied to
- *    range of numbers
- * @apiParam {Number} postPermissions.isSage.values.regexp Condition applied
- *    if string matches expression
+ * @apiParam {String} postPermissions.isSage.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @apiParam {Object} postPermissions.isApproved Set "isApproved" flag
  * @apiParam {Number} postPermissions.isApproved.priority [0-9999]
- * @apiParam {String} postPermissions.isApproved.access One of: "no-access",
- *    "read-only", "write-any", "write-value"
- * @apiParam {Object[]} postPermissions.isApproved.values Conditions for
- *    "write-value" access
- * @apiParam {Number} postPermissions.isApproved.values.priority Priority for
- *    this condition
- * @apiParam {Mixed} postPermissions.isApproved.values.eq Equals condition
- * @apiParam {Number} postPermissions.isApproved.values.min Condition applied
- *    to range of numbers
- * @apiParam {Number} postPermissions.isApproved.values.max Condition applied
- *    to range of numbers
- * @apiParam {Number} postPermissions.isApproved.values.regexp Condition
- *    applied if string matches expression
+ * @apiParam {String} postPermissions.isApproved.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @apiParam {Object} postPermissions.isDeleted Mark post or thread as deleted
  * @apiParam {Number} postPermissions.isDeleted.priority [0-9999]
- * @apiParam {String} postPermissions.isDeleted.access One of: "no-access",
- *    "read-only", "write-any", "write-value"
- * @apiParam {Object[]} postPermissions.isDeleted.values Conditions for
- *    "write-value" access
- * @apiParam {Number} postPermissions.isDeleted.values.priority Priority for
- *    this condition
- * @apiParam {Mixed} postPermissions.isDeleted.values.eq Equals condition
- * @apiParam {Number} postPermissions.isDeleted.values.min Condition applied
- *    to range of numbers
- * @apiParam {Number} postPermissions.isDeleted.values.max Condition applied
- *    to range of numbers
- * @apiParam {Number} postPermissions.isDeleted.values.regexp Condition
- *    applied if string matches expression
+ * @apiParam {String} postPermissions.isDeleted.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @apiParam {Object} attachmentPermissions Permissions for editing attachment
  *    fields
  * @apiParam {Object} attachmentPermissions.isDeleted Mark attachment as
@@ -190,50 +135,15 @@ const _privilegeValidator = {
  * @apiParam {Number} attachmentPermissions.isDeleted.priority [0-9999]
  * @apiParam {String} attachmentPermissions.isDeleted.access One of:
  *    "no-access", "read-only", "write-any", "write-value"
- * @apiParam {Object[]} attachmentPermissions.isDeleted.values Conditions for
- *    "write-value" access
- * @apiParam {Number} attachmentPermissions.isDeleted.values.priority Priority
- *    for this condition
- * @apiParam {Mixed} attachmentPermissions.isDeleted.values.eq Equals
- *    condition
- * @apiParam {Number} attachmentPermissions.isDeleted.values.min Condition
- *    applied to range of numbers
- * @apiParam {Number} attachmentPermissions.isDeleted.values.max Condition
- *    applied to range of numbers
- * @apiParam {Number} attachmentPermissions.isDeleted.values.regexp Condition
- *    applied if string matches expression
  * @apiParam {Object} attachmentPermissions.isNSFW Mark attachment as NSFW
  * @apiParam {Number} attachmentPermissions.isNSFW.priority [0-9999]
- * @apiParam {String} attachmentPermissions.isNSFW.access One of: "no-access",
- *    "read-only", "write-any", "write-value"
- * @apiParam {Object[]} attachmentPermissions.isNSFW.values Conditions for
- *    "write-value" access
- * @apiParam {Number} attachmentPermissions.isNSFW.values.priority Priority
- *    for this condition
- * @apiParam {Mixed} attachmentPermissions.isNSFW.values.eq Equals condition
- * @apiParam {Number} attachmentPermissions.isNSFW.values.min Condition
- *    applied to range of numbers
- * @apiParam {Number} attachmentPermissions.isNSFW.values.max Condition
- *    applied to range of numbers
- * @apiParam {Number} attachmentPermissions.isNSFW.values.regexp Condition
- *    applied if string matches expression
+ * @apiParam {String} attachmentPermissions.isNSFW.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @apiParam {Object} attachmentPermissions.isSpoiler Mark attachment as
  *    spoiler
  * @apiParam {Number} attachmentPermissions.isSpoiler.priority [0-9999]
  * @apiParam {String} attachmentPermissions.isSpoiler.access One of:
  *    "no-access", "read-only", "write-any", "write-value"
- * @apiParam {Object[]} attachmentPermissions.isSpoiler.values Conditions for
- *    "write-value" access
- * @apiParam {Number} attachmentPermissions.isSpoiler.values.priority Priority
- *    for this condition
- * @apiParam {Mixed} attachmentPermissions.isSpoiler.values.eq Equals
- *    condition
- * @apiParam {Number} attachmentPermissions.isSpoiler.values.min Condition
- *    applied to range of numbers
- * @apiParam {Number} attachmentPermissions.isSpoiler.values.max Condition
- *    applied to range of numbers
- * @apiParam {Number} attachmentPermissions.isSpoiler.values.regexp Condition
- *    applied if string matches expression
  * @property {Boolean} postingPrivileges.ignoreCaptcha User is not required to
  *    solve captcha
  * @property {Boolean} postingPrivileges.ignoreClosed  User can post in closed
@@ -242,6 +152,14 @@ const _privilegeValidator = {
  *    regardless of board options
  * @property {Boolean} postingPrivileges.canUseMarkdown User can post with
  *    markdown markup instead of default markup
+ * @property {Boolean} reportActions.canViewReports User can view reports on
+ *    board
+ * @property {Boolean} reportActions.canDeleteReports User can permanently
+ *    delete reports on board
+ * @apiParam {Object} reportPermissions.isDeleted Mark report as deleted
+ * @apiParam {Number} reportPermissions.isDeleted.priority [0-9999]
+ * @apiParam {String} reportPermissions.isDeleted.access One of: `no-access`,
+ *    `read-only`, `write-any`, `write-value`
  * @type {Object}
  */
 const rolePermissionsValidator = {
