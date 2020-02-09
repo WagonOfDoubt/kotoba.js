@@ -168,6 +168,30 @@
 .post__body {
   word-wrap: break-word;
   font-family: serif;
+
+  blockquote {
+    $max-lines: 18;
+    $lh: 1.2rem;
+    $max-height: $lh * $max-lines;
+
+    max-height: $max-height;
+    display: -webkit-box;
+    -webkit-line-clamp: $max-lines;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+  }
+}
+
+.post__body.post__body_expaned {
+  blockquote {
+    -webkit-line-clamp: unset;
+    max-height: max-content;
+  }
+}
+
+.post__body__expandbtn {
+  margin-left: 40px;
+  margin-top: -16px;
 }
 
 .post_reply {

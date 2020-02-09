@@ -17,6 +17,7 @@ import { initChangeStyle } from './modules/change-style';
 import { initHandlers } from './modules/misc-handlers';
 import { initFavorites } from './modules/favorites';
 import { initBoardsList } from './modules/boards-list';
+import { initExpandPost } from './modules/expand-post';
 
 
 $(() => {
@@ -37,6 +38,7 @@ $(() => {
   initHandlers();
   initFavorites();
   initBoardsList();
+  initExpandPost();
 
   // init login form
   $('[name=redirectHash]').val(window.location.hash);

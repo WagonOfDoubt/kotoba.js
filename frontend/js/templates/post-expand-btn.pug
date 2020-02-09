@@ -1,0 +1,12 @@
+div.post__body__expandbtn
+  span.button.button_link
+    a.js-toggle-expand(
+      href=`#`,
+      data-caption-show='Show more',
+      data-caption-hide='Show less',
+      data-visible=isInitiallyHidden ? 'false' : 'true'
+    )
+      if isInitiallyHidden
+        | Show more
+      else
+        | Show less
