@@ -39,7 +39,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.15",
-    "markdown-it": "^9.1.0",
+    "markdown-it": "^12.3.2",
     "mongodb": "^3.3.2",
     "mongoose": "^5.7.5",
     "mongoose-int32": "^0.3.1",
