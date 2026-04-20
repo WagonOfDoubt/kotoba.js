@@ -42,7 +42,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
     "dialog-polyfill": "^0.5.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "jquery-serializejson": "^2.9.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.escape": "^4.0.1",
