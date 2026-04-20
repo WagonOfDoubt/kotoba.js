@@ -46,7 +46,7 @@
     "multer": "^1.4.2",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "sharp": "^0.23.0",
     "streamifier": "^0.1.1",
     "unix-crypt-td-js": "^1.1.4",
