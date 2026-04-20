@@ -35,7 +35,7 @@
     "express-validator": "^6.2.0",
     "ffmpeg-static": "^2.6.0",
     "ffprobe-static": "^3.0.0",
-    "flat": "^4.1.0",
+    "flat": "^5.0.1",
     "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.15",
