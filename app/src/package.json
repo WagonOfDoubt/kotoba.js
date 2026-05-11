@@ -47,7 +47,7 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "pug": "^2.0.4",
-    "sharp": "^0.23.0",
+    "sharp": "^0.30.5",
     "streamifier": "^0.1.1",
     "unix-crypt-td-js": "^1.1.4",
     "xregexp": "^4.2.4"
